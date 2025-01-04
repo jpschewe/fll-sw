@@ -13,8 +13,7 @@
 <script type='text/javascript' src='../js/fll-functions.js'></script>
 <script type='text/javascript' src='../js/fll-storage.js'></script>
 
-<script type='text/javascript'
-    src='../extlib/js-joda/js-joda.min.js'></script>
+<script type='text/javascript' src='../extlib/js-joda/js-joda.min.js'></script>
 
 <script type='text/javascript' src='subjective.js'></script>
 <script type='text/javascript' src='index.js'></script>
@@ -57,7 +56,8 @@
                 href='#teams-list'>Enter Scores</a>
         </div>
         <div>
-            <a class='wide fll-sw-button' id='side-panel_final-scores'>Scores are final</a>
+            <a class='wide fll-sw-button' id='side-panel_final-scores'>Scores
+                are final</a>
         </div>
         <div>
             <a class='wide fll-sw-button' id='side-panel_synchronize'>Synchronize</a>
@@ -283,6 +283,9 @@
                     class='fll-sw-button'>Display Notes</button>
                 <button id='score-summary_show-comments' type='button'
                     class='fll-sw-button'>Display Comments</button>
+                <button id='score-summary_show-other-judges'
+                    type='button' class='fll-sw-button'>Display
+                    Other Judges</button>
             </div>
         </div>
 
@@ -413,19 +416,19 @@
     <!--  end enter score dialogs -->
 
     <!-- synchronize scores dialogs -->
-    
+
     <div class='fll-sw-ui-dialog fll-sw-ui-inactive'
-         id='sync-final-question'>
-      <div>
-        <p>Are all scores final?</p>
-        <p>Comments can still be modified after final scores are
-          submitted, however please notify the head judge if you
-          change scores after submitting final scores.</p>
-        <button type='button' id='sync-final-question_yes'>Yes</button>
-        <button type='button' id='sync-final-question_no'>No</button>
-      </div>
+        id='sync-final-question'>
+        <div>
+            <p>Are all scores final?</p>
+            <p>Comments can still be modified after final scores are
+                submitted, however please notify the head judge if you
+                change scores after submitting final scores.</p>
+            <button type='button' id='sync-final-question_yes'>Yes</button>
+            <button type='button' id='sync-final-question_no'>No</button>
+        </div>
     </div>
-    
+
     <!-- end synchronize scores dialogs -->
 
     <!--  end dialogs -->

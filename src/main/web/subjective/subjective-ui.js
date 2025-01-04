@@ -865,16 +865,16 @@ function populateScoreSummary() {
                 return 0;
             }
         });
-        
+
         // assign ranks
         let rank = 0;
         let rankOffset = 1;
         for (let i = 0; i < scoreDataList.length; ++i) {
             const scoreData = scoreDataList[i];
-            
+
             if (i > 0) {
                 const prevScoreData = scoreDataList[i - 1];
-                if(scoreData["computedScore"] == prevScoreData["computedScore"]) {
+                if (scoreData["computedScore"] == prevScoreData["computedScore"]) {
                     scoreData["tie"] = true;
                     rankOffset = rankOffset + 1;
                 } else {
@@ -888,13 +888,13 @@ function populateScoreSummary() {
 
             if (i + 1 < teamsWithScores.length) {
                 const nextScoreData = scoreDataList[i + 1];
-                if(scoreData["computedScore"] == nextScoreData["computedScore"]) {
+                if (scoreData["computedScore"] == nextScoreData["computedScore"]) {
                     scoreData["tie"] = true;
-                }                
+                }
             }
-            
-            scoreData["rank"] = rank;                        
-        }        
+
+            scoreData["rank"] = rank;
+        }
     }
 
     otherJudges.sort();
@@ -915,12 +915,13 @@ function populateScoreSummary() {
     const headerRowRightBlock = document.createElement("span");
     headerRow.appendChild(headerRowRightBlock);
     headerRowRightBlock.classList.add("right-align");
+    headerRowRightBlock.classList.add("other-judge");
+    headerRowRightBlock.classList.add("fll-sw-ui-inactive");
 
     for (const judgeId of otherJudges) {
         const judgeIdBlock = document.createElement("span");
         headerRowRightBlock.appendChild(judgeIdBlock);
         judgeIdBlock.classList.add("score-summary-right-elements");
-        judgeIdBlock.classList.add("other-judge");
         judgeIdBlock.innerText = judgeId;
     }
 
@@ -1006,6 +1007,7 @@ function populateScoreSummary() {
         for (const otherJudgeId of otherJudges) {
             const otherScoreBlock = document.createElement("span");
             rightBlock.appendChild(otherScoreBlock);
+            otherScoreBlock.classList.add("other-judge");
 
             const otherJudgeIdLength = otherJudgeId.length;
             const otherScoreData = teamOtherJudgeScores.get(otherJudgeId);
@@ -1017,10 +1019,10 @@ function populateScoreSummary() {
                     otherScoreBlock.innerHTML = centerText("No Show", otherJudgeIdLength);
                     otherScoreBlock.classList.add("no-show");
                 } else {
-                    if(otherScoreData["tie"]) {
+                    if (otherScoreData["tie"]) {
                         otherScoreBlock.classList.add("tie");
                     }
-                    
+
                     const otherComputed = otherScoreData["computedScore"];
                     if (otherComputed) {
                         const otherRank = otherScoreData["rank"];
@@ -1033,6 +1035,7 @@ function populateScoreSummary() {
             }
             otherScoreBlock.classList.add("score-summary-right-elements");
             otherScoreBlock.classList.add("other-judge");
+            otherScoreBlock.classList.add("fll-sw-ui-inactive");
         }
 
 
@@ -1746,6 +1749,10 @@ function setupAfterContentLoaded() {
     });
 
 
+    document.getElementById("score-summary_show-other-judges").addEventListener('click', function() {
+        toggleScoreSummaryOtherJudges();
+    });
+
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
 }
@@ -1850,6 +1857,12 @@ function toggleScoreSummaryNotes() {
     const button = document.getElementById("score-summary_show-notes");
     const hide = button.classList.contains("fll-sw-button-pressed");
     displayOrHideCommentsOrNotes(hide, button, '.score-summary_note');
+}
+
+function toggleScoreSummaryOtherJudges() {
+    const button = document.getElementById("score-summary_show-other-judges");
+    const hide = button.classList.contains("fll-sw-button-pressed");
+    displayOrHideCommentsOrNotes(hide, button, '.other-judge');
 }
 
 /**
