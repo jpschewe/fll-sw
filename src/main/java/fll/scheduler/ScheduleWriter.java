@@ -348,11 +348,10 @@ public final class ScheduleWriter {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    // left margin is for the header because of the rotation
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
-                                                               new Margins(0.50, 0.50, 0.2, 0.2), 0.4, 0.4);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
+                                                               FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
+                                                               FOPUtils.STANDARD_MARGINS, 0.20, 0.20);
     layoutMasterSet.appendChild(pageMaster);
-    pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
