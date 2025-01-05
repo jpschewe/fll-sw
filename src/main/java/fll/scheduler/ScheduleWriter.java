@@ -39,6 +39,7 @@ import com.diffplug.common.base.Errors;
 import com.google.common.collect.Iterables;
 
 import fll.Tournament;
+import fll.UserImages;
 import fll.Utilities;
 import fll.db.TableInformation;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
@@ -337,7 +338,7 @@ public final class ScheduleWriter {
   private static Document createScheduleByWaveAndTeam(final Tournament tournament,
                                                       final TournamentSchedule schedule) {
     final String nonCenteredSidePadding = "0.02in";
-    
+
     final Set<String> subjectiveStations = schedule.getSubjectiveStations();
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -402,15 +403,15 @@ public final class ScheduleWriter {
                                                                   TournamentSchedule.TEAM_NUMBER_HEADER);
     headerRow.appendChild(teamNumberHeaderCell);
     FOPUtils.addBorders(teamNumberHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);    
-    
+                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+
     final Element teamNameHeaderCell = FOPUtils.createTableCell(document, null, TournamentSchedule.TEAM_NAME_HEADER);
     headerRow.appendChild(teamNameHeaderCell);
     FOPUtils.addBorders(teamNameHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     teamNameHeaderCell.setAttribute("padding-left", nonCenteredSidePadding);
     teamNameHeaderCell.setAttribute("padding-right", nonCenteredSidePadding);
-    
+
     final Element organizationHeaderCell = FOPUtils.createTableCell(document, null,
                                                                     TournamentSchedule.ORGANIZATION_HEADER);
     headerRow.appendChild(organizationHeaderCell);
@@ -418,7 +419,7 @@ public final class ScheduleWriter {
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     organizationHeaderCell.setAttribute("padding-left", nonCenteredSidePadding);
     organizationHeaderCell.setAttribute("padding-right", nonCenteredSidePadding);
-    
+
     final Element judgeGroupHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                   TournamentSchedule.JUDGE_GROUP_HEADER);
     headerRow.appendChild(judgeGroupHeaderCell);
@@ -501,7 +502,7 @@ public final class ScheduleWriter {
                           FOPUtils.STANDARD_BORDER_WIDTH);
       teamNameCell.setAttribute("padding-left", nonCenteredSidePadding);
       teamNameCell.setAttribute("padding-right", nonCenteredSidePadding);
-      
+
       final Element organizationCell = FOPUtils.createTableCell(document, null,
                                                                 Utilities.stringValueOrEmpty(si.getOrganization()));
       row.appendChild(organizationCell);
@@ -509,7 +510,7 @@ public final class ScheduleWriter {
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
       organizationCell.setAttribute("padding-left", nonCenteredSidePadding);
       organizationCell.setAttribute("padding-right", nonCenteredSidePadding);
-      
+
       final Element judgeGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                               si.getJudgingGroup());
       row.appendChild(judgeGroupCell);
@@ -569,6 +570,41 @@ public final class ScheduleWriter {
 
       prevWave = si.getWave();
     } // foreach team schedule info
+
+    final Element bottomContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    documentBody.appendChild(bottomContainer);
+    bottomContainer.setAttribute("margin-top", "0.25in");
+
+    // general schedule
+    final Element bottomLeft = FOPUtils.createXslFoElement(document, "inline-container");
+    bottomContainer.appendChild(bottomLeft);
+    bottomLeft.setAttribute("width", "50%");
+
+    final Element generalScheduleContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    bottomLeft.appendChild(generalScheduleContainer);
+
+    final Element generalScheduleHeader = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    generalScheduleContainer.appendChild(generalScheduleHeader);
+    generalScheduleHeader.appendChild(document.createTextNode("General Schedule"));
+    generalScheduleHeader.setAttribute("font-weight", "bold");
+
+    // logo
+    final Element bottomRight = FOPUtils.createXslFoElement(document, "inline-container");
+    bottomContainer.appendChild(bottomRight);
+    bottomRight.setAttribute("width", "50%");
+
+    final Element logoBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    bottomRight.appendChild(logoBlock);
+    logoBlock.setAttribute("margin-top", "1em");
+
+    final Element logoGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+    logoBlock.appendChild(logoGraphic);
+    logoGraphic.setAttribute("src",
+                             String.format("url('data:image/jpeg;base64,%s')", UserImages.getPartnerLogoAsBase64()));
+    logoGraphic.setAttribute("content-width", "2in"); // assumes 11in x 8.5in page
+    logoGraphic.setAttribute("scaling", "uniform");
+    logoGraphic.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+    logoGraphic.setAttribute("width", "100%");
 
     return document;
   }
