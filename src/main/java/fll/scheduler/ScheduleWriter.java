@@ -342,7 +342,6 @@ public final class ScheduleWriter {
 
     final Element rootElement = FOPUtils.createRoot(document);
     document.appendChild(rootElement);
-    rootElement.setAttribute("font-size", "12pt");
 
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
@@ -369,12 +368,14 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element table = FOPUtils.createBasicTable(document);
+    final Element table = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_TAG);
     documentBody.appendChild(table);
+    table.setAttribute("font-size", "6pt");
+    table.setAttribute("table-layout", "fixed");
 
-    table.appendChild(FOPUtils.createTableColumn(document, 2)); // team number
-    table.appendChild(FOPUtils.createTableColumn(document, 3)); // team name
-    table.appendChild(FOPUtils.createTableColumn(document, 3)); // organization
+    table.appendChild(FOPUtils.createTableColumn(document, 1)); // team number
+    table.appendChild(FOPUtils.createTableColumn(document, 4)); // team name
+    table.appendChild(FOPUtils.createTableColumn(document, 4)); // organization
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // judging group
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
@@ -387,7 +388,7 @@ public final class ScheduleWriter {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
     }
-    table.appendChild(FOPUtils.createTableColumn(document, 2)); // wave
+    table.appendChild(FOPUtils.createTableColumn(document, 1)); // wave
 
     final Element tableHeader = FOPUtils.createTableHeader(document);
     table.appendChild(tableHeader);
@@ -395,12 +396,11 @@ public final class ScheduleWriter {
     final Element headerRow = FOPUtils.createTableRow(document);
     tableHeader.appendChild(headerRow);
 
-    final Element teamNumberHeaderCell = FOPUtils.createTableCell(document, null,
+    final Element teamNumberHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                   TournamentSchedule.TEAM_NUMBER_HEADER);
     headerRow.appendChild(teamNumberHeaderCell);
     FOPUtils.addBorders(teamNumberHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
     final Element teamNameHeaderCell = FOPUtils.createTableCell(document, null, TournamentSchedule.TEAM_NAME_HEADER);
     headerRow.appendChild(teamNameHeaderCell);
     FOPUtils.addBorders(teamNameHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
@@ -412,14 +412,14 @@ public final class ScheduleWriter {
     FOPUtils.addBorders(organizationHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
-    final Element judgeGroupHeaderCell = FOPUtils.createTableCell(document, null,
+    final Element judgeGroupHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                   TournamentSchedule.JUDGE_GROUP_HEADER);
     headerRow.appendChild(judgeGroupHeaderCell);
     FOPUtils.addBorders(judgeGroupHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
     for (final String subjectiveStation : subjectiveStations) {
-      final Element subjHeaderCell = FOPUtils.createTableCell(document, null, subjectiveStation);
+      final Element subjHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, subjectiveStation);
       headerRow.appendChild(subjHeaderCell);
       FOPUtils.addBorders(subjHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -433,7 +433,7 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
-      final Element headerCell2 = FOPUtils.createTableCell(document, null,
+      final Element headerCell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                            String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT,
                                                                          round
                                                                              + 1));
@@ -442,14 +442,14 @@ public final class ScheduleWriter {
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     }
     for (int round = 0; round < schedule.getNumberOfRegularMatchPlayRounds(); ++round) {
-      final Element headerCell1 = FOPUtils.createTableCell(document, null,
+      final Element headerCell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                            String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
                                                                + 1));
       headerRow.appendChild(headerCell1);
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
-      final Element headerCell2 = FOPUtils.createTableCell(document, null,
+      final Element headerCell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                            String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
                                                                + 1));
       headerRow.appendChild(headerCell2);
@@ -457,7 +457,8 @@ public final class ScheduleWriter {
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     }
 
-    final Element waveHeaderCell = FOPUtils.createTableCell(document, null, TournamentSchedule.WAVE_HEADER);
+    final Element waveHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                            TournamentSchedule.WAVE_HEADER);
     headerRow.appendChild(waveHeaderCell);
     FOPUtils.addBorders(waveHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -481,7 +482,8 @@ public final class ScheduleWriter {
         topBorderWidth = FOPUtils.STANDARD_BORDER_WIDTH;
       }
 
-      final Element teamNumberCell = FOPUtils.createTableCell(document, null, String.valueOf(si.getTeamNumber()));
+      final Element teamNumberCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                              String.valueOf(si.getTeamNumber()));
       row.appendChild(teamNumberCell);
       FOPUtils.addBorders(teamNumberCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -497,7 +499,8 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(organizationCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
-      final Element judgeGroupCell = FOPUtils.createTableCell(document, null, si.getJudgingGroup());
+      final Element judgeGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                              si.getJudgingGroup());
       row.appendChild(judgeGroupCell);
       FOPUtils.addBorders(judgeGroupCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -508,7 +511,7 @@ public final class ScheduleWriter {
           throw new RuntimeException("Cannot find time for "
               + subjectiveStation);
         }
-        final Element cell = FOPUtils.createTableCell(document, null,
+        final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                       TournamentSchedule.humanFormatTime(stime.getTime()));
         row.appendChild(cell);
         FOPUtils.addBorders(cell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
@@ -518,13 +521,13 @@ public final class ScheduleWriter {
       si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
         final PerformanceTime perf = pair.getLeft();
 
-        final Element cell1 = FOPUtils.createTableCell(document, null,
+        final Element cell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                        TournamentSchedule.humanFormatTime(perf.getTime()));
         row.appendChild(cell1);
         FOPUtils.addBorders(cell1, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                             FOPUtils.STANDARD_BORDER_WIDTH);
 
-        final Element cell2 = FOPUtils.createTableCell(document, null,
+        final Element cell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                        String.format("%s %s", perf.getTable(), perf.getSide()));
         row.appendChild(cell2);
         FOPUtils.addBorders(cell2, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
@@ -534,20 +537,21 @@ public final class ScheduleWriter {
       si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
         final PerformanceTime perf = pair.getLeft();
 
-        final Element cell1 = FOPUtils.createTableCell(document, null,
+        final Element cell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                        TournamentSchedule.humanFormatTime(perf.getTime()));
         row.appendChild(cell1);
         FOPUtils.addBorders(cell1, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                             FOPUtils.STANDARD_BORDER_WIDTH);
 
-        final Element cell2 = FOPUtils.createTableCell(document, null,
+        final Element cell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                        String.format("%s %s", perf.getTable(), perf.getSide()));
         row.appendChild(cell2);
         FOPUtils.addBorders(cell2, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                             FOPUtils.STANDARD_BORDER_WIDTH);
       }));
 
-      final Element waveCell = FOPUtils.createTableCell(document, null, Utilities.stringValueOrEmpty(si.getWave()));
+      final Element waveCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                        Utilities.stringValueOrEmpty(si.getWave()));
       row.appendChild(waveCell);
       FOPUtils.addBorders(waveCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH);
