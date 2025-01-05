@@ -484,7 +484,7 @@ public final class ScheduleWriter {
       final double topBorderWidth;
       if (null != prevWave
           && !prevWave.equals(si.getWave())) {
-        topBorderWidth = FOPUtils.THICK_BORDER_WIDTH;
+        topBorderWidth = 1.5;
       } else {
         topBorderWidth = FOPUtils.STANDARD_BORDER_WIDTH;
       }
