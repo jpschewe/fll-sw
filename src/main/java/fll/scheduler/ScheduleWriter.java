@@ -336,6 +336,8 @@ public final class ScheduleWriter {
 
   private static Document createScheduleByWaveAndTeam(final Tournament tournament,
                                                       final TournamentSchedule schedule) {
+    final String nonCenteredSidePadding = "0.02in";
+    
     final Set<String> subjectiveStations = schedule.getSubjectiveStations();
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -400,18 +402,23 @@ public final class ScheduleWriter {
                                                                   TournamentSchedule.TEAM_NUMBER_HEADER);
     headerRow.appendChild(teamNumberHeaderCell);
     FOPUtils.addBorders(teamNumberHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);    
+    
     final Element teamNameHeaderCell = FOPUtils.createTableCell(document, null, TournamentSchedule.TEAM_NAME_HEADER);
     headerRow.appendChild(teamNameHeaderCell);
     FOPUtils.addBorders(teamNameHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
+    teamNameHeaderCell.setAttribute("padding-left", nonCenteredSidePadding);
+    teamNameHeaderCell.setAttribute("padding-right", nonCenteredSidePadding);
+    
     final Element organizationHeaderCell = FOPUtils.createTableCell(document, null,
                                                                     TournamentSchedule.ORGANIZATION_HEADER);
     headerRow.appendChild(organizationHeaderCell);
     FOPUtils.addBorders(organizationHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                         FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
+    organizationHeaderCell.setAttribute("padding-left", nonCenteredSidePadding);
+    organizationHeaderCell.setAttribute("padding-right", nonCenteredSidePadding);
+    
     final Element judgeGroupHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                   TournamentSchedule.JUDGE_GROUP_HEADER);
     headerRow.appendChild(judgeGroupHeaderCell);
@@ -492,13 +499,17 @@ public final class ScheduleWriter {
       row.appendChild(teamNameCell);
       FOPUtils.addBorders(teamNameCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH);
-
+      teamNameCell.setAttribute("padding-left", nonCenteredSidePadding);
+      teamNameCell.setAttribute("padding-right", nonCenteredSidePadding);
+      
       final Element organizationCell = FOPUtils.createTableCell(document, null,
                                                                 Utilities.stringValueOrEmpty(si.getOrganization()));
       row.appendChild(organizationCell);
       FOPUtils.addBorders(organizationCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
+      organizationCell.setAttribute("padding-left", nonCenteredSidePadding);
+      organizationCell.setAttribute("padding-right", nonCenteredSidePadding);
+      
       final Element judgeGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                               si.getJudgingGroup());
       row.appendChild(judgeGroupCell);
