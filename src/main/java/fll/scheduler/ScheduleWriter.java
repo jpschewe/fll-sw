@@ -45,7 +45,6 @@ import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
-import fll.util.FOPUtils.Margins;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -371,8 +370,8 @@ public final class ScheduleWriter {
     table.setAttribute("table-layout", "fixed");
 
     table.appendChild(FOPUtils.createTableColumn(document, 1)); // team number
-    table.appendChild(FOPUtils.createTableColumn(document, 4)); // team name
-    table.appendChild(FOPUtils.createTableColumn(document, 4)); // organization
+    table.appendChild(FOPUtils.createTableColumn(document, 5)); // team name
+    table.appendChild(FOPUtils.createTableColumn(document, 5)); // organization
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // judging group
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
