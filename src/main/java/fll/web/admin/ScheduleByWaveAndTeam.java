@@ -30,8 +30,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputScheduleByWaveAndTeam(TournamentSchedule,
- *      java.io.OutputStream)
+ * @see ScheduleWriter#outputScheduleByWaveAndTeam(Tournament,
+ *      TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/ScheduleByWaveAndTeam")
 public class ScheduleByWaveAndTeam extends BaseFLLServlet {
