@@ -376,8 +376,8 @@ public final class ScheduleWriter {
     table.setAttribute("table-layout", "fixed");
 
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // team number
-    table.appendChild(FOPUtils.createTableColumn(document, 5)); // team name
-    table.appendChild(FOPUtils.createTableColumn(document, 5)); // organization
+    table.appendChild(FOPUtils.createTableColumn(document, 7)); // team name
+    table.appendChild(FOPUtils.createTableColumn(document, 7)); // organization
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // judging group
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
