@@ -241,6 +241,10 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                             schedule sorted by team</a>
                     </li>
                     <li>
+                        <a href="ScheduleByWaveAndTeam" target="_new">Full
+                            schedule sorted by wave and team</a>
+                    </li>
+                    <li>
                         <a href="SubjectiveScheduleByJudgingStation"
                             target="_new">Subjective schedule split
                             by category and sorted by judging group,

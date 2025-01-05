@@ -995,6 +995,47 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Comparator for for sorting by wave and then team number.
+   */
+  public static final class ComparatorByWaveAndTeam implements Comparator<TeamScheduleInfo>, Serializable {
+
+    /**
+     * Singleton instance.
+     */
+    public static final ComparatorByWaveAndTeam INSTANCE = new ComparatorByWaveAndTeam();
+
+    private ComparatorByWaveAndTeam() {
+    }
+
+    @Override
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
+      final @Nullable String oneWave = one.getWave();
+      final @Nullable String twoWave = two.getWave();
+      final int waveCompare;
+      if (null == oneWave
+          && null == twoWave) {
+        waveCompare = 0;
+      } else if (null == oneWave
+          && null != twoWave) {
+        waveCompare = 1;
+      } else if (null != oneWave
+          && null == twoWave) {
+        waveCompare = -1;
+      } else {
+        // checker bug
+        waveCompare = castNonNull(oneWave).compareTo(castNonNull(twoWave));
+      }
+
+      if (waveCompare == 0) {
+        return Integer.compare(one.getTeamNumber(), two.getTeamNumber());
+      } else {
+        return waveCompare;
+      }
+    }
+  }
+
+  /**
    * @return the general schedule as a string.
    */
   public String computeGeneralSchedule() {
