@@ -45,6 +45,7 @@ import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
+import fll.util.FOPUtils.Margins;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -348,8 +349,7 @@ public final class ScheduleWriter {
 
     final String pageMasterName = "simple";
     final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
-                                                               FOPUtils.STANDARD_MARGINS, 0.2,
-                                                               FOPUtils.STANDARD_FOOTER_HEIGHT);
+                                                               new Margins(0, 0.10, 0.45, 0.45), 0.2, 0);
     layoutMasterSet.appendChild(pageMaster);
     pageMaster.setAttribute("reference-orientation", "90");
 
@@ -361,9 +361,6 @@ public final class ScheduleWriter {
     final Element header = createHeader(document,
                                         null == tournamentDescription ? tournament.getName() : tournamentDescription);
     pageSequence.appendChild(header);
-
-    final Element footer = FOPUtils.createSimpleFooter(document);
-    pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
