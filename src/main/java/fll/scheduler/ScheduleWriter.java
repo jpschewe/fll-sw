@@ -338,6 +338,7 @@ public final class ScheduleWriter {
   private static Document createScheduleByWaveAndTeam(final Tournament tournament,
                                                       final TournamentSchedule schedule) {
     final String nonCenteredSidePadding = "0.02in";
+    final String tableFontSize = "7pt";
 
     final Set<String> subjectiveStations = schedule.getSubjectiveStations();
 
@@ -373,7 +374,7 @@ public final class ScheduleWriter {
 
     final Element table = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_TAG);
     documentBody.appendChild(table);
-    table.setAttribute("font-size", "7pt");
+    table.setAttribute("font-size", tableFontSize);
     table.setAttribute("table-layout", "fixed");
 
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // team number
@@ -574,12 +575,14 @@ public final class ScheduleWriter {
     final Element bottomContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     documentBody.appendChild(bottomContainer);
     bottomContainer.setAttribute("margin-top", "0.25in");
+    bottomContainer.setAttribute("font-size", tableFontSize);
 
     // general schedule
     final Element bottomLeft = FOPUtils.createXslFoElement(document, "inline-container");
     bottomContainer.appendChild(bottomLeft);
     bottomLeft.setAttribute("width", "50%");
-
+    bottomLeft.setAttribute("vertical-align", "top");
+    
     final Element generalScheduleContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     bottomLeft.appendChild(generalScheduleContainer);
 
