@@ -370,10 +370,10 @@ public final class ScheduleWriter {
 
     final Element table = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_TAG);
     documentBody.appendChild(table);
-    table.setAttribute("font-size", "6pt");
+    table.setAttribute("font-size", "7pt");
     table.setAttribute("table-layout", "fixed");
 
-    table.appendChild(FOPUtils.createTableColumn(document, 1)); // team number
+    table.appendChild(FOPUtils.createTableColumn(document, 2)); // team number
     table.appendChild(FOPUtils.createTableColumn(document, 5)); // team name
     table.appendChild(FOPUtils.createTableColumn(document, 5)); // organization
     table.appendChild(FOPUtils.createTableColumn(document, 2)); // judging group
