@@ -27,22 +27,24 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -1036,81 +1038,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @return the general schedule as a string.
-   */
-  public String computeGeneralSchedule() {
-    LocalTime minPerf = null;
-    LocalTime maxPerf = null;
-    // division -> date
-    final Map<String, LocalTime> minSubjectiveTimes = new HashMap<>();
-    final Map<String, LocalTime> maxSubjectiveTimes = new HashMap<>();
-
-    for (final TeamScheduleInfo si : schedule) {
-      final String judgingStation = si.getJudgingGroup();
-      for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
-        final LocalTime currentMin = minSubjectiveTimes.get(judgingStation);
-        if (null == currentMin) {
-          minSubjectiveTimes.put(judgingStation, stime.getTime());
-        } else {
-          if (stime.getTime().isBefore(currentMin)) {
-            minSubjectiveTimes.put(judgingStation, stime.getTime());
-          }
-        }
-        final LocalTime currentMax = maxSubjectiveTimes.get(judgingStation);
-        if (null == currentMax) {
-          maxSubjectiveTimes.put(judgingStation, stime.getTime());
-        } else {
-          if (stime.getTime().isAfter(currentMax)) {
-            maxSubjectiveTimes.put(judgingStation, stime.getTime());
-          }
-        }
-
-      } // foreach subjective time
-
-      for (final PerformanceTime performance : si.getAllPerformances()) {
-        if (null != performance.getTime()) {
-          if (null == minPerf
-              || performance.getTime().isBefore(minPerf)) {
-            minPerf = performance.getTime();
-          }
-
-          if (null == maxPerf
-              || performance.getTime().isAfter(maxPerf)) {
-            maxPerf = performance.getTime();
-          }
-        }
-      }
-
-    } // foreach team
-
-    // print out the general schedule
-    final Formatter output = new Formatter();
-    final Set<String> stations = new HashSet<>();
-    stations.addAll(minSubjectiveTimes.keySet());
-    stations.addAll(maxSubjectiveTimes.keySet());
-    for (final String station : stations) {
-      final LocalTime earliestStart = minSubjectiveTimes.get(station);
-      final LocalTime latestStart = maxSubjectiveTimes.get(station);
-      final Duration subjectiveDuration = Duration.ofMinutes(SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
-      final LocalTime latestEnd = null == latestStart ? null : latestStart.plus(subjectiveDuration);
-
-      output.format("Subjective times for judging station %s: %s - %s (assumes default subjective time of %d minutes)%n",
-                    station, humanFormatTime(earliestStart), humanFormatTime(latestEnd),
-                    SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
-    }
-    if (null != minPerf
-        && null != maxPerf) {
-      final Duration performanceDuration = Duration.ofMinutes(SolverParams.DEFAULT_PERFORMANCE_MINUTES);
-      final LocalTime performanceEnd = maxPerf.plus(performanceDuration);
-
-      output.format("Performance times: %s - %s (assumes default performance time of %d minutes)%n",
-                    humanFormatTime(minPerf), humanFormatTime(performanceEnd),
-                    SolverParams.DEFAULT_PERFORMANCE_MINUTES);
-    }
-    return output.toString();
-  }
-
-  /**
    * Add the data from the specified round of the specified TeamScheduleInfo to
    * matches.
    *
@@ -1939,4 +1866,208 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
+  /**
+   * @return all waves in the schedule
+   */
+  public Collection<@Nullable String> getAllWaves() {
+    // checker bug is fixed in 3.48.3
+    // return
+    // schedule.stream().map(TeamScheduleInfo::getWave).distinct().collect(Collectors.toList());
+    final Collection<@Nullable String> allWaves = new HashSet<>();
+    for (final TeamScheduleInfo si : schedule) {
+      allWaves.add(si.getWave());
+    }
+    return allWaves;
+  }
+
+  /**
+   * Schedule information for a wave.
+   * 
+   * @param wave the wave that the schedule is for
+   * @param performanceStart start of the first performance run
+   * @param performanceEnd end of the last performance run
+   * @param subjectiveStart start of the first subjective session
+   * @param subjectiveEnd end of the last subjective session
+   */
+  public record GeneralSchedule(@Nullable String wave,
+                                LocalTime performanceStart,
+                                LocalTime performanceEnd,
+                                LocalTime subjectiveStart,
+                                LocalTime subjectiveEnd) {
+  }
+
+  private static final class GeneralScheduleComparator implements Comparator<GeneralSchedule> {
+
+    static final GeneralScheduleComparator INSTANCE = new GeneralScheduleComparator();
+
+    @Override
+    public int compare(final GeneralSchedule o1,
+                       final GeneralSchedule o2) {
+      if (null == o1.wave()
+          && null == o2.wave()) {
+        return 0;
+      } else if (null == o1.wave()) {
+        return -1;
+      } else if (null == o2.wave()) {
+        return 1;
+      } else {
+        return o1.wave().compareTo(o2.wave());
+      }
+    }
+  }
+
+  /**
+   * @return general schedule sorted by wave, {@code null} is first
+   */
+  public List<GeneralSchedule> computeGeneralSchedule() {
+    final List<GeneralSchedule> generalSchedule = new LinkedList<>();
+    for (final @Nullable String wave : getAllWaves()) {
+      final ImmutablePair<LocalTime, LocalTime> performance = computePerformanceGeneralSchedule(wave);
+      final ImmutablePair<LocalTime, LocalTime> subjective = computeSubjectiveGeneralSchedule(wave);
+
+      final GeneralSchedule gs = new GeneralSchedule(wave, performance.getLeft(), performance.getRight(),
+                                                     subjective.getLeft(), subjective.getRight());
+      generalSchedule.add(gs);
+    }
+
+    Collections.sort(generalSchedule, GeneralScheduleComparator.INSTANCE);
+
+    return generalSchedule;
+  }
+
+  /**
+   * Compute the general performance schedule for the specified wave. Computes the
+   * minimum duration between performance runs and uses that for the duration of
+   * the last performance.
+   * 
+   * @param wave the wave to work with
+   * @return start of first performance and end of last performance
+   * @see TeamScheduleInfo#getWave()
+   */
+  private ImmutablePair<LocalTime, LocalTime> computePerformanceGeneralSchedule(final @Nullable String wave) {
+    final Stream<PerformanceTime> perfTimes = schedule.stream() //
+                                                      .filter(si -> Objects.equals(si.getWave(), wave)) //
+                                                      .map(TeamScheduleInfo::allPerformances).flatMap(s -> s) //
+                                                      .sorted();
+    PerformanceTime first = null;
+    PerformanceTime last = null;
+    Duration minDifference = null;
+    PerformanceTime prevTime = null;
+    for (final PerformanceTime perfTime : perfTimes.collect(Collectors.toList())) {
+      if (null == first) {
+        first = perfTime;
+      }
+      last = perfTime;
+
+      if (null != prevTime) {
+        final Duration difference = Duration.between(prevTime.getTime(), perfTime.getTime());
+        if (difference.isPositive()) {
+          if (null == minDifference) {
+            minDifference = difference;
+          } else if (difference.compareTo(minDifference) < 0) {
+            minDifference = difference;
+          }
+        }
+      }
+      prevTime = perfTime;
+    }
+
+    if (null == minDifference) {
+      throw new FLLRuntimeException("No difference between performance times found");
+    }
+    if (null == first) {
+      throw new FLLRuntimeException("No performance times found");
+    }
+    if (null == last) {
+      throw new FLLRuntimeException("No performance times found");
+    }
+
+    return ImmutablePair.of(first.getTime(), last.getTime().plus(minDifference));
+  }
+
+  /**
+   * Compute the general subjective schedule for the specified wave. Computes the
+   * minimum duration between subjective sessions and uses that for the duration
+   * of
+   * the last subjective session.
+   * 
+   * @param wave the wave to work with
+   * @return start of first subjective session and end of last subjective session
+   * @see TeamScheduleInfo#getWave()
+   */
+  private ImmutablePair<LocalTime, LocalTime> computeSubjectiveGeneralSchedule(final @Nullable String wave) {
+    final Stream<SubjectiveTime> allSubjectiveTimes = schedule.stream() //
+                                                              .filter(si -> Objects.equals(si.getWave(), wave)) //
+                                                              .map(TeamScheduleInfo::getSubjectiveTimes)
+                                                              .flatMap(Collection::stream);
+    final Map<String, SortedSet<SubjectiveTime>> subjectiveTimesByCategory = new HashMap<>();
+    for (final SubjectiveTime st : allSubjectiveTimes.collect(Collectors.toList())) {
+      subjectiveTimesByCategory.computeIfAbsent(st.getName(), k -> new TreeSet<>()).add(st);
+    }
+
+    LocalTime globalFirst = null;
+    LocalTime globalLast = null;
+    Duration globalMinDifference = null;
+    for (final Map.Entry<String, SortedSet<SubjectiveTime>> entry : subjectiveTimesByCategory.entrySet()) {
+      LocalTime localFirst = null;
+      LocalTime localLast = null;
+      Duration localMinDifference = null;
+      LocalTime prevTime = null;
+      for (final SubjectiveTime st : entry.getValue()) {
+        if (null == localFirst) {
+          localFirst = st.getTime();
+        }
+        localLast = st.getTime();
+
+        if (null != prevTime) {
+          final Duration difference = Duration.between(prevTime, st.getTime());
+          if (difference.isPositive()) {
+            if (null == localMinDifference) {
+              localMinDifference = difference;
+            } else if (difference.compareTo(localMinDifference) < 0) {
+              localMinDifference = difference;
+            }
+          }
+        }
+        prevTime = st.getTime();
+      }
+
+      if (null == localMinDifference) {
+        throw new FLLRuntimeException(String.format("No differences between subjective times found foor %s",
+                                                    entry.getKey()));
+      }
+      if (null == localFirst) {
+        throw new FLLRuntimeException(String.format("No subjective times found foor %s", entry.getKey()));
+      }
+      if (null == localLast) {
+        throw new FLLRuntimeException(String.format("No subjective times found foor %s", entry.getKey()));
+      }
+
+      if (null == globalFirst
+          || localFirst.isBefore(globalFirst)) {
+        globalFirst = localFirst;
+      }
+      if (null == globalLast
+          || localLast.isAfter(globalLast)) {
+        globalLast = localLast;
+      }
+      if (null == globalMinDifference
+          || localMinDifference.compareTo(globalMinDifference) < 0) {
+        globalMinDifference = localMinDifference;
+      }
+
+    }
+
+    if (null == globalMinDifference) {
+      throw new FLLRuntimeException("No differences between subjective times found");
+    }
+    if (null == globalFirst) {
+      throw new FLLRuntimeException("No subjective times found");
+    }
+    if (null == globalLast) {
+      throw new FLLRuntimeException("No subjective times found");
+    }
+
+    return ImmutablePair.of(globalFirst, globalLast.plus(globalMinDifference));
+  }
 }
