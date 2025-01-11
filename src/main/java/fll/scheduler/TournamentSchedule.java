@@ -1896,7 +1896,7 @@ public class TournamentSchedule implements Serializable {
                                 LocalTime subjectiveEnd) {
   }
 
-  private static final class GeneralScheduleComparator implements Comparator<GeneralSchedule> {
+  private static final class GeneralScheduleComparator implements Comparator<GeneralSchedule>, Serializable {
 
     static final GeneralScheduleComparator INSTANCE = new GeneralScheduleComparator();
 
