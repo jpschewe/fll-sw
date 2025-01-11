@@ -599,12 +599,27 @@ public final class ScheduleWriter {
       generalScheduleHeader.setAttribute("font-weight", "bold");
       generalScheduleHeader.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
 
-      final Element scheduleTable = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_TAG);
-      generalScheduleContainer.appendChild(scheduleTable);
-      scheduleTable.setAttribute("font-size", tableFontSize);
-      scheduleTable.setAttribute("table-layout", "fixed");
-      scheduleTable.setAttribute("width", "50%");
+      // put inside a table to center the inner table
+      // https://xmlgraphics.apache.org/fop/fo.html#fo-center-table-horizon
+      // Should be able to use table-and-caption element, but FOP doesn't support it
+      // as of 2.10
+      final Element scheduleTableContainer = FOPUtils.createBasicTable(document);
+      generalScheduleContainer.appendChild(scheduleTableContainer);
+      scheduleTableContainer.appendChild(FOPUtils.createTableColumn(document, 1)); // 25%
+      scheduleTableContainer.appendChild(FOPUtils.createTableColumn(document, 2)); // 50%
+      scheduleTableContainer.appendChild(FOPUtils.createTableColumn(document, 1)); // 25%
 
+      final Element scheduleContainerBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+      scheduleTableContainer.appendChild(scheduleContainerBody);
+      final Element scheduleContainerRow = FOPUtils.createTableRow(document);
+      scheduleContainerBody.appendChild(scheduleContainerRow);
+      final Element scheduleContainerCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      scheduleContainerRow.appendChild(scheduleContainerCell);
+      scheduleContainerCell.setAttribute("column-number", "2");
+
+      final Element scheduleTable = FOPUtils.createBasicTable(document);
+      scheduleContainerCell.appendChild(scheduleTable);
+      scheduleTable.setAttribute("font-size", tableFontSize);
 
       scheduleTable.appendChild(FOPUtils.createTableColumn(document, 1)); // title
       scheduleTable.appendChild(FOPUtils.createTableColumn(document, 1)); // times
