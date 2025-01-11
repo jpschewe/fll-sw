@@ -588,14 +588,121 @@ public final class ScheduleWriter {
     bottomContainer.appendChild(bottomLeft);
     bottomLeft.setAttribute("width", "50%");
     bottomLeft.setAttribute("vertical-align", "top");
-    
+
     final Element generalScheduleContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     bottomLeft.appendChild(generalScheduleContainer);
 
-    final Element generalScheduleHeader = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    generalScheduleContainer.appendChild(generalScheduleHeader);
-    generalScheduleHeader.appendChild(document.createTextNode("General Schedule"));
-    generalScheduleHeader.setAttribute("font-weight", "bold");
+    if (!generalSchedule.isEmpty()) {
+      final Element generalScheduleHeader = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      generalScheduleContainer.appendChild(generalScheduleHeader);
+      generalScheduleHeader.appendChild(document.createTextNode("General Schedule"));
+      generalScheduleHeader.setAttribute("font-weight", "bold");
+      generalScheduleHeader.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+
+      final Element scheduleTable = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_TAG);
+      generalScheduleContainer.appendChild(scheduleTable);
+      scheduleTable.setAttribute("font-size", tableFontSize);
+      scheduleTable.setAttribute("table-layout", "fixed");
+      scheduleTable.setAttribute("width", "50%");
+
+
+      scheduleTable.appendChild(FOPUtils.createTableColumn(document, 1)); // title
+      scheduleTable.appendChild(FOPUtils.createTableColumn(document, 1)); // times
+
+      final Element scheduleTableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+      scheduleTable.appendChild(scheduleTableBody);
+
+      for (final var gs : generalSchedule) {
+        // Check-in -----
+        final Element checkinRow = FOPUtils.createTableRow(document);
+        scheduleTableBody.appendChild(checkinRow);
+
+        final @Nullable String wave = gs.wave();
+        final String checkinTitle;
+        if (null != wave) {
+          checkinTitle = String.format("Wave %s Check-in", wave);
+        } else {
+          checkinTitle = "Check-in";
+        }
+        final Element checkinTitleCell = FOPUtils.createTableCell(document, null, checkinTitle);
+        checkinRow.appendChild(checkinTitleCell);
+        FOPUtils.addLeftBorder(checkinTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(checkinTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addTopBorder(checkinTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        checkinTitleCell.setAttribute("padding-left", nonCenteredSidePadding);
+        checkinTitleCell.setAttribute("padding-right", nonCenteredSidePadding);
+
+        // FIXME need to get this from somewhere
+        final Element checkinTimeCell = FOPUtils.createTableCell(document, null, "12:00 AM");
+        checkinRow.appendChild(checkinTimeCell);
+        FOPUtils.addLeftBorder(checkinTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(checkinTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addTopBorder(checkinTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        checkinTimeCell.setAttribute("padding-left", nonCenteredSidePadding);
+        checkinTimeCell.setAttribute("padding-right", nonCenteredSidePadding);
+
+        // Judging -----
+        final Element judgingRow = FOPUtils.createTableRow(document);
+        scheduleTableBody.appendChild(judgingRow);
+
+        final Element judgingTitleCell = FOPUtils.createTableCell(document, null, "Judging");
+        judgingRow.appendChild(judgingTitleCell);
+        FOPUtils.addLeftBorder(judgingTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(judgingTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        judgingTitleCell.setAttribute("padding-left", nonCenteredSidePadding);
+        judgingTitleCell.setAttribute("padding-right", nonCenteredSidePadding);
+
+        final String judgingTimeText = String.format("%s - %s",
+                                                     TournamentSchedule.humanFormatTime(gs.subjectiveStart()),
+                                                     TournamentSchedule.humanFormatTime(gs.subjectiveEnd()));
+        final Element judgingTimeCell = FOPUtils.createTableCell(document, null, judgingTimeText);
+        judgingRow.appendChild(judgingTimeCell);
+        FOPUtils.addLeftBorder(judgingTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(judgingTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        judgingTimeCell.setAttribute("padding-left", nonCenteredSidePadding);
+        judgingTimeCell.setAttribute("padding-right", nonCenteredSidePadding);
+
+        // Robot Game -----
+        final Element robotGameRow = FOPUtils.createTableRow(document);
+        scheduleTableBody.appendChild(robotGameRow);
+
+        final Element robotGameTitleCell = FOPUtils.createTableCell(document, null, "Robot Game");
+        robotGameRow.appendChild(robotGameTitleCell);
+        FOPUtils.addLeftBorder(robotGameTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(robotGameTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        robotGameTitleCell.setAttribute("padding-left", nonCenteredSidePadding);
+        robotGameTitleCell.setAttribute("padding-right", nonCenteredSidePadding);
+
+        final String robotGameTimeText = String.format("%s - %s",
+                                                       TournamentSchedule.humanFormatTime(gs.performanceStart()),
+                                                       TournamentSchedule.humanFormatTime(gs.performanceEnd()));
+        final Element robotGameTimeCell = FOPUtils.createTableCell(document, null, robotGameTimeText);
+        robotGameRow.appendChild(robotGameTimeCell);
+        FOPUtils.addLeftBorder(robotGameTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(robotGameTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        robotGameTimeCell.setAttribute("padding-left", nonCenteredSidePadding);
+        robotGameTimeCell.setAttribute("padding-right", nonCenteredSidePadding);
+
+        // blank -----
+        final Element blankRow = FOPUtils.createTableRow(document);
+        scheduleTableBody.appendChild(blankRow);
+
+        final Element blankTitleCell = FOPUtils.createTableCell(document, null,
+                                                                String.valueOf(Utilities.NON_BREAKING_SPACE));
+        blankRow.appendChild(blankTitleCell);
+        FOPUtils.addLeftBorder(blankTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(blankTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addBottomBorder(blankTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
+
+        final Element blankTimeCell = FOPUtils.createTableCell(document, null,
+                                                               String.valueOf(Utilities.NON_BREAKING_SPACE));
+        blankRow.appendChild(blankTimeCell);
+        FOPUtils.addLeftBorder(blankTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addRightBorder(blankTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+        FOPUtils.addBottomBorder(blankTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
+
+      }
+    } // general schedule exists
 
     // logo
     final Element bottomRight = FOPUtils.createXslFoElement(document, "inline-container");
