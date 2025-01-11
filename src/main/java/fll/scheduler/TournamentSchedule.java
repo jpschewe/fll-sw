@@ -1903,15 +1903,17 @@ public class TournamentSchedule implements Serializable {
     @Override
     public int compare(final GeneralSchedule o1,
                        final GeneralSchedule o2) {
-      if (null == o1.wave()
-          && null == o2.wave()) {
+      final @Nullable String o1Wave = o1.wave();
+      final @Nullable String o2Wave = o2.wave();
+      if (null == o1Wave
+          && null == o2Wave) {
         return 0;
-      } else if (null == o1.wave()) {
+      } else if (null == o1Wave) {
         return -1;
-      } else if (null == o2.wave()) {
+      } else if (null == o2Wave) {
         return 1;
       } else {
-        return o1.wave().compareTo(o2.wave());
+        return o1Wave.compareTo(o2Wave);
       }
     }
   }
