@@ -341,6 +341,8 @@ public final class ScheduleWriter {
     final String tableFontSize = "7pt";
 
     final Set<String> subjectiveStations = schedule.getSubjectiveStations();
+    final List<TournamentSchedule.GeneralSchedule> generalSchedule = schedule.computeGeneralSchedule();
+    final boolean hasWaves = generalSchedule.size() > 1;
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -392,7 +394,9 @@ public final class ScheduleWriter {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
     }
-    table.appendChild(FOPUtils.createTableColumn(document, 1)); // wave
+    if (hasWaves) {
+      table.appendChild(FOPUtils.createTableColumn(document, 1)); // wave
+    }
 
     final Element tableHeader = FOPUtils.createTableHeader(document);
     table.appendChild(tableHeader);
@@ -466,11 +470,13 @@ public final class ScheduleWriter {
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     }
 
-    final Element waveHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                            TournamentSchedule.WAVE_HEADER);
-    headerRow.appendChild(waveHeaderCell);
-    FOPUtils.addBorders(waveHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                        FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+    if (hasWaves) {
+      final Element waveHeaderCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                              TournamentSchedule.WAVE_HEADER);
+      headerRow.appendChild(waveHeaderCell);
+      FOPUtils.addBorders(waveHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
+    }
 
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
