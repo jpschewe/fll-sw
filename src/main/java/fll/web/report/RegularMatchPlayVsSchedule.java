@@ -88,10 +88,8 @@ public final class RegularMatchPlayVsSchedule {
       // update with tournament data
       try (
           PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, runnumber, computedtotal, noshow, bye, timestamp, tablename FROM performance" //
-              + " WHERE tournament = ?" //
-              + "   AND runnumber <= ?")) {
+              + " WHERE tournament = ?")) {
         prep.setInt(1, currentTournament.getTournamentID());
-        prep.setInt(2, numRegularMatchPlayRounds);
 
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
