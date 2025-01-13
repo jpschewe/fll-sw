@@ -61,7 +61,7 @@ public class LoadSchedule extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       loadSchedule(uploadScheduleData, datasource);
 
-      WebUtils.sendRedirect(application, response, "CheckMissingTeams");
+      WebUtils.sendRedirect(application, response, "specifyTimes.jsp");
     } finally {
       session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }

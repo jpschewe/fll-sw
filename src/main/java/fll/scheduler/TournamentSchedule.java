@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -487,6 +488,19 @@ public class TournamentSchedule implements Serializable {
       } // allocate sched ResultSet
 
     } // allocate prepared statements
+
+    try (
+        PreparedStatement waveCheckin = connection.prepareStatement("SELECT wave, checkin_time FROM schedule_wave_checkin WHERE tournament = ?")) {
+      waveCheckin.setInt(1, tournamentID);
+      final Collection<WaveCheckin> waveCheckins = new LinkedList<>();
+      try (ResultSet rs = waveCheckin.executeQuery()) {
+        while (rs.next()) {
+          final String waveDb = castNonNull(rs.getString(1));
+          final LocalTime checkin = castNonNull(rs.getTime(2)).toLocalTime();
+          waveCheckins.add(new WaveCheckin(waveDb.equals(NULL_WAVE_DB_VALUE) ? null : waveDb, checkin));
+        }
+      }
+    }
 
     if (!schedule.isEmpty()) {
       this.numRegularMatchPlayRounds = schedule.get(0).getNumRegularMatchPlayRounds();
@@ -1270,6 +1284,8 @@ public class TournamentSchedule implements Serializable {
     } // PreparedStatement
   }
 
+  private static final String NULL_WAVE_DB_VALUE = "__NULL_WAVE__";
+
   /**
    * Store a tournament schedule in the database. This will delete any previous
    * schedule for the same tournament.
@@ -1282,6 +1298,12 @@ public class TournamentSchedule implements Serializable {
                             final int tournamentID)
       throws SQLException {
     // delete previous tournament schedule
+    try (
+        PreparedStatement delete = connection.prepareStatement("DELETE FROM schedule_wave_checkin WHERE tournament = ?")) {
+      delete.setInt(1, tournamentID);
+      delete.executeUpdate();
+    }
+
     try (
         PreparedStatement deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?")) {
       deletePerfRounds.setInt(1, tournamentID);
@@ -1308,13 +1330,18 @@ public class TournamentSchedule implements Serializable {
             + " VALUES(?, ?, ?, ?, ?, ?)");
         PreparedStatement insertSubjective = connection.prepareStatement("INSERT INTO sched_subjective" //
             + " (tournament, team_number, name, subj_time)" //
-            + " VALUES(?, ?, ?, ?)")) {
+            + " VALUES(?, ?, ?, ?)");
+        PreparedStatement insertWaveCheckin = connection.prepareStatement("INSERT INTO schedule_wave_checkin" //
+            + " (tournament, wave, checkin_time)" //
+            + " VALUES(?, ?, ?)")) {
 
       insertSchedule.setInt(1, tournamentID);
 
       insertPerfRounds.setInt(1, tournamentID);
 
       insertSubjective.setInt(1, tournamentID);
+
+      insertWaveCheckin.setInt(1, tournamentID);
 
       for (final TeamScheduleInfo si : getSchedule()) {
         insertSchedule.setInt(2, si.getTeamNumber());
@@ -1336,6 +1363,12 @@ public class TournamentSchedule implements Serializable {
           insertSubjective.executeUpdate();
         }
       } // foreach team
+
+      for (final WaveCheckin waveCheckin : waveCheckinTimes) {
+        final @Nullable String wave = waveCheckin.wave();
+        insertWaveCheckin.setString(2, null == wave ? NULL_WAVE_DB_VALUE : wave);
+        insertWaveCheckin.setTime(3, Time.valueOf(waveCheckin.checkin()));
+      }
     }
 
   }
@@ -1880,16 +1913,38 @@ public class TournamentSchedule implements Serializable {
     return allWaves;
   }
 
+  private final Collection<WaveCheckin> waveCheckinTimes = new LinkedList<>();
+
+  /**
+   * @param times see {@link #getWaveCheckinTimes()}
+   */
+  public void setWaveCheckinTimes(final Collection<WaveCheckin> times) {
+    waveCheckinTimes.clear();
+    waveCheckinTimes.addAll(times);
+  }
+
+  /**
+   * Check-in time for a wave.
+   * 
+   * @param wave the wave
+   * @param checkin the check-in time
+   */
+  public record WaveCheckin(@Nullable String wave,
+                            LocalTime checkin) {
+  }
+
   /**
    * Schedule information for a wave.
    * 
    * @param wave the wave that the schedule is for
+   * @param checkin the time that the wave is to checkin
    * @param performanceStart start of the first performance run
    * @param performanceEnd end of the last performance run
    * @param subjectiveStart start of the first subjective session
    * @param subjectiveEnd end of the last subjective session
    */
   public record GeneralSchedule(@Nullable String wave,
+                                LocalTime checkin,
                                 LocalTime performanceStart,
                                 LocalTime performanceEnd,
                                 LocalTime subjectiveStart,
@@ -1926,8 +1981,12 @@ public class TournamentSchedule implements Serializable {
     for (final @Nullable String wave : getAllWaves()) {
       final ImmutablePair<LocalTime, LocalTime> performance = computePerformanceGeneralSchedule(wave);
       final ImmutablePair<LocalTime, LocalTime> subjective = computeSubjectiveGeneralSchedule(wave);
+      final LocalTime checkin = getCheckinTime(wave,
+                                               performance.getLeft().isBefore(subjective.getLeft())
+                                                   ? performance.getLeft()
+                                                   : subjective.getLeft());
 
-      final GeneralSchedule gs = new GeneralSchedule(wave, performance.getLeft(), performance.getRight(),
+      final GeneralSchedule gs = new GeneralSchedule(wave, checkin, performance.getLeft(), performance.getRight(),
                                                      subjective.getLeft(), subjective.getRight());
       generalSchedule.add(gs);
     }
@@ -1935,6 +1994,20 @@ public class TournamentSchedule implements Serializable {
     Collections.sort(generalSchedule, GeneralScheduleComparator.INSTANCE);
 
     return generalSchedule;
+  }
+
+  private static final Duration DEFAULT_CHECKIN_OFFSET = Duration.ofMinutes(30);
+
+  private LocalTime getCheckinTime(final @Nullable String wave,
+                                   final LocalTime earliestEvent) {
+    final Optional<WaveCheckin> checkin = waveCheckinTimes.stream() //
+                                                          .filter(wc -> Objects.equals(wc.wave(), wave)) //
+                                                          .findAny();
+    if (checkin.isPresent()) {
+      return checkin.get().checkin();
+    } else {
+      return earliestEvent.minus(DEFAULT_CHECKIN_OFFSET);
+    }
   }
 
   /**
@@ -2035,7 +2108,7 @@ public class TournamentSchedule implements Serializable {
       }
 
       if (null == localMinDifference) {
-        throw new FLLRuntimeException(String.format("No differences between subjective times found foor %s",
+        throw new FLLRuntimeException(String.format("No differences between subjective times found for %s",
                                                     entry.getKey()));
       }
       if (null == localFirst) {

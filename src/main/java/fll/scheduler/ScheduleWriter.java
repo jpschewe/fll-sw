@@ -647,8 +647,8 @@ public final class ScheduleWriter {
         checkinTitleCell.setAttribute("padding-left", nonCenteredSidePadding);
         checkinTitleCell.setAttribute("padding-right", nonCenteredSidePadding);
 
-        // FIXME need to get this from somewhere
-        final Element checkinTimeCell = FOPUtils.createTableCell(document, null, "12:00 AM");
+        final Element checkinTimeCell = FOPUtils.createTableCell(document, null,
+                                                                 TournamentSchedule.humanFormatTime(gs.checkin()));
         checkinRow.appendChild(checkinTimeCell);
         FOPUtils.addLeftBorder(checkinTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
         FOPUtils.addRightBorder(checkinTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);

@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 48;
+  public static final int DATABASE_VERSION = 49;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -215,6 +215,7 @@ public final class GenerateDB {
 
       createScheduleTables(connection, true);
       createScheduleDurationTable(connection, true);
+      createScheduleWaveCheckin(connection, true);
 
       createSubjectiveCategoryScheduleColumnMappingTables(connection);
 
@@ -868,9 +869,9 @@ public final class GenerateDB {
   /**
    * Create tables for schedule data
    *
-   * @param connection
+   * @param connection database
    * @param createConstraints if false, don't create foreign key constraints
-   * @throws SQLException
+   * @throws SQLException on an error
    */
   /* package */static void createScheduleTables(final Connection connection,
                                                 final boolean createConstraints)
@@ -917,6 +918,32 @@ public final class GenerateDB {
       }
       subjectiveSql.append(")");
       stmt.executeUpdate(subjectiveSql.toString());
+    }
+  }
+
+  /**
+   * Create tables for schedule wave checkin times
+   *
+   * @param connection database
+   * @param createConstraints if false, don't create foreign key constraints
+   * @throws SQLException on an error
+   */
+  /* package */static void createScheduleWaveCheckin(final Connection connection,
+                                                     final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE schedule_wave_checkin (");
+      sql.append("  tournament INTEGER NOT NULL");
+      sql.append(" ,wave LONGVARCHAR NOT NULL");
+      sql.append(" ,checkin_time time NOT NULL");
+      sql.append(" ,CONSTRAINT schedule_wave_checkin_pk PRIMARY KEY (tournament, wave)");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT schedule_wave_checkin_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
     }
   }
 

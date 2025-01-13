@@ -20,7 +20,10 @@ ChooseScheduleHeaders -> "specifySubjectiveStationDurations.jsp";
 "specifySubjectiveStationDurations.jsp" -> SpecifySubjectiveStationDurations;
 SpecifySubjectiveStationDurations -> LoadSchedule;
 
-LoadSchedule -> CheckMissingTeams;
+LoadSchedule -> "specifyTimes.jsp";
+
+"specifyTimes.jsp" -> SpecifyTimes;
+SpecifyTimes -> CheckMissingTeams;
 
 CheckMissingTeams -> CheckViolations;
 CheckMissingTeams -> "promptAddScheduleTeams.jsp" [label="if teams in schedule not in database"];
