@@ -55,7 +55,12 @@ public final class SubjectiveTime implements Comparable<SubjectiveTime>, Seriali
     } else if (this == o) {
       return 0;
     } else {
-      return this.time.compareTo(o.time);
+      final int nameCompare = this.name.compareTo(o.name);
+      if (0 == nameCompare) {
+        return this.time.compareTo(o.time);
+      } else {
+        return nameCompare;
+      }
     }
   }
 

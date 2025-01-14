@@ -1902,11 +1902,11 @@ public class TournamentSchedule implements Serializable {
   /**
    * @return all waves in the schedule
    */
-  public Collection<@Nullable String> getAllWaves() {
+  public Set<@Nullable String> getAllWaves() {
     // checker bug is fixed in 3.48.3
     // return
     // schedule.stream().map(TeamScheduleInfo::getWave).distinct().collect(Collectors.toList());
-    final Collection<@Nullable String> allWaves = new HashSet<>();
+    final Set<@Nullable String> allWaves = new HashSet<>();
     for (final TeamScheduleInfo si : schedule) {
       allWaves.add(si.getWave());
     }
@@ -2048,13 +2048,14 @@ public class TournamentSchedule implements Serializable {
     }
 
     if (null == minDifference) {
-      throw new FLLRuntimeException("No difference between performance times found");
+      throw new FLLRuntimeException(String.format("No difference between performance times found for wave %s - null minDifference",
+                                                  wave));
     }
     if (null == first) {
-      throw new FLLRuntimeException("No performance times found");
+      throw new FLLRuntimeException(String.format("No performance times found for wave %s - null first", wave));
     }
     if (null == last) {
-      throw new FLLRuntimeException("No performance times found");
+      throw new FLLRuntimeException(String.format("No performance times found for wave %s - null last", wave));
     }
 
     return ImmutablePair.of(first.getTime(), last.getTime().plus(minDifference));
@@ -2071,24 +2072,31 @@ public class TournamentSchedule implements Serializable {
    * @see TeamScheduleInfo#getWave()
    */
   private ImmutablePair<LocalTime, LocalTime> computeSubjectiveGeneralSchedule(final @Nullable String wave) {
-    final Stream<SubjectiveTime> allSubjectiveTimes = schedule.stream() //
-                                                              .filter(si -> Objects.equals(si.getWave(), wave)) //
-                                                              .map(TeamScheduleInfo::getSubjectiveTimes)
-                                                              .flatMap(Collection::stream);
-    final Map<String, SortedSet<SubjectiveTime>> subjectiveTimesByCategory = new HashMap<>();
-    for (final SubjectiveTime st : allSubjectiveTimes.collect(Collectors.toList())) {
-      subjectiveTimesByCategory.computeIfAbsent(st.getName(), k -> new TreeSet<>()).add(st);
-    }
+    final Map<String, List<SubjectiveTime>> subjectiveTimesByCategory = schedule.stream() //
+                                                                                .filter(si -> Objects.equals(si.getWave(),
+                                                                                                             wave)) //
+                                                                                .map(TeamScheduleInfo::getSubjectiveTimes)
+                                                                                .flatMap(Collection::stream) //
+                                                                                .collect(Collectors.groupingBy(SubjectiveTime::getName));
+    // final Map<String, SortedSet<SubjectiveTime>> subjectiveTimesByCategory = new
+    // HashMap<>();
+    // for (final SubjectiveTime st : allSubjectiveTimes) {
+    // subjectiveTimesByCategory.computeIfAbsent(st.getName(), k -> new
+    // TreeSet<>()).add(st);
+    // }
 
     LocalTime globalFirst = null;
     LocalTime globalLast = null;
     Duration globalMinDifference = null;
-    for (final Map.Entry<String, SortedSet<SubjectiveTime>> entry : subjectiveTimesByCategory.entrySet()) {
+    for (final Map.Entry<String, List<SubjectiveTime>> entry : subjectiveTimesByCategory.entrySet()) {
+      final List<SubjectiveTime> times = entry.getValue();
+      times.sort(null);
+
       LocalTime localFirst = null;
       LocalTime localLast = null;
       Duration localMinDifference = null;
       LocalTime prevTime = null;
-      for (final SubjectiveTime st : entry.getValue()) {
+      for (final SubjectiveTime st : times) {
         if (null == localFirst) {
           localFirst = st.getTime();
         }
@@ -2108,14 +2116,16 @@ public class TournamentSchedule implements Serializable {
       }
 
       if (null == localMinDifference) {
-        throw new FLLRuntimeException(String.format("No differences between subjective times found for %s",
-                                                    entry.getKey()));
+        throw new FLLRuntimeException(String.format("No differences between subjective times found for %s in wave %s - null localMinDifference",
+                                                    entry.getKey(), wave));
       }
       if (null == localFirst) {
-        throw new FLLRuntimeException(String.format("No subjective times found foor %s", entry.getKey()));
+        throw new FLLRuntimeException(String.format("No subjective times found for %s in wave %s - null localFirst",
+                                                    entry.getKey(), wave));
       }
       if (null == localLast) {
-        throw new FLLRuntimeException(String.format("No subjective times found foor %s", entry.getKey()));
+        throw new FLLRuntimeException(String.format("No subjective times found for %s in wave %s - null localLast",
+                                                    entry.getKey(), wave));
       }
 
       if (null == globalFirst
@@ -2134,13 +2144,14 @@ public class TournamentSchedule implements Serializable {
     }
 
     if (null == globalMinDifference) {
-      throw new FLLRuntimeException("No differences between subjective times found");
+      throw new FLLRuntimeException(String.format("No differences between subjective times found for wave %s - null globalMinDifference",
+                                                  wave));
     }
     if (null == globalFirst) {
-      throw new FLLRuntimeException("No subjective times found");
+      throw new FLLRuntimeException(String.format("No subjective times found for wave %s - null globalFirst", wave));
     }
     if (null == globalLast) {
-      throw new FLLRuntimeException("No subjective times found");
+      throw new FLLRuntimeException(String.format("No subjective times found for wave %s - null globalLast", wave));
     }
 
     return ImmutablePair.of(globalFirst, globalLast.plus(globalMinDifference));
