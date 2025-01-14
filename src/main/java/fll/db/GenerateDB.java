@@ -225,7 +225,7 @@ public final class GenerateDB {
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("CREATE TABLE Judges ("
-          + "  id varchar(64) NOT NULL,"//
+          + "  id longvarchar NOT NULL,"//
           + "  category longvarchar NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
@@ -299,7 +299,7 @@ public final class GenerateDB {
             + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament INTEGER NOT NULL,");
-        createStatement.append(" Judge VARCHAR(64) NOT NULL,");
+        createStatement.append(" Judge longvarchar NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
         for (final AbstractGoal element : categoryElement.getAllGoals()) {
           final String columnDefinition = generateGoalColumnDefinition(element);
@@ -456,7 +456,7 @@ public final class GenerateDB {
       sql.append("  tournament INTEGER NOT NULL");
       sql.append(" ,category LONGVARCHAR NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
-      sql.append(" ,judge VARCHAR(64) DEFAULT NULL");
+      sql.append(" ,judge longvarchar DEFAULT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
         sql.append(" ,CONSTRAINT non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
@@ -963,7 +963,7 @@ public final class GenerateDB {
       sql.append("  category LONGVARCHAR NOT NULL");
       sql.append(" ,tournament INTEGER NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
-      sql.append(" ,judge VARCHAR(64) NOT NULL");
+      sql.append(" ,judge longvarchar NOT NULL");
       sql.append(" ,computed_total float");
       sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
       if (createConstraints) {
@@ -1421,7 +1421,7 @@ public final class GenerateDB {
       sql.format("  tournament_level_id INTEGER NOT NULL");
       sql.format(" ,tournament_id INTEGER NOT NULL");
       sql.format(" ,layer_rank INTEGER NOT NULL");
-      sql.format(" ,%s VARCHAR(64) NOT NULL", keyColumn);
+      sql.format(" ,%s longvarchar NOT NULL", keyColumn);
       if (valueAllowNull) {
         sql.format(" ,%s LONGVARCHAR", valueColumn);
       } else {
