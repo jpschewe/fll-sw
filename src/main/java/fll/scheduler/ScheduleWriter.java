@@ -764,19 +764,16 @@ public final class ScheduleWriter {
     logoGraphic.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
     logoGraphic.setAttribute("width", "100%");
 
-    /*
-     * final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
-     * block.setAttribute("text-align", "end");
-     * block.appendChild(document.createTextNode("Page "));
-     * block.appendChild(createXslFoElement(document, "page-number"));
-     * block.appendChild(document.createTextNode(" of "));
-     * final Element lastPage = createXslFoElement(document,
-     * "page-number-citation-last");
-     * lastPage.setAttribute("ref-id", lastPageElementId);
-     * block.appendChild(lastPage);
-     * 
-     * staticContent.appendChild(block);
-     */
+    final Element pageNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    pageNumberBlock.setAttribute("text-align", "end");
+    pageNumberBlock.setAttribute("font-size", "10pt");
+    pageNumberBlock.appendChild(document.createTextNode("Page "));
+    pageNumberBlock.appendChild(FOPUtils.createXslFoElement(document, "page-number"));
+    pageNumberBlock.appendChild(document.createTextNode(" of "));
+    final Element lastPage = FOPUtils.createXslFoElement(document, "page-number-citation-last");
+    lastPage.setAttribute("ref-id", lastPageElementId);
+    pageNumberBlock.appendChild(lastPage);
+    staticContent.appendChild(pageNumberBlock);
 
     return staticContent;
   }
