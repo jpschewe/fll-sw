@@ -365,24 +365,20 @@ public final class ScheduleWriter {
     final String pageMasterName = "simple";
     final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
                                                                FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
-                                                               FOPUtils.STANDARD_MARGINS, 0.00, 0.00);
+                                                               FOPUtils.STANDARD_MARGINS, 0.25, 0.00);
     layoutMasterSet.appendChild(pageMaster);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
+    final @Nullable String tournamentDescription = tournament.getDescription();
+    final Element header = createHeader(document,
+                                        null == tournamentDescription ? tournament.getName() : tournamentDescription);
+    pageSequence.appendChild(header);
+
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
-
-    final Element tournamentHeader = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    documentBody.appendChild(tournamentHeader);
-    tournamentHeader.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-    tournamentHeader.setAttribute("font-weight", "bold");
-    tournamentHeader.setAttribute("margin-bottom", "0.1in");
-    final @Nullable String tournamentDescription = tournament.getDescription();
-    tournamentHeader.appendChild(document.createTextNode(null == tournamentDescription ? tournament.getName()
-        : tournamentDescription));
 
     final Element table = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_TAG);
     documentBody.appendChild(table);
