@@ -83,8 +83,7 @@ public final class SpecifyTimes extends BaseFLLServlet {
           schedule.getAllWaves().stream() //
                   .map(wave -> {
                     final LocalTime checkin = WebUtils.getTimeRequestParameter(request,
-                                                                               String.format("%s:checkin_time",
-                                                                                             null == wave ? "" : wave));
+                                                                               String.format("%s:checkin_time", wave));
 
                     return new TournamentSchedule.WaveCheckin(wave, checkin);
                   }) //

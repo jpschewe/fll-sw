@@ -1903,15 +1903,8 @@ public class TournamentSchedule implements Serializable {
   /**
    * @return all waves in the schedule
    */
-  public Set<@Nullable String> getAllWaves() {
-    // checker bug is fixed in 3.48.3
-    // return
-    // schedule.stream().map(TeamScheduleInfo::getWave).distinct().collect(Collectors.toList());
-    final Set<@Nullable String> allWaves = new HashSet<>();
-    for (final TeamScheduleInfo si : schedule) {
-      allWaves.add(si.getWave());
-    }
-    return allWaves;
+  public Set<String> getAllWaves() {
+    return schedule.stream().map(TeamScheduleInfo::getWave).distinct().collect(Collectors.toSet());
   }
 
   private final Collection<WaveCheckin> waveCheckinTimes = new LinkedList<>();
