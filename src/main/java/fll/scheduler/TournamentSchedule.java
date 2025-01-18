@@ -1162,7 +1162,8 @@ public class TournamentSchedule implements Serializable {
       final @Nullable String wave = ci.getWave(line);
       final TournamentTeam team = new TournamentTeam(teamNumber, null == org ? "" : org, null == name ? "" : name,
                                                      null == awardGroup ? "" : awardGroup,
-                                                     null == judgingGroup ? "" : judgingGroup, wave);
+                                                     null == judgingGroup ? "" : judgingGroup,
+                                                     null == wave ? "" : wave);
       final TeamScheduleInfo ti = new TeamScheduleInfo(team);
 
       for (final CategoryColumnMapping mapping : ci.getSubjectiveColumnMappings()) {

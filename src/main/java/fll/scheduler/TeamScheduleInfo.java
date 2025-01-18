@@ -179,7 +179,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @return {@link TournamentTeam#getWave()}
    */
-  public @Nullable String getWave() {
+  public String getWave() {
     return team.getWave();
   }
 

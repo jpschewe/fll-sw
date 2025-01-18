@@ -40,7 +40,7 @@ public class TournamentTeam extends Team {
                         @JsonProperty("teamName") final String name,
                         @JsonProperty("awardGroup") final String awardGroup,
                         @JsonProperty("judgingGroup") final String judgingGroup,
-                        @JsonProperty("wave") final @Nullable String wave) {
+                        @JsonProperty("wave") final String wave) {
     super(teamNumber, org, name);
     this.awardGroup = awardGroup;
     this.judgingGroup = judgingGroup;
@@ -65,12 +65,12 @@ public class TournamentTeam extends Team {
     return judgingGroup;
   }
 
-  private final @Nullable String wave;
+  private final String wave;
 
   /**
    * @return the wave for the team
    */
-  public @Nullable String getWave() {
+  public String getWave() {
     return wave;
   }
 
@@ -139,7 +139,7 @@ public class TournamentTeam extends Team {
           final String name = castNonNull(rs.getString(2));
           final String awardGroup = castNonNull(rs.getString(3));
           final String judgingGroup = castNonNull(rs.getString(4));
-          final @Nullable String wave = rs.getString(5);
+          final String wave = castNonNull(rs.getString(5));
 
           final TournamentTeam x = new TournamentTeam(teamNumber, org, name, awardGroup, judgingGroup, wave);
           return x;

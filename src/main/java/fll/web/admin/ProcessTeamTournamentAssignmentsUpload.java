@@ -305,7 +305,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
             if (!Queries.isTeamInTournament(connection, teamNumber, tournament.getTournamentID())) {
               Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                          judgingStation, wave);
+                                          judgingStation, null == wave ? "" : wave);
             }
             ++rowsProcessed;
           }

@@ -170,7 +170,7 @@ public class CommitTeam extends BaseFLLServlet {
 
                 // add to tournament
                 Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                            judgingGroup, StringUtils.isBlank(wave) ? null : wave);
+                                            judgingGroup, StringUtils.isBlank(wave) ? "" : wave);
               } else {
                 // just update the division and judging station information and wave
 

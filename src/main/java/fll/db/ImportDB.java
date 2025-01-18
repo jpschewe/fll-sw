@@ -1674,9 +1674,16 @@ public final class ImportDB {
 
   /**
    * Add wave checkin times.
+   * Ensure all waves are non-null.
    */
   private static void upgrade48to49(final Connection connection) throws SQLException {
     GenerateDB.createScheduleWaveCheckin(connection, false);
+
+    // ensure waves are set to the empty string instead of null
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("UPDATE TournamentTeams SET wave = '' WHERE wave IS NULL");
+    }
+
     setDBVersion(connection, 49);
   }
 

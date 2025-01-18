@@ -105,7 +105,7 @@ public final class Queries {
           final String name = castNonNull(rs.getString("TeamName"));
           final String eventDivision = castNonNull(rs.getString("event_division"));
           final String judgingStation = castNonNull(rs.getString("judging_station"));
-          final @Nullable String wave = rs.getString("wave");
+          final String wave = castNonNull(rs.getString("wave"));
 
           final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation, wave);
           tournamentTeams.put(teamNumber, team);
@@ -1447,7 +1447,7 @@ public final class Queries {
                                          final int tournament,
                                          final String eventDivision,
                                          final String judgingStation,
-                                         final @Nullable String wave)
+                                         final String wave)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station, wave) VALUES (?, ?, ?, ?, ?)")) {
