@@ -9,6 +9,7 @@ package fll.scheduler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalTime;
@@ -52,6 +53,9 @@ import net.mtu.eggplant.xml.XMLUtils;
  * Writes various versions of a schedule.
  */
 public final class ScheduleWriter {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   private ScheduleWriter() {
   }
 
@@ -88,13 +92,19 @@ public final class ScheduleWriter {
                                                  final TournamentSchedule schedule,
                                                  final OutputStream stream)
       throws IOException {
+    final Document performanceDoc = createScheduleByWaveAndTeam(tournament, schedule);
+    final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
     try {
-      final Document performanceDoc = createScheduleByWaveAndTeam(tournament, schedule);
-      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
-
       FOPUtils.renderPdf(fopFactory, performanceDoc, stream);
     } catch (FOPException | TransformerException e) {
-      throw new FLLInternalException("Error creating the overall wave and team schedule PDF", e);
+      try (StringWriter writer = new StringWriter()) {
+        XMLUtils.writeXML(performanceDoc, writer);
+        throw new FLLInternalException(String.format("Error creating the overall wave and team schedule PDF. Document: %s",
+                                                     writer.toString()),
+                                       e);
+      } catch (final IOException e2) {
+        LOGGER.error("Error writing document for exception", e2);
+      }
     }
   }
 
@@ -280,7 +290,7 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(awardGroupCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
 
-      final Element waveCell = FOPUtils.createTableCell(document, null, Utilities.stringValueOrEmpty(si.getWave()));
+      final Element waveCell = FOPUtils.createTableCell(document, null, si.getWave());
       row.appendChild(waveCell);
       FOPUtils.addBorders(waveCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -569,11 +579,13 @@ public final class ScheduleWriter {
                             FOPUtils.STANDARD_BORDER_WIDTH);
       }));
 
-      final Element waveCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                        Utilities.stringValueOrEmpty(si.getWave()));
-      row.appendChild(waveCell);
-      FOPUtils.addBorders(waveCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                          FOPUtils.STANDARD_BORDER_WIDTH);
+      if (hasWaves) {
+        final Element waveCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                          Utilities.stringValueOrEmpty(si.getWave()));
+        row.appendChild(waveCell);
+        FOPUtils.addBorders(waveCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
+                            FOPUtils.STANDARD_BORDER_WIDTH);
+      }
 
       prevWave = si.getWave();
     } // foreach team schedule info
