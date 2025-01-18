@@ -204,7 +204,7 @@ public final class GenerateDB {
           + " ,event_division varchar(32) DEFAULT '"
           + DEFAULT_TEAM_DIVISION
           + "' NOT NULL" //
-          + " ,wave varchar(32) DEFAULT NULL" //
+          + " ,wave LONGVARCHAR DEFAULT NULL" //
           + " ,judging_station varchar(64) NOT NULL"
           + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
           + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
