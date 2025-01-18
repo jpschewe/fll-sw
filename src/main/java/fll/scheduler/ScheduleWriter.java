@@ -366,7 +366,7 @@ public final class ScheduleWriter {
     final String pageMasterName = "simple";
     final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
                                                                FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
-                                                               FOPUtils.STANDARD_MARGINS, 0.30, 1.00);
+                                                               FOPUtils.STANDARD_MARGINS, 0.30, 1.40);
     layoutMasterSet.appendChild(pageMaster);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
@@ -773,7 +773,7 @@ public final class ScheduleWriter {
     final Element lastPage = FOPUtils.createXslFoElement(document, "page-number-citation-last");
     lastPage.setAttribute("ref-id", lastPageElementId);
     pageNumberBlock.appendChild(lastPage);
-    staticContent.appendChild(pageNumberBlock);
+    bottomRight.appendChild(pageNumberBlock);
 
     return staticContent;
   }
