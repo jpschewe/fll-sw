@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -365,7 +366,7 @@ public final class ScheduleWriter {
     final String pageMasterName = "simple";
     final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
                                                                FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
-                                                               FOPUtils.STANDARD_MARGINS, 0.25, 0.00);
+                                                               FOPUtils.STANDARD_MARGINS, 0.30, 1.00);
     layoutMasterSet.appendChild(pageMaster);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
@@ -376,6 +377,10 @@ public final class ScheduleWriter {
     final Element header = createHeader(document,
                                         null == tournamentDescription ? tournament.getName() : tournamentDescription);
     pageSequence.appendChild(header);
+
+    final Element footer = createTeamAndWaveFooter(document, FOPUtils.PAGE_SEQUENCE_NAME, tableFontSize,
+                                                   nonCenteredSidePadding, hasWaves, generalSchedule);
+    pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
@@ -586,10 +591,23 @@ public final class ScheduleWriter {
       prevWave = si.getWave();
     } // foreach team schedule info
 
+    return document;
+  }
+
+  private static Element createTeamAndWaveFooter(final Document document,
+                                                 final String lastPageElementId,
+                                                 final String tableFontSize,
+                                                 final String nonCenteredSidePadding,
+                                                 final boolean hasWaves,
+                                                 final List<TournamentSchedule.GeneralSchedule> generalSchedule) {
+
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+
     final Element bottomContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    documentBody.appendChild(bottomContainer);
-    bottomContainer.setAttribute("margin-top", "0.25in");
+    staticContent.appendChild(bottomContainer);
     bottomContainer.setAttribute("font-size", tableFontSize);
+    bottomContainer.setAttribute("margin-top", "0.25in");
 
     // general schedule
     final Element bottomLeft = FOPUtils.createXslFoElement(document, "inline-container");
@@ -642,7 +660,8 @@ public final class ScheduleWriter {
 
         final @Nullable String wave = gs.wave();
         final String checkinTitle;
-        if (null != wave) {
+        if (hasWaves
+            && !StringUtils.isBlank(wave)) {
           checkinTitle = String.format("Wave %s Check-in", wave);
         } else {
           checkinTitle = "Check-in";
@@ -745,7 +764,21 @@ public final class ScheduleWriter {
     logoGraphic.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
     logoGraphic.setAttribute("width", "100%");
 
-    return document;
+    /*
+     * final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
+     * block.setAttribute("text-align", "end");
+     * block.appendChild(document.createTextNode("Page "));
+     * block.appendChild(createXslFoElement(document, "page-number"));
+     * block.appendChild(document.createTextNode(" of "));
+     * final Element lastPage = createXslFoElement(document,
+     * "page-number-citation-last");
+     * lastPage.setAttribute("ref-id", lastPageElementId);
+     * block.appendChild(lastPage);
+     * 
+     * staticContent.appendChild(block);
+     */
+
+    return staticContent;
   }
 
   /**
