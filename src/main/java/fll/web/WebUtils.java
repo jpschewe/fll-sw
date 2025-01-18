@@ -267,7 +267,10 @@ public final class WebUtils {
     }
   }
 
-  private static final DateTimeFormatter WEB_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+  /**
+   * Format of the value from a time form field.
+   */
+  public static final DateTimeFormatter WEB_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
   /**
    * @param request where to get the parameter from

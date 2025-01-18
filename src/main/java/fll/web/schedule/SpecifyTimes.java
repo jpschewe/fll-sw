@@ -10,11 +10,15 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
+
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -22,6 +26,7 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
@@ -79,15 +84,30 @@ public final class SpecifyTimes extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final Collection<TournamentSchedule.WaveCheckin> checkins = //
-          schedule.getAllWaves().stream() //
-                  .map(wave -> {
-                    final LocalTime checkin = WebUtils.getTimeRequestParameter(request,
-                                                                               String.format("%s:checkin_time", wave));
+      final Collection<TournamentSchedule.WaveCheckin> checkins = new LinkedList<>();
+      for (final String wave : schedule.getAllWaves()) {
+        final @Nullable LocalTime checkin = getTimeRequestParameter(request, String.format("%s:checkin_time", wave));
+        if (null != checkin) {
+          checkins.add(new TournamentSchedule.WaveCheckin(wave, checkin));
+        }
+      }
+      /*
+       * should be fixed in new checker
+       * final Collection<TournamentSchedule.WaveCheckin> checkins = //
+       * schedule.getAllWaves().stream() //
+       * .map(wave -> {
+       * final @Nullable LocalTime checkin = getTimeRequestParameter(request,
+       * String.format("%s:checkin_time", wave));
+       * if (null == checkin) {
+       * return null;
+       * } else {
+       * return new TournamentSchedule.WaveCheckin(wave, checkin);
+       * }
+       * }) //
+       * .filter(Objects::nonNull)//
+       * .collect(Collectors.toList());
+       */
 
-                    return new TournamentSchedule.WaveCheckin(wave, checkin);
-                  }) //
-                  .collect(Collectors.toList());
       schedule.setWaveCheckinTimes(checkins);
 
       WebUtils.sendRedirect(application, response, "/schedule/CheckMissingTeams");
@@ -96,6 +116,21 @@ public final class SpecifyTimes extends BaseFLLServlet {
     } finally {
       session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }
+  }
+
+  private static @Nullable LocalTime getTimeRequestParameter(final HttpServletRequest request,
+                                                             final String parameter)
+      throws MissingRequiredParameterException, DateTimeParseException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new MissingRequiredParameterException(parameter);
+    }
+    if (StringUtils.isBlank(str)) {
+      return null;
+    }
+
+    final LocalTime value = LocalTime.parse(str, WebUtils.WEB_TIME_FORMAT);
+    return value;
   }
 
 }
