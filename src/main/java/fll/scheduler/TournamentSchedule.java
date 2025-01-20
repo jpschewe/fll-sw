@@ -1910,7 +1910,7 @@ public class TournamentSchedule implements Serializable {
   private final Collection<WaveCheckin> waveCheckinTimes = new LinkedList<>();
 
   /**
-   * @param times see {@link #getWaveCheckinTimes()}
+   * @param times wave check-in times
    */
   public void setWaveCheckinTimes(final Collection<WaveCheckin> times) {
     waveCheckinTimes.clear();
