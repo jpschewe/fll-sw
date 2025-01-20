@@ -500,6 +500,7 @@ public class TournamentSchedule implements Serializable {
           waveCheckins.add(new WaveCheckin(waveDb.equals(NULL_WAVE_DB_VALUE) ? null : waveDb, checkin));
         }
       }
+      setWaveCheckinTimes(waveCheckins);
     }
 
     if (!schedule.isEmpty()) {
@@ -1907,7 +1908,7 @@ public class TournamentSchedule implements Serializable {
     return schedule.stream().map(TeamScheduleInfo::getWave).distinct().collect(Collectors.toSet());
   }
 
-  private final Collection<WaveCheckin> waveCheckinTimes = new LinkedList<>();
+  private final LinkedList<WaveCheckin> waveCheckinTimes = new LinkedList<>();
 
   /**
    * @param times wave check-in times
