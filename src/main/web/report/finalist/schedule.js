@@ -76,10 +76,12 @@ const finalistScheduleModule = {};
         timeSlotHeader.classList.add("rTableHead");
         timeSlotHeader.innerText = "Time Slot";
 
-        const h2hHeader = document.createElement("div");
-        headerRow.appendChild(h2hHeader);
-        h2hHeader.classList.add("rTableHead");
-        h2hHeader.innerText = "Head to Head";
+        if (finalist_module.getRunningHead2Head()) {
+            const h2hHeader = document.createElement("div");
+            headerRow.appendChild(h2hHeader);
+            h2hHeader.classList.add("rTableHead");
+            h2hHeader.innerText = "Head to Head";
+        }
 
         for (const category of finalist_module.getAllScheduledCategories()) {
             const room = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
@@ -456,22 +458,24 @@ const finalistScheduleModule = {};
         timeCell.classList.add("rTableCell");
         timeCell.innerText = finalist_module.timeToDisplayString(slot.time);
 
-        const playoffCell = document.createElement("div");
-        row.appendChild(playoffCell);
-        playoffCell.classList.add("rTableCell");
-        let text = "";
-        let first = true;
-        for (const [bracketName, playoffSchedule] of Object.entries(finalist_module.getPlayoffSchedules())) {
-            if (finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
-                if (first) {
-                    first = false;
-                } else {
-                    text = text + ",";
+        if (finalist_module.getRunningHead2Head()) {
+            const playoffCell = document.createElement("div");
+            row.appendChild(playoffCell);
+            playoffCell.classList.add("rTableCell");
+            let text = "";
+            let first = true;
+            for (const [bracketName, playoffSchedule] of Object.entries(finalist_module.getPlayoffSchedules())) {
+                if (finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        text = text + ",";
+                    }
+                    text = text + bracketName;
                 }
-                text = text + bracketName;
             }
+            playoffCell.innerText = text;
         }
-        playoffCell.innerText = text;
 
         const categoriesToCells = {};
         const teamsInSlot = {};

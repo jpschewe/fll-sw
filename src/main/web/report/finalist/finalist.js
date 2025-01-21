@@ -1034,6 +1034,11 @@ const finalist_module = {}
      * @returns true or false
      */
     finalist_module.hasPlayoffConflict = function(team, slot) {
+        if (!finalist_module.getRunningHead2Head()) {
+            // cannot have a conflict if running head to head
+            return false;
+        }
+
         let conflict = false;
         for (const bracketName of team.playoffDivisions) {
             const playoffSchedule = _playoffSchedules[bracketName];
@@ -1055,6 +1060,11 @@ const finalist_module = {}
      * @returns true or false
      */
     finalist_module.slotHasPlayoffConflict = function(playoffSchedule, slot) {
+        if (!finalist_module.getRunningHead2Head()) {
+            // cannot have a conflict if running head to head
+            return false;
+        }
+
         const start = playoffSchedule.startTime;
         const end = playoffSchedule.endTime;
         if (null != start && null != end) {

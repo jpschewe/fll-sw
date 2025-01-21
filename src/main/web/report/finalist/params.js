@@ -164,7 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
         location.href = "non-numeric.html";
     });
 
-    finalistParamsModule.populateHeadToHeadTimes();
+    if (finalist_module.getRunningHead2Head()) {
+        finalistParamsModule.populateHeadToHeadTimes();
+    } else {
+        document.getElementById('head_head_times').classList.add('fll-sw-ui-inactive');
+    }
 
     finalist_module.saveToLocalStorage();
 
