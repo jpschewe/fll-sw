@@ -500,7 +500,7 @@ public class TournamentSchedule implements Serializable {
           waveCheckins.add(new WaveCheckin(waveDb.equals(NULL_WAVE_DB_VALUE) ? null : waveDb, checkin));
         }
       }
-      setWaveCheckinTimes(waveCheckins);
+      this.waveCheckinTimes.addAll(waveCheckins);
     }
 
     if (!schedule.isEmpty()) {
