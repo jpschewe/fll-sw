@@ -1925,7 +1925,8 @@ public class TournamentSchedule implements Serializable {
    * @param checkin the check-in time
    */
   public record WaveCheckin(@Nullable String wave,
-                            LocalTime checkin) {
+                            LocalTime checkin)
+      implements Serializable {
   }
 
   /**
