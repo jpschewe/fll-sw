@@ -492,8 +492,12 @@ public class FullTournamentTest {
       seleniumWait.until(ExpectedConditions.urlContains("specifySubjectiveStationDurations"));
       selenium.findElement(By.id("submit_data")).click();
 
+      // use default wave check-in times
+      seleniumWait.until(ExpectedConditions.urlContains("specifyTimes"));
+      selenium.findElement(By.id("submit_data")).click();
+
       // the page has changed
-      seleniumWait.until(ExpectedConditions.not(ExpectedConditions.urlContains("chooseSubjectiveHeaders")));
+      seleniumWait.until(ExpectedConditions.not(ExpectedConditions.urlContains("specifyTimes")));
 
       // check that we don't have hard violations and skip past soft
       // violations
