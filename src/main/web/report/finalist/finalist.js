@@ -28,6 +28,7 @@ const finalist_module = {}
     let _teams;
     let _categories;
     let _tournament;
+    let _runningHead2Head;
     let _divisions;
     let _currentDivision;
     let _numTeamsAutoSelected;
@@ -41,6 +42,7 @@ const finalist_module = {}
         _teams = {};
         _categories = {};
         _tournament = null;
+        _runningHead2Head = true;
         _divisions = [];
         _currentDivision = null;
         _numTeamsAutoSelected = 1;
@@ -58,6 +60,7 @@ const finalist_module = {}
         fllStorage.set(STORAGE_PREFIX, "_teams", _teams);
         fllStorage.set(STORAGE_PREFIX, "_categories", _categories);
         fllStorage.set(STORAGE_PREFIX, "_tournament", _tournament);
+        fllStorage.set(STORAGE_PREFIX, "_runningHead2Head", _runningHead2Head);
         fllStorage.set(STORAGE_PREFIX, "_divisions", _divisions);
         fllStorage.set(STORAGE_PREFIX, "_currentDivision", _currentDivision);
         fllStorage.set(STORAGE_PREFIX, "_numTeamsAutoSelected",
@@ -87,6 +90,10 @@ const finalist_module = {}
         value = fllStorage.get(STORAGE_PREFIX, "_tournament");
         if (null != value) {
             _tournament = value;
+        }
+        value = fllStorage.get(STORAGE_PREFIX, "_runningHead2Head");
+        if (null != value) {
+            _runningHead2Head = value;
         }
         value = fllStorage.get(STORAGE_PREFIX, "_divisions");
         if (null != value) {
@@ -369,6 +376,14 @@ const finalist_module = {}
 
     finalist_module.setTournament = function(tournament) {
         _tournament = tournament;
+    };
+
+    finalist_module.setRunningHead2Head = function(value) {
+        _runningHead2Head = value;
+    };
+
+    finalist_module.getRunningHead2Head = function() {
+        return _runningHead2Head;
     };
 
     /**
@@ -1465,6 +1480,17 @@ const finalist_module = {}
         });
     };
 
+    /**
+      * Load the tournament parameters from the server.
+      * 
+      * @return promise to execute
+      */
+    finalist_module.loadTournamentParameters = function() {
+        return fetch("../../api/TournamentParameters").then(checkJsonResponse).then(function(data) {
+            finalist_module.setRunningHead2Head(data.runningHead2Head);
+        });
+    };
+
 
     /**
       * Load the subjective categories in the challenge description from the server.
@@ -1678,6 +1704,12 @@ const finalist_module = {}
         })
         waitList1.push(playoffBracketsPromise);
 
+
+        const tournamentParametersPromise = finalist_module.loadTournamentParameters();
+        tournamentParametersPromise.catch(function() {
+            failCallback("Tournament Parameters");
+        })
+        waitList1.push(tournamentParametersPromise);
 
         Promise.all(waitList1).then(function(_) {
             // everything else can be loaded in parallel
