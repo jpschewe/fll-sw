@@ -899,8 +899,23 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      final String schedule = getScheduleData().computeGeneralSchedule();
-      JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule", JOptionPane.INFORMATION_MESSAGE);
+      final List<TournamentSchedule.GeneralSchedule> generalSchedule = getScheduleData().computeGeneralSchedule();
+
+      final StringBuilder schedule = new StringBuilder();
+      for (final var gs : generalSchedule) {
+        if (null != gs.wave()) {
+          schedule.append(String.format("Wave %s%n", gs.wave()));
+        }
+
+        schedule.append(String.format("Judging %s - %s%n", TournamentSchedule.humanFormatTime(gs.subjectiveStart()),
+                                      TournamentSchedule.humanFormatTime(gs.subjectiveEnd())));
+        schedule.append(String.format("Robot Game %s - %s%n", TournamentSchedule.humanFormatTime(gs.performanceStart()),
+                                      TournamentSchedule.humanFormatTime(gs.performanceEnd())));
+        schedule.append(String.format("%n"));
+      }
+
+      JOptionPane.showMessageDialog(SchedulerUI.this, schedule.toString(), "General Schedule",
+                                    JOptionPane.INFORMATION_MESSAGE);
     }
   }
 

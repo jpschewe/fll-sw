@@ -1,3 +1,4 @@
+* #1211 - Add PDF version of the schedule
 * #1224 - allow judge names to be longer than 64 characters
 
 Release 19.1.0

@@ -76,7 +76,7 @@ public class BracketSortTest {
             - i, teamNames[i], null);
         assertNull(otherTeam);
         Queries.addTeamToTournament(connection, teamNames.length
-            - i, tournament, divisionStr, divisionStr, null);
+            - i, tournament, divisionStr, divisionStr, "wave 1");
         // final Team team = new Team();
         // team.setDivision(divisionStr);
         // team.setTeamName(teamNames[i]);

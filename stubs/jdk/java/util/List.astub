@@ -6,5 +6,6 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 public interface List<E> extends SequencedCollection<E> {
 
   boolean add(@UnknownInitialization E e);
-  
+
+  void sort(@Nullable Comparator<? super E> c);
 }

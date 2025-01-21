@@ -11,7 +11,6 @@ fll.web.schedule.SpecifySubjectiveStationDurations.populateContext(session, page
 <title>Specify Subjective Station Durations (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-</script>
 
 </head>
 

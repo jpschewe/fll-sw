@@ -820,6 +820,11 @@ public final class ImportDB {
       upgrade47to48(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 49) {
+      upgrade48to49(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1668,6 +1673,21 @@ public final class ImportDB {
   }
 
   /**
+   * Add wave checkin times.
+   * Ensure all waves are non-null.
+   */
+  private static void upgrade48to49(final Connection connection) throws SQLException {
+    GenerateDB.createScheduleWaveCheckin(connection, false);
+
+    // ensure waves are set to the empty string instead of null
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("UPDATE TournamentTeams SET wave = '' WHERE wave IS NULL");
+    }
+
+    setDBVersion(connection, 49);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -2271,6 +2291,12 @@ public final class ImportDB {
     LOGGER.debug("Importing Schedule");
 
     try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM schedule_wave_checkin WHERE tournament = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM sched_perf_rounds WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
@@ -2334,6 +2360,16 @@ public final class ImportDB {
             + " (tournament_id, key, duration_minutes)" //
             + " VALUES (?, ?, ?)")) {
 
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT wave, checkin_time" //
+        + " FROM schedule_wave_checkin WHERE tournament = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO schedule_wave_checkin" //
+            + " (tournament, wave, checkin_time)" //
+            + " VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);

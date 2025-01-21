@@ -151,7 +151,7 @@ public class TournamentScheduleTest {
                 + " School");
         assertNull(dup);
         Queries.addTeamToTournament(memConnection, teamNumber, tournament.getTournamentID(),
-                                    GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION, null);
+                                    GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION, "wave 1");
       }
 
       // load schedule with matching team numbers

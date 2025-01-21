@@ -14,6 +14,9 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -262,6 +265,29 @@ public final class WebUtils {
     } else {
       return requestURL.append('?').append(queryString).toString();
     }
+  }
+
+  /**
+   * Format of the value from a time form field.
+   */
+  public static final DateTimeFormatter WEB_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws MissingRequiredParameterException if the parameter is missing
+   * @throws DateTimeParseException if the value isn't parsable as a time
+   */
+  public static LocalTime getTimeRequestParameter(final HttpServletRequest request,
+                                                  final String parameter)
+      throws MissingRequiredParameterException, DateTimeParseException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new MissingRequiredParameterException(parameter);
+    }
+    final LocalTime value = LocalTime.parse(str, WEB_TIME_FORMAT);
+    return value;
   }
 
   /**

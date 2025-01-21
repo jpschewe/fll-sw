@@ -660,6 +660,28 @@ public final class FOPUtils {
   }
 
   /**
+   * Set all borders to the same width.
+   * 
+   * @param element the element to add borders to
+   * @param width the width of the border
+   * @param color color of the border
+   * @see #addTopBorder(Element, double, String)
+   * @see #addBottomBorder(Element, double, String)
+   * @see #addLeftBorder(Element, double, String)
+   * @see #addRightBorder(Element, double, String)
+   * @return element
+   */
+  public static Element addBorders(final Element element,
+                                   final double width,
+                                   final String color) {
+    addTopBorder(element, width, color);
+    addBottomBorder(element, width, color);
+    addLeftBorder(element, width, color);
+    addRightBorder(element, width, color);
+    return element;
+  }
+
+  /**
    * Set all borders.
    * 
    * @param element element to add the borders to
