@@ -1,3 +1,4 @@
+* #1211 - Add PDF version of the schedule
 * #1129 - Display scores for other judges in the subjective score summary
 * shrink font size for judging group on pit signs
 * #1215 - Allow the user to specify the order of the tables in performance schedules
