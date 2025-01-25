@@ -26,7 +26,6 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.db.TournamentParameters;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -60,9 +59,6 @@ public final class RegularMatchPlayVsSchedule {
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-
-      final int numRegularMatchPlayRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                                     currentTournament.getTournamentID());
 
       final List<Data> data = new LinkedList<>();
 
