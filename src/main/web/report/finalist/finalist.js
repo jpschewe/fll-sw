@@ -1157,6 +1157,26 @@ const finalist_module = {}
             return false;
         }
 
+        // allow times after the last group
+        let latestGroupEnd = null;
+        for (const [_, group] of Object.entries(finalist_module.getFinalistGroups())) {
+            if (group.endTime) {
+                if (!latestGroupEnd) {
+                    latestGroupEnd = group.endTime;
+                } else if (latestGroupEnd.isBefore(group.endTime)) {
+                    latestGroupEnd = group.endTime;
+                }
+            }
+        }
+        if (!latestGroupEnd) {
+            // no latest, must not be groups, so just allow it
+            return false;
+        }
+        if (!slot.time.isBefore(latestGroupEnd)) {
+            // slot is after last group
+            return false;
+        }
+
         const group = finalist_module.getFinalistGroupForTeam(team);
         if (null == group) {
             // no group, let's assume it's ok
