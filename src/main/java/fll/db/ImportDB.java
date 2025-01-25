@@ -825,6 +825,11 @@ public final class ImportDB {
       upgrade48to49(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 50) {
+      upgrade49to50(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1685,6 +1690,15 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 49);
+  }
+
+  /**
+   * Add tables for finalist groups
+   */
+  private static void upgrade49to50(final Connection connection) throws SQLException {
+    GenerateDB.createFinalistGroupTables(connection, false);
+
+    setDBVersion(connection, 50);
   }
 
   /**
@@ -2911,6 +2925,12 @@ public final class ImportDB {
       destPrep.executeUpdate();
     }
 
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_groups WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
     // insert categories next
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?)");
@@ -2965,8 +2985,41 @@ public final class ImportDB {
           destPrep.executeUpdate();
         }
       }
-
     }
+
+    // finalist groups
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_groups (tournament_id, name, start_time, end_time) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, start_time, end_time FROM finalist_groups WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setTime(3, sourceRS.getTime(2));
+          destPrep.setTime(4, sourceRS.getTime(3));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_groups_judging_groups (tournament_id, name, judging_group) VALUES(?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, judging_group FROM finalist_groups_judging_groups WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
   }
 
   private static void importDeliberation(final Connection sourceConnection,
