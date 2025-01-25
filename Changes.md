@@ -1,3 +1,5 @@
+* Fix bug in subjective application where the score summary sometimes would not display
+
 Release 19.1.0
 ==============
 * #1129 - Display scores for other judges in the subjective score summary
