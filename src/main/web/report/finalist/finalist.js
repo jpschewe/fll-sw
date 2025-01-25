@@ -34,8 +34,9 @@ const finalist_module = {}
     let _numTeamsAutoSelected;
     let _scheduleParameters;
     let _categoriesVisited;
-    let _currentCategoryName; // category to display with numeric.html
-    let _playoffSchedules;
+    let _currentCategoryName; // category to display with numeric.html    
+    let _playoffSchedules; // group name -> PlayoffSchedule 
+    let _finalistGroups; // group name -> FinalistGroup
     let _schedules; // awardGroup -> list of FinalistDBRow
 
     function _init_variables() {
@@ -50,6 +51,7 @@ const finalist_module = {}
         _categoriesVisited = {};
         _currentCategoryName = null;
         _playoffSchedules = {};
+        _finalistGroups = {};
         _schedules = {};
     }
 
@@ -69,6 +71,7 @@ const finalist_module = {}
         fllStorage.set(STORAGE_PREFIX, "_categoriesVisited", _categoriesVisited);
         fllStorage.set(STORAGE_PREFIX, "_currentCategoryName", _currentCategoryName);
         fllStorage.set(STORAGE_PREFIX, "_playoffSchedules", _playoffSchedules);
+        fllStorage.set(STORAGE_PREFIX, "_finalistGroups", _finalistGroups);
 
         fllStorage.set(STORAGE_PREFIX, "_schedules", _schedules);
     }
@@ -122,6 +125,10 @@ const finalist_module = {}
         value = fllStorage.get(STORAGE_PREFIX, "_playoffSchedules");
         if (null != value) {
             _playoffSchedules = value;
+        }
+        value = fllStorage.get(STORAGE_PREFIX, "_finalistGroups");
+        if (null != value) {
+            _finalistGroups = value;
         }
 
         value = fllStorage.get(STORAGE_PREFIX, "_schedules");
@@ -274,6 +281,18 @@ const finalist_module = {}
         }
         if (null != playoffSchedule.endTime && !(playoffSchedule.endTime instanceof JSJoda.LocalTime)) {
             playoffSchedule.endTime = JSJoda.LocalTime.parse(playoffSchedule.endTime);
+        }
+    }
+
+    /**
+     * Make sure that the start and end times are JSJoda.LocalTime objects.
+     */
+    function _fixFinalistGroup(group) {
+        if (null != group.startTime && !(group.startTime instanceof JSJoda.LocalTime)) {
+            group.startTime = JSJoda.LocalTime.parse(group.startTime);
+        }
+        if (null != group.endTime && !(group.endTime instanceof JSJoda.LocalTime)) {
+            group.endTime = JSJoda.LocalTime.parse(group.endTime);
         }
     }
 
@@ -486,6 +505,51 @@ const finalist_module = {}
         existing.endTime = time;
         _playoffSchedules[division] = existing;
     };
+
+    /**
+     * The finalist groups. Note that the times may be null. 
+     *
+     * @return key= name, value=FinalistGroup
+     */
+    finalist_module.getFinalistGroups = function() {
+        return _finalistGroups;
+    };
+
+    /**
+     * @param newGroups the new finalist groups
+     */
+    finalist_module.setFinalistGroups = function(newGroups) {
+        _finalistGroups = newGroups;
+    }
+
+    /**
+     * Find the finalist group for the specified time.
+     * @return FinalistGroup or null when the team is not a member of any group
+     */
+    finalist_module.getFinalistGroupForTeam = function(team) {
+        for (const [_, group] of Object.entries(finalist_module.getFinalistGroups())) {
+            for (const judgingGroup of group.judgingGroups) {
+                if (team.judgingGroup == judgingGroup) {
+                    return group;
+                }
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Get all judging groups from all teams.
+     * @return a possibly empty set of judging groups
+     */
+    finalist_module.getJudgingGroups = function() {
+        const judgingGroups = new Set();
+        for (const [_, team] of Object.entries(_teams)) {
+            if (team.judgingGroup) {
+                judgingGroups.add(team.judgingGroup);
+            }
+        }
+        return judgingGroups;
+    }
 
     /**
      * Get the room for the specified category and division.
@@ -1031,11 +1095,11 @@ const finalist_module = {}
      *          Team object
      * @param slot
      *          Timeslot object
-     * @returns true or false
+     * @returns true if there is a conflict
      */
     finalist_module.hasPlayoffConflict = function(team, slot) {
         if (!finalist_module.getRunningHead2Head()) {
-            // cannot have a conflict if running head to head
+            // cannot have a conflict if not running head to head
             return false;
         }
 
@@ -1076,11 +1140,41 @@ const finalist_module = {}
         return false;
     };
 
+
     /**
-     * The schedule parameters.
-     *
-     * @param currentDivision the award group to get the schedule start time for
+     * Check if the specified time slot is outside the finalist group schedule for the team based on their judging group.
+     * 
+     * @param team Team object
+     * @param slot Timeslot object
+     * @returns true if outside the schedule for their group
      */
+    finalist_module.outsideFinalistGroup = function(team, slot) {
+        if (finalist_module.getRunningHead2Head()) {
+            // finalist groups are only used when not running head to head
+            return false;
+        }
+
+        const group = finalist_module.getFinalistGroupForTeam(team);
+        if (null == group) {
+            // no group, let's assume it's ok
+            return false;
+        }
+        if (null != group.startTime && null != group.endTime) {
+            if (slot.time.isBefore(group.startTime)) {
+                return true;
+            }
+            if (group.endTime.isBefore(slot.endTime)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+ * The schedule parameters.
+ *
+ * @param currentDivision the award group to get the schedule start time for
+ */
     finalist_module.getScheduleParameters = function(currentDivision) {
         let prevValue = _scheduleParameters[currentDivision];
         if (undefined == prevValue) {
@@ -1336,6 +1430,47 @@ const finalist_module = {}
         }
 
         return uploadJsonData("../../api/PlayoffSchedules", "POST", schedulesToUpload)
+            .then(checkJsonResponse).then(function(result) {
+                if (result.success) {
+                    successCallback(result);
+                } else {
+                    failCallback(result);
+                }
+            }).catch(function(result) {
+                failCallback(result);
+            });
+    };
+
+    /**
+     * Load the finalist groups from the server.
+     * 
+     * @return promise to execute
+     */
+    finalist_module.loadFinalistGroups = function() {
+        return fetch("../../api/FinalistGroups").then(checkJsonResponse).then(function(data) {
+            for (const [name, group] of Object.entries(data)) {
+                _fixFinalistGroup(group);
+                _finalistGroups[name] = group;
+            }
+        });
+    };
+
+    /**
+     * Upload the finalist groups to the server.
+     * 
+     * @param successCallback called with the server result on success
+     * @param failCallback called with the server result on failure
+     * @return promise to execute
+     */
+    finalist_module.uploadFinalistGroups = function(successCallback, failCallback) {
+        const groupsToUpload = {};
+        for (const [name, group] of Object.entries(_finalistGroups)) {
+            if (null != group.startTime && null != group.endTime) {
+                groupsToUpload[name] = group;
+            }
+        }
+
+        return uploadJsonData("../../api/FinalistGroups", "POST", groupsToUpload)
             .then(checkJsonResponse).then(function(result) {
                 if (result.success) {
                     successCallback(result);
@@ -1764,6 +1899,12 @@ const finalist_module = {}
             failCallback("Playoff Schedules");
         })
         waitList.push(playoffSchedulesPromise);
+
+        const finalistGroupsPromise = finalist_module.loadFinalistGroups();
+        finalistGroupsPromise.catch(function() {
+            failCallback("Finalist groups");
+        })
+        waitList.push(finalistGroupsPromise);
 
         const finalistParamsPromise = finalist_module.loadFinalistScheduleParameters();
         finalistParamsPromise.catch(function() {
