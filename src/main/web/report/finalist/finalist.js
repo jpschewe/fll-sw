@@ -1035,7 +1035,8 @@ const finalist_module = {}
                         if (!scheduled
                             && !finalist_module.isTimeslotBusy(slot, category.name)
                             && !finalist_module.isTeamInTimeslot(slot, teamNum)
-                            && !finalist_module.hasPlayoffConflict(team, slot)) {
+                            && !finalist_module.hasPlayoffConflict(team, slot)
+                            && !finalist_module.outsideFinalistGroup(team, slot)) {
                             finalist_module.addTeamToTimeslot(slot, category.name, teamNum);
                             scheduled = true;
                         }
@@ -1047,7 +1048,9 @@ const finalist_module = {}
 
                         nextTime = newRow.endTime;
 
-                        if (!finalist_module.hasPlayoffConflict(team, newRow)) {
+                        const playoffConflict = finalist_module.hasPlayoffConflict(team, newRow);
+                        const outsideFinalistGroup = finalist_module.outsideFinalistGroup(team, newRow);
+                        if (!playoffConflict && !outsideFinalistGroup) {
                             scheduled = true;
                             finalist_module.addTeamToTimeslot(newRow, category.name, teamNum);
                         }
@@ -1094,7 +1097,7 @@ const finalist_module = {}
      * @param team
      *          Team object
      * @param slot
-     *          Timeslot object
+     *          Timeslot object or FinalistDBRow object (needs time and endTime properties)
      * @returns true if there is a conflict
      */
     finalist_module.hasPlayoffConflict = function(team, slot) {
