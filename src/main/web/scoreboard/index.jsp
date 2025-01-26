@@ -51,6 +51,12 @@
 
         <li>
             <a
+                href='<c:url value="/scoreboard/dynamic.jsp"><c:param name="layout" value="most_recent_all_teams"/></c:url>'
+                target="_blank">All teams and most recent scores</a>
+        </li>
+
+        <li>
+            <a
                 href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'
                 target="_blank">Teams in finalist judging</a>
         </li>

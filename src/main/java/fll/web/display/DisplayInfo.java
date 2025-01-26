@@ -47,6 +47,11 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   public static final String SCOREBOARD_REMOTE_PAGE = "scoreboard";
 
   /**
+   * Constant for displaying the scoreboard with most recent and all teams.
+   */
+  public static final String SCOREBOARD_MOST_RECENT_ALL_TEAMS_REMOTE_PAGE = "scoreboard_most-recent_all-teams";
+
+  /**
    * Constant for displaying the slideshow.
    */
   public static final String SLIDESHOW_REMOTE_PAGE = "slideshow";
@@ -312,6 +317,13 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
+   * @return is the scoreboard with most recent and all teams being displayed
+   */
+  public boolean isScoreboardMostRecentAllTeams() {
+    return SCOREBOARD_MOST_RECENT_ALL_TEAMS_REMOTE_PAGE.equals(mRemotePage);
+  }
+
+  /**
    * @return is the head to head page being displayed
    */
   public boolean isHeadToHead() {
@@ -532,6 +544,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
       return "/welcome.jsp";
     } else if (isScoreboard()) {
       return "/scoreboard/dynamic.jsp";
+    } else if (isScoreboardMostRecentAllTeams()) {
+      return "/scoreboard/dynamic.jsp?layout=most_recent_all_teams";
     } else if (isSlideshow()) {
       return "/slideshow.jsp";
     } else if (isHeadToHead()) {

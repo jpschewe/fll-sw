@@ -104,6 +104,38 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
             </tr>
 
             <tr>
+                <th>Specify the award groups to show on this
+                    display. None checked is the same as all checked</th>
+                <c:forEach items="${displayInformation}"
+                    var="displayInfo">
+                    <td>
+                        <!-- choose award groups -->
+                        <c:forEach items="${allAwardGroups}"
+                            var="awardGroup" varStatus="agIterStatus">
+                            <c:choose>
+                                <c:when
+                                    test="${ displayInfo.determineScoreboardAwardGroups(allAwardGroups).contains(awardGroup) }">
+                                    <input type="checkbox"
+                                        name="${displayInfo.awardGroupsFormParamName}"
+                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
+                                        value="${awardGroup}" checked />
+                                </c:when>
+                                <c:otherwise>
+                                    <input type="checkbox"
+                                        name="${displayInfo.awardGroupsFormParamName}"
+                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
+                                        value="${awardGroup}" />
+                                </c:otherwise>
+                            </c:choose>
+                            <label
+                                for="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}">${awardGroup}</label>
+                            <br />
+                        </c:forEach>
+                    </td>
+                </c:forEach>
+            </tr>
+
+            <tr>
                 <th>Follow Default</th>
                 <c:forEach items="${displayInformation}"
                     var="displayInfo">
@@ -156,12 +188,7 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
             <!-- welcome -->
 
             <tr>
-                <th>
-                    Scoreboard
-                    <br />
-                    Select the award groups to show on the display (non
-                    checked is the same as all checked)
-                </th>
+                <th>Scoreboard</th>
                 <c:forEach items="${displayInformation}"
                     var="displayInfo">
                     <td>
@@ -175,36 +202,37 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
                             <c:otherwise>
                                 <input type='radio'
                                     name="${displayInfo.remotePageFormParamName}"
-                                    value='scoreboard' />
+                                    value='<%=DisplayInfo.SCOREBOARD_REMOTE_PAGE%>' />
                             </c:otherwise>
                         </c:choose>
-                        <br />
-                        <!-- choose award groups -->
-                        <c:forEach items="${allAwardGroups}"
-                            var="awardGroup" varStatus="agIterStatus">
-                            <c:choose>
-                                <c:when
-                                    test="${ displayInfo.determineScoreboardAwardGroups(allAwardGroups).contains(awardGroup) }">
-                                    <input type="checkbox"
-                                        name="${displayInfo.awardGroupsFormParamName}"
-                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
-                                        value="${awardGroup}" checked />
-                                </c:when>
-                                <c:otherwise>
-                                    <input type="checkbox"
-                                        name="${displayInfo.awardGroupsFormParamName}"
-                                        id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
-                                        value="${awardGroup}" />
-                                </c:otherwise>
-                            </c:choose>
-                            <label
-                                for="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}">${awardGroup}</label>
-                            <br />
-                        </c:forEach>
                     </td>
                 </c:forEach>
             </tr>
             <!--  Scoreboard -->
+
+            <tr>
+                <th>Scoreboard - Most Recent and All Teams Scores</th>
+                <c:forEach items="${displayInformation}"
+                    var="displayInfo">
+                    <td>
+                        <c:choose>
+                            <c:when
+                                test="${displayInfo.scoreboardMostRecentAllTeams}">
+                                <input type='radio'
+                                    name="${displayInfo.remotePageFormParamName}"
+                                    value='<%=DisplayInfo.SCOREBOARD_MOST_RECENT_ALL_TEAMS_REMOTE_PAGE%>'
+                                    checked />
+                            </c:when>
+                            <c:otherwise>
+                                <input type='radio'
+                                    name="${displayInfo.remotePageFormParamName}"
+                                    value='<%=DisplayInfo.SCOREBOARD_MOST_RECENT_ALL_TEAMS_REMOTE_PAGE%>' />
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+                </c:forEach>
+            </tr>
+            <!--  Scoreboard - most recent and all teams -->
 
             <tr>
                 <th>Head to Head</th>
