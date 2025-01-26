@@ -125,9 +125,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                     .appendValue(ChronoField.YEAR,
                                                                                                                  4)
                                                                                                     .appendLiteral(' ')
-                                                                                                    .appendValue(ChronoField.HOUR_OF_DAY)
+                                                                                                    .appendValue(ChronoField.HOUR_OF_DAY,
+                                                                                                                 2)
                                                                                                     .appendLiteral(':')
-                                                                                                    .appendValue(ChronoField.MINUTE_OF_HOUR)
+                                                                                                    .appendValue(ChronoField.MINUTE_OF_HOUR,
+                                                                                                                 2)
                                                                                                     .toFormatter();
 
   /**
