@@ -294,13 +294,13 @@ function allTeamsDoScroll(timestamp) {
 function addToMostRecent(tableBody, scoreUpdate) {
     const rowId = "most_recent_" + scoreUpdate.team.teamNumber + "_run_" + scoreUpdate.runNumber;
     const prevRow = document.getElementById(rowId);
-    if(prevRow) {
+    if (prevRow) {
         prevRow.parentNode.removeChild(prevRow);
     }
-    
+
     const trElement = tableBody.insertRow(0);
     trElement.id = rowId;
-    
+
     const teamNumElement = trElement.insertCell();
     teamNumElement.classList.add("left");
     teamNumElement.innerText = scoreUpdate.team.teamNumber;
@@ -462,23 +462,28 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if ("top_scores" == layout) {
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
-        const allTeams = document.getElementById("top_scores");
+        const topScores = document.getElementById("top_scores");
         const container = document.getElementById("container");
-        container.appendChild(allTeams);
+        container.appendChild(topScores);
     } else if ("top_scores_all" == layout) {
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
-        const allTeams = document.getElementById("top_scores");
+        const topScores = document.getElementById("top_scores");
         const container = document.getElementById("container");
-        container.appendChild(allTeams);
+        container.appendChild(topScores);
 
         topScoresDisplayAllTeams = true;
     } else if ("most_recent" == layout) {
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
-        const allTeams = document.getElementById("most_recent");
+        const mostRecent = document.getElementById("most_recent");
         const container = document.getElementById("container");
-        container.appendChild(allTeams);
+        container.appendChild(mostRecent);
+    } else if ("most_recent_all_teams" == layout) {
+        document.getElementById("top_scores").classList.add("fll-sw-ui-inactive");
+
+        document.getElementById("all_teams").classList.add("automatic_scroll");
+        requestAnimationFrame(allTeamsDoScroll);
     } else {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);
