@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="REF,HEAD_JUDGE" allowSetup="false" />
 
 <%
-fll.web.report.RegularMatchPlayVsSchedule.populateContext(application, pageContext);
+fll.web.report.PerformanceRunsVsSchedule.populateContext(application, pageContext);
 %>
 
 <html>
@@ -26,11 +26,11 @@ table#perf-data th, table#perf-data td {
 }
 </style>
 
-<title>Regular Match Play Runs vs. Schedule</title>
+<title>Performance Runs vs. Schedule</title>
 </head>
 
 <body>
-    <h1>Regular Match Play Runs vs. Schedule</h1>
+    <h1>Performance Runs vs. Schedule</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <table id="perf-data" class="center">

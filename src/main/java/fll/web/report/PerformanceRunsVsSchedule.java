@@ -26,7 +26,6 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.db.TournamentParameters;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -39,11 +38,11 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Support for regular-match-play-vs-schedule.jsp.
+ * Support for performance-runs-vs-schedule.jsp.
  */
-public final class RegularMatchPlayVsSchedule {
+public final class PerformanceRunsVsSchedule {
 
-  private RegularMatchPlayVsSchedule() {
+  private PerformanceRunsVsSchedule() {
   }
 
   /**
@@ -60,9 +59,6 @@ public final class RegularMatchPlayVsSchedule {
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-
-      final int numRegularMatchPlayRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                                     currentTournament.getTournamentID());
 
       final List<Data> data = new LinkedList<>();
 
@@ -88,10 +84,8 @@ public final class RegularMatchPlayVsSchedule {
       // update with tournament data
       try (
           PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, runnumber, computedtotal, noshow, bye, timestamp, tablename FROM performance" //
-              + " WHERE tournament = ?" //
-              + "   AND runnumber <= ?")) {
+              + " WHERE tournament = ?")) {
         prep.setInt(1, currentTournament.getTournamentID());
-        prep.setInt(2, numRegularMatchPlayRounds);
 
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
