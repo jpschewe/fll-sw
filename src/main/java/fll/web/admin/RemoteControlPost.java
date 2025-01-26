@@ -126,19 +126,18 @@ public class RemoteControlPost extends BaseFLLServlet {
           display.setBrackets(brackets);
         } // head to head
 
-        if (display.isScoreboard()) {
-          final String awardGroupsFormParamName = display.getAwardGroupsFormParamName();
-          final String @Nullable [] awardGroupsParamValues = request.getParameterValues(awardGroupsFormParamName);
-          if (null == awardGroupsParamValues) {
-            throw new MissingRequiredParameterException(awardGroupsFormParamName);
-          }
-          final List<String> awardGroupsToDisplay = Arrays.asList(awardGroupsParamValues);
-          final List<String> currentAwardGroupsToDisplay = display.getScoreboardAwardGroups();
-          if (!awardGroupsToDisplay.equals(currentAwardGroupsToDisplay)) {
-            display.setScoreboardAwardGroups(awardGroupsToDisplay);
-            ScoreboardUpdates.awardGroupChange();
-          }
-        } // scoreboard
+        // award groups to display
+        final String awardGroupsFormParamName = display.getAwardGroupsFormParamName();
+        final String @Nullable [] awardGroupsParamValues = request.getParameterValues(awardGroupsFormParamName);
+        if (null == awardGroupsParamValues) {
+          throw new MissingRequiredParameterException(awardGroupsFormParamName);
+        }
+        final List<String> awardGroupsToDisplay = Arrays.asList(awardGroupsParamValues);
+        final List<String> currentAwardGroupsToDisplay = display.getScoreboardAwardGroups();
+        if (!awardGroupsToDisplay.equals(currentAwardGroupsToDisplay)) {
+          display.setScoreboardAwardGroups(awardGroupsToDisplay);
+          ScoreboardUpdates.awardGroupChange();
+        }
 
       } // display to keep
     } // foreach display
