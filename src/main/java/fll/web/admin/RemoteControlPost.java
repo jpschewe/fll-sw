@@ -57,8 +57,6 @@ public class RemoteControlPost extends BaseFLLServlet {
     final Collection<DisplayInfo> displays = DisplayHandler.getAllRemoteControlDisplays();
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("finalistDivision {}", request.getParameter("finalistDivision"));
-
       for (final DisplayInfo display : displays) {
         LOGGER.trace("display name: {} uuid: {} ", display.getName(), display.getUuid());
         LOGGER.trace("\tremotePage {}", request.getParameter(display.getRemotePageFormParamName()));
