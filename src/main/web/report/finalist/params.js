@@ -82,6 +82,170 @@ const finalistParamsModule = {}
 
     };
 
+    finalistParamsModule.populateFinalistGroupTimes = function() {
+        const container = document.getElementById("finalist_group_times");
+        removeChildren(container);
+
+        // array of pairs of groupDiv and save function
+        const groupData = [];
+
+        const buttonBar = document.createElement("div");
+        container.appendChild(buttonBar);
+
+        const addButton = document.createElement("button");
+        buttonBar.appendChild(addButton);
+        addButton.setAttribute("type", "button");
+        addButton.innerText = "Add Finalist Group";
+        addButton.addEventListener("click", () => {
+            const [groupDiv, saveFunc] = createFinalistGroupBlock(null, null);
+            groupData.push([groupDiv, saveFunc]);
+            container.appendChild(groupDiv);
+        });
+
+        // add existing groups
+        for (const [name, group] of Object.entries(finalist_module.getFinalistGroups())) {
+            const [groupDiv, saveFunc] = createFinalistGroupBlock(name, group);
+            groupData.push([groupDiv, saveFunc]);
+            container.appendChild(groupDiv);
+        }
+
+        const saveButton = document.createElement("button");
+        buttonBar.appendChild(saveButton);
+        saveButton.setAttribute("type", "button");
+        saveButton.innerText = "Save Finalist Groups";
+        saveButton.addEventListener("click", () => {
+            const newGroups = {};
+            for (const [groupDiv, saveFunc] of groupData) {
+                if (groupDiv.parentNode == container) {
+                    // still in the container
+                    const [name, group] = saveFunc();
+                    if (name) {
+                        newGroups[name] = group;
+                    }
+                }
+            }
+            finalist_module.setFinalistGroups(newGroups);
+            finalist_module.saveToLocalStorage();
+        });
+    };
+
+    /**
+     * @param {string} groupName if not null, name of the group for the block
+     * @param {FinalistGroup} group if not null, used to populate the block 
+     */
+    function createFinalistGroupBlock(groupName, group) {
+        const groupDiv = document.createElement("div");
+
+        const nameDiv = document.createElement("div");
+        groupDiv.appendChild(nameDiv);
+
+        const nameLabel = document.createElement("span");
+        nameDiv.appendChild(nameLabel);
+        nameLabel.innerText = "Name: ";
+
+        const nameInput = document.createElement("input");
+        nameDiv.appendChild(nameInput);
+        nameInput.setAttribute("type", "text");
+        if (groupName) {
+            nameInput.value = groupName;
+        }
+
+        //start time
+        const startDiv = document.createElement("div");
+        groupDiv.appendChild(startDiv);
+
+        const startLabel = document.createElement("span");
+        startDiv.appendChild(startLabel);
+        startLabel.innerText = "Start Time";
+
+        const startInput = document.createElement("input");
+        startDiv.appendChild(startInput);
+        startInput.setAttribute("type", "time");
+        if (group && group.startTime) {
+            finalistParamsModule.setTimeField(startInput, group.startTime);
+        }
+
+        //end time
+        const endDiv = document.createElement("div");
+        groupDiv.appendChild(endDiv);
+
+        const endLabel = document.createElement("span");
+        endDiv.appendChild(endLabel);
+        endLabel.innerText = "End Time";
+
+        const endInput = document.createElement("input");
+        endDiv.appendChild(endInput);
+        endInput.setAttribute("type", "time");
+        if (group && group.endTime) {
+            finalistParamsModule.setTimeField(endInput, group.endTime);
+        }
+
+
+        // checkboxes for judging groups
+        const judgingGroupDiv = document.createElement("div");
+        groupDiv.appendChild(judgingGroupDiv);
+        let judgingGroupIndex = 1;
+        const judgingGroupInputs = [];
+        for (const judgingGroup of finalist_module.getJudgingGroups()) {
+            const div = document.createElement("div");
+            judgingGroupDiv.appendChild(div);
+
+            const inputId = `judgingGroup${judgingGroupIndex}`;
+
+            const label = document.createElement("label");
+            div.appendChild(label);
+            label.innerText = judgingGroup;
+            label.setAttribute("for", inputId);
+
+            const input = document.createElement("input");
+            div.appendChild(input);
+            input.setAttribute("type", "checkbox");
+            input.id = inputId;
+            input.value = judgingGroup;
+            if (group && group.judgingGroups.indexOf(judgingGroup) >= 0) {
+                input.checked = true;
+            }
+            judgingGroupInputs.push(input);
+        }
+
+
+        const buttonBar = document.createElement("div");
+        groupDiv.appendChild(buttonBar);
+
+        const removeButton = document.createElement("button");
+        buttonBar.appendChild(removeButton);
+        removeButton.setAttribute("type", "button");
+        removeButton.innerText = "Remove Group";
+        removeButton.addEventListener("click", () => {
+            const groupParent = groupDiv.parentNode;
+            if (groupParent) {
+                groupParent.removeChild(groupDiv);
+            }
+        });
+
+        const saveFunc = function() {
+            const groupName = nameInput.value;
+            if (!groupName) {
+                alert("All groups must be named");
+                return [null, null];
+            }
+
+            const newGroup = new FinalistGroup();
+            newGroup.startTime = finalistParamsModule.parseTime(startInput.value);
+            newGroup.endTime = finalistParamsModule.parseTime(endInput.value);
+
+            for (const input of judgingGroupInputs) {
+                if (input.checked) {
+                    newGroup.judgingGroups.push(input.value);
+                }
+            }
+
+            return [groupName, newGroup];
+        };
+
+        return [groupDiv, saveFunc];
+    }
+
     finalistParamsModule.updateDivision = function() {
         const startTime = finalist_module.getStartTime(finalist_module.getCurrentDivision());
         document.getElementById("startTime").value = startTime.format(TIME_FORMATTER);
@@ -164,7 +328,15 @@ document.addEventListener('DOMContentLoaded', function() {
         location.href = "non-numeric.html";
     });
 
-    finalistParamsModule.populateHeadToHeadTimes();
+    if (finalist_module.getRunningHead2Head()) {
+        document.getElementById('head_to_head').classList.remove('fll-sw-ui-inactive');
+        document.getElementById('finalist_groups').classList.add('fll-sw-ui-inactive');
+        finalistParamsModule.populateHeadToHeadTimes();
+    } else {
+        document.getElementById('head_to_head').classList.add('fll-sw-ui-inactive');
+        document.getElementById('finalist_groups').classList.remove('fll-sw-ui-inactive');
+        finalistParamsModule.populateFinalistGroupTimes();
+    }
 
     finalist_module.saveToLocalStorage();
 

@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 49;
+  public static final int DATABASE_VERSION = 50;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -341,6 +341,7 @@ public final class GenerateDB {
       createDelayedPerformanceTable(connection, true);
 
       createFinalistParameterTables(connection, true);
+      createFinalistGroupTables(connection, true);
 
       createCategoriesIgnored(connection, true);
 
@@ -1371,6 +1372,45 @@ public final class GenerateDB {
       sql2.append(")");
       stmt.executeUpdate(sql2.toString());
 
+    }
+  }
+
+  /**
+   * Create the tables to store finalist group information.
+   *
+   * @param connection
+   */
+  /* package */ static void createFinalistGroupTables(final Connection connection,
+                                                      final boolean createConstraints)
+      throws SQLException {
+    LOGGER.trace("Creating finalist group tables. Create constraints: {}", createConstraints);
+
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE finalist_groups (");
+      sql.append("    tournament_id INTEGER NOT NULL");
+      sql.append("   ,name LONGVARCHAR NOT NULL");
+      sql.append("   ,start_time TIME NOT NULL");
+      sql.append("   ,end_time TIME NOT NULL");
+      if (createConstraints) {
+        sql.append("   ,CONSTRAINT finalist_group_pk PRIMARY KEY(tournament_id, name)");
+        sql.append("   ,CONSTRAINT finalist_group_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
+      final StringBuilder sql2 = new StringBuilder();
+      sql2.append("CREATE TABLE finalist_groups_judging_groups (");
+      sql2.append("    tournament_id INTEGER NOT NULL");
+      sql2.append("   ,name LONGVARCHAR NOT NULL");
+      sql2.append("   ,judging_group LONGVARCHAR NOT NULL");
+      if (createConstraints) {
+        sql2.append("   ,CONSTRAINT finalist_group_judging_groups_pk PRIMARY KEY(tournament_id, name, judging_group)");
+        sql2.append("   ,CONSTRAINT finalist_group_judging_groups_fk1 FOREIGN KEY(tournament_id, name) REFERENCES finalist_groups(tournament_id, name) ON DELETE CASCADE");
+      }
+      sql2.append(")");
+      stmt.executeUpdate(sql2.toString());
     }
   }
 

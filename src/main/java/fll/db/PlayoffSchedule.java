@@ -34,7 +34,7 @@ public class PlayoffSchedule implements Serializable {
    * @param endTime {@link #getEndTime()}
    */
   public PlayoffSchedule(@JsonProperty("startTime") final LocalTime startTime,
-                         @JsonProperty("endTim") final LocalTime endTime) {
+                         @JsonProperty("endTime") final LocalTime endTime) {
     this.startTime = startTime;
     this.endTime = endTime;
   }

@@ -1,3 +1,4 @@
+* #1229 - support generating finalist schedule when not running head to head
 * #1222 - Display all performance runs in the performance runs vs. schedule report
 * Fix bug in subjective application where the score summary sometimes would not display
 * #1211 - Add PDF version of the schedule
