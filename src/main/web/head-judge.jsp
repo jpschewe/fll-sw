@@ -53,8 +53,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         Match Play performance scores</a>
 
     <a class="wide" target="_performanceVsSchedule"
-        href="<c:url value='/report/regular-match-play-vs-schedule.jsp'/>">
-        Regular Match Play runs compared with the schedule</a>
+        href="<c:url value='/report/performance-runs-vs-schedule.jsp'/>">
+        Performance runs compared with the schedule</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit

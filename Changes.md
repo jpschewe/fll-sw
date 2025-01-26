@@ -1,3 +1,5 @@
+* #1222 - Display all performance runs in the performance runs vs. schedule report
+
 Release 19.1.0
 ==============
 * #1129 - Display scores for other judges in the subjective score summary

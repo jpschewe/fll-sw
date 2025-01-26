@@ -38,11 +38,11 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Support for regular-match-play-vs-schedule.jsp.
+ * Support for performance-runs-vs-schedule.jsp.
  */
-public final class RegularMatchPlayVsSchedule {
+public final class PerformanceRunsVsSchedule {
 
-  private RegularMatchPlayVsSchedule() {
+  private PerformanceRunsVsSchedule() {
   }
 
   /**
