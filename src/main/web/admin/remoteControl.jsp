@@ -188,12 +188,7 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
             <!-- welcome -->
 
             <tr>
-                <th>
-                    Scoreboard
-                    <br />
-                    Select the award groups to show on the display (non
-                    checked is the same as all checked)
-                </th>
+                <th>Scoreboard</th>
                 <c:forEach items="${displayInformation}"
                     var="displayInfo">
                     <td>
@@ -207,13 +202,37 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
                             <c:otherwise>
                                 <input type='radio'
                                     name="${displayInfo.remotePageFormParamName}"
-                                    value='scoreboard' />
+                                    value='<%=DisplayInfo.SCOREBOARD_REMOTE_PAGE%>' />
                             </c:otherwise>
                         </c:choose>
                     </td>
                 </c:forEach>
             </tr>
             <!--  Scoreboard -->
+
+            <tr>
+                <th>Scoreboard - Most Recent and All Teams Scores</th>
+                <c:forEach items="${displayInformation}"
+                    var="displayInfo">
+                    <td>
+                        <c:choose>
+                            <c:when
+                                test="${displayInfo.scoreboardMostRecentAllTeams}">
+                                <input type='radio'
+                                    name="${displayInfo.remotePageFormParamName}"
+                                    value='<%=DisplayInfo.SCOREBOARD_MOST_RECENT_ALL_TEAMS_REMOTE_PAGE%>'
+                                    checked />
+                            </c:when>
+                            <c:otherwise>
+                                <input type='radio'
+                                    name="${displayInfo.remotePageFormParamName}"
+                                    value='<%=DisplayInfo.SCOREBOARD_MOST_RECENT_ALL_TEAMS_REMOTE_PAGE%>' />
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+                </c:forEach>
+            </tr>
+            <!--  Scoreboard - most recent and all teams -->
 
             <tr>
                 <th>Head to Head</th>
