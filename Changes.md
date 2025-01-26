@@ -1,3 +1,4 @@
+* Fix bug in subjective application where the score summary sometimes would not display
 * #1211 - Add PDF version of the schedule
 * #1224 - allow judge names to be longer than 64 characters
 

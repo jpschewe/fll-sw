@@ -888,7 +888,7 @@ function populateScoreSummary() {
 
             if (i + 1 < teamsWithScores.length) {
                 const nextScoreData = scoreDataList[i + 1];
-                if (scoreData["computedScore"] == nextScoreData["computedScore"]) {
+                if (scoreData && nextScoreData && scoreData["computedScore"] == nextScoreData["computedScore"]) {
                     scoreData["tie"] = true;
                 }
             }
