@@ -414,7 +414,8 @@ public class AwardsCSV extends BaseFLLServlet {
             final String awardText = String.format("%s - %s %s", awardName, (allWinners.size() > 1 ? "Tie" : "Winner"),
                                                    group);
 
-            csv.writeNext(new String[] { String.valueOf(winner.getTeamNumber()), winner.getTeamName(), awardText });
+            csv.writeNext(new String[] { String.valueOf(winner.getTeamNumber()), winner.getTeamName(), awardText,
+                                         winner.getFormattedScore() });
           }
         } // have a winner
       } // group has scores

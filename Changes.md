@@ -1,3 +1,4 @@
+* #1227 - add score to performance winners in the awards CSV file
 * #1230 - Add option to display scoreboard with most recent and all teams scores
 * #1229 - support generating finalist schedule when not running head to head
 * #1222 - Display all performance runs in the performance runs vs. schedule report
