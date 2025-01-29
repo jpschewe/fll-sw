@@ -67,7 +67,7 @@ public class SubjectiveScheduleByTime extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
-                         String.format("filename=\"%s_subjectiveByTime.pdf\"", tournament.getName()));
+                         String.format("attachment; filename=\"%s_subjectiveByTime.pdf\"", tournament.getName()));
       ScheduleWriter.outputSubjectiveSchedulesByTimeOnly(schedule, response.getOutputStream());
     } catch (final IOException e) {
       LOGGER.error(e.getMessage(), e);

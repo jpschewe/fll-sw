@@ -114,7 +114,7 @@ public class SubjectiveSheets extends BaseFLLServlet {
         } else {
           response.reset();
           response.setContentType("application/pdf");
-          response.setHeader("Content-Disposition", String.format("filename=\"%s_subjective-%s-%s.pdf\"",
+          response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s_subjective-%s-%s.pdf\"",
                                                                   tournament.getName(), categoryName, columnName));
 
           final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());

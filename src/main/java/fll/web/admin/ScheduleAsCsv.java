@@ -64,7 +64,8 @@ public class ScheduleAsCsv extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("text/csv");
-      response.setHeader("Content-Disposition", String.format("filename=\"%s_schedule.csv\"", tournament.getName()));
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_schedule.csv\"", tournament.getName()));
       schedule.outputScheduleAsCSV(response.getOutputStream());
 
     } catch (final SQLException sqle) {

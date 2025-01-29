@@ -68,7 +68,8 @@ public class SubjectiveScheduleByCategory extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
-                         String.format("filename=\"%s_subjectiveByCategoryAndTime.pdf\"", tournament.getName()));
+                         String.format("attachment; filename=\"%s_subjectiveByCategoryAndTime.pdf\"",
+                                       tournament.getName()));
       ScheduleWriter.outputSubjectiveSchedulesByCategory(schedule, response.getOutputStream());
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
