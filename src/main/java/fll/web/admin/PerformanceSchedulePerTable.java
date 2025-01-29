@@ -66,7 +66,8 @@ public class PerformanceSchedulePerTable extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
-                         String.format("filename=\"%s_performanceSchedulePerTable.pdf\"", tournament.getName()));
+                         String.format("attachment; filename=\"%s_performanceSchedulePerTable.pdf\"",
+                                       tournament.getName()));
       ScheduleWriter.outputPerformanceSchedulePerTableByTime(connection, tournament, schedule,
                                                              response.getOutputStream());
 

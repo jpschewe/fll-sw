@@ -66,8 +66,9 @@ public class PerformanceNotes extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", String.format("filename=\"%s_performanceSchedulePerTableForNotes.pdf\"",
-                                                              tournament.getName()));
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_performanceSchedulePerTableForNotes.pdf\"",
+                                       tournament.getName()));
       ScheduleWriter.outputPerformanceSchedulePerTableByTimeForNotes(connection, tournament, schedule,
                                                                      response.getOutputStream());
 
