@@ -30,7 +30,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputPerformanceSchedulePerTableByTime(Connection, Tournament, TournamentSchedule, java.io.OutputStream)
+ * @see ScheduleWriter#outputPerformanceSchedulePerTableByTime(Connection,
+ *      Tournament, TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/PerformanceNotes")
 public class PerformanceNotes extends BaseFLLServlet {
@@ -65,7 +66,8 @@ public class PerformanceNotes extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=performanceSchedulePerTableForNotes.pdf");
+      response.setHeader("Content-Disposition", String.format("filename=\"%s_performanceSchedulePerTableForNotes.pdf\"",
+                                                              tournament.getName()));
       ScheduleWriter.outputPerformanceSchedulePerTableByTimeForNotes(connection, tournament, schedule,
                                                                      response.getOutputStream());
 

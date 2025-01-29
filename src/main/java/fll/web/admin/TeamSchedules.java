@@ -71,10 +71,12 @@ public class TeamSchedules extends BaseFLLServlet {
 
       final int teamNumber = WebUtils.getIntRequestParameter(request, "TeamNumber", Team.NULL_TEAM_NUMBER);
       if (Team.NULL_TEAM_NUMBER == teamNumber) {
-        response.setHeader("Content-Disposition", "filename=teamSchedules.pdf");
+        response.setHeader("Content-Disposition",
+                           String.format("filename=\"%s_teamSchedules.pdf\"", tournament.getName()));
         ScheduleWriter.outputTeamSchedules(schedule, response.getOutputStream());
       } else {
-        response.setHeader("Content-Disposition", String.format("filename=teamSchedule-%d.pdf", teamNumber));
+        response.setHeader("Content-Disposition",
+                           String.format("filename=\"%s_teamSchedule-%d.pdf\"", tournament.getName(), teamNumber));
         ScheduleWriter.outputTeamSchedule(schedule, response.getOutputStream(), teamNumber);
       }
 

@@ -11,15 +11,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -27,6 +21,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * @see TournamentSchedule#outputScheduleAsCSV(java.io.OutputStream)
@@ -51,7 +51,8 @@ public class ScheduleAsCsv extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -63,7 +64,7 @@ public class ScheduleAsCsv extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("text/csv");
-      response.setHeader("Content-Disposition", "filename=schedule.csv");
+      response.setHeader("Content-Disposition", String.format("filename=\"%s_schedule.csv\"", tournament.getName()));
       schedule.outputScheduleAsCSV(response.getOutputStream());
 
     } catch (final SQLException sqle) {
