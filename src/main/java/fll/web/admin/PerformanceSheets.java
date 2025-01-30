@@ -70,7 +70,8 @@ public class PerformanceSheets extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=performance-sheets.pdf");
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_performance-sheets.pdf\"", tournament.getName()));
       schedule.outputPerformanceSheets(tournament.getName(), response.getOutputStream(), description);
 
     } catch (final IOException e) {

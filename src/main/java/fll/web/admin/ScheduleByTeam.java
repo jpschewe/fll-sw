@@ -11,15 +11,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
@@ -28,6 +22,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * @see ScheduleWriter#outputScheduleByTeam(TournamentSchedule,
@@ -52,7 +52,8 @@ public class ScheduleByTeam extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -64,7 +65,8 @@ public class ScheduleByTeam extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=schedule.pdf");
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_schedule-by-team.pdf\"", tournament.getName()));
       ScheduleWriter.outputScheduleByTeam(schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {

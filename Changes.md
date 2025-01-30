@@ -1,10 +1,11 @@
-* #1227 - add score to performance winners in the awards CSV file
+* #1223 - Add button to allow downloading all common schedules at once
+* #1227 - Add score to performance winners in the awards CSV file
 * #1230 - Add option to display scoreboard with most recent and all teams scores
-* #1229 - support generating finalist schedule when not running head to head
+* #1229 - Support generating finalist schedule when not running head to head
 * #1222 - Display all performance runs in the performance runs vs. schedule report
 * Fix bug in subjective application where the score summary sometimes would not display
 * #1211 - Add PDF version of the schedule
-* #1224 - allow judge names to be longer than 64 characters
+* #1224 - Allow judge names to be longer than 64 characters
 
 Release 19.1.0
 ==============

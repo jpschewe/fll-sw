@@ -20,14 +20,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 }
 </style>
 
-<script type="text/javascript">
-  function display(id) {
-    document.getElementById(id).style.display = "block";
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = "none";
-  }
-</script>
+<script type="text/javascript" src="index.js"></script>
 </head>
 
 <body>
@@ -345,8 +338,14 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                         </form>
                     </li>
                     <!-- end Team schedules -->
+
+                    <li>
+                        <button type='button' id='schedule_download'>Download
+                            Common Schedules</button>
+                    </li>
                 </ul>
             </c:if>
+            <!-- end schedule loaded -->
         </li>
 
         <li>

@@ -11,15 +11,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -29,7 +23,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * @see ScheduleWriter#outputSubjectiveSchedulesByJudgingStation(TournamentSchedule,
@@ -53,11 +52,10 @@ public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {
     }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -69,7 +67,9 @@ public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=subjectiveByJudgingStation.pdf");
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_subjectiveByJudgingStation.pdf\"",
+                                       tournament.getName()));
       ScheduleWriter.outputSubjectiveSchedulesByJudgingStation(schedule, response.getOutputStream());
     } catch (final IOException e) {
       LOGGER.error(e.getMessage(), e);
@@ -77,8 +77,6 @@ public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

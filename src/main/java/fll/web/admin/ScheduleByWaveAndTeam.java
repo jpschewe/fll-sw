@@ -64,7 +64,9 @@ public class ScheduleByWaveAndTeam extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=schedule.pdf");
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_schedule-by-wave-and-team.pdf\"",
+                                       tournament.getName()));
       ScheduleWriter.outputScheduleByWaveAndTeam(tournament, schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
