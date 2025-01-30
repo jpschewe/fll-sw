@@ -750,53 +750,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Output the detailed schedule.
-   * 
-   * @param directory the directory to put the files in
-   * @param baseFilename the base filename
-   * @throws IOException if there is an error writing the schedules
-   * @throws IllegalArgumentException if directory doesn't exist and can't be
-   *           created or exists and isn't a directory
-   */
-  public void outputDetailedSchedules(final File directory,
-                                      final String baseFilename)
-      throws IOException, IllegalArgumentException {
-    if (!directory.exists()) {
-      if (!directory.mkdirs()) {
-        throw new IllegalArgumentException("Unable to create "
-            + directory.getAbsolutePath());
-      }
-    } else if (!directory.isDirectory()) {
-      throw new IllegalArgumentException(directory.getAbsolutePath()
-          + " exists, but isn't a directory");
-    }
-
-    final File byDivision = new File(directory, baseFilename
-        + "-subjective-by-division.pdf");
-    try (OutputStream pdfFos = new FileOutputStream(byDivision)) {
-      ScheduleWriter.outputSubjectiveSchedulesByJudgingStation(this, pdfFos);
-    }
-
-    final File byCategory = new File(directory, baseFilename
-        + "-subjective-by-category.pdf");
-    try (OutputStream pdfFos = new FileOutputStream(byCategory)) {
-      ScheduleWriter.outputSubjectiveSchedulesByCategory(this, pdfFos);
-    }
-
-    final File byTime = new File(directory, baseFilename
-        + "-subjective-by-time.pdf");
-    try (OutputStream pdfFos = new FileOutputStream(byTime)) {
-      ScheduleWriter.outputSubjectiveSchedulesByTimeOnly(this, pdfFos);
-    }
-
-    final File teamSchedules = new File(directory, baseFilename
-        + "-team-schedules.pdf");
-    try (OutputStream pdfFos = new FileOutputStream(teamSchedules)) {
-      ScheduleWriter.outputTeamSchedules(this, pdfFos);
-    }
-  }
-
-  /**
    * @param dir where to write the files
    * @param baseFileName the base name of the files
    * @param description the challenge description
