@@ -1541,6 +1541,21 @@ function synchronizeData() {
 
 }
 
+function synchronizeButtonAction() {
+    subjective_module.checkServerStatus(true, function() {
+        server_online = true;
+        postServerStatusCallback();
+        synchronizeData();
+    },
+        function() {
+            server_online = false;
+            postServerStatusCallback();
+
+            document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        });
+}
+
 function setupAfterContentLoaded() {
     const sidePanel = document.getElementById("side-panel");
 
@@ -1597,19 +1612,7 @@ function setupAfterContentLoaded() {
 
     document.getElementById("side-panel_synchronize").addEventListener('click', () => {
         sidePanel.classList.remove('open');
-
-        subjective_module.checkServerStatus(true, function() {
-            server_online = true;
-            postServerStatusCallback();
-            synchronizeData();
-        },
-            function() {
-                server_online = false;
-                postServerStatusCallback();
-
-                document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
-                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-            });
+        synchronizeButtonAction();
     });
 
     document.getElementById("side-panel_offline-download").addEventListener('click', () => {
