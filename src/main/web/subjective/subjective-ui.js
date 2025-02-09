@@ -1541,6 +1541,21 @@ function synchronizeData() {
 
 }
 
+function synchronizeButtonAction() {
+    subjective_module.checkServerStatus(true, function() {
+        server_online = true;
+        postServerStatusCallback();
+        synchronizeData();
+    },
+        function() {
+            server_online = false;
+            postServerStatusCallback();
+
+            document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
+            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+        });
+}
+
 function setupAfterContentLoaded() {
     const sidePanel = document.getElementById("side-panel");
 
@@ -1595,22 +1610,16 @@ function setupAfterContentLoaded() {
     });
 
 
-    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
-        sidePanel.classList.remove('open');
+    const synchronizeButtons = document.getElementsByClassName("synchronize-button");
+    for (let i = 0; i < synchronizeButtons.length; i++) {
+        synchronizeButtons.item(i).addEventListener("click", () => {
+            // one button is in the panel, doing the remove for the footer buttons is a no-op
+            sidePanel.classList.remove('open');
 
-        subjective_module.checkServerStatus(true, function() {
-            server_online = true;
-            postServerStatusCallback();
-            synchronizeData();
-        },
-            function() {
-                server_online = false;
-                postServerStatusCallback();
+            synchronizeButtonAction();
+        });
+    }
 
-                document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
-                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-            });
-    });
 
     document.getElementById("side-panel_offline-download").addEventListener('click', () => {
         sidePanel.classList.remove('open');
