@@ -1610,10 +1610,16 @@ function setupAfterContentLoaded() {
     });
 
 
-    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
-        sidePanel.classList.remove('open');
-        synchronizeButtonAction();
-    });
+    const synchronizeButtons = document.getElementsByClassName("synchronize-button");
+    for (let i = 0; i < synchronizeButtons.length; i++) {
+        synchronizeButtons.item(i).addEventListener("click", () => {
+            // one button is in the panel, doing the remove for the footer buttons is a no-op
+            sidePanel.classList.remove('open');
+
+            synchronizeButtonAction();
+        });
+    }
+
 
     document.getElementById("side-panel_offline-download").addEventListener('click', () => {
         sidePanel.classList.remove('open');
