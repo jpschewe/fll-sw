@@ -1,3 +1,5 @@
+Release 19.2.0
+==============
 * #1228 - Add synchronize button to the footer of the subjective judging app
 * #1223 - Add button to allow downloading all common schedules at once
 * #1227 - Add score to performance winners in the awards CSV file
