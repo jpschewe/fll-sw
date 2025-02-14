@@ -87,18 +87,10 @@ function storeAdvancingTeams() {
         }
     });
 
-    if (advancing.length) {
-        // send to server
-
-        return uploadJsonData("/api/AdvancingTeams", "POST", advancing)
-            .then(checkJsonResponse)
-            .catch(error => { throw new Error("Error sending group advancing teams: " + error) });
-
-    } else {
-        return new Promise(function() {
-            _log("No advancing teams to store");
-        });
-    }
+    // send to server
+    return uploadJsonData("/api/AdvancingTeams", "POST", advancing)
+        .then(checkJsonResponse)
+        .catch(error => { throw new Error("Error sending group advancing teams: " + error) });
 }
 
 /**
