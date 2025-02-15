@@ -379,6 +379,7 @@ public final class GenerateDB {
           + "         , Performance.tournament" //
           + "    FROM Performance, tournament_seeding_rounds AS TSR" //
           + "    WHERE Performance.RunNumber <= TSR.seeding_rounds" //
+          + "        AND Performance.tournament = TSR.tournament_id" //
           + "    GROUP BY Performance.tournament, Performance.TeamNumber");
 
       // verified performance scores
