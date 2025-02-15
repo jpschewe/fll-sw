@@ -70,14 +70,9 @@ fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
                 </li>
 
                 <li>
-                    <form name='check' action='CheckSeedingRounds'
-                        method='POST'>
-                        Check to make sure all teams have scores entered
-                        for each regular match play round.
-                        <input type='submit' id='check_seeding_rounds'
-                            value='Check Missing Rounds' />
-
-                    </form>
+                    <a href='checkSeedingRoundsResult.jsp'>Check
+                        Missing Rounds</a> Check to make sure all teams have
+                    scores entered for each regular match play round.
                 </li>
 
 
