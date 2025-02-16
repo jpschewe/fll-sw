@@ -479,18 +479,6 @@ public final class TournamentParameters {
   }
 
   /**
-   * @param connection database connection
-   * @param tournament the tournament ID
-   * @throws SQLException on a database error
-   * @see #setNumSeedingRounds(Connection, int, int)
-   */
-  public static void unsetNumSeedingRounds(final Connection connection,
-                                           final int tournament)
-      throws SQLException {
-    unsetParameter(connection, tournament, SEEDING_ROUNDS);
-  }
-
-  /**
    * Set the default value for the number of seeding rounds.
    * 
    * @param connection database connection
@@ -503,17 +491,6 @@ public final class TournamentParameters {
     setIntParameterDefault(connection, SEEDING_ROUNDS, newSeedingRounds);
   }
 
-  /**
-   * @param connection database connection
-   * @param tournament the tournament ID
-   * @return true if there is a tournament specific value
-   * @throws SQLException on a database error
-   */
-  public static boolean isNumPracticeRoundsSet(final Connection connection,
-                                               final int tournament)
-      throws SQLException {
-    return tournamentParameterValueExists(connection, tournament, PRACTICE_ROUNDS);
-  }
 
   /**
    * Get the number of practice rounds from the database.
@@ -530,17 +507,6 @@ public final class TournamentParameters {
   }
 
   /**
-   * Get default numbers of practice rounds for the database.
-   * 
-   * @param connection database connection
-   * @return the default number of practice rounds
-   * @throws SQLException on a database error
-   */
-  public static int getDefaultNumPracticeRounds(final Connection connection) throws SQLException {
-    return getIntTournamentParameterDefault(connection, PRACTICE_ROUNDS);
-  }
-
-  /**
    * Set the number of practice rounds.
    *
    * @param tournament the tournament ID
@@ -553,18 +519,6 @@ public final class TournamentParameters {
                                           final int value)
       throws SQLException {
     setIntParameter(connection, tournament, PRACTICE_ROUNDS, value);
-  }
-
-  /**
-   * @param connection database connection
-   * @param tournament the tournament ID
-   * @throws SQLException on a database error
-   * @see #setNumPracticeRounds(Connection, int, int)
-   */
-  public static void unsetNumPracticeRounds(final Connection connection,
-                                            final int tournament)
-      throws SQLException {
-    unsetParameter(connection, tournament, PRACTICE_ROUNDS);
   }
 
   /**
