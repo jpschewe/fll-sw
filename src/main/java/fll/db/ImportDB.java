@@ -830,6 +830,11 @@ public final class ImportDB {
       upgrade49to50(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 51) {
+      upgrade50to51(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1699,6 +1704,57 @@ public final class ImportDB {
     GenerateDB.createFinalistGroupTables(connection, false);
 
     setDBVersion(connection, 50);
+  }
+
+  /**
+   * Add run metadata.
+   */
+  private static void upgrade50to51(final Connection connection) throws SQLException {
+    GenerateDB.createRunMetadataTable(connection, false);
+
+    // migrate data
+    try (PreparedStatement prep = connection.prepareStatement("SELECT TP3.param_value FROM tournament_parameters AS TP3" //
+        + "   WHERE TP3.param = 'SeedingRounds'" //
+        + "      AND TP3.tournament = ( " //
+        + "      SELECT MAX(TP2.tournament) FROM tournament_parameters AS TP2 " //
+        + "           WHERE TP2.param = 'SeedingRounds'" //
+        + "           AND TP2.tournament IN (-1, ?) )");
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO run_metadata" //
+            + " (tournament_id, run_number, display_name, regular_match_play, scoreboard_display)" //
+            + " VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement maxRunPrep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE tournament = ?")) {
+
+      for (final Tournament tournament : Tournament.getTournaments(connection)) {
+        prep.setInt(1, tournament.getTournamentID());
+        insert.setInt(1, tournament.getTournamentID());
+        maxRunPrep.setInt(1, tournament.getTournamentID());
+
+        try (ResultSet rs = prep.executeQuery()) {
+          if (rs.next()) {
+            final int seedingRounds = rs.getInt(1);
+            try (ResultSet maxRunRs = maxRunPrep.executeQuery()) {
+              if (maxRunRs.next()) {
+                final int maxRun = maxRunRs.getInt(1);
+                for (int run = 1; run <= maxRun; ++run) {
+                  final boolean regularMatchPlay = run <= seedingRounds;
+                  final boolean scoreboardDisplay = true;
+
+                  insert.setInt(2, run);
+                  // ideally this would have something about the playoff round in the name, but
+                  // that's a lot of work for historical data
+                  insert.setString(3, String.format("Run %d", run));
+                  insert.setBoolean(4, regularMatchPlay);
+                  insert.setBoolean(5, scoreboardDisplay);
+                  insert.executeUpdate();
+                } // for each run
+              }
+            }
+          }
+        }
+      } // foreach tournament
+    } // allocate prepared statements
+
+    setDBVersion(connection, 51);
   }
 
   /**
@@ -2733,6 +2789,22 @@ public final class ImportDB {
                                         final int destTournamentID,
                                         final ChallengeDescription description)
       throws SQLException {
+    LOGGER.debug("Importing performance run metadata");
+    try (
+        PreparedStatement delete = destinationConnection.prepareStatement("DELETE FROM run_metadata WHERE tournament_id = ?")) {
+      delete.setInt(1, destTournamentID);
+      delete.executeUpdate();
+    }
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, display_name, regular_match_play, scoreboard_display"
+            + " FROM run_metadata WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO run_metadata (tournament_id, run_number, display_name, regular_match_play, scoreboard_display)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
     LOGGER.debug("Importing performance scores");
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final String tableName = "Performance";

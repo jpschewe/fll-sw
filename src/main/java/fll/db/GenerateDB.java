@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 50;
+  public static final int DATABASE_VERSION = 51;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -353,6 +353,8 @@ public final class GenerateDB {
       createVirtualSubjectiveCategoryTable(connection, true);
 
       createAwardDeterminationTable(connection, true);
+
+      createRunMetadataTable(connection, true);
 
       // --------------- create views ---------------
 
@@ -1606,6 +1608,33 @@ public final class GenerateDB {
       // store sponsor order
       createAwardsScriptRankTable(connection, createConstraints, "awards_script_sponsor_order", "sponsor",
                                   "sponsor_rank");
+    }
+  }
+
+  /**
+   * @param connection database
+   * @param createConstraints if foreign key constraints should be created
+   * @throws SQLException on an error
+   */
+  /* package */ static void createRunMetadataTable(final Connection connection,
+                                                   final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder createTable = new StringBuilder();
+      createTable.append("CREATE TABLE run_metadata (");
+      createTable.append("  tournament_id INTEGER NOT NULL");
+      createTable.append(" ,run_number INTEGER NOT NULL");
+      createTable.append(" ,display_name VARCHAR DEFAULT NULL");
+      createTable.append(" ,regular_match_play BOOLEAN NOT NULL");
+      createTable.append(" ,scoreboard_display BOOLEAN NOT NULL");
+      if (createConstraints) {
+        createTable.append(" ,CONSTRAINT run_metadata_pk PRIMARY KEY (tournament_id, run_number)");
+        createTable.append(" ,CONSTRAINT run_metadata_fk1 FOREIGN KEY (tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+      }
+      createTable.append(")");
+      stmt.executeUpdate(createTable.toString());
+
     }
   }
 
