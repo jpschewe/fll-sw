@@ -1,3 +1,5 @@
+* Fix finalist schedule link missing
+
 Release 19.2.0
 ==============
 * #1228 - Add synchronize button to the footer of the subjective judging app
