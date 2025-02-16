@@ -1,3 +1,4 @@
+* Scale weighted rank by number of teams in group per category
 * Fix finalist schedule link missing
 
 Release 19.2.0
