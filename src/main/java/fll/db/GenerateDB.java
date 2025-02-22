@@ -358,31 +358,16 @@ public final class GenerateDB {
 
       // --------------- create views ---------------
 
-      // number of seeding rounds for each tournament
-      stmt.executeUpdate("DROP VIEW IF EXISTS tournament_seeding_rounds");
-      stmt.executeUpdate("CREATE VIEW tournament_seeding_rounds AS" //
-          + " SELECT T1.tournament_id, " //
-          + "      (SELECT TP3.param_value FROM tournament_parameters AS TP3" //
-          + "   WHERE TP3.param = 'SeedingRounds'" //
-          + "      AND TP3.tournament = ( " //
-          + "      SELECT MAX(TP2.tournament) FROM tournament_parameters AS TP2 " //
-          + "           WHERE TP2.param = '"
-          + TournamentParameters.SEEDING_ROUNDS
-          + "' " //
-          + "           AND TP2.tournament IN (-1, T1.tournament_id ) )) as seeding_rounds" //
-          + "      FROM tournaments as T1");
-
       // max seeding round score for all tournaments
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
-      stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + "    SELECT MAX(Performance.TeamNumber) AS TeamNumber" //
-          + "         , MAX(Performance.ComputedTotal) AS score" //
-          + "         , AVG(Performance.ComputedTotal) AS average" //
-          + "         , Performance.tournament" //
-          + "    FROM Performance, tournament_seeding_rounds AS TSR" //
-          + "    WHERE Performance.RunNumber <= TSR.seeding_rounds" //
-          + "        AND Performance.tournament = TSR.tournament_id" //
-          + "    GROUP BY Performance.tournament, Performance.TeamNumber");
+      stmt.executeUpdate("CREATE VIEW performance_seeding_max AS" //
+          + " SELECT MAX(Performance.TeamNumber) AS TeamNumber" //
+          + "     , MAX(Performance.ComputedTotal) AS score" //
+          + "     , AVG(Performance.ComputedTotal) AS average" //
+          + "     , Performance.tournament AS tournament" //
+          + " FROM Performance" //
+          + " WHERE Performance.RunNumber IN ( SELECT run_number FROM run_metadata WHERE regular_match_play = TRUE AND tournament_id = Performance.tournament )" //
+          + " GROUP BY Performance.tournament, Performance.TeamNumber");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
