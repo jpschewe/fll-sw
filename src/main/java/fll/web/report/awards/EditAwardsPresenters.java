@@ -220,7 +220,7 @@ public class EditAwardsPresenters extends BaseFLLServlet {
       final int tournamentId = WebUtils.getIntRequestParameter(request, "tournament");
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
 
-      storeSectionText(request, connection, tournament);
+      storeSpecialCategoryPresenters(request, connection, tournament);
 
       storeSubjectiveCategoryPresenters(request, description, connection, tournament);
 
@@ -238,11 +238,13 @@ public class EditAwardsPresenters extends BaseFLLServlet {
 
   }
 
-  private void storeSectionText(final HttpServletRequest request,
-                                final Connection connection,
-                                final Tournament tournament)
+  private void storeSpecialCategoryPresenters(final HttpServletRequest request,
+                                              final Connection connection,
+                                              final Tournament tournament)
       throws SQLException {
-    for (final AwardsScript.Section section : AwardsScript.Section.values()) {
+    for (final AwardsScript.Section section : new AwardsScript.Section[] { AwardsScript.Section.CATEGORY_CHAMPIONSHIP_PRESENTER,
+                                                                           AwardsScript.Section.CATEGORY_HEAD2HEAD_PRESENTER,
+                                                                           AwardsScript.Section.CATEGORY_PERFORMANCE_PRESENTER }) {
       final @Nullable String specifiedStr = request.getParameter(String.format("%s_specified",
                                                                                section.getIdentifier()));
       if (null != specifiedStr) {
