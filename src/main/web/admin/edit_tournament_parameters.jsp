@@ -42,39 +42,6 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
             id='edit_tournament_parameters'
             action='StoreTournamentParameters' method='POST'>
 
-            <!-- num seeding rounds -->
-            <div>
-                <b>Number of Regular Match Play Rounds</b>
-                <c:choose>
-                    <c:when test="${numSeedingRoundsDisabled}">
-                        <i>This parameter cannot be changed once any
-                            performance scores have been entered.</i>
-                        <input type="number" name="seeding_rounds"
-                            id="seeding_rounds"
-                            value="${numSeedingRounds}" required
-                            readonly />
-                    </c:when>
-                    <c:otherwise>
-                        <a
-                            href='javascript:display("SeedingRoundsHelp")'>[help]</a>
-                        <div id='SeedingRoundsHelp' class='help'
-                            style='display: none'>
-                            This parameter specifies the number of
-                            rounds in regular match play. Regular match
-                            play rounds are used for the performance
-                            score in the final report and are typically
-                            used to rank teams for the initial head to
-                            head round. <a
-                                href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
-                        </div>
-
-                        <input type="number" name="seeding_rounds"
-                            id="seeding_rounds"
-                            value="${numSeedingRounds}" min="0" required />
-                    </c:otherwise>
-                </c:choose>
-            </div>
-
             <!-- num practice rounds -->
             <div>
                 <b>Number of Practice Rounds</b>

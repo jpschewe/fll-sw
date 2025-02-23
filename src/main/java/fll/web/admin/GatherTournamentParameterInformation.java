@@ -8,17 +8,15 @@ package fll.web.admin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
-import fll.web.playoff.Playoff;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Gather parameter information for edit_tournament_parameters.jsp.
@@ -43,9 +41,6 @@ public final class GatherTournamentParameterInformation {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       pageContext.setAttribute("tournament", tournament);
 
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
-      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
-
       final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
       pageContext.setAttribute("numPracticeRounds", numPracticeRounds);
 
@@ -55,9 +50,7 @@ public final class GatherTournamentParameterInformation {
         pageContext.setAttribute("runningHeadToHeadChecked", "");
       }
       final int maxPerformanceRoundEntered = Queries.maxPerformanceRunNumberCompleted(connection);
-      final List<String> playoffBrackets = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
-      final boolean runningHeadToHeadDisabled = maxPerformanceRoundEntered > numSeedingRounds
-          || !playoffBrackets.isEmpty();
+      final boolean runningHeadToHeadDisabled = maxPerformanceRoundEntered > 0;
       pageContext.setAttribute("runningHeadToHeadDisabled", runningHeadToHeadDisabled);
 
       pageContext.setAttribute("numSeedingRoundsDisabled", maxPerformanceRoundEntered > 0);
