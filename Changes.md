@@ -1,4 +1,5 @@
 * Fix finalist schedule link missing
+* #1232 - Allow the user to delete all advancing teams
 
 Release 19.2.0
 ==============
