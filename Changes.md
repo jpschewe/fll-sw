@@ -1,3 +1,4 @@
+* #1253 - fix error uploading delibration winners a second time
 * Fix finalist schedule link missing
 
 Release 19.2.0
