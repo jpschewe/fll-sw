@@ -1,3 +1,4 @@
+* #1253 - fix error uploading delibration winners a second time
 * Fix finalist schedule link missing
 * #1232 - Allow the user to delete all advancing teams
 
