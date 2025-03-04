@@ -20,11 +20,13 @@ import fll.web.playoff.TeamScore;
    * @param formattedScore {@link #formattedScore}
    * @param teamScore used to gather {@link #isBye()} {@link #isNoShow()}
    *          {@link #getRunNumber()}
+   * @param runDisplayName {@link #getRunDisplayName()}
    */
   ScoreUpdateMessage(final TournamentTeam team,
-                            final double score,
-                            final String formattedScore,
-                            final TeamScore teamScore) {
+                     final double score,
+                     final String formattedScore,
+                     final TeamScore teamScore,
+                     final String runDisplayName) {
     super(Message.MessageType.UPDATE);
     this.team = team;
     this.score = score;
@@ -32,6 +34,7 @@ import fll.web.playoff.TeamScore;
     this.runNumber = teamScore.getRunNumber();
     this.bye = teamScore.isBye();
     this.noShow = teamScore.isNoShow();
+    this.runDisplayName = runDisplayName;
   }
 
   /**
@@ -69,6 +72,15 @@ import fll.web.playoff.TeamScore;
   }
 
   private final int runNumber;
+
+  private final String runDisplayName;
+
+  /**
+   * @return display name for the run
+   */
+  public String getRunDisplayName() {
+    return runDisplayName;
+  }
 
   /**
    * @return if this is a bye

@@ -114,6 +114,7 @@ public final class ImportDB {
    * {@link #loadFromDumpIntoNewDB(ZipInputStream, Connection)}, this
    * will result in a database with all views and generated columns.
    * This also loads all images from the dump into the application directory.
+   * This also sets the current tournament
    *
    * @param zipfile the dump file to read
    * @param destConnection where to load the data

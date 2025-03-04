@@ -37,6 +37,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
+import fll.web.TournamentData;
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
@@ -334,6 +335,7 @@ public final class Queries {
    * Insert a performance score into the database and do all appropriate updates
    * to the playoff tables and notifications to the UI code.
    *
+   * @param tournamentData tournament data cache
    * @param connection the database connection
    * @param datasource used to create background database connections
    * @param description the challenge description
@@ -344,7 +346,8 @@ public final class Queries {
    * @throws ParseException on an error parsing the score data
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static void insertPerformanceScore(final Connection connection,
+  public static void insertPerformanceScore(final TournamentData tournamentData,
+                                            final Connection connection,
                                             final DataSource datasource,
                                             final ChallengeDescription description,
                                             final Tournament tournament,
@@ -428,7 +431,7 @@ public final class Queries {
                                                                                teamScore.getTeamNumber());
       final ScoreType performanceScoreType = description.getPerformance().getScoreType();
       final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-      ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+      ScoreboardUpdates.newScore(tournamentData, datasource, team, score, formattedScore, teamScore);
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
@@ -466,6 +469,7 @@ public final class Queries {
    * Update a performance score in the database. All of the values are expected
    * to be in request.
    *
+   * @param tournamentData tournament data cache
    * @param description
    *          description of the challenge
    * @param connection database connection
@@ -477,7 +481,8 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static int updatePerformanceScore(final ChallengeDescription description,
+  public static int updatePerformanceScore(final TournamentData tournamentData,
+                                           final ChallengeDescription description,
                                            final Connection connection,
                                            final DataSource datasource,
                                            final TeamScore teamScore)
@@ -573,7 +578,7 @@ public final class Queries {
                                                                                    teamScore.getTeamNumber());
           final ScoreType performanceScoreType = description.getPerformance().getScoreType();
           final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-          ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+          ScoreboardUpdates.newScore(tournamentData, datasource, team, score, formattedScore, teamScore);
         }
       }
 

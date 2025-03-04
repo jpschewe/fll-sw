@@ -33,10 +33,12 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.DelayedPerformance;
 import fll.db.Queries;
+import fll.db.RunMetadata;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
 import fll.web.display.DisplayInfo;
@@ -86,9 +88,10 @@ public final class ScoreboardUpdates {
     final ServletContext application = httpSession.getServletContext();
     ALL_CLIENTS.put(uuid, client);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     try {
-      sendAllScores(datasource, challengeDescription, uuid, client);
+      sendAllScores(tournamentData, datasource, challengeDescription, uuid, client);
     } catch (final UnknownDisplayException e) {
       LOGGER.error("Cannot find display {} that was just added as a new client", uuid);
     }
@@ -96,7 +99,8 @@ public final class ScoreboardUpdates {
     return uuid;
   }
 
-  private static void sendAllScores(final DataSource datasource,
+  private static void sendAllScores(final TournamentData tournamentData,
+                                    final DataSource datasource,
                                     final ChallengeDescription challengeDescription,
                                     final String displayUuid,
                                     final Session client)
@@ -132,6 +136,7 @@ public final class ScoreboardUpdates {
           while (rs.next()) {
             final int teamNumber = rs.getInt("teamNumber");
             final int runNumber = rs.getInt("runNumber");
+            final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
 
             final @Nullable TournamentTeam team = teams.get(teamNumber);
             if (null == team) {
@@ -143,7 +148,8 @@ public final class ScoreboardUpdates {
             final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
             final double score = performanceElement.evaluate(teamScore);
             final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-            final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore);
+            final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
+                                                                     runMetadata.getDisplayName());
 
             try {
               final String updateStr = jsonMapper.writeValueAsString(update);
@@ -247,18 +253,22 @@ public final class ScoreboardUpdates {
   /**
    * Notify all clients of a new verified score. Messages are sent asynchronously.
    * 
+   * @param tournamentData tournament data cache
    * @param datasource database connection
    * @param team {@link ScoreUpdateMessage#getTeam()}
    * @param score {@link ScoreUpdateMessage#getScore()}
    * @param formattedScore {@link ScoreUpdateMessage#getFormattedScore()}
    * @param teamScore used to get some score information
    */
-  public static void newScore(final DataSource datasource,
+  public static void newScore(final TournamentData tournamentData,
+                              final DataSource datasource,
                               final TournamentTeam team,
                               final double score,
                               final String formattedScore,
                               final TeamScore teamScore) {
-    final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore);
+    final RunMetadata runMetadata = tournamentData.getRunMetadata(teamScore.getRunNumber());
+    final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
+                                                             runMetadata.getDisplayName());
     newScore(datasource, update);
   }
 
@@ -325,6 +335,8 @@ public final class ScoreboardUpdates {
   }
 
   /**
+   * Send a score to the specified display if the display should receive it.
+   * 
    * @return false on an error sending data
    */
   private static boolean newScore(final Session client,

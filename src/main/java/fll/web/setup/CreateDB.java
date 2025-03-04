@@ -28,6 +28,7 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Authentication;
 import fll.db.DumpDB;
@@ -154,6 +155,9 @@ public class CreateDB extends BaseFLLServlet {
             message.append(String.format("<p id='import_logs_dir'>See %s for bug reports and logs.</p>",
                                          importResult.getImportDirectory()));
           }
+
+          ApplicationAttributes.getTournamentData(application)
+                               .setCurrentTournament(Tournament.getCurrentTournament(connection));
 
           // remove application variables that depend on the database
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);

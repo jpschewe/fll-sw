@@ -30,6 +30,7 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.ApiResult;
 import fll.web.playoff.MapTeamScore;
@@ -85,6 +86,7 @@ public class SubmitScoreEntry extends HttpServlet {
       formData = jsonMapper.readValue(request.getReader(), FORM_DATA_TYPE_REF);
     }
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -114,7 +116,8 @@ public class SubmitScoreEntry extends HttpServlet {
         jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
         final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
-        final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, datasource, teamScore);
+        final int rowsUpdated = Queries.updatePerformanceScore(tournamentData, challengeDescription, connection,
+                                                               datasource, teamScore);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");
         } else if (rowsUpdated > 1) {
@@ -160,7 +163,7 @@ public class SubmitScoreEntry extends HttpServlet {
                 + runNumber;
           }
 
-          Queries.insertPerformanceScore(connection, datasource, challengeDescription, tournament,
+          Queries.insertPerformanceScore(tournamentData, connection, datasource, challengeDescription, tournament,
                                          teamScore.isVerified(), teamScore);
 
           final String message = String.format("<div class='success'>Entered score for team number %d %s</div>",

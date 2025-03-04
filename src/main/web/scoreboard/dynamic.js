@@ -198,7 +198,11 @@ function topScoresComparator(a, b) {
 }
 
 function allTeamsScoreCellId(teamNumber, runNumber) {
-    return "all_teams_" + teamNumber + "_run_" + runNumber + "_score";
+    return allTeamsScoreRowId(teamNumber, runNumber) + "_score";
+}
+
+function allTeamsRunCellId(teamNumber, runNumber) {
+    return allTeamsScoreRowId(teamNumber, runNumber) + "_runDisplay";
 }
 
 function allTeamsScoreRowId(teamNumber, runNumber) {
@@ -244,6 +248,7 @@ function allTeamsEnsureScoreRowExists(teamNumber, runNumber) {
 
         const runCell = row.insertCell();
         runCell.innerText = runNumber;
+        runCell.id = allTeamsRunCellId(teamNumber, runNumber);
 
         const scoreSpacerCell = row.insertCell();
         const scoreSpacer = document.createElement("img");
@@ -260,7 +265,10 @@ function addToAllTeams(scoreUpdate) {
     // make sure the row exists
     allTeamsEnsureScoreRowExists(scoreUpdate.team.teamNumber, scoreUpdate.runNumber);
 
-    // populate the score
+    // populate the cells
+    const runCell = document.getElementById(allTeamsRunCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
+    runCell.innerText = scoreUpdate.runDisplayName;
+    
     const scoreCell = document.getElementById(allTeamsScoreCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
     scoreCell.innerText = scoreUpdate.formattedScore;
 

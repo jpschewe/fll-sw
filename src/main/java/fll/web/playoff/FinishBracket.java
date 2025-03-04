@@ -12,12 +12,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
@@ -27,9 +21,16 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Finish a playoff bracket.
@@ -51,6 +52,7 @@ public class FinishBracket extends BaseFLLServlet {
       return;
     }
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
@@ -66,7 +68,8 @@ public class FinishBracket extends BaseFLLServlet {
 
       final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
 
-      final boolean result = Playoff.finishBracket(connection, datasource, challenge, tournament, bracketName);
+      final boolean result = Playoff.finishBracket(tournamentData, connection, datasource, challenge, tournament,
+                                                   bracketName);
 
       if (!result) {
         LOGGER.warn("Could not finish bracket "

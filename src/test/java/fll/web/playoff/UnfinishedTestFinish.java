@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import fll.db.GlobalParameters;
+import fll.web.TournamentData;
 import fll.xml.ChallengeDescription;
 
 /**
@@ -53,7 +54,8 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
                                                               bracketName);
     assertThat(before, is(true));
 
-    Playoff.finishBracket(getConnection(), getDatasource(), challenge, getTournament(), bracketName);
+    final TournamentData tournamentData = new TournamentData(getDatasource());
+    Playoff.finishBracket(tournamentData, getConnection(), getDatasource(), challenge, getTournament(), bracketName);
 
     final boolean after = Playoff.isPlayoffBracketUnfinished(getConnection(), getTournament().getTournamentID(),
                                                              bracketName);

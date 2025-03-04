@@ -42,6 +42,7 @@ import fll.util.DummyTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
+import fll.web.TournamentData;
 import fll.xml.AbstractGoal;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
@@ -1317,6 +1318,7 @@ public final class Playoff {
    * If an exception occurs the database is consistent, but the bracket will not
    * be finished.
    *
+   * @param tournamentData tournament data cache
    * @param connection the database connection
    * @param datasource used to create background database connections
    * @param tournament the tournament that the bracket is in
@@ -1328,7 +1330,8 @@ public final class Playoff {
    * @throws SQLException if there is a problem talking to the database
    * @throws ParseException if there is an error parsing the score data
    */
-  public static boolean finishBracket(final Connection connection,
+  public static boolean finishBracket(final TournamentData tournamentData,
+                                      final Connection connection,
                                       final DataSource datasource,
                                       final ChallengeDescription challenge,
                                       final Tournament tournament,
@@ -1357,7 +1360,8 @@ public final class Playoff {
           + info.round
           + " line: "
           + info.dbLine);
-      finishRound(connection, datasource, challenge, tournament, simpleGoals, enumGoals, bracketName, info);
+      finishRound(tournamentData, connection, datasource, challenge, tournament, simpleGoals, enumGoals, bracketName,
+                  info);
     }
 
     // mark bracket as automatically finished
@@ -1371,7 +1375,8 @@ public final class Playoff {
     return true;
   }
 
-  private static void finishRound(final Connection connection,
+  private static void finishRound(final TournamentData tournamentData,
+                                  final Connection connection,
                                   final DataSource datasource,
                                   final ChallengeDescription description,
                                   final Tournament tournament,
@@ -1448,22 +1453,22 @@ public final class Playoff {
     } else if (teamAscoreExists) {
       final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamBscore);
+      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamBscore);
 
     } else if (teamBscoreExists) {
       final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamAscore);
+      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamAscore);
     } else {
       // initial value score
       final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, false, false);
-      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamAscore);
+      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamAscore);
 
       // no show
       final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(connection, datasource, description, tournament, true, teamBscore);
+      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamBscore);
     }
 
   }
@@ -1919,7 +1924,7 @@ public final class Playoff {
       final List<TableInformation> tables = TableInformation.filterToTablesForBracket(allTables, connection, tournament,
                                                                                       bracketName);
       TableInformation.sortByTableUsage(tables, connection, tournament);
-      
+
       final TableInformation tableInfo = tables.get(0);
 
       prep.setString(1, tableInfo.getSideA());

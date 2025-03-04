@@ -172,4 +172,21 @@ public final class ApplicationAttributes {
     }
   }
 
+  private static final String TOURNAMENT_DATA = "tournamentData";
+
+  /**
+   * @param application variable store
+   * @return the tournament data cache
+   */
+  public static TournamentData getTournamentData(final ServletContext application) {
+    @Nullable
+    TournamentData data = getAttribute(application, TOURNAMENT_DATA, TournamentData.class);
+    if (null == data) {
+      final DataSource datasource = getDataSource(application);
+      data = new TournamentData(datasource);
+      application.setAttribute(TOURNAMENT_DATA, data);
+    }
+    return data;
+  }
+
 }
