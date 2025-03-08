@@ -31,10 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.db.DelayedPerformance;
 import fll.db.Queries;
 import fll.db.RunMetadata;
-import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -112,12 +110,6 @@ public final class ScoreboardUpdates {
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                            currentTournament.getTournamentID());
-      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
-                                                                                  currentTournament.getTournamentID());
-      final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
-
       final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
       final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
       final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
@@ -137,6 +129,9 @@ public final class ScoreboardUpdates {
             final int teamNumber = rs.getInt("teamNumber");
             final int runNumber = rs.getInt("runNumber");
             final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+            if (!runMetadata.isScoreboardDisplay()) {
+              continue;
+            }
 
             final @Nullable TournamentTeam team = teams.get(teamNumber);
             if (null == team) {
@@ -154,8 +149,7 @@ public final class ScoreboardUpdates {
             try {
               final String updateStr = jsonMapper.writeValueAsString(update);
 
-              if (!newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay,
-                            team, teamScore.getRunNumber(), updateStr)) {
+              if (!newScore(client, awardGroupsToDisplay, team, updateStr)) {
                 removeClient(displayUuid);
               }
             } catch (final JsonProcessingException e) {
@@ -267,9 +261,11 @@ public final class ScoreboardUpdates {
                               final String formattedScore,
                               final TeamScore teamScore) {
     final RunMetadata runMetadata = tournamentData.getRunMetadata(teamScore.getRunNumber());
-    final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
-                                                             runMetadata.getDisplayName());
-    newScore(datasource, update);
+    if (runMetadata.isScoreboardDisplay()) {
+      final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
+                                                               runMetadata.getDisplayName());
+      newScore(datasource, update);
+    }
   }
 
   private static void newScore(final DataSource datasource,
@@ -279,12 +275,6 @@ public final class ScoreboardUpdates {
       try (Connection connection = datasource.getConnection()) {
 
         final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-        final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                              currentTournament.getTournamentID());
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
-                                                                                    currentTournament.getTournamentID());
-        final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
-
         final List<String> allAwardGroups = Queries.getAwardGroups(connection, currentTournament.getTournamentID());
 
         try {
@@ -293,8 +283,7 @@ public final class ScoreboardUpdates {
           final Set<String> toRemove = new HashSet<>();
           for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
             try {
-              if (!newScore(numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, allAwardGroups, entry.getKey(),
-                            entry.getValue(), update.getTeam(), update.getRunNumber(), updateStr)) {
+              if (!newScore(allAwardGroups, entry.getKey(), entry.getValue(), update.getTeam(), updateStr)) {
                 toRemove.add(entry.getKey());
               }
             } catch (final UnknownDisplayException e) {
@@ -317,21 +306,16 @@ public final class ScoreboardUpdates {
     });
   }
 
-  private static boolean newScore(final int numSeedingRounds,
-                                  final boolean runningHeadToHead,
-                                  final int maxRunNumberToDisplay,
-                                  final List<String> allAwardGroups,
+  private static boolean newScore(final List<String> allAwardGroups,
                                   final String displayUuid,
                                   final Session client,
                                   final TournamentTeam team,
-                                  final int runNumber,
                                   final String data)
       throws UnknownDisplayException {
     final DisplayInfo displayInfo = DisplayHandler.resolveDisplay(displayUuid);
     final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
-    return newScore(client, awardGroupsToDisplay, numSeedingRounds, runningHeadToHead, maxRunNumberToDisplay, team,
-                    runNumber, data);
+    return newScore(client, awardGroupsToDisplay, team, data);
   }
 
   /**
@@ -341,16 +325,9 @@ public final class ScoreboardUpdates {
    */
   private static boolean newScore(final Session client,
                                   final Collection<String> awardGroupsToDisplay,
-                                  final int numSeedingRounds,
-                                  final boolean runningHeadToHead,
-                                  final int maxRunNumberToDisplay,
                                   final TournamentTeam team,
-                                  final int runNumber,
                                   final String data) {
-    if (runNumber <= maxRunNumberToDisplay
-        && awardGroupsToDisplay.contains(team.getAwardGroup())
-        && (!runningHeadToHead
-            || runNumber <= numSeedingRounds)) {
+    if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
       return WebUtils.sendWebsocketTextMessage(client, data);
     } else {
       return true;
