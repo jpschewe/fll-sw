@@ -56,9 +56,6 @@ public class StoreTournamentParameters extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final int numPracticeRounds = WebUtils.getIntRequestParameter(request, "practice_rounds");
-      TournamentParameters.setNumPracticeRounds(connection, tournament.getTournamentID(), numPracticeRounds);
-
       final boolean runningHeadToHead = "on".equals(request.getParameter("running_head_to_head"));
       TournamentParameters.setRunningHeadToHead(connection, tournament.getTournamentID(), runningHeadToHead);
 

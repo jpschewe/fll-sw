@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -37,6 +39,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.StoreColumnNames;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
@@ -72,6 +75,11 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
                                                                                         UploadScheduleData.class);
 
+    @SuppressWarnings("unchecked") // cannot store generics in session
+    final Collection<String> headerNames = SessionAttributes.getNonNullAttribute(session,
+                                                                                 StoreColumnNames.HEADER_NAMES_KEY,
+                                                                                 Collection.class);
+
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
@@ -84,6 +92,35 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       pageContext.setAttribute("AWARD_GROUP_HEADER", TournamentSchedule.AWARD_GROUP_HEADER);
       pageContext.setAttribute("JUDGE_GROUP_HEADER", TournamentSchedule.JUDGE_GROUP_HEADER);
       pageContext.setAttribute("WAVE_HEADER", TournamentSchedule.WAVE_HEADER);
+
+      for (final String header : headerNames) {
+        if (TournamentSchedule.TEAM_NUMBER_HEADER.equals(header)) {
+          pageContext.setAttribute("teamNumber_value", header);
+        } else if (TournamentSchedule.TEAM_NAME_HEADER.equals(header)) {
+          pageContext.setAttribute("teamName_value", header);
+        } else if (TournamentSchedule.ORGANIZATION_HEADER.equals(header)) {
+          pageContext.setAttribute("organization_value", header);
+        } else if (TournamentSchedule.AWARD_GROUP_HEADER.equals(header)) {
+          pageContext.setAttribute("awardGroup_value", header);
+        } else if (TournamentSchedule.JUDGE_GROUP_HEADER.equals(header)) {
+          pageContext.setAttribute("judgingGroup_value", header);
+        } else if (TournamentSchedule.WAVE_HEADER.equals(header)) {
+          pageContext.setAttribute("wave_value", header);
+        }
+      }
+
+      // set judging group and award group to be the same if only 1 is specified
+      final @Nullable Object awardGroupColumn = pageContext.getAttribute("awardGroup_value");
+      final @Nullable Object judgingGroupColumn = pageContext.getAttribute("judgingGroup_value");
+      if (null == awardGroupColumn
+          && null != judgingGroupColumn) {
+        pageContext.setAttribute("awardGroup_value", judgingGroupColumn);
+      } else if (null != awardGroupColumn
+          && null == judgingGroupColumn) {
+        pageContext.setAttribute("judgingGroup_value", awardGroupColumn);
+      }
+
+      computePerformanceRoundValues(pageContext, headerNames);
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -120,6 +157,57 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
+  }
+
+  private static void computePerformanceRoundValues(final PageContext page,
+                                                    final Collection<String> headerNames) {
+    final Map<Integer, String> performanceRoundValues = new HashMap<>();
+    final Map<Integer, Boolean> performanceRoundRegularMatch = new HashMap<>();
+    final Map<Integer, Boolean> performanceRoundScoreboard = new HashMap<>();
+
+    final List<String> practiceTimeHeaders = headerNames.stream() //
+                                                        .filter(h -> h.startsWith(TournamentSchedule.BASE_PRACTICE_HEADER_SHORT)
+                                                            && !h.endsWith("Table")) //
+                                                        .sorted().toList();
+
+    final List<String> performanceTimeHeaders = headerNames.stream() //
+                                                           .filter(h -> h.startsWith(TournamentSchedule.BASE_PERF_HEADER)
+                                                               && !h.endsWith("Table")) //
+                                                           .sorted().toList();
+
+    final List<String> funRunTimeHeaders = headerNames.stream() //
+                                                      .filter(h -> h.startsWith("Fun Run")
+                                                          && !h.endsWith("Table")) //
+                                                      .sorted().toList();
+
+    // check for practice rounds first
+    int roundNumber = 1;
+    for (final String header : practiceTimeHeaders) {
+      performanceRoundValues.put(roundNumber, header);
+      performanceRoundRegularMatch.put(roundNumber, false);
+      performanceRoundScoreboard.put(roundNumber, false);
+      ++roundNumber;
+    }
+
+    // performance rounds next
+    for (final String header : performanceTimeHeaders) {
+      performanceRoundValues.put(roundNumber, header);
+      performanceRoundRegularMatch.put(roundNumber, true);
+      performanceRoundScoreboard.put(roundNumber, true);
+      ++roundNumber;
+    }
+
+    // fun run rounds next
+    for (final String header : funRunTimeHeaders) {
+      performanceRoundValues.put(roundNumber, header);
+      performanceRoundRegularMatch.put(roundNumber, false);
+      performanceRoundScoreboard.put(roundNumber, true);
+      ++roundNumber;
+    }
+
+    page.setAttribute("performanceRound_values", performanceRoundValues);
+    page.setAttribute("performanceRound_regularMatch", performanceRoundRegularMatch);
+    page.setAttribute("performanceRound_scoreboard", performanceRoundScoreboard);
   }
 
   @Override

@@ -42,27 +42,6 @@ GatherTournamentParameterInformation.populateContext(application, pageContext);
             id='edit_tournament_parameters'
             action='StoreTournamentParameters' method='POST'>
 
-            <!-- num practice rounds -->
-            <div>
-                <b>Number of Practice Rounds</b>
-                <c:choose>
-                    <c:when test="${numSeedingRoundsDisabled}">
-                        <i>This parameter cannot be changed once any
-                            performance scores have been entered.</i>
-                        <input type="number" name="practice_rounds"
-                            id="practice_rounds"
-                            value="${numPracticeRounds}" required
-                            readonly />
-                    </c:when>
-                    <c:otherwise>
-                        <input type="number" name="practice_rounds"
-                            id="practice_rounds"
-                            value="${numPracticeRounds}" min="0"
-                            required />
-                    </c:otherwise>
-                </c:choose>
-            </div>
-
             <!-- running head to head -->
             <div>
                 <b>Running head to head</b>

@@ -34,7 +34,8 @@ public class UploadScheduleData implements Serializable {
    * @param scheduleFile {@link #getScheduleFile()}
    * @param headerRowIndex {@link #getHeaderRowIndex()}
    * @param headerNames {@link #getHeaderNames()}
-   * @param numSeedingRounds number of seeding rounds for the tournament, used to set the initial number of performance runs
+   * @param numSeedingRounds number of seeding rounds for the tournament, used to
+   *          set the initial number of performance runs
    */
   public UploadScheduleData(final File scheduleFile,
                             final int headerRowIndex,
@@ -268,7 +269,7 @@ public class UploadScheduleData implements Serializable {
   private int numPerformanceRuns;
 
   /**
-   * @return the number of non-practice performance runs in the schedule
+   * @return the number of performance runs in the schedule
    */
   public int getNumPerformanceRuns() {
     return numPerformanceRuns;
@@ -280,5 +281,5 @@ public class UploadScheduleData implements Serializable {
   public void setNumPerformanceRuns(final int v) {
     numPerformanceRuns = v;
   }
-  
+
 }

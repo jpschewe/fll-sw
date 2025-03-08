@@ -41,9 +41,6 @@ public final class GatherTournamentParameterInformation {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       pageContext.setAttribute("tournament", tournament);
 
-      final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
-      pageContext.setAttribute("numPracticeRounds", numPracticeRounds);
-
       if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
         pageContext.setAttribute("runningHeadToHeadChecked", "checked");
       } else {
