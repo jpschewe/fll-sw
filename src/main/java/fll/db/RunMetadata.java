@@ -145,7 +145,7 @@ public class RunMetadata {
         + " USING (VALUES (?, ?, ?, ?, ?)) AS source(tournament_id, run_number, display_name, regular_match_play, scoreboard_display)" //
         + "   ON run_metadata.tournament_id = source.tournament_id AND run_metadata.run_number = source.run_number" //
         + " WHEN MATCHED" //
-        + "   THEN UPDATE SET run_metadta.display_name = source.display_name" //
+        + "   THEN UPDATE SET run_metadata.display_name = source.display_name" //
         + "     ,run_metadata.regular_match_play = source.regular_match_play" //
         + "     ,run_metadata.scoreboard_display = source.scoreboard_display" //
         + " WHEN NOT MATCHED" //
