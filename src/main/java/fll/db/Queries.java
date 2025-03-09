@@ -435,12 +435,11 @@ public final class Queries {
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
                                                                                 tournament.getTournamentID());
-    if (teamScore.getRunNumber() > numSeedingRounds) {
-
-      if (runningHeadToHead) {
+    if (runningHeadToHead) {
+      final boolean isPlayoffRound = Playoff.isPlayoffRound(connection, tournament, teamScore.getRunNumber());
+      if (isPlayoffRound) {
         if (verified) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Updating playoff score from insert");
@@ -456,7 +455,7 @@ public final class Queries {
           H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
                                            teamScore.getRunNumber());
         }
-      } // running head to head
+      }
     }
 
     if (tournamentData.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
@@ -585,10 +584,11 @@ public final class Queries {
       }
 
       // Check if we need to update the PlayoffData table
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
-      if (runNumber > numSeedingRounds) {
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
-        if (runningHeadToHead) {
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                  tournament.getTournamentID());
+      if (runningHeadToHead) {
+        final boolean isPlayoffRound = Playoff.isPlayoffRound(connection, tournament, teamScore.getRunNumber());
+        if (isPlayoffRound) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Updating playoff score from updatePerformanceScore");
           }
@@ -597,7 +597,7 @@ public final class Queries {
                                      tiebreakerElement, teamNumber, runNumber, teamScore);
         }
       }
-      
+
       if (tournamentData.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
         tournament.recordPerformanceSeedingModified(connection);
       }

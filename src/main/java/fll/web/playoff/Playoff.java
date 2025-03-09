@@ -739,6 +739,29 @@ public final class Playoff {
   }
 
   /**
+   * Check if a performance run number is pat of an initialized playoff bracket.
+   * 
+   * @param connection database
+   * @param tournament tournament
+   * @param runNumber performance run to check
+   * @return true if {code}runNumber{code} is part of an initialized playoff
+   *         bracket
+   */
+  public static boolean isPlayoffRound(final Connection connection,
+                                       final Tournament tournament,
+                                       final int runNumber)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT run_number FROM PlayoffData WHERE" //
+        + " tournament = ? and run_number = ? LIMIT 1")) {
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setInt(2, runNumber);
+      try (ResultSet rs = prep.executeQuery()) {
+        return rs.next();
+      }
+    }
+  }
+
+  /**
    * Compute the assignments to the initial playoff brackets.
    *
    * @param numTeams will be rounded up to the next power of 2
