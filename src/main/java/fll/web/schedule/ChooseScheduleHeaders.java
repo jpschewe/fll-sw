@@ -22,24 +22,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fll.Tournament;
-import fll.Utilities;
 import fll.db.CategoryColumnMapping;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.scheduler.SchedParams;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.StoreColumnNames;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
@@ -72,27 +67,12 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
-                                                                                        UploadScheduleData.class);
-
     @SuppressWarnings("unchecked") // cannot store generics in session
     final Collection<String> headerNames = SessionAttributes.getNonNullAttribute(session,
                                                                                  StoreColumnNames.HEADER_NAMES_KEY,
                                                                                  Collection.class);
 
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
-
-      final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
-      pageContext.setAttribute("numPracticeRounds", numPracticeRounds);
-
-      pageContext.setAttribute("TEAM_NUMBER_HEADER", TournamentSchedule.TEAM_NUMBER_HEADER);
-      pageContext.setAttribute("TEAM_NAME_HEADER", TournamentSchedule.TEAM_NAME_HEADER);
-      pageContext.setAttribute("ORGANIZATION_HEADER", TournamentSchedule.ORGANIZATION_HEADER);
-      pageContext.setAttribute("AWARD_GROUP_HEADER", TournamentSchedule.AWARD_GROUP_HEADER);
-      pageContext.setAttribute("JUDGE_GROUP_HEADER", TournamentSchedule.JUDGE_GROUP_HEADER);
-      pageContext.setAttribute("WAVE_HEADER", TournamentSchedule.WAVE_HEADER);
-
       for (final String header : headerNames) {
         if (TournamentSchedule.TEAM_NUMBER_HEADER.equals(header)) {
           pageContext.setAttribute("teamNumber_value", header);
@@ -121,39 +101,6 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       }
 
       computePerformanceRoundValues(pageContext, headerNames);
-
-      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-
-      final List<String> perfHeaders = new LinkedList<>();
-      final List<String> perfTableHeaders = new LinkedList<>();
-      for (int i = 0; i < uploadScheduleData.getNumPerformanceRuns(); ++i) {
-        final int roundNumber = i
-            + 1;
-        perfHeaders.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, roundNumber));
-        perfTableHeaders.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, roundNumber));
-      }
-      pageContext.setAttribute("perfHeaders",
-                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(perfHeaders)));
-      pageContext.setAttribute("perfTableHeaders",
-                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(perfTableHeaders)));
-      pageContext.setAttribute("BASE_PRACTICE_HEADER_SHORT", TournamentSchedule.BASE_PRACTICE_HEADER_SHORT);
-      pageContext.setAttribute("PRACTICE_TABLE_HEADER_FORMAT_SHORT",
-                               TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT_SHORT);
-      final List<String> practiceHeaders = new LinkedList<>();
-      final List<String> practiceTableHeaders = new LinkedList<>();
-      for (int i = 0; i < numPracticeRounds; ++i) {
-        final int roundNumber = i
-            + 1;
-        practiceHeaders.add(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
-        practiceTableHeaders.add(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
-      }
-      pageContext.setAttribute("practiceHeaders",
-                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(practiceHeaders)));
-      pageContext.setAttribute("practiceTableHeaders",
-                               WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(practiceTableHeaders)));
-
-    } catch (final JsonProcessingException e) {
-      throw new FLLInternalException("Error converting header arrays to JSON", e);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
@@ -225,11 +172,10 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
                                                                                         UploadScheduleData.class);
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(connection, tournament.getTournamentID());
-
       final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
 
       final @Nullable String[] headerLine = getHeaderLine(uploadScheduleData);
@@ -241,22 +187,19 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       final String judgingGroup = WebUtils.getNonNullRequestParameter(request, "judgingGroup");
       final String wave = WebUtils.getNonNullRequestParameter(request, "wave");
 
-      final String[] practiceColumn = new String[numPracticeRounds];
-      final String[] practiceTableColumn = new String[numPracticeRounds];
-      for (int i = 0; i < numPracticeRounds; ++i) {
-        final int round = i
-            + 1;
-        practiceColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("practice%d", round));
-        practiceTableColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("practiceTable%d", round));
-      }
-
       final String[] perfColumn = new String[uploadScheduleData.getNumPerformanceRuns()];
       final String[] perfTableColumn = new String[uploadScheduleData.getNumPerformanceRuns()];
       for (int i = 0; i < uploadScheduleData.getNumPerformanceRuns(); ++i) {
         final int round = i
             + 1;
-        perfColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perf%d", round));
-        perfTableColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perfTable%d", round));
+        perfColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_time", round));
+        perfTableColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_table", round));
+
+        final String displayName = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_name", round));
+        final boolean regularMatchPlay = null != request.getParameter(String.format("perf%d_regularMatchPlay", round));
+        final boolean scoreboardDisplay = null != request.getParameter(String.format("perf%d_scoreboard", round));
+        final RunMetadata runMetadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay);
+        tournamentData.storeRunMetadata(runMetadata);
       }
 
       final Collection<CategoryColumnMapping> subjectiveColumnMappings = new LinkedList<>();
@@ -284,7 +227,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
                                                                      : judgingGroup,
                                                                  StringUtils.isBlank(wave) ? null : wave,
                                                                  subjectiveColumnMappings, perfColumn, perfTableColumn,
-                                                                 practiceColumn, practiceTableColumn);
+                                                                 new String[0], new String[0]);
 
       uploadScheduleData.setColumnInformation(columnInfo);
 

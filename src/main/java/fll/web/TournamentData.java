@@ -91,20 +91,38 @@ public class TournamentData {
    * @return the metadata
    */
   public RunMetadata getRunMetadata(final int runNumber) {
+    synchronized (this) {
+      final Integer runNumberObj = Integer.valueOf(runNumber);
 
-    final Integer runNumberObj = Integer.valueOf(runNumber);
-
-    if (runMetadata.containsKey(runNumberObj)) {
-      return runMetadata.get(runNumberObj);
-    } else {
-      try (Connection connection = datasource.getConnection()) {
-        final RunMetadata data = RunMetadata.getFromDatabase(connection, getCurrentTournament(), runNumber);
-        runMetadata.put(runNumberObj, data);
-        return data;
-      } catch (final SQLException e) {
-        throw new FLLInternalException("Unable to get run metadata from database", e);
+      if (runMetadata.containsKey(runNumberObj)) {
+        return runMetadata.get(runNumberObj);
+      } else {
+        try (Connection connection = datasource.getConnection()) {
+          final RunMetadata data = RunMetadata.getFromDatabase(connection, getCurrentTournament(), runNumber);
+          runMetadata.put(runNumberObj, data);
+          return data;
+        } catch (final SQLException e) {
+          throw new FLLInternalException("Unable to get run metadata from database", e);
+        }
       }
     }
+  }
 
+  /**
+   * Store run metadata and update the cache.
+   * 
+   * @param metadata the new meta data
+   */
+  public void storeRunMetadata(final RunMetadata metadata) {
+    synchronized (this) {
+      // clear cache on write
+      this.runMetadata.put(metadata.getRunNumber(), metadata);
+
+      try (Connection connection = datasource.getConnection()) {
+        RunMetadata.storeToDatabase(connection, getCurrentTournament(), metadata);
+      } catch (final SQLException e) {
+        throw new FLLInternalException("Error storing run metadata to database", e);
+      }
+    }
   }
 }
