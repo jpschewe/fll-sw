@@ -434,6 +434,7 @@ public class FullTournamentTest {
 
       // accept default schedule constraints
       seleniumWait.until(ExpectedConditions.urlContains("scheduleConstraints"));
+      LOGGER.info("Setting number of performance runs to {}", String.valueOf(schedule.getTotalNumberOfRounds()));
       selenium.findElement(By.id("numPerformanceRuns")).sendKeys(String.valueOf(schedule.getTotalNumberOfRounds()));
       selenium.findElement(By.id("submit_data")).click();
 
