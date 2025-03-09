@@ -604,7 +604,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     final int numAwards = AwardsScript.getNumPerformanceAwards(connection, tournament);
 

@@ -33,7 +33,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Get top performance scores.
+ * Get top performance scores from regular match play.
  */
 @WebServlet("/api/TopPerformanceScores")
 public class TopPerformanceScores extends HttpServlet {
@@ -65,7 +65,7 @@ public class TopPerformanceScores extends HttpServlet {
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
 
-      final Map<String, List<ScoreEntry>> result = Top10.getTableAsMapByAwardGroup(connection, description);
+      final Map<String, List<ScoreEntry>> result = Top10.getTableAsMapByAwardGroup(connection, description, true, false);
       jsonMapper.writeValue(writer, result);
     } catch (final SQLException e) {
       throw new RuntimeException(e);

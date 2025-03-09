@@ -54,7 +54,7 @@ public class TopScoreReportPerJudgingStationPdf extends TopScoreReportPdf {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByJudgingStation(connection, description,
-                                                                                             tournament);
+                                                                                             tournament, true, false);
       outputReport(response.getOutputStream(), challengeDescription, tournament, "Judging Station", scores);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);

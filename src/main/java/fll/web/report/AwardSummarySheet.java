@@ -320,7 +320,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
     final Map<String, List<Top10.ScoreEntry>> performanceData = Top10.getTableAsMapByJudgingStation(connection,
                                                                                                     description,
-                                                                                                    tournament);
+                                                                                                    tournament, true,
+                                                                                                    false);
 
     final List<Top10.ScoreEntry> scores = performanceData.get(groupName);
     if (null == scores) {
