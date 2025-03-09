@@ -27,7 +27,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * PDF of top performance scores organized by judging station.
+ * PDF of top regular match play performance scores organized by judging
+ * station.
  */
 @WebServlet("/report/TopScoreReportPerJudgingStationPdf")
 public class TopScoreReportPerJudgingStationPdf extends TopScoreReportPdf {
