@@ -455,26 +455,14 @@ public class FullTournamentTest {
       new Select(selenium.findElement(By.name("judgingGroup"))).selectByVisibleText(TournamentSchedule.JUDGE_GROUP_HEADER);
       new Select(selenium.findElement(By.name("wave"))).selectByVisibleText(TournamentSchedule.WAVE_HEADER);
 
-      for (int i = 0; i < schedule.getNumberOfPracticeRounds(); ++i) {
-        final int round = i
-            + 1;
-        new Select(selenium.findElement(By.name(String.format("practice%d",
-                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT,
-                                                                                                          round));
-
-        new Select(selenium.findElement(By.name(String.format("practiceTable%d",
-                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT,
-                                                                                                          round));
-      }
-
       for (int i = 0; i < schedule.getNumberOfRegularMatchPlayRounds(); ++i) {
         final int round = i
             + 1;
-        new Select(selenium.findElement(By.name(String.format("perf%d",
+        new Select(selenium.findElement(By.name(String.format("perf%d_time",
                                                               round)))).selectByVisibleText(String.format(TournamentSchedule.PERF_HEADER_FORMAT,
                                                                                                           round));
 
-        new Select(selenium.findElement(By.name(String.format("perfTable%d",
+        new Select(selenium.findElement(By.name(String.format("perf%d_table",
                                                               round)))).selectByVisibleText(String.format(TournamentSchedule.TABLE_HEADER_FORMAT,
                                                                                                           round));
       }
