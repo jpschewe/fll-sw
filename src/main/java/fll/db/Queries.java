@@ -457,7 +457,9 @@ public final class Queries {
                                            teamScore.getRunNumber());
         }
       } // running head to head
-    } else {
+    }
+
+    if (tournamentData.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
       tournament.recordPerformanceSeedingModified(connection);
     }
 
@@ -594,9 +596,12 @@ public final class Queries {
           Playoff.updatePlayoffScore(connection, currentTournament, winnerCriteria, performanceElement,
                                      tiebreakerElement, teamNumber, runNumber, teamScore);
         }
-      } else {
+      }
+      
+      if (tournamentData.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
         tournament.recordPerformanceSeedingModified(connection);
       }
+
     }
 
     // notify that there may be more runs to verify
