@@ -280,7 +280,8 @@ public final class Queries {
    * 
    * @param connection database connection
    * @param teamNumber team number
-   * @return the highest run number that the team has completed
+   * @return the highest run number that the team has completed at the current
+   *         tournament
    * @throws SQLException on a database error
    */
   public static int getMaxRunNumber(final Connection connection,
@@ -310,7 +311,7 @@ public final class Queries {
    * 
    * @param connection database connection
    * @param tournament the tournament to check
-   * @return the highest run number that the team has completed
+   * @return the highest run number that any team has completed
    * @throws SQLException on a database error
    */
   public static int getMaxRunNumber(final Connection connection,
