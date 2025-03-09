@@ -62,9 +62,6 @@ public class TestPlayoffs {
             + teamNumber, "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
 
-      // set seeding rounds to 1
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, seleniumWait, 1);
-
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
         enterTeamScore(selenium, seleniumWait, teamNumber);

@@ -894,29 +894,6 @@ public final class IntegrationTestUtils {
   }
 
   /**
-   * Change the number of seeding rounds for the current tournament.
-   *
-   * @param selenium the driver
-   * @param seleniumWait wait for elements
-   * @param newValue the new value
-   * @throws NoSuchElementException if there was a problem changing the value
-   * @throws IOException if there is an error talking to selenium
-   */
-  public static void changeNumSeedingRounds(final WebDriver selenium,
-                                            final WebDriverWait seleniumWait,
-                                            final int newValue)
-      throws NoSuchElementException, IOException {
-    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/edit_tournament_parameters.jsp");
-
-    selenium.findElement(By.id("seeding_rounds")).sendKeys(String.valueOf(newValue));
-
-    selenium.findElement(By.id("submit_data")).click();
-
-    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
-  }
-
-  /**
    * Get the id of the current tournament.
    *
    * @param seleniumWait wait for elements
@@ -1203,59 +1180,6 @@ public final class IntegrationTestUtils {
     if (runningHeadToHead != element.isSelected()) {
       element.click();
     }
-
-    selenium.findElement(By.id("submit_data")).click();
-
-    assertNotNull(selenium.findElement(By.id("success")));
-  }
-
-  /**
-   * Set the number of regular match play rounds tournament parameter. Make sure
-   * that the
-   * current
-   * tournament is set before calling this method.
-   *
-   * @param selenium the web driver
-   * @param seleniumWait wait for elements
-   * @param numRounds the value to use
-   * @throws IOException see {@link #loadPage(WebDriver, WebDriverWait, String)}
-   */
-  public static void setNumRegularMatchPlayRounds(final WebDriver selenium,
-                                                  final WebDriverWait seleniumWait,
-                                                  final int numRounds)
-      throws IOException {
-    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/edit_tournament_parameters.jsp");
-
-    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("seeding_rounds")));
-    element.clear();
-    element.sendKeys(String.valueOf(numRounds));
-
-    selenium.findElement(By.id("submit_data")).click();
-
-    assertNotNull(selenium.findElement(By.id("success")));
-  }
-
-  /**
-   * Set the number of practice rounds tournament parameter. Make sure that the
-   * current
-   * tournament is set before calling this method.
-   *
-   * @param selenium the web driver
-   * @param seleniumWait wait for elements
-   * @param numRounds the value to use
-   * @throws IOException see {@link #loadPage(WebDriver, WebDriverWait, String)}
-   */
-  public static void setNumPracticeRounds(final WebDriver selenium,
-                                          final WebDriverWait seleniumWait,
-                                          final int numRounds)
-      throws IOException {
-    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/edit_tournament_parameters.jsp");
-
-    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("practice_rounds")));
-    element.clear();
-    element.sendKeys(String.valueOf(numRounds));
 
     selenium.findElement(By.id("submit_data")).click();
 

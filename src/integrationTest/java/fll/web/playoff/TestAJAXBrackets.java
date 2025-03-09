@@ -117,8 +117,6 @@ public class TestAJAXBrackets {
       selenium.findElement(By.name("SideB1")).sendKeys("Table 2");
       selenium.findElement(By.id("finished")).click();
 
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, seleniumWait, 0);
-
       IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, true);
 
       // init brackets

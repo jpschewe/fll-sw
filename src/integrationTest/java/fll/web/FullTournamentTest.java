@@ -211,9 +211,6 @@ public class FullTournamentTest {
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(testDataConn,
                                                                           sourceTournament.getTournamentID());
 
-    final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(testDataConn,
-                                                                            sourceTournament.getTournamentID());
-
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(testDataConn,
                                                                                 sourceTournament.getTournamentID());
 
@@ -234,12 +231,6 @@ public class FullTournamentTest {
 
     LOGGER.info("Setting head to head parameter");
     IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, runningHeadToHead);
-
-    LOGGER.info("Setting number of regular match play rounds");
-    IntegrationTestUtils.setNumRegularMatchPlayRounds(selenium, seleniumWait, numSeedingRounds);
-
-    LOGGER.info("Setting number of practice rounds");
-    IntegrationTestUtils.setNumPracticeRounds(selenium, seleniumWait, numPracticeRounds);
 
     LOGGER.info("Loading the schedule");
     uploadSchedule(selenium, seleniumWait, testDataConn, sourceTournament, outputDirectory);
