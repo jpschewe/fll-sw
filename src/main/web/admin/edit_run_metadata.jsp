@@ -24,8 +24,11 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
         <%-- clear out the message, so that we don't see it again --%>
         <c:remove var="message" />
 
-        <div>Editing performance run information for
-            ${tournamentData.currentTournament.description}</div>
+        <p>Editing performance run information for
+            ${tournamentData.currentTournament.description}.</p>
+        <p>All runs must have a display name. Runs cannot be deleted
+            if they have performance scores, are in the schedule, are
+            not the last known run.</p>
 
         <!-- ${canDelete} -->
         <form name='edit_run_metadata' id='edit_run_metadata'

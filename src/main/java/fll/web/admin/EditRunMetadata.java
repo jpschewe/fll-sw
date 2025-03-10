@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.MissingFormatArgumentException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -87,8 +86,19 @@ public class EditRunMetadata extends BaseFLLServlet {
     // delete in reverse order so that it doesn't fail from trying to delete and
     // leave a gap
     Collections.sort(toDelete, Collections.reverseOrder());
-    for (final Integer round : toDelete) {
-      tournamentData.deleteRunMetadata(round);
+    try (Connection connection = tournamentData.getDataSource().getConnection()) {
+      for (final Integer round : toDelete) {
+        if (!RunMetadata.canDelete(connection, tournamentData.getCurrentTournament(), round)) {
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<p class='error'>Cannot delete metadata for run %d.</p>"));
+          response.sendRedirect(response.encodeRedirectURL("edit_run_metadata.jsp"));
+          return;
+        } else {
+          tournamentData.deleteRunMetadata(round);
+        }
+      }
+    } catch (final SQLException e) {
+      throw new FLLInternalException("Error checking if run metadata can be deleted", e);
     }
 
     for (int round = 1; round < Integer.MAX_VALUE; ++round) {
@@ -104,8 +114,11 @@ public class EditRunMetadata extends BaseFLLServlet {
         break;
       } else {
         if (StringUtils.isBlank(displayName)) {
-          throw new MissingFormatArgumentException(String.format("Round %d has an empty display name, this is not allowed, all rounds must have a display name",
-                                                                 round));
+          SessionAttributes.appendToMessage(session,
+                                            String.format(String.format("<p class='error'>Round %d has an empty display name, this is not allowed, all rounds must have a display name.</p>",
+                                                                        round)));
+          response.sendRedirect(response.encodeRedirectURL("edit_run_metadata.jsp"));
+          return;
         }
 
         final boolean regularMatchPlay = null != request.getParameter(String.format("%d_regularMatchPlay", round));
