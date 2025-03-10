@@ -9,6 +9,8 @@ package fll.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -52,7 +54,7 @@ public class TournamentData {
   public Tournament getCurrentTournament() {
     synchronized (this) {
       if (null == currentTournament) {
-        try (Connection connection = datasource.getConnection()) {
+        try (Connection connection = getDataSource().getConnection()) {
           currentTournament = Tournament.getCurrentTournament(connection);
           return currentTournament;
         } catch (final SQLException e) {
@@ -71,7 +73,7 @@ public class TournamentData {
    */
   public void setCurrentTournament(final Tournament tournament) {
     synchronized (this) {
-      try (Connection connection = datasource.getConnection()) {
+      try (Connection connection = getDataSource().getConnection()) {
         Queries.setCurrentTournament(connection, tournament.getTournamentID());
         currentTournament = tournament;
 
@@ -97,7 +99,7 @@ public class TournamentData {
       if (runMetadata.containsKey(runNumberObj)) {
         return runMetadata.get(runNumberObj);
       } else {
-        try (Connection connection = datasource.getConnection()) {
+        try (Connection connection = getDataSource().getConnection()) {
           final RunMetadata data = RunMetadata.getFromDatabase(connection, getCurrentTournament(), runNumber);
           runMetadata.put(runNumberObj, data);
           return data;
@@ -106,6 +108,24 @@ public class TournamentData {
         }
       }
     }
+  }
+
+  /**
+   * @return the metadata for all runs that any team has completed, sorted by
+   *         round
+   */
+  public List<RunMetadata> getAllRunMetadata() {
+    final List<RunMetadata> allMetadata = new LinkedList<>();
+    try (Connection connection = getDataSource().getConnection()) {
+      final int maxPerfRounds = Queries.getMaxRunNumber(connection, getCurrentTournament());
+      for (int round = 1; round <= maxPerfRounds; ++round) {
+        final RunMetadata metadata = getRunMetadata(round);
+        allMetadata.add(metadata);
+      }
+    } catch (final SQLException e) {
+      throw new FLLInternalException("Error getting maximum number of performance rounds", e);
+    }
+    return allMetadata;
   }
 
   /**
@@ -118,11 +138,24 @@ public class TournamentData {
       // clear cache on write
       this.runMetadata.put(metadata.getRunNumber(), metadata);
 
-      try (Connection connection = datasource.getConnection()) {
+      try (Connection connection = getDataSource().getConnection()) {
         RunMetadata.storeToDatabase(connection, getCurrentTournament(), metadata);
       } catch (final SQLException e) {
         throw new FLLInternalException("Error storing run metadata to database", e);
       }
+    }
+  }
+
+  public void deleteRunMetadata(final int runNumber) {
+    synchronized (this) {
+      this.runMetadata.remove(runNumber);
+
+      try (Connection connection = getDataSource().getConnection()) {
+        RunMetadata.deleteFromDatabase(connection, getCurrentTournament(), runNumber);
+      } catch (final SQLException e) {
+        throw new FLLInternalException("Error delete run metadata", e);
+      }
+
     }
   }
 }

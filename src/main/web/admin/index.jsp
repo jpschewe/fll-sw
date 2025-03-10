@@ -401,6 +401,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a href="<c:url value='/admin/edit_run_metadata.jsp'/>">Edit
+                Performance Run Data</a>
+        </li>
+
+        <li>
             <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
                 delay of displaying performance scores</a>
         </li>
