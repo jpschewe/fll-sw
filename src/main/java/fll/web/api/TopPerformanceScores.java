@@ -39,8 +39,7 @@ import jakarta.servlet.http.HttpSession;
 public class TopPerformanceScores extends HttpServlet {
 
   /**
-   * @see Top10#getTableAsMapByAwardGroup(Connection,
-   *      fll.xml.ChallengeDescription)
+   * @see Top10#getTableAsMapByAwardGroup(Connection, ChallengeDescription, boolean, boolean)
    */
   @Override
   protected final void doGet(final HttpServletRequest request,

@@ -29,7 +29,7 @@ public class RunMetadata {
    * @param runNumber {@link #getRunNumber()}
    * @param displayName {@link #getDisplayName()}
    * @param regularMatchPlay {@link #isRegularMatchPlay()}
-   * @param scoreboardDisplay {@Link #isScoreboardDisplay()}
+   * @param scoreboardDisplay {@link #isScoreboardDisplay()}
    */
   public RunMetadata(final int runNumber,
                      final String displayName,
