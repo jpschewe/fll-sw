@@ -118,7 +118,9 @@ public class TournamentData {
     final List<RunMetadata> allMetadata = new LinkedList<>();
     try (Connection connection = getDataSource().getConnection()) {
       final int maxPerfRounds = Queries.getMaxRunNumber(connection, getCurrentTournament());
-      for (int round = 1; round <= maxPerfRounds; ++round) {
+      final int maxMetadataRound = RunMetadata.getMaxRunNumber(connection, getCurrentTournament());
+
+      for (int round = 1; round <= Math.max(maxPerfRounds, maxMetadataRound); ++round) {
         final RunMetadata metadata = getRunMetadata(round);
         allMetadata.add(metadata);
       }

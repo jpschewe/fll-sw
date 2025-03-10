@@ -24,6 +24,7 @@ import fll.db.RunMetadata;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -71,7 +72,7 @@ public class EditRunMetadata extends BaseFLLServlet {
       throws IOException, ServletException {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
 
-    // FIXME check for deletes first and do from top down
+    // check for deletes first and do from top down
     final List<Integer> toDelete = new LinkedList<>();
     for (int round = 1; round < Integer.MAX_VALUE; ++round) {
       final @Nullable String displayName = request.getParameter(String.format("%d_name", round));
@@ -114,6 +115,8 @@ public class EditRunMetadata extends BaseFLLServlet {
       }
     }
 
+    SessionAttributes.appendToMessage(session, "<p id='success'>Performance Run Data saved</p>");
+    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
 }

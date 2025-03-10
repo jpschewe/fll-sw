@@ -167,6 +167,29 @@ public class RunMetadata {
   /**
    * @param connection database
    * @param tournament tournament
+   * @return maximum run number that metadata has been stored for
+   * @throws SQLException on a database error
+   */
+  public static int getMaxRunNumber(final Connection connection,
+                                    final Tournament tournament)
+      throws SQLException {
+    try (
+        PreparedStatement findMax = connection.prepareStatement("SELECT MAX(run_number) FROM run_metadata WHERE tournament_id = ?")) {
+      findMax.setInt(1, tournament.getTournamentID());
+      try (ResultSet rs = findMax.executeQuery()) {
+        if (rs.next()) {
+          final int maxKnown = rs.getInt(1);
+          return maxKnown;
+        } else {
+          return 0;
+        }
+      }
+    }
+  }
+
+  /**
+   * @param connection database
+   * @param tournament tournament
    * @param runNumber run number to check
    * @return true if the metadata for this run can be deleted
    * @throws SQLException on a database error
@@ -177,18 +200,10 @@ public class RunMetadata {
       throws SQLException {
 
     // check that this is the maximum run we know about
-    try (
-        PreparedStatement checkLast = connection.prepareStatement("SELECT MAX(run_number) FROM run_metadata WHERE tournament_id = ?")) {
-      checkLast.setInt(1, tournament.getTournamentID());
-      try (ResultSet rs = checkLast.executeQuery()) {
-        if (rs.next()) {
-          final int maxKnown = rs.getInt(1);
-          if (runNumber < maxKnown) {
-            LOGGER.warn("Can only delete metadata for the maximum run known. Run: {} max run: {}", runNumber, maxKnown);
-            return false;
-          }
-        }
-      }
+    final int maxKnown = getMaxRunNumber(connection, tournament);
+    if (runNumber < maxKnown) {
+      LOGGER.warn("Can only delete metadata for the maximum run known. Run: {} max run: {}", runNumber, maxKnown);
+      return false;
     }
 
     // check that it isn't in the schedule
@@ -252,7 +267,7 @@ public class RunMetadata {
       }
 
       try (
-          PreparedStatement delete = connection.prepareStatement("DELETE FROM run_metadata WHERE tournament = ? AND run_number = ?")) {
+          PreparedStatement delete = connection.prepareStatement("DELETE FROM run_metadata WHERE tournament_id = ? AND run_number = ?")) {
         delete.setInt(1, tournament.getTournamentID());
         delete.setInt(2, runNumber);
         delete.executeUpdate();
