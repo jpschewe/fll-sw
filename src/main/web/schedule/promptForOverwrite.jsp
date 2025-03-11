@@ -4,13 +4,13 @@
 
 <html>
 <head>
-<title>Upload Schedule</title>
+<title>Overwrite Schedule?</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
-    <h1>Upload Schedule</h1>
+    <h1>Overwrite Schedule?</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>

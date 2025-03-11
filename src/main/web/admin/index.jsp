@@ -221,7 +221,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <input type="file" size="32" id='scheduleFile'
                     name="file" />
                 <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/schedule/CheckScheduleExists'/>" />
+                    value="<c:url value='/schedule/CheckPerformanceScoresExist'/>" />
                 <input id="upload-schedule" type="submit"
                     value="Upload Schedule" />
             </form>
