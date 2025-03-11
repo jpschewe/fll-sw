@@ -191,20 +191,13 @@ public class RunMetadata {
    * @param connection database
    * @param tournament tournament
    * @param runNumber run number to check
-   * @return true if the metadata for this run can be deleted
+   * @return true if the metadata for this run can potentially be deleted
    * @throws SQLException on a database error
    */
   public static boolean canDelete(final Connection connection,
                                   final Tournament tournament,
                                   final int runNumber)
       throws SQLException {
-
-    // check that this is the maximum run we know about
-    final int maxKnown = getMaxRunNumber(connection, tournament);
-    if (runNumber < maxKnown) {
-      LOGGER.warn("Can only delete metadata for the maximum run known. Run: {} max run: {}", runNumber, maxKnown);
-      return false;
-    }
 
     // check that it isn't in the schedule
     try (
@@ -260,6 +253,13 @@ public class RunMetadata {
 
     try {
       connection.setAutoCommit(false);
+
+      // check that this is the maximum run we know about
+      final int maxKnown = getMaxRunNumber(connection, tournament);
+      if (runNumber < maxKnown) {
+        throw new FLLRuntimeException(String.format("Can only delete metadata for the maximum run known. Run: %d max run: %d",
+                                                    runNumber, maxKnown));
+      }
 
       if (!canDelete(connection, tournament, runNumber)) {
         throw new FLLRuntimeException(String.format("The metadata for run %d cannot be deleted and maintain consistency of the database",

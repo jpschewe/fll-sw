@@ -88,6 +88,15 @@ public class EditRunMetadata extends BaseFLLServlet {
     Collections.sort(toDelete, Collections.reverseOrder());
     try (Connection connection = tournamentData.getDataSource().getConnection()) {
       for (final Integer round : toDelete) {
+        final int maxKnown = RunMetadata.getMaxRunNumber(connection, tournamentData.getCurrentTournament());
+        if (round < maxKnown) {
+          SessionAttributes.appendToMessage(session,
+                                            String.format("<p class='error'>Can only delete metadata for the maximum run known. Run: %d max run: %d</p>",
+                                                          round, maxKnown));
+          response.sendRedirect(response.encodeRedirectURL("edit_run_metadata.jsp"));
+          return;
+        }
+
         if (!RunMetadata.canDelete(connection, tournamentData.getCurrentTournament(), round)) {
           SessionAttributes.appendToMessage(session,
                                             String.format("<p class='error'>Cannot delete metadata for run %d.</p>"));

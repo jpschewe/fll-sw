@@ -12,6 +12,11 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
+<script type='text/javascript'
+    src='<c:url value="/js/fll-functions.js" />'></script>
+
+<script type='text/javascript' src='edit_run_metadata.js'></script>
+
 </head>
 
 <body>
@@ -34,7 +39,7 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
         <form name='edit_run_metadata' id='edit_run_metadata'
             action='EditRunMetadata' method='POST'>
 
-            <table class='center'>
+            <table class='center' id='run_metadata_table'>
                 <tr>
                     <th>Run</th>
                     <th>Display Name</th>
@@ -105,6 +110,7 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
 
             </table>
 
+            <button type='button' id='addRow'>Add Row</button>
 
             <input type="submit" id='submit_data' name='submit_data'
                 value='Submit' />
