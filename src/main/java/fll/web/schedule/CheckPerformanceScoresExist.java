@@ -7,6 +7,7 @@
 package fll.web.schedule;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,9 +39,8 @@ public class CheckPerformanceScoresExist extends BaseFLLServlet {
 
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
 
-    try (
-        PreparedStatement checkPerf = tournamentData.getDataSource().getConnection()
-                                                    .prepareStatement("SELECT COUNT(*) FROM performance where tournament = ?")) {
+    try (Connection connection = tournamentData.getDataSource().getConnection();
+        PreparedStatement checkPerf = connection.prepareStatement("SELECT COUNT(*) FROM performance where tournament = ?")) {
       checkPerf.setInt(1, tournamentData.getCurrentTournament().getTournamentID());
       try (ResultSet rs = checkPerf.executeQuery()) {
         final boolean havePerformanceScores;
