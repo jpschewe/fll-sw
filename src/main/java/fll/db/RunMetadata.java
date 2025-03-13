@@ -104,12 +104,10 @@ public class RunMetadata {
    * @param tournament tournament
    * @param runNumber internal performance run number
    * @return metadata for the run
-   * @throws SQLException on a database error
    */
   public static RunMetadata getFromDatabase(final Connection connection,
                                             final Tournament tournament,
-                                            final int runNumber)
-      throws SQLException {
+                                            final int runNumber) {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT display_name, regular_match_play, scoreboard_display" //
             + " FROM run_metadata" //
@@ -123,14 +121,16 @@ public class RunMetadata {
           final boolean scoreboardDisplay = rs.getBoolean(3);
           final RunMetadata runMetadata = new RunMetadata(runNumber, displayName, regularMatchPlay, scoreboardDisplay);
           return runMetadata;
-        } else {
-          // TODO what to do if not found
-          // Synthesize it to be "Run #", regular=false,
-          // scoreboard=true
-          return new RunMetadata(runNumber, String.format("Run %d", runNumber), false, true);
         }
       }
+    } catch (final SQLException e) {
+      LOGGER.error("Error getting run metadata from database, synthesizing best guess data", e);
     }
+
+    // TODO what to do if not found or a database error
+    // Synthesize it to be "Run #", regular=false,
+    // scoreboard=true
+    return new RunMetadata(runNumber, String.format("Run %d", runNumber), false, true);
   }
 
   /**
