@@ -105,6 +105,10 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
                                         disabled />
                                 </c:otherwise>
                             </c:choose>
+                            <input type='hidden'
+                                name='${runMetadata.runNumber}_head2head'
+                                value='${runMetadata.headToHead}' />
+                        </td>
                     </tr>
                 </c:forEach>
 

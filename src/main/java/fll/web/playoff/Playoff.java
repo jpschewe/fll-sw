@@ -381,7 +381,7 @@ public final class Playoff {
                                           final int playoffRound)
       throws SQLException {
     final RunMetadata metadata = new RunMetadata(runNumber, String.format("%s P%d", playoffBracketName, playoffRound),
-                                                 false, true);
+                                                 false, true, true);
     RunMetadata.storeToDatabase(connection, tournament, metadata);
   }
 

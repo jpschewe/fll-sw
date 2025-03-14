@@ -25,7 +25,6 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.RunMetadata;
-import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -109,7 +108,7 @@ public class SubmitScoreEntry extends HttpServlet {
 
       final boolean deleteScore = Boolean.valueOf(formData.get("delete"));
       if (deleteScore) {
-        Queries.deletePerformanceScore(connection, teamNumber, runNumber);
+        Queries.deletePerformanceScore(tournamentData, connection, teamNumber, runNumber);
 
         final String message = String.format("<div class='success'>Deleted score for team %d run %d</div>", teamNumber,
                                              runNumber);
@@ -144,12 +143,9 @@ public class SubmitScoreEntry extends HttpServlet {
           final ApiResult result = new ApiResult(false, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         } else {
-          final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
-                                                                                      tournament.getTournamentID());
           final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
           final String roundText;
-          if (runningHeadToHead
-              && !runMetadata.isRegularMatchPlay()) {
+          if (runMetadata.isHeadToHead()) {
             final String division = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(), teamNumber,
                                                                runNumber);
             final int playoffRun = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), division,

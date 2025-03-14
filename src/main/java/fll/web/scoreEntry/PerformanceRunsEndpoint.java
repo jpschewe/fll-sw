@@ -255,7 +255,6 @@ public class PerformanceRunsEndpoint {
       return new PerformanceRunsEndpoint.SelectTeamData(team, nextPerformance, nextRunNumber,
                                                         runMetadata.getDisplayName());
     } else {
-
       final String nextTableAndSide = getNextTableAndSide(connection, tournament, team.getTeamNumber(), nextRunNumber);
 
       try {
@@ -264,7 +263,8 @@ public class PerformanceRunsEndpoint {
                                                  .findFirst() //
                                                  .orElse("");
         final String runNumberDisplay;
-        if (!playoffBracketName.isEmpty()) {
+        if (runMetadata.isHeadToHead()
+            && !playoffBracketName.isEmpty()) {
           final int playoffMatch = Playoff.getPlayoffMatch(connection, tournament.getTournamentID(), playoffBracketName,
                                                            nextRunNumber);
           runNumberDisplay = String.format("%s M%d", runMetadata.getDisplayName(), playoffMatch);

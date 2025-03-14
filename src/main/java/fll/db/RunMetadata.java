@@ -30,15 +30,18 @@ public class RunMetadata {
    * @param displayName {@link #getDisplayName()}
    * @param regularMatchPlay {@link #isRegularMatchPlay()}
    * @param scoreboardDisplay {@link #isScoreboardDisplay()}
+   * @param headToHead {@link #isHeadToHead()}
    */
   public RunMetadata(final int runNumber,
                      final String displayName,
                      final boolean regularMatchPlay,
-                     final boolean scoreboardDisplay) {
+                     final boolean scoreboardDisplay,
+                     final boolean headToHead) {
     this.runNumber = runNumber;
     this.displayName = displayName;
     this.regularMatchPlay = regularMatchPlay;
     this.scoreboardDisplay = scoreboardDisplay;
+    this.headToHead = headToHead;
   }
 
   /**
@@ -77,6 +80,15 @@ public class RunMetadata {
 
   private boolean scoreboardDisplay;
 
+  private final boolean headToHead;
+
+  /**
+   * @return true if this is a run in a head to head bracket
+   */
+  public boolean isHeadToHead() {
+    return headToHead;
+  }
+
   @Override
   public int hashCode() {
     return runNumber;
@@ -109,7 +121,7 @@ public class RunMetadata {
                                             final Tournament tournament,
                                             final int runNumber) {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT display_name, regular_match_play, scoreboard_display" //
+        PreparedStatement prep = connection.prepareStatement("SELECT display_name, regular_match_play, scoreboard_display, head_to_head" //
             + " FROM run_metadata" //
             + " WHERE tournament_id = ? and run_number = ?")) {
       prep.setInt(1, tournament.getTournamentID());
@@ -119,7 +131,9 @@ public class RunMetadata {
           final String displayName = castNonNull(rs.getString(1));
           final boolean regularMatchPlay = rs.getBoolean(2);
           final boolean scoreboardDisplay = rs.getBoolean(3);
-          final RunMetadata runMetadata = new RunMetadata(runNumber, displayName, regularMatchPlay, scoreboardDisplay);
+          final boolean head2Head = rs.getBoolean(4);
+          final RunMetadata runMetadata = new RunMetadata(runNumber, displayName, regularMatchPlay, scoreboardDisplay,
+                                                          head2Head);
           return runMetadata;
         }
       }
@@ -127,10 +141,18 @@ public class RunMetadata {
       LOGGER.error("Error getting run metadata from database, synthesizing best guess data", e);
     }
 
+    boolean runningHeadToHead;
+    try {
+      runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID());
+    } catch (final SQLException e) {
+      LOGGER.error("Error checking if tournament is running head to head, defaulting to false", e);
+      runningHeadToHead = false;
+    }
+
     // TODO what to do if not found or a database error
     // Synthesize it to be "Run #", regular=false,
     // scoreboard=true
-    return new RunMetadata(runNumber, String.format("Run %d", runNumber), false, true);
+    return new RunMetadata(runNumber, String.format("Run %d", runNumber), false, true, runningHeadToHead);
   }
 
   /**
@@ -145,21 +167,23 @@ public class RunMetadata {
       throws SQLException {
     // update or insert based on tournament and run number
     try (PreparedStatement prep = connection.prepareStatement("MERGE INTO run_metadata" //
-        + " USING (VALUES (?, ?, ?, ?, ?)) AS source(tournament_id, run_number, display_name, regular_match_play, scoreboard_display)" //
+        + " USING (VALUES (?, ?, ?, ?, ?, ?)) AS source(tournament_id, run_number, display_name, regular_match_play, scoreboard_display, head_to_head)" //
         + "   ON run_metadata.tournament_id = source.tournament_id AND run_metadata.run_number = source.run_number" //
         + " WHEN MATCHED" //
         + "   THEN UPDATE SET run_metadata.display_name = source.display_name" //
         + "     ,run_metadata.regular_match_play = source.regular_match_play" //
         + "     ,run_metadata.scoreboard_display = source.scoreboard_display" //
+        + "     ,run_metadata.head_to_head = source.head_to_head" //
         + " WHEN NOT MATCHED" //
-        + "   THEN INSERT (tournament_id, run_number, display_name, regular_match_play, scoreboard_display)" //
-        + "     VALUES (source.tournament_id, source.run_number, source.display_name, source.regular_match_play, source.scoreboard_display)" //
+        + "   THEN INSERT (tournament_id, run_number, display_name, regular_match_play, scoreboard_display, head_to_head)" //
+        + "     VALUES (source.tournament_id, source.run_number, source.display_name, source.regular_match_play, source.scoreboard_display, source.head_to_head)" //
     )) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setInt(2, metadata.getRunNumber());
       prep.setString(3, metadata.getDisplayName());
       prep.setBoolean(4, metadata.isRegularMatchPlay());
       prep.setBoolean(5, metadata.isScoreboardDisplay());
+      prep.setBoolean(6, metadata.isHeadToHead());
       prep.executeUpdate();
     }
   }

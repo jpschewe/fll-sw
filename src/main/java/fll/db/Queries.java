@@ -614,26 +614,26 @@ public final class Queries {
   /**
    * Delete a performance score in the database in the current tournament.
    *
+   * @param tournamentData stored tournament data
    * @param connection database connection
    * @param teamNumber team to delete the score for
    * @param runNumber run number to delete
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
-  public static void deletePerformanceScore(final Connection connection,
+  public static void deletePerformanceScore(final TournamentData tournamentData,
+                                            final Connection connection,
                                             final int teamNumber,
                                             final int runNumber)
       throws SQLException {
-    final int currentTournament = getCurrentTournament(connection);
+    final Tournament currentTournament = tournamentData.getCurrentTournament();
+    final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
 
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
-    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
-
-    final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
-    final String division = runningHeadToHead
-        && runNumber > numSeedingRounds
-            ? Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber)
-            : "not in playoffs or no playoffs";
+    final int dbLine = getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), teamNumber,
+                                                 runNumber);
+    final String division = runMetadata.isHeadToHead()
+        ? Playoff.getPlayoffDivision(connection, currentTournament.getTournamentID(), teamNumber, runNumber)
+        : "not in playoffs or no playoffs";
 
     // Check if we need to update the PlayoffData table
     try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM Performance" //
@@ -641,24 +641,24 @@ public final class Queries {
         + " AND RunNumber > ?" //
         + " AND Tournament = ?")) {
 
-      if (runNumber > numSeedingRounds) {
+      if (runMetadata.isHeadToHead()) {
         if (dbLine > 0) {
           final int siblingDbLine = dbLine
               % 2 == 0 ? dbLine
                   - 1
                   : dbLine
                       + 1;
-          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingDbLine,
-                                                             runNumber);
+          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament.getTournamentID(), division,
+                                                             siblingDbLine, runNumber);
 
           if (siblingTeam != Team.NULL_TEAM_NUMBER) {
             // See if either teamNumber or siblingTeam has a score entered in
             // subsequent rounds
-            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber
+            if (getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), teamNumber, runNumber
                 + 1) > 0) {
               prep.setInt(1, teamNumber);
               prep.setInt(2, runNumber);
-              prep.setInt(3, currentTournament);
+              prep.setInt(3, currentTournament.getTournamentID());
               try (ResultSet rs = prep.executeQuery()) {
                 if (rs.next()) {
                   throw new RuntimeException("Unable to delete score for team number "
@@ -672,11 +672,11 @@ public final class Queries {
               }
             }
             if (siblingTeam != Team.BYE_TEAM_NUMBER
-                && getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
+                && getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), siblingTeam, runNumber
                     + 1) > 0) {
               prep.setInt(1, siblingTeam);
               prep.setInt(2, runNumber);
-              prep.setInt(3, currentTournament);
+              prep.setInt(3, currentTournament.getTournamentID());
               try (ResultSet rs = prep.executeQuery()) {
                 if (rs.next()) {
                   throw new RuntimeException("Unable to delete score for team number "
@@ -708,13 +708,13 @@ public final class Queries {
         + " WHERE Tournament = ?"
         + " AND TeamNumber = ?"
         + " AND RunNumber = ?")) {
-      deletePrep.setInt(1, currentTournament);
+      deletePrep.setInt(1, currentTournament.getTournamentID());
       deletePrep.setInt(2, teamNumber);
       deletePrep.setInt(3, runNumber);
 
       deletePrep.executeUpdate();
 
-      if (runNumber > numSeedingRounds) {
+      if (runMetadata.isHeadToHead()) {
         final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
         final PerformanceScoreCategory performance = description.getPerformance();
         final ScoreType performanceScoreType = performance.getScoreType();
@@ -723,7 +723,7 @@ public final class Queries {
 
         // if the delete of the performance score succeeded it's save to remove the
         // information from the playoff table
-        Playoff.removePlayoffScore(connection, division, currentTournament, runNumber, dbLine);
+        Playoff.removePlayoffScore(connection, division, currentTournament.getTournamentID(), runNumber, dbLine);
 
         // update the display for the deleted score
         H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, runNumber);

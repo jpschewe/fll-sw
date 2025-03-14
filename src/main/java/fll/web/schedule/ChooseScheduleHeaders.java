@@ -198,7 +198,8 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         final String displayName = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_name", round));
         final boolean regularMatchPlay = null != request.getParameter(String.format("perf%d_regularMatchPlay", round));
         final boolean scoreboardDisplay = null != request.getParameter(String.format("perf%d_scoreboard", round));
-        final RunMetadata runMetadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay);
+        // head to head runs are never scheduled
+        final RunMetadata runMetadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay, false);
         tournamentData.storeRunMetadata(runMetadata);
       }
 

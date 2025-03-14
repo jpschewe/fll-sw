@@ -132,7 +132,11 @@ public class EditRunMetadata extends BaseFLLServlet {
 
         final boolean regularMatchPlay = null != request.getParameter(String.format("%d_regularMatchPlay", round));
         final boolean scoreboardDisplay = null != request.getParameter(String.format("%d_scoreboardDisplay", round));
-        final RunMetadata metadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay);
+        // headToHead may be specified as a true or false value, or may not be there at
+        // all (false)
+        final boolean headToHead = Boolean.valueOf(request.getParameter(String.format("%d_head2head", round)));
+        final RunMetadata metadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay,
+                                                     headToHead);
         tournamentData.storeRunMetadata(metadata);
       }
     }

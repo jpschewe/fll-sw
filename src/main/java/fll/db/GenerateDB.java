@@ -1613,6 +1613,7 @@ public final class GenerateDB {
       createTable.append(" ,display_name VARCHAR DEFAULT NULL");
       createTable.append(" ,regular_match_play BOOLEAN NOT NULL");
       createTable.append(" ,scoreboard_display BOOLEAN NOT NULL");
+      createTable.append(" ,head_to_head BOOLEAN NOT NULL");
       if (createConstraints) {
         createTable.append(" ,CONSTRAINT run_metadata_pk PRIMARY KEY (tournament_id, run_number)");
         createTable.append(" ,CONSTRAINT run_metadata_fk1 FOREIGN KEY (tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");

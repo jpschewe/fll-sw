@@ -1721,11 +1721,14 @@ public final class ImportDB {
         + "           WHERE TP2.param = 'SeedingRounds'" //
         + "           AND TP2.tournament IN (-1, ?) )");
         PreparedStatement insert = connection.prepareStatement("INSERT INTO run_metadata" //
-            + " (tournament_id, run_number, display_name, regular_match_play, scoreboard_display)" //
-            + " VALUES(?, ?, ?, ?, ?)");
+            + " (tournament_id, run_number, display_name, regular_match_play, scoreboard_display, head_to_head)" //
+            + " VALUES(?, ?, ?, ?, ?, ?)");
         PreparedStatement maxRunPrep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE tournament = ?")) {
 
       for (final Tournament tournament : Tournament.getTournaments(connection)) {
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                    tournament.getTournamentID());
+
         prep.setInt(1, tournament.getTournamentID());
         insert.setInt(1, tournament.getTournamentID());
         maxRunPrep.setInt(1, tournament.getTournamentID());
@@ -1746,6 +1749,11 @@ public final class ImportDB {
                   insert.setString(3, String.format("Run %d", run));
                   insert.setBoolean(4, regularMatchPlay);
                   insert.setBoolean(5, scoreboardDisplay);
+
+                  // if the tournament is running head to head and the run isn't a regular match
+                  // play, then it must be head to head
+                  insert.setBoolean(6, !regularMatchPlay
+                      && runningHeadToHead);
                   insert.executeUpdate();
                 } // for each run
               }
@@ -2797,10 +2805,10 @@ public final class ImportDB {
       delete.executeUpdate();
     }
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, display_name, regular_match_play, scoreboard_display"
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, display_name, regular_match_play, scoreboard_display, head_to_head"
             + " FROM run_metadata WHERE tournament_id = ?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO run_metadata (tournament_id, run_number, display_name, regular_match_play, scoreboard_display)"
-            + "VALUES (?, ?, ?, ?, ?)")) {
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO run_metadata (tournament_id, run_number, display_name, regular_match_play, scoreboard_display, head_to_head)"
+            + "VALUES (?, ?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
