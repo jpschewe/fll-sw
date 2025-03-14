@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.RunMetadata;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -71,6 +72,8 @@ public class SubmitScoreEntry extends HttpServlet {
       return;
     }
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+
     final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     response.reset();
     response.setContentType("application/json");
@@ -86,7 +89,6 @@ public class SubmitScoreEntry extends HttpServlet {
       formData = jsonMapper.readValue(request.getReader(), FORM_DATA_TYPE_REF);
     }
 
-    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -103,8 +105,7 @@ public class SubmitScoreEntry extends HttpServlet {
       }
       final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
 
-      final int currentTournament = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final boolean deleteScore = Boolean.valueOf(formData.get("delete"));
       if (deleteScore) {
@@ -136,7 +137,7 @@ public class SubmitScoreEntry extends HttpServlet {
 
         final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
 
-        if (Queries.performanceScoreExists(connection, currentTournament, teamNumber, runNumber)) {
+        if (Queries.performanceScoreExists(connection, tournament.getTournamentID(), teamNumber, runNumber)) {
           final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %d. Check that you selected the correct team and enter the score again.</div>",
                                                teamNumber, runNumber);
 
@@ -145,13 +146,10 @@ public class SubmitScoreEntry extends HttpServlet {
         } else {
           final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
                                                                                       tournament.getTournamentID());
-          final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                                tournament.getTournamentID());
-          final boolean regularMatchPlay = runNumber <= numSeedingRounds;
-
+          final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
           final String roundText;
           if (runningHeadToHead
-              && !regularMatchPlay) {
+              && !runMetadata.isRegularMatchPlay()) {
             final String division = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(), teamNumber,
                                                                runNumber);
             final int playoffRun = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), division,

@@ -104,9 +104,9 @@ public final class Playoff {
       seedingOrder = teams;
     } else if (BracketSortType.SEEDING.equals(bracketSort)) {
       // standard seeding
-      final int tournament = Queries.getCurrentTournament(connection);
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
-      if (numSeedingRounds < 1) {
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final int numRegularMatchPlayRounds = RunMetadata.getNumRegularMatchPlayRounds(connection, tournament);
+      if (numRegularMatchPlayRounds < 1) {
         throw new FLLRuntimeException("Cannot initialize playoff brackets using scores from regular match play when the number of regular match play rounds is less than 1");
       }
 

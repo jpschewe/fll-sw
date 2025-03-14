@@ -431,18 +431,6 @@ public final class TournamentParameters {
   /**
    * @param connection database connection
    * @param tournament the tournament ID
-   * @return true if there is a tournament specific value
-   * @throws SQLException on a database error
-   */
-  public static boolean isNumSeedingRoundsSet(final Connection connection,
-                                              final int tournament)
-      throws SQLException {
-    return tournamentParameterValueExists(connection, tournament, SEEDING_ROUNDS);
-  }
-
-  /**
-   * @param connection database connection
-   * @param tournament the tournament ID
    * @return the number of seeding rounds
    * @throws SQLException on a database error
    */
@@ -450,32 +438,6 @@ public final class TournamentParameters {
                                         final int tournament)
       throws SQLException {
     return getIntTournamentParameter(connection, tournament, SEEDING_ROUNDS);
-  }
-
-  /**
-   * Get default numbers of seeding rounds for the database.
-   * 
-   * @param connection database connection
-   * @return the default number of seeding rounds
-   * @throws SQLException on a database error
-   */
-  public static int getDefaultNumSeedingRounds(final Connection connection) throws SQLException {
-    return getIntTournamentParameterDefault(connection, SEEDING_ROUNDS);
-  }
-
-  /**
-   * Set the number of seeding rounds.
-   *
-   * @param tournament the tournament ID
-   * @param connection the connection
-   * @param value the new value
-   * @throws SQLException on a database error
-   */
-  public static void setNumSeedingRounds(final Connection connection,
-                                         final int tournament,
-                                         final int value)
-      throws SQLException {
-    setIntParameter(connection, tournament, SEEDING_ROUNDS, value);
   }
 
   /**
@@ -490,7 +452,6 @@ public final class TournamentParameters {
       throws SQLException {
     setIntParameterDefault(connection, SEEDING_ROUNDS, newSeedingRounds);
   }
-
 
   /**
    * Get the number of practice rounds from the database.

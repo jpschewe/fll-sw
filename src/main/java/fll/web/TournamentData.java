@@ -131,6 +131,16 @@ public class TournamentData {
   }
 
   /**
+   * @return regular match play run metadata
+   * @see #getAllRunMetadata()
+   */
+  public List<RunMetadata> getRegularMatchPlayRunMetadata() {
+    return getAllRunMetadata().stream() //
+                              .filter(RunMetadata::isRegularMatchPlay) //
+                              .toList();
+  }
+
+  /**
    * Store run metadata and update the cache.
    * 
    * @param metadata the new meta data

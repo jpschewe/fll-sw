@@ -146,7 +146,7 @@ public class PerformanceRunsEndpoint {
    * @param connection database connection to retrieve data
    * @throws SQLException on a database error
    */
-  public static void notifyToUpdate(Connection connection) throws SQLException {
+  public static void notifyToUpdate(final Connection connection) throws SQLException {
     final Collection<UnverifiedRunData> unverifiedData = getUnverifiedRunData(connection);
     final List<SelectTeamData> teamSelectData = getTeamSelectData(connection);
     sendData(teamSelectData, unverifiedData);
@@ -338,8 +338,6 @@ public class PerformanceRunsEndpoint {
         + "       ORDER BY Performance.RunNumber, Teams.TeamNumber")) {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final List<String> unfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection,
-                                                                                   tournament.getTournamentID());
 
       prep.setInt(1, tournament.getTournamentID());
 
@@ -350,23 +348,12 @@ public class PerformanceRunsEndpoint {
           final String name = castNonNull(rs.getString(3));
           final String trimmedName = StringUtils.trimString(name, Team.MAX_TEAM_NAME_LEN);
           final String escapedName = StringEscapeUtils.escapeEcmaScript(trimmedName);
+          final RunMetadata runMetadata = RunMetadata.getFromDatabase(connection, tournament, runNumber);
 
-          final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection, teamNumber).stream() //
-                                                   .filter(b -> unfinishedBrackets.contains(b)) //
-                                                   .findFirst() //
-                                                   .orElse("");
-
-          final String runNumberDisplay;
-          if (!playoffBracketName.isEmpty()) {
-            final int playoffRound = Playoff.getPlayoffRound(connection, tournament.getTournamentID(),
-                                                             playoffBracketName, runNumber);
-            runNumberDisplay = String.format("%s P%d", playoffBracketName, playoffRound);
-          } else {
-            runNumberDisplay = String.valueOf(runNumber);
-          }
+          final String runNumberDisplay = runMetadata.getDisplayName();
 
           final String displayString;
-          displayString = String.format("Run %s - %d [%s]", runNumberDisplay, teamNumber, escapedName);
+          displayString = String.format("%s - %d [%s]", runNumberDisplay, teamNumber, escapedName);
 
           final UnverifiedRunData d = new UnverifiedRunData(teamNumber, runNumber, displayString);
           data.add(d);

@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +29,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.util.FP;
@@ -35,6 +37,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.TeamScore;
@@ -85,14 +88,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       return;
     }
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
-      final int tournamentId = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
-
       // setting some response headers
       response.setHeader("Expires", "0");
       response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
@@ -106,7 +106,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       try {
         final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection);
 
-        final Document document = createDocument(connection, challengeDescription, tournament, teams.values());
+        final Document document = createDocument(tournamentData, connection, challengeDescription, teams.values());
 
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -124,20 +124,18 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   }
 
   /**
+   * @param tournamentData data for the tournament
    * @param connection database connection
    * @param challengeDescription challenge description
-   * @param tournament tournament
    * @param teams the teams to output the details for
    * @return the document to be rendered
    * @throws SQLException if there is a database error
    */
-  public static Document createDocument(final Connection connection,
+  public static Document createDocument(final TournamentData tournamentData,
+                                        final Connection connection,
                                         final ChallengeDescription challengeDescription,
-                                        final Tournament tournament,
                                         final Collection<TournamentTeam> teams)
       throws SQLException {
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
-
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -157,7 +155,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       rootElement.appendChild(pageSequence);
       pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-      final Element header = createHeader(document, challengeDescription.getTitle(), tournament, null);
+      final Element header = createHeader(document, challengeDescription.getTitle(),
+                                          tournamentData.getCurrentTournament(), null);
       pageSequence.appendChild(header);
 
       final Element footer = FOPUtils.createSimpleFooter(document);
@@ -171,8 +170,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       block.appendChild(document.createTextNode("No teams in the tournament."));
     } else {
       for (final TournamentTeam team : teams) {
-        final Element teamPageSequence = createTeamPageSequence(connection, document, pageMasterName, tournament,
-                                                                challengeDescription, numSeedingRounds, team);
+        final Element teamPageSequence = createTeamPageSequence(tournamentData, connection, document, pageMasterName,
+                                                                challengeDescription, team);
         rootElement.appendChild(teamPageSequence);
       }
     }
@@ -180,12 +179,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return document;
   }
 
-  private static Element createTeamPageSequence(final Connection connection,
+  private static Element createTeamPageSequence(final TournamentData tournamentData,
+                                                final Connection connection,
                                                 final Document document,
                                                 final String pageMasterName,
-                                                final Tournament tournament,
                                                 final ChallengeDescription challenge,
-                                                final int numSeedingRounds,
                                                 final TournamentTeam team)
       throws SQLException {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
@@ -193,7 +191,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final String pageSequenceId = String.format("ps-%d", team.getTeamNumber());
     pageSequence.setAttribute("id", pageSequenceId);
 
-    final Element header = createHeader(document, challenge.getTitle(), tournament, team);
+    final Element header = createHeader(document, challenge.getTitle(), tournamentData.getCurrentTournament(), team);
     pageSequence.appendChild(header);
 
     final Element footer = FOPUtils.createSimpleFooter(document, pageSequenceId);
@@ -202,17 +200,16 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element teamData = outputTeam(connection, document, tournament, challenge, numSeedingRounds, team);
+    final Element teamData = outputTeam(tournamentData, connection, document, challenge, team);
     documentBody.appendChild(teamData);
 
     return pageSequence;
   }
 
-  private static Element outputTeam(final Connection connection,
+  private static Element outputTeam(final TournamentData tournamentData,
+                                    final Connection connection,
                                     final Document document,
-                                    final Tournament tournament,
                                     final ChallengeDescription challenge,
-                                    final int numSeedingRounds,
                                     final TournamentTeam team)
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
@@ -233,11 +230,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, 1));
     tableHeaderRow.appendChild(createCell(document, ""));
 
-    for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
+    final List<RunMetadata> regularMatchPlayRuns = tournamentData.getRegularMatchPlayRunMetadata();
+    for (final RunMetadata metadata : regularMatchPlayRuns) {
       table.appendChild(FOPUtils.createTableColumn(document, 1));
 
-      tableHeaderRow.appendChild(createCell(document, "Run "
-          + runNumber));
+      tableHeaderRow.appendChild(createCell(document, metadata.getDisplayName()));
     }
     // add the table header to the table after all of the columns are created
     table.appendChild(tableHeader);
@@ -247,7 +244,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
-    final TeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
+    final List<TeamScore> scores = getScores(connection, tournamentData.getCurrentTournament(), team,
+                                             regularMatchPlayRuns);
     for (final GoalElement goalEle : performance.getGoalElements()) {
       if (goalEle.isGoalGroup()) {
         outputGoalGroup(document, tableBody, performance, scores, (GoalGroup) goalEle);
@@ -303,9 +301,9 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static void outputGoalGroup(final Document document,
                                       final Element tableBody,
                                       final PerformanceScoreCategory performance,
-                                      final TeamScore[] scores,
+                                      final List<TeamScore> scores,
                                       final GoalGroup group) {
-    final int numCols = scores.length
+    final int numCols = scores.size()
         + 1;
 
     // description
@@ -330,7 +328,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static void outputGoal(final Document document,
                                  final Element tableBody,
                                  final PerformanceScoreCategory performance,
-                                 final TeamScore[] scores,
+                                 final List<TeamScore> scores,
                                  final AbstractGoal goal) {
     final double bestScore = bestScoreForGoal(scores, goal);
 
@@ -405,7 +403,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
    * @return best total score
    */
   private static double bestTotalScore(final PerformanceScoreCategory performance,
-                                       final TeamScore[] scores) {
+                                       final List<TeamScore> scores) {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
@@ -424,7 +422,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   /**
    * @return the best score for the specified goal
    */
-  private static double bestScoreForGoal(final TeamScore[] scores,
+  private static double bestScoreForGoal(final List<TeamScore> scores,
                                          final AbstractGoal goal) {
     double bestScore = Double.MAX_VALUE
         * -1;
@@ -441,15 +439,15 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return bestScore;
   }
 
-  private static TeamScore[] getScores(final Connection connection,
-                                       final Tournament tournament,
-                                       final TournamentTeam team,
-                                       final int numSeedingRounds)
+  private static List<TeamScore> getScores(final Connection connection,
+                                           final Tournament tournament,
+                                           final TournamentTeam team,
+                                           final List<RunMetadata> regularMatchPlayRuns)
       throws SQLException {
-    final TeamScore[] scores = new TeamScore[numSeedingRounds];
-    for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
-      scores[runNumber
-          - 1] = new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(), runNumber, connection);
+    final List<TeamScore> scores = new LinkedList<>();
+    for (final RunMetadata metadata : regularMatchPlayRuns) {
+      scores.add(new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(), metadata.getRunNumber(),
+                                       connection));
     }
     return scores;
   }

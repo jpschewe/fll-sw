@@ -280,6 +280,27 @@ public class RunMetadata {
     } finally {
       connection.setAutoCommit(autoCommit);
     }
-
   }
+
+  /**
+   * @param connection database
+   * @param tournament tournament
+   * @return number of regular match play rounds in the specified tournament
+   * @throws SQLException on a database error
+   */
+  public static int getNumRegularMatchPlayRounds(final Connection connection,
+                                                 final Tournament tournament)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM run_metadata WHERE tournament_id = ? AND regular_match_play IS TRUE")) {
+      prep.setInt(1, tournament.getTournamentID());
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1);
+        }
+      }
+    }
+    return 0;
+  }
+
 }

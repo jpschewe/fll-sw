@@ -2893,9 +2893,6 @@ public final class ImportDB {
     // use the "get" methods rather than generic SQL query to ensure that the
     // default value is picked up in case the default value has been changed
 
-    final int seedingRounds = TournamentParameters.getNumSeedingRounds(sourceConnection, sourceTournamentID);
-    TournamentParameters.setNumSeedingRounds(destinationConnection, destTournamentID, seedingRounds);
-
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(sourceConnection, sourceTournamentID);
     TournamentParameters.setRunningHeadToHead(destinationConnection, destTournamentID, runningHeadToHead);
 
