@@ -448,7 +448,7 @@ public class FullTournamentTest {
       new Select(selenium.findElement(By.name("judgingGroup"))).selectByVisibleText(TournamentSchedule.JUDGE_GROUP_HEADER);
       new Select(selenium.findElement(By.name("wave"))).selectByVisibleText(TournamentSchedule.WAVE_HEADER);
 
-      for (int i = 0; i < schedule.getNumberOfRegularMatchPlayRounds(); ++i) {
+      for (int i = 0; i < schedule.getTotalNumberOfRounds(); ++i) {
         final int round = i
             + 1;
         new Select(selenium.findElement(By.name(String.format("perf%d_time",

@@ -44,7 +44,6 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.RunMetadata;
-import fll.db.TournamentParameters;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -250,12 +249,13 @@ public class PerformanceRunsEndpoint {
     final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(), 0)
         + 1;
     final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule, team.getTeamNumber(), nextRunNumber);
-    final RunMetadata runMetadata = RunMetadata.getFromDatabase(connection, tournament, nextRunNumber);
+    final RunMetadata nextRunMetadata = RunMetadata.getFromDatabase(connection, tournament, nextRunNumber);
     if (null != nextPerformance) {
       return new PerformanceRunsEndpoint.SelectTeamData(team, nextPerformance, nextRunNumber,
-                                                        runMetadata.getDisplayName());
+                                                        nextRunMetadata.getDisplayName());
     } else {
-      final String nextTableAndSide = getNextTableAndSide(connection, tournament, team.getTeamNumber(), nextRunNumber);
+      final String nextTableAndSide = getNextTableAndSide(connection, tournament, team.getTeamNumber(),
+                                                          nextRunMetadata);
 
       try {
         final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection, team.getTeamNumber()).stream() //
@@ -263,20 +263,20 @@ public class PerformanceRunsEndpoint {
                                                  .findFirst() //
                                                  .orElse("");
         final String runNumberDisplay;
-        if (runMetadata.isHeadToHead()
+        if (nextRunMetadata.isHeadToHead()
             && !playoffBracketName.isEmpty()) {
           final int playoffMatch = Playoff.getPlayoffMatch(connection, tournament.getTournamentID(), playoffBracketName,
                                                            nextRunNumber);
-          runNumberDisplay = String.format("%s M%d", runMetadata.getDisplayName(), playoffMatch);
+          runNumberDisplay = String.format("%s M%d", nextRunMetadata.getDisplayName(), playoffMatch);
         } else {
-          runNumberDisplay = runMetadata.getDisplayName();
+          runNumberDisplay = nextRunMetadata.getDisplayName();
         }
         return new PerformanceRunsEndpoint.SelectTeamData(team, nextTableAndSide, nextRunNumber, runNumberDisplay);
       } catch (final SQLException e) {
         LOGGER.warn("Got error retrieving playoff bracket information for team {} run {}", team.getTeamNumber(),
                     nextRunNumber, e);
         return new PerformanceRunsEndpoint.SelectTeamData(team, nextTableAndSide, nextRunNumber,
-                                                          runMetadata.getDisplayName());
+                                                          nextRunMetadata.getDisplayName());
       }
     }
   }
@@ -288,17 +288,18 @@ public class PerformanceRunsEndpoint {
   private static String getNextTableAndSide(final Connection connection,
                                             final Tournament tournament,
                                             final int teamNumber,
-                                            final int nextRunNumber) {
+                                            final RunMetadata nextRunMetadata) {
     try {
-      if (nextRunNumber <= TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID())) {
+      if (nextRunMetadata.isHeadToHead()) {
         // no schedule, not going to know the table
         return "";
       } else {
         // get information from the playoffs
-        return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunNumber);
+        return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunMetadata.getRunNumber());
       }
     } catch (final SQLException e) {
-      LOGGER.warn("Got error retrieving next table and side for team {} run {}", teamNumber, nextRunNumber, e);
+      LOGGER.warn("Got error retrieving next table and side for team {} run {}", teamNumber,
+                  nextRunMetadata.getRunNumber(), e);
       return "";
     }
   }

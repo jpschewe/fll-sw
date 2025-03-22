@@ -196,16 +196,13 @@ class ChooseScheduleHeadersDialog extends JDialog {
     final String[] perfTableColumn = performanceRoundTables.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
                                                            .collect(Collectors.toList()).toArray(new String[0]);
 
-    final String[] practiceColumn = new String[0];
-    final String[] practiceTableColumn = new String[0];
-
     return new ColumnInformation(headerRowIndex, headerRow, teamNumber.getItemAt(teamNumber.getSelectedIndex()),
                                  organization.getItemAt(organization.getSelectedIndex()),
                                  teamName.getItemAt(teamName.getSelectedIndex()),
                                  awardGroup.getItemAt(awardGroup.getSelectedIndex()),
                                  judgingGroup.getItemAt(judgingGroup.getSelectedIndex()),
                                  wave.getItemAt(wave.getSelectedIndex()), subjectiveColumnMappings, perfColumn,
-                                 perfTableColumn, practiceColumn, practiceTableColumn);
+                                 perfTableColumn);
   }
 
 }

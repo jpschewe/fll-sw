@@ -227,8 +227,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
                                                                  StringUtils.isBlank(judgingGroup) ? null
                                                                      : judgingGroup,
                                                                  StringUtils.isBlank(wave) ? null : wave,
-                                                                 subjectiveColumnMappings, perfColumn, perfTableColumn,
-                                                                 new String[0], new String[0]);
+                                                                 subjectiveColumnMappings, perfColumn, perfTableColumn);
 
       uploadScheduleData.setColumnInformation(columnInfo);
 

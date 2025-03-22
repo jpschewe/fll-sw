@@ -82,8 +82,6 @@ import fll.xml.SubjectiveScoreCategory;
  * </p>
  */
 public class TournamentSchedule implements Serializable {
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
   /**
    * How wide to make the line between time separations in the "by time" schedule
    * outputs.
@@ -167,32 +165,13 @@ public class TournamentSchedule implements Serializable {
   public static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
   /**
-   * @return Number of rounds in this schedule (practice and regular match play).
-   * @see #getNumberOfPracticeRounds()
-   * @see #getNumberOfRegularMatchPlayRounds()
+   * @return Number of performance rounds in this schedule
    */
   public int getTotalNumberOfRounds() {
-    return getNumberOfRegularMatchPlayRounds()
-        + getNumberOfPracticeRounds();
-  }
-
-  private final int numRegularMatchPlayRounds;
-
-  /**
-   * @return number of regular match play rounds in this schedule
-   */
-  public int getNumberOfRegularMatchPlayRounds() {
     return numRegularMatchPlayRounds;
   }
 
-  private final int numPracticeRounds;
-
-  /**
-   * @return number of practice rounds in this schedule
-   */
-  public int getNumberOfPracticeRounds() {
-    return numPracticeRounds;
-  }
+  private final int numRegularMatchPlayRounds;
 
   /**
    * Always output without 24-hour time and without AM/PM.
@@ -385,7 +364,6 @@ public class TournamentSchedule implements Serializable {
       throws IOException, ParseException, ScheduleParseException {
     this.name = name;
     numRegularMatchPlayRounds = columnInfo.getNumPerfs();
-    numPracticeRounds = columnInfo.getNumPracticePerfs();
     parseData(reader, columnInfo);
     reader.close();
     this.subjectiveStations.clear();
@@ -397,7 +375,6 @@ public class TournamentSchedule implements Serializable {
    */
   public TournamentSchedule() {
     numRegularMatchPlayRounds = 0;
-    numPracticeRounds = 0;
     name = "empty";
   }
 
@@ -505,11 +482,9 @@ public class TournamentSchedule implements Serializable {
 
     if (!schedule.isEmpty()) {
       this.numRegularMatchPlayRounds = schedule.get(0).getNumRegularMatchPlayRounds();
-      this.numPracticeRounds = schedule.get(0).getNumPracticeRounds();
       validateRounds();
     } else {
       this.numRegularMatchPlayRounds = 0;
-      this.numPracticeRounds = 0;
     }
 
   }
@@ -524,16 +499,6 @@ public class TournamentSchedule implements Serializable {
             + " for team "
             + si.getTeamNumber());
       }
-
-      if (this.numPracticeRounds != si.getNumPracticeRounds()) {
-        throw new RuntimeException("Should have "
-            + this.numPracticeRounds
-            + " practice for all teams, but found "
-            + si.getNumPracticeRounds()
-            + " for team "
-            + si.getTeamNumber());
-      }
-
     }
   }
 
@@ -603,71 +568,6 @@ public class TournamentSchedule implements Serializable {
             + ". Looking for header '"
             + tableHeader
             + "'");
-      }
-
-      ++expectedValue;
-    }
-
-    return perfRounds.size();
-  }
-
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
-  private static int countNumPracticeRounds(final @Nullable String[] line) {
-    final SortedSet<Integer> perfRounds = new TreeSet<>();
-    for (final String element : line) {
-      if (null != element
-          && element.startsWith(BASE_PRACTICE_HEADER)
-          && element.length() > BASE_PRACTICE_HEADER.length()) {
-        final String perfNumberStr = element.substring(BASE_PRACTICE_HEADER.length());
-        final Integer perfNumber = Integer.valueOf(perfNumberStr);
-        if (!perfRounds.add(perfNumber)) {
-          throw new FLLRuntimeException("Found practice rounds num "
-              + perfNumber
-              + " twice in the header: "
-              + Arrays.asList(line));
-        }
-      } else if (null != element
-          && element.equals(BASE_PRACTICE_HEADER_SHORT)) {
-        if (!perfRounds.add(1)) {
-          throw new FLLRuntimeException("Found practice rounds num "
-              + 1
-              + " twice in the header: "
-              + Arrays.asList(line));
-        }
-      }
-    }
-
-    /*
-     * check that the values start at 1, are contiguous, and that the
-     * corresponding table header exists
-     */
-    int expectedValue = 1;
-    for (final Integer value : perfRounds) {
-      if (null == value) {
-        throw new FLLInternalException("Found null practice round in header!");
-      }
-      if (expectedValue != value.intValue()) {
-        throw new FLLRuntimeException("Practice rounds not contiguous after "
-            + (expectedValue
-                - 1)
-            + " found "
-            + value);
-      }
-
-      if (1 == expectedValue
-          && 1 == perfRounds.size()
-          && checkHeaderExists(line, PRACTICE_TABLE_HEADER_FORMAT_SHORT)) {
-        // pass
-        LOGGER.trace("Found short practice table header");
-      } else {
-        final String tableHeader = String.format(PRACTICE_TABLE_HEADER_FORMAT, expectedValue);
-        if (!checkHeaderExists(line, tableHeader)) {
-          throw new FLLRuntimeException("Couldn't find header for round "
-              + expectedValue
-              + ". Looking for header '"
-              + tableHeader
-              + "'");
-        }
       }
 
       ++expectedValue;
@@ -1171,43 +1071,6 @@ public class TournamentSchedule implements Serializable {
         }
       }
 
-      // parse practice rounds
-      for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
-        final String perfStr = ci.getPractice(line, perfIndex);
-        if (StringUtils.isBlank(perfStr)) {
-          throw new ScheduleParseException(String.format("Line %d is missing a time for practice %d",
-                                                         reader.getLineNumber(), (perfIndex
-                                                             + 1)));
-        }
-        final String table = ci.getPracticeTable(line, perfIndex);
-        if (StringUtils.isBlank(table)) {
-          throw new ScheduleParseException(String.format("Line %d is missing a table for practice %d",
-                                                         reader.getLineNumber(), (perfIndex
-                                                             + 1)));
-        }
-
-        final String[] tablePieces = table.split(" ");
-        if (tablePieces.length != 2) {
-          throw new ScheduleParseException(String.format("Error parsing practice table information from: '%s', expecting 2 strings separated by a space",
-                                                         table));
-        }
-        // perfStr is not empty, so cannot be null
-        final LocalTime perfTime = castNonNull(parseTime(perfStr));
-
-        final String tableName = tablePieces[0];
-        final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
-        final int roundNumber = perfIndex
-            + 1;
-        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide, true);
-
-        ti.addPerformance(performance);
-        if (performance.getSide() > 2
-            || performance.getSide() < 1) {
-          throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d practice round: %d line: %d",
-                                                         ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
-        }
-      }
-
       return ti;
     } catch (final ParseException | NumberFormatException pe) {
       throw new ScheduleParseException(String.format("Error parsing line '%s': %s", Arrays.toString(line),
@@ -1545,39 +1408,6 @@ public class TournamentSchedule implements Serializable {
       return getValue(line, columnIndex);
     }
 
-    private final int[] practiceColumn;
-
-    /**
-     * @return number of practice rounds
-     */
-    public int getNumPracticePerfs() {
-      return practiceColumn.length;
-    }
-
-    /**
-     * @param line the line to parse
-     * @param round the practice round to get the value for
-     * @return the practice column value, null if column cannot be found
-     */
-    public @Nullable String getPractice(final @Nullable String[] line,
-                                        final int round) {
-      final int columnIndex = practiceColumn[round];
-      return getValue(line, columnIndex);
-    }
-
-    private final int[] practiceTableColumn;
-
-    /**
-     * @param line the line to parse
-     * @param round the practice round to get the value for
-     * @return the practice table column value, null if column cannot be found
-     */
-    public @Nullable String getPracticeTable(final @Nullable String[] line,
-                                             final int round) {
-      final int columnIndex = practiceTableColumn[round];
-      return getValue(line, columnIndex);
-    }
-
     /**
      * @param headerLine the header line to check
      * @param columnName the name of the column to find
@@ -1622,8 +1452,6 @@ public class TournamentSchedule implements Serializable {
       this.waveColumn = -1;
       this.perfColumn = new int[0];
       this.perfTableColumn = new int[0];
-      this.practiceColumn = new int[0];
-      this.practiceTableColumn = new int[0];
       this.subjectiveColumnMappings = Collections.emptyList();
       this.subjectiveColumnIndicies = Collections.emptyMap();
     }
@@ -1640,12 +1468,8 @@ public class TournamentSchedule implements Serializable {
      * @param waveColumn {@link #getWave(String[])}
      * @param perfColumn {@link #getPerf(String[], int)}
      * @param perfTableColumn {@link #getPerfTable(String[], int)}
-     * @param practiceColumn {@link #getPractice(String[], int)}
-     * @param practiceTableColumn {@link #getPracticeTable(String[], int)}
      * @throws IllegalArgumentException if {@code perfColumn} and
-     *           {@code perfTableColumn} are not the same length, or
-     *           {@code practiceColumn} and {@code practiceTableColumn} are not the
-     *           same length
+     *           {@code perfTableColumn} are not the same length
      */
     @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
     public ColumnInformation(final int headerRowIndex,
@@ -1658,16 +1482,10 @@ public class TournamentSchedule implements Serializable {
                              final @Nullable String waveColumn,
                              final Collection<CategoryColumnMapping> subjectiveColumnMappings,
                              final String[] perfColumn,
-                             final String[] perfTableColumn,
-                             final String[] practiceColumn,
-                             final String[] practiceTableColumn) {
+                             final String[] perfTableColumn) {
       if (perfColumn.length != perfTableColumn.length) {
         throw new IllegalArgumentException(String.format("perfColumn (%d) must be the same length as perfTableColumn(%d)",
                                                          perfColumn.length, perfTableColumn.length));
-      }
-      if (practiceColumn.length != practiceTableColumn.length) {
-        throw new IllegalArgumentException(String.format("practiceColumn (%d) must be the same length as practiceTableColumn(%d)",
-                                                         practiceColumn.length, practiceTableColumn.length));
       }
 
       this.headerRowIndex = headerRowIndex;
@@ -1685,15 +1503,6 @@ public class TournamentSchedule implements Serializable {
       this.perfTableColumn = new int[perfTableColumn.length];
       for (int i = 0; i < this.perfTableColumn.length; ++i) {
         this.perfTableColumn[i] = findColumnIndex(headerLine, perfTableColumn[i]);
-      }
-
-      this.practiceColumn = new int[practiceColumn.length];
-      for (int i = 0; i < this.practiceColumn.length; ++i) {
-        this.practiceColumn[i] = findColumnIndex(headerLine, practiceColumn[i]);
-      }
-      this.practiceTableColumn = new int[practiceTableColumn.length];
-      for (int i = 0; i < this.practiceTableColumn.length; ++i) {
-        this.practiceTableColumn[i] = findColumnIndex(headerLine, practiceTableColumn[i]);
       }
 
       this.subjectiveColumnMappings = Collections.unmodifiableCollection(new LinkedList<>(subjectiveColumnMappings));
@@ -1764,18 +1573,12 @@ public class TournamentSchedule implements Serializable {
       for (final String category : categories) {
         line.add(category);
       }
-      for (int round = 0; round < getNumberOfPracticeRounds(); ++round) {
-        line.add(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, round
-            + 1));
-        line.add(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, round
-            + 1));
-      }
 
-      for (int round = 0; round < getNumberOfRegularMatchPlayRounds(); ++round) {
-        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
-            + 1));
-        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
-            + 1));
+      for (int round = 0; round < getTotalNumberOfRounds(); ++round) {
+        final int runNumber = round
+            + 1;
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, runNumber));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, runNumber));
       }
 
       csv.writeNext(line.toArray(new String[line.size()]));
@@ -1795,14 +1598,6 @@ public class TournamentSchedule implements Serializable {
             line.add(TournamentSchedule.formatTime(d));
           }
         }
-
-        si.enumeratePracticePerformances().forEachOrdered(pair -> {
-          final PerformanceTime p = pair.getLeft();
-          line.add(TournamentSchedule.formatTime(p.getTime()));
-          line.add(p.getTable()
-              + " "
-              + p.getSide());
-        });
 
         si.enumerateRegularMatchPlayPerformances().forEachOrdered(pair -> {
           final PerformanceTime p = pair.getLeft();

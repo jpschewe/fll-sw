@@ -32,14 +32,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @return number of regular match play rounds
    */
   public int getNumRegularMatchPlayRounds() {
-    return (int) performances.stream().filter(Predicate.not(PerformanceTime::isPractice)).count();
-  }
-
-  /**
-   * @return number of practice rounds
-   */
-  public int getNumPracticeRounds() {
-    return (int) performances.stream().filter(PerformanceTime::isPractice).count();
+    return performances.size();
   }
 
   /**

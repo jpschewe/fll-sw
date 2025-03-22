@@ -20,6 +20,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
@@ -50,9 +51,10 @@ public class ScheduleByWaveAndTeam extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -67,7 +69,7 @@ public class ScheduleByWaveAndTeam extends BaseFLLServlet {
       response.setHeader("Content-Disposition",
                          String.format("attachment; filename=\"%s_schedule-by-wave-and-team.pdf\"",
                                        tournament.getName()));
-      ScheduleWriter.outputScheduleByWaveAndTeam(tournament, schedule, response.getOutputStream());
+      ScheduleWriter.outputScheduleByWaveAndTeam(tournamentData, schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);

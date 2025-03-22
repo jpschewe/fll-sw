@@ -26,11 +26,12 @@ import fll.Team;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.util.FLLInternalException;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.playoff.Playoff;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
@@ -140,6 +141,8 @@ public final class ScoreEntry {
     final double minimumAllowedScore = challengeDescription.getPerformance().getMinimumScore();
     pageContext.setAttribute("minimumAllowedScore", minimumAllowedScore);
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+
     final boolean previousVerified;
     final boolean regularMatchPlay;
     if (practice) {
@@ -175,7 +178,6 @@ public final class ScoreEntry {
           teamNumber = Utilities.getIntegerNumberFormat().parse(lTeamNum).intValue();
         }
         final int tournament = Queries.getCurrentTournament(connection);
-        final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
         final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
         if (!tournamentTeams.containsKey(Integer.valueOf(teamNumber))) {
           throw new RuntimeException("Selected team number is not valid: "
@@ -186,8 +188,7 @@ public final class ScoreEntry {
 
         // the next run the team will be competing in
         final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
-
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament);
+        final RunMetadata nextRunMetadata = tournamentData.getRunMetadata(nextRunNumber);
 
         // what run number we're going to edit/enter
         int lRunNumber;
@@ -220,8 +221,7 @@ public final class ScoreEntry {
             lRunNumber = runNumber;
           }
         } else {
-          if (runningHeadToHead
-              && nextRunNumber > numSeedingRounds) {
+          if (nextRunMetadata.isHeadToHead()) {
             if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
                                                             Collections.singletonList(teamNumber))) {
               SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Selected team ("
@@ -242,19 +242,9 @@ public final class ScoreEntry {
         }
         pageContext.setAttribute("lRunNumber", lRunNumber);
 
-        regularMatchPlay = lRunNumber <= numSeedingRounds;
+        regularMatchPlay = nextRunMetadata.isRegularMatchPlay();
 
-        final String roundText;
-        if (runningHeadToHead
-            && !regularMatchPlay) {
-          final String division = Playoff.getPlayoffDivision(connection, tournament, teamNumber, lRunNumber);
-          final int playoffRun = Playoff.getPlayoffRound(connection, tournament, division, lRunNumber);
-          roundText = "Playoff&nbsp;Round&nbsp;"
-              + playoffRun;
-        } else {
-          roundText = "Run&nbsp;Number&nbsp;"
-              + lRunNumber;
-        }
+        final String roundText = nextRunMetadata.getDisplayName();
         pageContext.setAttribute("roundText", roundText);
 
         // check if this is the last run a team has completed

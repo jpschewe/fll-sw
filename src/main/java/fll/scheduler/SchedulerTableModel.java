@@ -108,22 +108,12 @@ import org.apache.commons.lang3.tuple.Pair;
       final int perfColIdx = columnIndex
           - getFirstPerformanceColumn();
 
-      final int globalRoundIndex = perfColIdx
+      final int roundIndex = perfColIdx
           / NUM_COLUMNS_PER_ROUND;
 
       final Optional<PerformanceTime> performance;
-      final int numPracticeRounds = schedule.getNumberOfPracticeRounds();
-      if (globalRoundIndex >= numPracticeRounds) {
-        // regular match play rounds are in columns after the practice rounds
-        final int roundIndex = globalRoundIndex
-            - numPracticeRounds;
-        performance = schedInfo.enumerateRegularMatchPlayPerformances().filter(p -> p.getRight() == roundIndex)
-                               .map(Pair::getLeft).findFirst();
-      } else {
-        // practice round
-        performance = schedInfo.enumeratePracticePerformances().filter(p -> p.getRight() == globalRoundIndex)
-                               .map(Pair::getLeft).findFirst();
-      }
+      performance = schedInfo.enumerateRegularMatchPlayPerformances().filter(p -> p.getRight() == roundIndex)
+                             .map(Pair::getLeft).findFirst();
 
       if (performance.isPresent()) {
         switch (perfColIdx
@@ -190,23 +180,12 @@ import org.apache.commons.lang3.tuple.Pair;
       switch (perfColIdx
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
-        final int globalRoundIndex = perfColIdx
+        final int roundIndex = perfColIdx
             / NUM_COLUMNS_PER_ROUND;
 
-        final int numPracticeRounds = schedule.getNumberOfPracticeRounds();
-        if (globalRoundIndex >= numPracticeRounds) {
-          // regular match play
-          final int roundIndex = globalRoundIndex
-              - numPracticeRounds;
-          return "Perf #"
-              + (roundIndex
-                  + 1);
-        } else {
-          // practice round
-          return "Practice #"
-              + (globalRoundIndex
-                  + 1);
-        }
+        return "Perf #"
+            + (roundIndex
+                + 1);
       case 1:
         return "Table";
       case 2:
