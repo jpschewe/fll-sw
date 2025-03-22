@@ -16,6 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Tournament;
+import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 
 /**
@@ -152,7 +153,8 @@ public class RunMetadata {
     // TODO what to do if not found or a database error
     // Synthesize it to be "Run #", regular=false,
     // scoreboard=true
-    return new RunMetadata(runNumber, String.format("Run %d", runNumber), false, true, runningHeadToHead);
+    return new RunMetadata(runNumber, String.format(TournamentSchedule.PERF_HEADER_FORMAT, runNumber), false, true,
+                           runningHeadToHead);
   }
 
   /**
