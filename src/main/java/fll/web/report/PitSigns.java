@@ -41,6 +41,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.Welcome;
 import jakarta.servlet.ServletContext;
@@ -70,13 +71,14 @@ public class PitSigns extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     response.reset();
     response.setContentType("application/pdf");
 
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final @Nullable TournamentSchedule schedule;
       if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
@@ -125,7 +127,7 @@ public class PitSigns extends BaseFLLServlet {
 
         for (final TournamentTeam team : Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                 .values()) {
-          final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64,
+          final Element page = renderTeam(document, tournamentData, schedule, challengeImageBase64, partnerImageBase64,
                                           firstImageBase64, team, topText, bottomText);
           documentBody.appendChild(page);
           page.setAttribute("page-break-after", "always");
@@ -137,8 +139,8 @@ public class PitSigns extends BaseFLLServlet {
 
         final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament, teamNumber);
 
-        final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64, firstImageBase64,
-                                        team, topText, bottomText);
+        final Element page = renderTeam(document, tournamentData, schedule, challengeImageBase64, partnerImageBase64,
+                                        firstImageBase64, team, topText, bottomText);
         documentBody.appendChild(page);
       }
 
@@ -156,6 +158,7 @@ public class PitSigns extends BaseFLLServlet {
   }
 
   private Element renderTeam(final Document document,
+                             final TournamentData tournamentData,
                              final @Nullable TournamentSchedule schedule,
                              final @Nullable String challengeImageBase64,
                              final @Nullable String partnerImageBase64,
@@ -236,7 +239,7 @@ public class PitSigns extends BaseFLLServlet {
       if (null == si) {
         scheduleContainer.appendChild(document.createTextNode("No schedule"));
       } else {
-        ScheduleWriter.appendTeamSchedule(document, schedule, si, scheduleContainer);
+        ScheduleWriter.appendTeamSchedule(document, tournamentData, schedule, si, scheduleContainer);
       }
     }
 

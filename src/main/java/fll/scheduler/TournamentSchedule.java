@@ -42,8 +42,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
@@ -61,10 +59,12 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
+import fll.db.RunMetadata;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.CellFileReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.web.TournamentData;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
@@ -659,12 +659,12 @@ public class TournamentSchedule implements Serializable {
    *          be empty
    * @throws IOException if there is an error writing the files
    */
-  public void outputSubjectiveSheets(@Nonnull final String tournamentName,
+  public void outputSubjectiveSheets(final String tournamentName,
                                      final String dir,
                                      final String baseFileName,
                                      final ChallengeDescription description,
-                                     @Nonnull final Map<ScoreCategory, Collection<String>> categoryToSchedule,
-                                     @Nonnull final Map<ScoreCategory, @Nullable String> filenameSuffixes)
+                                     final Map<ScoreCategory, Collection<String>> categoryToSchedule,
+                                     final Map<ScoreCategory, @Nullable String> filenameSuffixes)
       throws IOException {
 
     // setup the sheets from the sucked in xml
@@ -713,18 +713,18 @@ public class TournamentSchedule implements Serializable {
   /**
    * Sheets are sorted by table and then by time.
    *
-   * @param tournamentName the name of the tournament to put in the sheets
+   * @param tournamentData tournament information for name and performance names
    * @param output where to output
    * @param description where to get the goals from
    * @throws SQLException if there is an error talking to the database
    * @throws IOException if there is an error writing to the stream
    */
-  public void outputPerformanceSheets(@Nonnull final String tournamentName,
-                                      @Nonnull final OutputStream output,
-                                      @Nonnull final ChallengeDescription description)
+  public void outputPerformanceSheets(final TournamentData tournamentData,
+                                      final OutputStream output,
+                                      final ChallengeDescription description)
       throws SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getTotalNumberOfRounds()
-        * schedule.size(), description, tournamentName);
+        * schedule.size(), description, tournamentData.getCurrentTournament().getName());
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>(PerformanceTime.ByTableThenTime.INSTANCE);
     for (final TeamScheduleInfo si : schedule) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
@@ -736,10 +736,13 @@ public class TournamentSchedule implements Serializable {
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
+      final int runNumber = si.computeRound(performance)
+          + 1;
+      final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
 
       scoresheets.setTime(sheetIndex, performance.getTime());
       scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));
-      scoresheets.setRound(sheetIndex, si.getRoundName(performance));
+      scoresheets.setRound(sheetIndex, runMetadata.getDisplayName());
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, ScoresheetGenerator.AWARD_GROUP_LABEL, si.getAwardGroup());
       scoresheets.setName(sheetIndex, si.getTeamName());
