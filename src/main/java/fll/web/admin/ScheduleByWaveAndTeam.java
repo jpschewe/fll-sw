@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputScheduleByWaveAndTeam(Tournament,
+ * @see ScheduleWriter#outputScheduleByWaveAndTeam(TournamentData,
  *      TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/ScheduleByWaveAndTeam")
