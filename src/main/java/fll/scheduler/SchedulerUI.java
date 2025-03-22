@@ -1406,7 +1406,7 @@ public class SchedulerUI extends JFrame {
           } else if (null != violation.getPerformance()) {
             final LocalTime violationPerformanceTime = violation.getPerformance();
 
-            final Pair<PerformanceTime, Long> performanceRoundResult = schedInfo.enumerateRegularMatchPlayPerformances()
+            final Pair<PerformanceTime, Long> performanceRoundResult = schedInfo.enumeratePerformances()
                                                                                 .filter(p -> p.getLeft().getTime()
                                                                                               .equals(violationPerformanceTime))
                                                                                 .findFirst().orElse(null);

@@ -1599,7 +1599,7 @@ public class TournamentSchedule implements Serializable {
           }
         }
 
-        si.enumerateRegularMatchPlayPerformances().forEachOrdered(pair -> {
+        si.enumeratePerformances().forEachOrdered(pair -> {
           final PerformanceTime p = pair.getLeft();
           line.add(TournamentSchedule.formatTime(p.getTime()));
           line.add(p.getTable()

@@ -315,7 +315,7 @@ public class PerformanceRunsEndpoint {
         return null;
       } else {
         // subtract 1 from the run number to get to a zero based index
-        final @Nullable PerformanceTime time = sched.enumerateRegularMatchPlayPerformances()//
+        final @Nullable PerformanceTime time = sched.enumeratePerformances()//
                                                     .filter(p -> p.getRight().longValue() == (nextRunNumber
                                                         - 1))//
                                                     .findFirst().map(Pair::getLeft).orElse(null);

@@ -294,23 +294,7 @@ public final class ScheduleWriter {
                             FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
       }
 
-      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
-        final PerformanceTime perf = pair.getLeft();
-
-        final Element cell1 = FOPUtils.createTableCell(document, null,
-                                                       TournamentSchedule.humanFormatTime(perf.getTime()));
-        row.appendChild(cell1);
-        FOPUtils.addBorders(cell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
-        final Element cell2 = FOPUtils.createTableCell(document, null,
-                                                       String.format("%s %s", perf.getTable(), perf.getSide()));
-        row.appendChild(cell2);
-        FOPUtils.addBorders(cell2, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-      }));
-
-      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+      si.enumeratePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
         final PerformanceTime perf = pair.getLeft();
 
         final Element cell1 = FOPUtils.createTableCell(document, null,
@@ -515,23 +499,7 @@ public final class ScheduleWriter {
                             FOPUtils.STANDARD_BORDER_WIDTH);
       }
 
-      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
-        final PerformanceTime perf = pair.getLeft();
-
-        final Element cell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                       TournamentSchedule.humanFormatTime(perf.getTime()));
-        row.appendChild(cell1);
-        FOPUtils.addBorders(cell1, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH);
-
-        final Element cell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                       String.format("%s %s", perf.getTable(), perf.getSide()));
-        row.appendChild(cell2);
-        FOPUtils.addBorders(cell2, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH);
-      }));
-
-      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+      si.enumeratePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
         final PerformanceTime perf = pair.getLeft();
 
         final Element cell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,

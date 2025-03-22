@@ -50,23 +50,12 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return stream of all practice performance rounds and their index within
-   *         practice rounds
-   */
-  public Stream<Pair<PerformanceTime, Long>> enumeratePracticePerformances() {
-    return Streams.mapWithIndex(allPerformances().filter(PerformanceTime::isPractice), (performance,
-                                                                                        index) -> Pair.of(performance,
-                                                                                                          index));
-  }
-
-  /**
    * @return stream of all regular match play performance rounds and their index
    *         within in the rounds, so round #1 shows up as index 0.
    */
-  public Stream<Pair<PerformanceTime, Long>> enumerateRegularMatchPlayPerformances() {
-    return Streams.mapWithIndex(allPerformances().filter(Predicate.not(PerformanceTime::isPractice)), (performance,
-                                                                                                       index) -> Pair.of(performance,
-                                                                                                                         index));
+  public Stream<Pair<PerformanceTime, Long>> enumeratePerformances() {
+    return Streams.mapWithIndex(allPerformances(), (performance,
+                                                    index) -> Pair.of(performance, index));
   }
 
   /**
@@ -224,12 +213,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @return the round number or -1 if the performance cannot be found
    */
   public int computeRound(final PerformanceTime performance) {
-    final Stream<Pair<PerformanceTime, Long>> stream;
-    if (performance.isPractice()) {
-      stream = enumeratePracticePerformances();
-    } else {
-      stream = enumerateRegularMatchPlayPerformances();
-    }
+    final Stream<Pair<PerformanceTime, Long>> stream = enumeratePerformances();
     return stream.filter(p -> p.getLeft().equals(performance)).map(Pair::getRight).findFirst().orElse(Long.valueOf(-1))
                  .intValue();
   }

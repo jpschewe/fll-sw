@@ -112,7 +112,7 @@ import org.apache.commons.lang3.tuple.Pair;
           / NUM_COLUMNS_PER_ROUND;
 
       final Optional<PerformanceTime> performance;
-      performance = schedInfo.enumerateRegularMatchPlayPerformances().filter(p -> p.getRight() == roundIndex)
+      performance = schedInfo.enumeratePerformances().filter(p -> p.getRight() == roundIndex)
                              .map(Pair::getLeft).findFirst();
 
       if (performance.isPresent()) {
