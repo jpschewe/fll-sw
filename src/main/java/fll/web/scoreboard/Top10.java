@@ -20,6 +20,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.DelayedPerformance;
 import fll.db.Queries;
+import fll.db.RunMetadata;
 import fll.util.FP;
 import fll.web.report.FinalComputedScores;
 import fll.web.report.awards.AwardsScriptReport;
@@ -255,7 +256,8 @@ public final class Top10 {
     sql.append("       AND NoShow = False");
     sql.append("       AND Bye = False");
     if (regularMatchPlay) {
-      sql.append("       AND RunNumber IN (SELECT run_number FROM run_metadata WHERE tournament_id = ? AND regular_match_play = TRUE)"); // tournament
+      sql.append("       AND RunNumber IN (SELECT run_number FROM run_metadata WHERE tournament_id = ? AND run_type = ?)"); // tournament,
+                                                                                                                            // REGULAR_MATCH_PLAY
     }
     if (scoreboardDisplay) {
       sql.append("       AND RunNumber IN (SELECT run_number FROM run_metadata WHERE tournament_id = 15 AND scoreboard_display = TRUE)"); // tournament
@@ -273,6 +275,7 @@ public final class Top10 {
       prep.setInt(paramIndex++, currentTournamentId);
       if (regularMatchPlay) {
         prep.setInt(paramIndex++, currentTournamentId);
+        prep.setString(paramIndex++, RunMetadata.RunType.REGULAR_MATCH_PLAY.name());
       }
       if (scoreboardDisplay) {
         prep.setInt(paramIndex++, currentTournamentId);

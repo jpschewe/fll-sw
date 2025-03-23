@@ -20,12 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
         nameInput.setAttribute("name", `${nextRound}_name`);
         nameCell.appendChild(nameInput);
 
-        const regularMatchCell = row.insertCell();
-        const regularMatchCheck = document.createElement("input");
-        regularMatchCheck.setAttribute("type", "checkbox");
-        regularMatchCheck.setAttribute("id", `${nextRound}_regularMatchPlay`);
-        regularMatchCheck.setAttribute("name", `${nextRound}_regularMatchPlay`);
-        regularMatchCell.appendChild(regularMatchCheck);
+        const runTypeCell = row.insertCell();
+        // clone the first run to pickup all of the options without needing to get them into javascript
+        const runTypeSelect = document.getElementById("1_runType").cloneNode(true);
+        runTypeSelect.setAttribute("id", `${nextRound}_runType`);
+        runTypeSelect.setAttribute("name", `${nextRound}_runType`);
+        setSelectValue(runTypeSelect, "OTHER");
+        runTypeCell.appendChild(runTypeSelect);
 
         const scoreboardCell = row.insertCell();
         const scoreboardCheck = document.createElement("input");

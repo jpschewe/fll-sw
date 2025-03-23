@@ -239,20 +239,22 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                     </td>
 
                     <td>
-                        <c:choose>
-                            <c:when
-                                test="${performanceRound_regularMatch[perfLoopStatus.index] == true}">
-                                <input type='checkbox'
-                                    id='perf${perfLoopStatus.index}_regularMatchPlay'
-                                    name='perf${perfLoopStatus.index}_regularMatchPlay'
-                                    checked />
-                            </c:when>
-                            <c:otherwise>
-                                <input type='checkbox'
-                                    id='perf${perfLoopStatus.index}_regularMatchPlay'
-                                    name='perf${perfLoopStatus.index}_regularMatchPlay' />
-                            </c:otherwise>
-                        </c:choose>
+                        <select id='perf${perfLoopStatus.index}_runType'
+                            name='perf${perfLoopStatus.index}_runType'>
+                            <c:forEach items='${runTypes}' var='runType'>
+                                <c:choose>
+                                    <c:when
+                                        test='${performanceRound_runType[perfLoopStatus.index] == runType}'>
+                                        <option value='${runType}'
+                                            selected>${runType}</option>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <option value='${runType}'>${runType}</option>
+                                    </c:otherwise>
+
+                                </c:choose>
+                            </c:forEach>
+                        </select>
                     </td>
 
                     <td>

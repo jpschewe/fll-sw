@@ -25,6 +25,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.TournamentData;
+import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -48,6 +49,7 @@ public class EditRunMetadata extends BaseFLLServlet {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final List<RunMetadata> allRunMetadata = tournamentData.getRunMetadataFactory().getAllRunMetadata();
     page.setAttribute("allRunMetadata", allRunMetadata);
+    page.setAttribute("runTypes", RunMetadata.RunType.values());
 
     try (Connection connection = tournamentData.getDataSource().getConnection()) {
       final Tournament tournament = tournamentData.getCurrentTournament();
@@ -130,13 +132,10 @@ public class EditRunMetadata extends BaseFLLServlet {
           return;
         }
 
-        final boolean regularMatchPlay = null != request.getParameter(String.format("%d_regularMatchPlay", round));
         final boolean scoreboardDisplay = null != request.getParameter(String.format("%d_scoreboardDisplay", round));
-        // headToHead may be specified as a true or false value, or may not be there at
-        // all (false)
-        final boolean headToHead = Boolean.valueOf(request.getParameter(String.format("%d_head2head", round)));
-        final RunMetadata metadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay,
-                                                     headToHead);
+        final String runTypeStr = WebUtils.getNonNullRequestParameter(request, String.format("%d_runType", round));
+        final RunMetadata.RunType runType = RunMetadata.RunType.valueOf(runTypeStr);
+        final RunMetadata metadata = new RunMetadata(round, displayName, scoreboardDisplay, runType);
         tournamentData.getRunMetadataFactory().storeRunMetadata(metadata);
       }
     }

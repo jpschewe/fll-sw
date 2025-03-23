@@ -43,7 +43,7 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
                 <tr>
                     <th>Run</th>
                     <th>Display Name</th>
-                    <th>Regular Match Play</th>
+                    <th>Run Type</th>
                     <th>Display on Scoreboard</th>
                     <th>Delete</th>
                 </tr>
@@ -57,22 +57,28 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
                                 id='${runMetadata.runNumber}_name'
                                 value='${runMetadata.displayName}' />
                         </td>
+
                         <td>
-                            <c:choose>
-                                <c:when
-                                    test="${runMetadata.regularMatchPlay}">
-                                    <input type='checkbox'
-                                        name='${runMetadata.runNumber}_regularMatchPlay'
-                                        id='${runMetadata.runNumber}_regularMatchPlay'
-                                        checked />
-                                </c:when>
-                                <c:otherwise>
-                                    <input type='checkbox'
-                                        name='${runMetadata.runNumber}_regularMatchPlay'
-                                        id='${runMetadata.runNumber}_regularMatchPlay' />
-                                </c:otherwise>
-                            </c:choose>
+                            <select
+                                name='${runMetadata.runNumber}_runType'
+                                id='${runMetadata.runNumber}_runType'>
+                                <c:forEach items='${runTypes}'
+                                    var='runType'>
+                                    <c:choose>
+                                        <c:when
+                                            test='${runType == runMetadata.runType}'>
+                                            <option value='${runType}'
+                                                selected>${runType}</option>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <option value='${runType}'>${runType}</option>
+                                        </c:otherwise>
+
+                                    </c:choose>
+                                </c:forEach>
+                            </select>
                         </td>
+
                         <td>
                             <c:choose>
                                 <c:when
@@ -105,9 +111,6 @@ fll.web.admin.EditRunMetadata.populateContext(application, pageContext);
                                         disabled />
                                 </c:otherwise>
                             </c:choose>
-                            <input type='hidden'
-                                name='${runMetadata.runNumber}_head2head'
-                                value='${runMetadata.headToHead}' />
                         </td>
                     </tr>
                 </c:forEach>

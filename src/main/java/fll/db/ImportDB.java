@@ -1721,8 +1721,8 @@ public final class ImportDB {
         + "           WHERE TP2.param = 'SeedingRounds'" //
         + "           AND TP2.tournament IN (-1, ?) )");
         PreparedStatement insert = connection.prepareStatement("INSERT INTO run_metadata" //
-            + " (tournament_id, run_number, display_name, regular_match_play, scoreboard_display, head_to_head)" //
-            + " VALUES(?, ?, ?, ?, ?, ?)");
+            + " (tournament_id, run_number, display_name, scoreboard_display, run_type)" //
+            + " VALUES(?, ?, ?, ?, ?)");
         PreparedStatement maxRunPrep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE tournament = ?")) {
 
       for (final Tournament tournament : Tournament.getTournaments(connection)) {
@@ -1743,17 +1743,24 @@ public final class ImportDB {
                   final boolean regularMatchPlay = run <= seedingRounds;
                   final boolean scoreboardDisplay = true;
 
+                  final RunMetadata.RunType runType;
+                  if (regularMatchPlay) {
+                    runType = RunMetadata.RunType.REGULAR_MATCH_PLAY;
+                  } else if (runningHeadToHead) {
+                    // if the tournament is running head to head and the run isn't a regular match
+                    // play, then it must be head to head
+                    runType = RunMetadata.RunType.HEAD_TO_HEAD;
+                  } else {
+                    runType = RunMetadata.RunType.OTHER;
+                  }
+
                   insert.setInt(2, run);
                   // ideally this would have something about the playoff round in the name, but
                   // that's a lot of work for historical data
                   insert.setString(3, String.format("Run %d", run));
-                  insert.setBoolean(4, regularMatchPlay);
-                  insert.setBoolean(5, scoreboardDisplay);
+                  insert.setBoolean(4, scoreboardDisplay);
+                  insert.setString(5, runType.name());
 
-                  // if the tournament is running head to head and the run isn't a regular match
-                  // play, then it must be head to head
-                  insert.setBoolean(6, !regularMatchPlay
-                      && runningHeadToHead);
                   insert.executeUpdate();
                 } // for each run
               }
@@ -2805,10 +2812,10 @@ public final class ImportDB {
       delete.executeUpdate();
     }
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, display_name, regular_match_play, scoreboard_display, head_to_head"
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, display_name, scoreboard_display, run_type"
             + " FROM run_metadata WHERE tournament_id = ?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO run_metadata (tournament_id, run_number, display_name, regular_match_play, scoreboard_display, head_to_head)"
-            + "VALUES (?, ?, ?, ?, ?, ?)")) {
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO run_metadata (tournament_id, run_number, display_name, scoreboard_display, run_type)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);

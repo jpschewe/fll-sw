@@ -100,6 +100,8 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         pageContext.setAttribute("judgingGroup_value", awardGroupColumn);
       }
 
+      pageContext.setAttribute("runTypes", RunMetadata.RunType.values());
+
       computePerformanceRoundValues(pageContext, headerNames);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
@@ -109,7 +111,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
   private static void computePerformanceRoundValues(final PageContext page,
                                                     final Collection<String> headerNames) {
     final Map<Integer, String> performanceRoundValues = new HashMap<>();
-    final Map<Integer, Boolean> performanceRoundRegularMatch = new HashMap<>();
+    final Map<Integer, RunMetadata.RunType> performanceRoundRunType = new HashMap<>();
     final Map<Integer, Boolean> performanceRoundScoreboard = new HashMap<>();
 
     final List<String> practiceTimeHeaders = headerNames.stream() //
@@ -131,7 +133,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     int roundNumber = 1;
     for (final String header : practiceTimeHeaders) {
       performanceRoundValues.put(roundNumber, header);
-      performanceRoundRegularMatch.put(roundNumber, false);
+      performanceRoundRunType.put(roundNumber, RunMetadata.RunType.PRACTICE);
       performanceRoundScoreboard.put(roundNumber, false);
       ++roundNumber;
     }
@@ -139,7 +141,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     // performance rounds next
     for (final String header : performanceTimeHeaders) {
       performanceRoundValues.put(roundNumber, header);
-      performanceRoundRegularMatch.put(roundNumber, true);
+      performanceRoundRunType.put(roundNumber, RunMetadata.RunType.REGULAR_MATCH_PLAY);
       performanceRoundScoreboard.put(roundNumber, true);
       ++roundNumber;
     }
@@ -147,13 +149,13 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     // fun run rounds next
     for (final String header : funRunTimeHeaders) {
       performanceRoundValues.put(roundNumber, header);
-      performanceRoundRegularMatch.put(roundNumber, false);
+      performanceRoundRunType.put(roundNumber, RunMetadata.RunType.OTHER);
       performanceRoundScoreboard.put(roundNumber, true);
       ++roundNumber;
     }
 
     page.setAttribute("performanceRound_values", performanceRoundValues);
-    page.setAttribute("performanceRound_regularMatch", performanceRoundRegularMatch);
+    page.setAttribute("performanceRound_runType", performanceRoundRunType);
     page.setAttribute("performanceRound_scoreboard", performanceRoundScoreboard);
   }
 
@@ -196,10 +198,13 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         perfTableColumn[i] = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_table", round));
 
         final String displayName = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_name", round));
-        final boolean regularMatchPlay = null != request.getParameter(String.format("perf%d_regularMatchPlay", round));
+
         final boolean scoreboardDisplay = null != request.getParameter(String.format("perf%d_scoreboard", round));
-        // head to head runs are never scheduled
-        final RunMetadata runMetadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay, false);
+
+        final String runTypeStr = WebUtils.getNonNullRequestParameter(request, String.format("perf%d_runType", round));
+        final RunMetadata.RunType runType = RunMetadata.RunType.valueOf(runTypeStr);
+
+        final RunMetadata runMetadata = new RunMetadata(round, displayName, scoreboardDisplay, runType);
         tournamentData.getRunMetadataFactory().storeRunMetadata(runMetadata);
       }
 
