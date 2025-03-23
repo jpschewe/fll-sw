@@ -32,10 +32,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputTeamSchedules(TournamentData, TournamentSchedule,
- *      java.io.OutputStream)
- * @see ScheduleWriter#outputTeamSchedule(TournamentData, TournamentSchedule,
- *      java.io.OutputStream, int)
+ * @see ScheduleWriter#outputTeamSchedules(fll.db.RunMetadataFactory,
+ *      TournamentSchedule, java.io.OutputStream)
+ * @see ScheduleWriter#outputTeamSchedule(fll.db.RunMetadataFactory,
+ *      TournamentSchedule, java.io.OutputStream, int)
  */
 @WebServlet("/admin/TeamSchedules")
 public class TeamSchedules extends BaseFLLServlet {

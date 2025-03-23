@@ -31,8 +31,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputScheduleByTeam(TournamentData, TournamentSchedule,
- *      java.io.OutputStream)
+ * @see ScheduleWriter#outputScheduleByTeam(fll.db.RunMetadataFactory,
+ *      TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/ScheduleByTeam")
 public class ScheduleByTeam extends BaseFLLServlet {

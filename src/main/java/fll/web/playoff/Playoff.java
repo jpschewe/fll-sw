@@ -44,7 +44,6 @@ import fll.util.DummyTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-import fll.web.TournamentData;
 import fll.xml.AbstractGoal;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
@@ -1593,7 +1592,7 @@ public final class Playoff {
    * @return non-null list of brackets, may be empty
    * @throws SQLException on a database error
    * @see #isPlayoffBracketUnfinished(Connection, int, String)
-   * @see #finishBracket(TournamentData, Connection, DataSource,
+   * @see #finishBracket(RunMetadataFactory, Connection, DataSource,
    *      ChallengeDescription, Tournament, String)
    */
   @Nonnull
@@ -1623,7 +1622,7 @@ public final class Playoff {
    * @return true if automatically finished, false otherwise (including
    *         unfinished)
    * @throws SQLException on a database error
-   * @see #finishBracket(TournamentData, Connection, DataSource,
+   * @see #finishBracket(RunMetadataFactory, Connection, DataSource,
    *      ChallengeDescription, Tournament, String)
    */
   public static boolean isAutomaticallyFinished(final Connection connection,
