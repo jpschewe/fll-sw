@@ -54,6 +54,7 @@ import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
+import fll.db.RunMetadataFactory;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -143,11 +144,11 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private void addMacrosToTemplateContext(final Connection connection,
-                                          final Tournament tournament,
+                                          final RunMetadataFactory runMetadataFactory,
                                           final VelocityContext templateContext)
       throws SQLException {
     for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
-      final String value = AwardsScript.getMacroValue(connection, tournament, macro);
+      final String value = AwardsScript.getMacroValue(connection, runMetadataFactory, macro);
       templateContext.put(macro.getText(), value);
     }
   }
@@ -159,7 +160,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Tournament tournament = tournamentData.getCurrentTournament();
 
     final VelocityContext templateContext = new VelocityContext();
-    addMacrosToTemplateContext(connection, tournament, templateContext);
+    addMacrosToTemplateContext(connection, tournamentData.getRunMetadataFactory(), templateContext);
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 

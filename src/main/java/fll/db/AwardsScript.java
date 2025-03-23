@@ -1125,22 +1125,24 @@ public final class AwardsScript {
    * Get the text for a macro.
    * 
    * @param connection database connection
-   * @param tournament the tournament that the script is being generated for
+   * @param runMetadataFactory information about the tournament that the script is
+   *          being
+   *          generated for
    * @param macro the macro in the script
    * @return the value, "UNKNOWN" if it cannot be resolved
    * @throws SQLException on a database error
    */
   public static String getMacroValue(final Connection connection,
-                                     final Tournament tournament,
+                                     final RunMetadataFactory runMetadataFactory,
                                      final Macro macro)
       throws SQLException {
 
     switch (macro) {
     case TOURNAMENT_LEVEL:
-      return tournament.getLevel().getName();
+      return runMetadataFactory.getTournament().getLevel().getName();
 
     case TOURNAMENT_NEXT_LEVEL: {
-      final int nextLevelId = tournament.getLevel().getNextLevelId();
+      final int nextLevelId = runMetadataFactory.getTournament().getLevel().getNextLevelId();
       if (TournamentLevel.NO_NEXT_LEVEL_ID == nextLevelId) {
         return "No Next Level";
       } else {
@@ -1149,14 +1151,14 @@ public final class AwardsScript {
     }
 
     case NUM_REGULAR_MATCH_PLAY_ROUNDS:
-      return Integer.toString(TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID()));
+      return Integer.toString(runMetadataFactory.getRegularMatchPlayRunMetadata().size());
 
     case HOST_SCHOOL:
     case NUM_TEAMS_ADVANCING:
     case NUM_TRAINED_OFFICIALS:
     case TOURNAMENT_DIRECTORS: {
-      return getValue(connection, tournament, "awards_script_parameters", "param_name", macro.name(), "param_value",
-                      "UNKNOWN");
+      return getValue(connection, runMetadataFactory.getTournament(), "awards_script_parameters", "param_name",
+                      macro.name(), "param_value", "UNKNOWN");
     }
 
     default:

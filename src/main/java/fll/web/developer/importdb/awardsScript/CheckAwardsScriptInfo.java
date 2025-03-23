@@ -7,7 +7,6 @@
 package fll.web.developer.importdb.awardsScript;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
@@ -66,11 +65,9 @@ public class CheckAwardsScriptInfo extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
-    try (Connection sourceConnection = sourceDataSource.getConnection();
-        Connection destConnection = destDataSource.getConnection()) {
-
-      final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(description, sourceConnection,
-                                                                                      destConnection, tournament);
+    try {
+      final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(description, sourceDataSource,
+                                                                                      destDataSource, tournament);
       sessionInfo.setAwardsScriptDifferences(differences);
       session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
 
