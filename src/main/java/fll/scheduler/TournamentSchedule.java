@@ -738,7 +738,7 @@ public class TournamentSchedule implements Serializable {
       final TeamScheduleInfo si = entry.getValue();
       final int runNumber = si.computeRound(performance)
           + 1;
-      final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+      final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
 
       scoresheets.setTime(sheetIndex, performance.getTime());
       scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));

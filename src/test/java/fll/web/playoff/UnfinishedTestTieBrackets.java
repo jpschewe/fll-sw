@@ -50,8 +50,8 @@ public final class UnfinishedTestTieBrackets extends UnfinishedBaseTest {
     final TournamentData tournamentData = new TournamentData(getDatasource());
 
     // should get false for all ties
-    final boolean result = Playoff.finishBracket(tournamentData, getConnection(), getDatasource(), challenge,
-                                                 getTournament(), bracketName);
+    final boolean result = Playoff.finishBracket(tournamentData.getRunMetadataFactory(), getConnection(),
+                                                 getDatasource(), challenge, getTournament(), bracketName);
     assertThat(result, is(false));
   }
 }

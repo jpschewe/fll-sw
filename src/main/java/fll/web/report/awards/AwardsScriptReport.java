@@ -62,6 +62,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.FinalComputedScores;
@@ -109,7 +110,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -118,7 +120,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=awardsScript.pdf");
 
       try {
-        final Document document = generateDocument(description, connection);
+        final Document document = generateDocument(tournamentData, description, connection);
 
         if (LOGGER.isTraceEnabled()) {
           try (StringWriter writer = new StringWriter()) {
@@ -150,10 +152,11 @@ public class AwardsScriptReport extends BaseFLLServlet {
     }
   }
 
-  private Document generateDocument(final ChallengeDescription description,
+  private Document generateDocument(final TournamentData tournamentData,
+                                    final ChallengeDescription description,
                                     final Connection connection)
       throws SQLException {
-    final Tournament tournament = Tournament.getCurrentTournament(connection);
+    final Tournament tournament = tournamentData.getCurrentTournament();
 
     final VelocityContext templateContext = new VelocityContext();
     addMacrosToTemplateContext(connection, tournament, templateContext);

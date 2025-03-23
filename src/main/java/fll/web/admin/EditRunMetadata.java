@@ -46,7 +46,7 @@ public class EditRunMetadata extends BaseFLLServlet {
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
-    final List<RunMetadata> allRunMetadata = tournamentData.getAllRunMetadata();
+    final List<RunMetadata> allRunMetadata = tournamentData.getRunMetadataFactory().getAllRunMetadata();
     page.setAttribute("allRunMetadata", allRunMetadata);
 
     try (Connection connection = tournamentData.getDataSource().getConnection()) {
@@ -103,7 +103,7 @@ public class EditRunMetadata extends BaseFLLServlet {
           response.sendRedirect(response.encodeRedirectURL("edit_run_metadata.jsp"));
           return;
         } else {
-          tournamentData.deleteRunMetadata(round);
+          tournamentData.getRunMetadataFactory().deleteRunMetadata(round);
         }
       }
     } catch (final SQLException e) {
@@ -137,7 +137,7 @@ public class EditRunMetadata extends BaseFLLServlet {
         final boolean headToHead = Boolean.valueOf(request.getParameter(String.format("%d_head2head", round)));
         final RunMetadata metadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay,
                                                      headToHead);
-        tournamentData.storeRunMetadata(metadata);
+        tournamentData.getRunMetadataFactory().storeRunMetadata(metadata);
       }
     }
 

@@ -116,8 +116,8 @@ public class SubmitScoreEntry extends HttpServlet {
         jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
         final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
-        final int rowsUpdated = Queries.updatePerformanceScore(tournamentData, challengeDescription, connection,
-                                                               datasource, teamScore);
+        final int rowsUpdated = Queries.updatePerformanceScore(tournamentData.getRunMetadataFactory(),
+                                                               challengeDescription, connection, datasource, teamScore);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");
         } else if (rowsUpdated > 1) {
@@ -143,7 +143,7 @@ public class SubmitScoreEntry extends HttpServlet {
           final ApiResult result = new ApiResult(false, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         } else {
-          final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+          final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
           final String roundText;
           if (runMetadata.isHeadToHead()) {
             final String division = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(), teamNumber,
@@ -157,8 +157,8 @@ public class SubmitScoreEntry extends HttpServlet {
                 + runNumber;
           }
 
-          Queries.insertPerformanceScore(tournamentData, connection, datasource, challengeDescription, tournament,
-                                         teamScore.isVerified(), teamScore);
+          Queries.insertPerformanceScore(tournamentData.getRunMetadataFactory(), connection, datasource,
+                                         challengeDescription, tournament, teamScore.isVerified(), teamScore);
 
           final String message = String.format("<div class='success'>Entered score for team number %d %s</div>",
                                                teamNumber, roundText);

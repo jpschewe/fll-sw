@@ -200,7 +200,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         final boolean scoreboardDisplay = null != request.getParameter(String.format("perf%d_scoreboard", round));
         // head to head runs are never scheduled
         final RunMetadata runMetadata = new RunMetadata(round, displayName, regularMatchPlay, scoreboardDisplay, false);
-        tournamentData.storeRunMetadata(runMetadata);
+        tournamentData.getRunMetadataFactory().storeRunMetadata(runMetadata);
       }
 
       final Collection<CategoryColumnMapping> subjectiveColumnMappings = new LinkedList<>();

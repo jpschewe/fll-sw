@@ -74,11 +74,13 @@ public class TeamSchedules extends BaseFLLServlet {
       if (Team.NULL_TEAM_NUMBER == teamNumber) {
         response.setHeader("Content-Disposition",
                            String.format("filename=\"%s_teamSchedules.pdf\"", tournament.getName()));
-        ScheduleWriter.outputTeamSchedules(tournamentData, schedule, response.getOutputStream());
+        ScheduleWriter.outputTeamSchedules(tournamentData.getRunMetadataFactory(), schedule,
+                                           response.getOutputStream());
       } else {
         response.setHeader("Content-Disposition",
                            String.format("filename=\"%s_teamSchedule-%d.pdf\"", tournament.getName(), teamNumber));
-        ScheduleWriter.outputTeamSchedule(tournamentData, schedule, response.getOutputStream(), teamNumber);
+        ScheduleWriter.outputTeamSchedule(tournamentData.getRunMetadataFactory(), schedule, response.getOutputStream(),
+                                          teamNumber);
       }
 
     } catch (final SQLException sqle) {

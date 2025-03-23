@@ -70,7 +70,7 @@ public class ScheduleByTeam extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
                          String.format("attachment; filename=\"%s_schedule-by-team.pdf\"", tournament.getName()));
-      ScheduleWriter.outputScheduleByTeam(tournamentData, schedule, response.getOutputStream());
+      ScheduleWriter.outputScheduleByTeam(tournamentData.getRunMetadataFactory(), schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);

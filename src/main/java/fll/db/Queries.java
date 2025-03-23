@@ -336,7 +336,7 @@ public final class Queries {
    * Insert a performance score into the database and do all appropriate updates
    * to the playoff tables and notifications to the UI code.
    *
-   * @param tournamentData tournament data cache
+   * @param runMetadataFactory run metadata cache
    * @param connection the database connection
    * @param datasource used to create background database connections
    * @param description the challenge description
@@ -347,7 +347,7 @@ public final class Queries {
    * @throws ParseException on an error parsing the score data
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static void insertPerformanceScore(final TournamentData tournamentData,
+  public static void insertPerformanceScore(final RunMetadataFactory runMetadataFactory,
                                             final Connection connection,
                                             final DataSource datasource,
                                             final ChallengeDescription description,
@@ -432,7 +432,7 @@ public final class Queries {
                                                                                teamScore.getTeamNumber());
       final ScoreType performanceScoreType = description.getPerformance().getScoreType();
       final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-      ScoreboardUpdates.newScore(tournamentData, datasource, team, score, formattedScore, teamScore);
+      ScoreboardUpdates.newScore(runMetadataFactory, datasource, team, score, formattedScore, teamScore);
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
@@ -459,7 +459,7 @@ public final class Queries {
       }
     }
 
-    if (tournamentData.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
+    if (runMetadataFactory.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
       tournament.recordPerformanceSeedingModified(connection);
     }
 
@@ -471,7 +471,7 @@ public final class Queries {
    * Update a performance score in the database. All of the values are expected
    * to be in request.
    *
-   * @param tournamentData tournament data cache
+   * @param runMetadataFactory get run information
    * @param description
    *          description of the challenge
    * @param connection database connection
@@ -483,7 +483,7 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static int updatePerformanceScore(final TournamentData tournamentData,
+  public static int updatePerformanceScore(final RunMetadataFactory runMetadataFactory,
                                            final ChallengeDescription description,
                                            final Connection connection,
                                            final DataSource datasource,
@@ -580,7 +580,7 @@ public final class Queries {
                                                                                    teamScore.getTeamNumber());
           final ScoreType performanceScoreType = description.getPerformance().getScoreType();
           final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-          ScoreboardUpdates.newScore(tournamentData, datasource, team, score, formattedScore, teamScore);
+          ScoreboardUpdates.newScore(runMetadataFactory, datasource, team, score, formattedScore, teamScore);
         }
       }
 
@@ -599,7 +599,7 @@ public final class Queries {
         }
       }
 
-      if (tournamentData.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
+      if (runMetadataFactory.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
         tournament.recordPerformanceSeedingModified(connection);
       }
 
@@ -627,7 +627,7 @@ public final class Queries {
                                             final int runNumber)
       throws SQLException {
     final Tournament currentTournament = tournamentData.getCurrentTournament();
-    final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+    final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
 
     final int dbLine = getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), teamNumber,
                                                  runNumber);

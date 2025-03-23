@@ -188,7 +188,7 @@ public final class ScoreEntry {
 
         // the next run the team will be competing in
         final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
-        final RunMetadata nextRunMetadata = tournamentData.getRunMetadata(nextRunNumber);
+        final RunMetadata nextRunMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(nextRunNumber);
 
         // what run number we're going to edit/enter
         int lRunNumber;

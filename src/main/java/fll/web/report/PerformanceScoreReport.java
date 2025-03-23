@@ -230,7 +230,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, 1));
     tableHeaderRow.appendChild(createCell(document, ""));
 
-    final List<RunMetadata> regularMatchPlayRuns = tournamentData.getRegularMatchPlayRunMetadata();
+    final List<RunMetadata> regularMatchPlayRuns = tournamentData.getRunMetadataFactory()
+                                                                 .getRegularMatchPlayRunMetadata();
     for (final RunMetadata metadata : regularMatchPlayRuns) {
       table.appendChild(FOPUtils.createTableColumn(document, 1));
 

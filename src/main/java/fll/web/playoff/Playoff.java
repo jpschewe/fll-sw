@@ -37,6 +37,7 @@ import fll.db.GenerateDB;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
 import fll.util.DummyTeamScore;
@@ -1363,7 +1364,7 @@ public final class Playoff {
    * If an exception occurs the database is consistent, but the bracket will not
    * be finished.
    *
-   * @param tournamentData tournament data cache
+   * @param runMetadataFactory run metadata cache
    * @param connection the database connection
    * @param datasource used to create background database connections
    * @param tournament the tournament that the bracket is in
@@ -1375,7 +1376,7 @@ public final class Playoff {
    * @throws SQLException if there is a problem talking to the database
    * @throws ParseException if there is an error parsing the score data
    */
-  public static boolean finishBracket(final TournamentData tournamentData,
+  public static boolean finishBracket(final RunMetadataFactory runMetadataFactory,
                                       final Connection connection,
                                       final DataSource datasource,
                                       final ChallengeDescription challenge,
@@ -1405,8 +1406,8 @@ public final class Playoff {
           + info.round
           + " line: "
           + info.dbLine);
-      finishRound(tournamentData, connection, datasource, challenge, tournament, simpleGoals, enumGoals, bracketName,
-                  info);
+      finishRound(runMetadataFactory, connection, datasource, challenge, tournament, simpleGoals, enumGoals,
+                  bracketName, info);
     }
 
     // mark bracket as automatically finished
@@ -1420,7 +1421,7 @@ public final class Playoff {
     return true;
   }
 
-  private static void finishRound(final TournamentData tournamentData,
+  private static void finishRound(final RunMetadataFactory runMetadataFactory,
                                   final Connection connection,
                                   final DataSource datasource,
                                   final ChallengeDescription description,
@@ -1498,22 +1499,26 @@ public final class Playoff {
     } else if (teamAscoreExists) {
       final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamBscore);
+      Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
+                                     teamBscore);
 
     } else if (teamBscoreExists) {
       final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamAscore);
+      Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
+                                     teamAscore);
     } else {
       // initial value score
       final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, false, false);
-      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamAscore);
+      Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
+                                     teamAscore);
 
       // no show
       final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
                                                       enumGoals, true, false);
-      Queries.insertPerformanceScore(tournamentData, connection, datasource, description, tournament, true, teamBscore);
+      Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
+                                     teamBscore);
     }
 
   }

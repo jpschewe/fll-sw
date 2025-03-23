@@ -44,6 +44,7 @@ import fll.Tournament;
 import fll.UserImages;
 import fll.Utilities;
 import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.db.TableInformation;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
@@ -66,17 +67,17 @@ public final class ScheduleWriter {
    * Output the schedule sorted by team number. This schedule looks much like
    * the input spreadsheet.
    *
-   * @param tournamentData used to get names of runs
+   * @param runMetadataFactory used to get names of runs
    * @param schedule where to write the schedule
    * @param stream where to write the schedule
    * @throws IOException error writing to the stream
    */
-  public static void outputScheduleByTeam(final TournamentData tournamentData,
+  public static void outputScheduleByTeam(final RunMetadataFactory runMetadataFactory,
                                           final TournamentSchedule schedule,
                                           final OutputStream stream)
       throws IOException {
     try {
-      final Document performanceDoc = createScheduleByTeam(tournamentData, schedule);
+      final Document performanceDoc = createScheduleByTeam(runMetadataFactory, schedule);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, stream);
@@ -128,7 +129,7 @@ public final class ScheduleWriter {
     return staticContent;
   }
 
-  private static Document createScheduleByTeam(final TournamentData tournamentData,
+  private static Document createScheduleByTeam(final RunMetadataFactory runMetadataFactory,
                                                final TournamentSchedule schedule) {
     final Set<String> subjectiveStations = schedule.getSubjectiveStations();
 
@@ -227,7 +228,7 @@ public final class ScheduleWriter {
     for (int round = 0; round < schedule.getTotalNumberOfRounds(); ++round) {
       final int runNumber = round
           + 1;
-      final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
       final Element headerCell1 = FOPUtils.createTableCell(document, null, runMetadata.getDisplayName());
       headerRow.appendChild(headerCell1);
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
@@ -417,7 +418,7 @@ public final class ScheduleWriter {
     for (int round = 0; round < schedule.getTotalNumberOfRounds(); ++round) {
       final int runNumber = round
           + 1;
-      final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+      final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
       final Element headerCell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                            runMetadata.getDisplayName());
       headerRow.appendChild(headerCell1);
@@ -730,7 +731,8 @@ public final class ScheduleWriter {
     try {
       final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection,
                                                                                            tournamentData.getCurrentTournament());
-      final Document performanceDoc = createPerformanceSchedule(tournamentData, tables, schedule);
+      final Document performanceDoc = createPerformanceSchedule(tournamentData.getRunMetadataFactory(), tables,
+                                                                schedule);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -835,16 +837,16 @@ public final class ScheduleWriter {
     pageSequence.appendChild(documentBody);
 
     tables.forEach(tableInfo -> {
-      addScheduleForTableSide(tournamentData, tables, schedule, displayAwardGroup, displayNotes, performanceTimes,
-                              tableInfo.getSideA(), document, documentBody);
-      addScheduleForTableSide(tournamentData, tables, schedule, displayAwardGroup, displayNotes, performanceTimes,
-                              tableInfo.getSideB(), document, documentBody);
+      addScheduleForTableSide(tournamentData.getRunMetadataFactory(), tables, schedule, displayAwardGroup, displayNotes,
+                              performanceTimes, tableInfo.getSideA(), document, documentBody);
+      addScheduleForTableSide(tournamentData.getRunMetadataFactory(), tables, schedule, displayAwardGroup, displayNotes,
+                              performanceTimes, tableInfo.getSideB(), document, documentBody);
     });
 
     return document;
   }
 
-  private static void addScheduleForTableSide(final TournamentData tournamentData,
+  private static void addScheduleForTableSide(final RunMetadataFactory runMetadataFactory,
                                               final List<TableInformation> tables,
                                               final TournamentSchedule schedule,
                                               final boolean displayAwardGroup,
@@ -861,13 +863,13 @@ public final class ScheduleWriter {
                                                                                          .collect(Collectors.toMap(Map.Entry::getKey,
                                                                                                                    Map.Entry::getValue));
 
-    final Element ele = createPerformanceScheduleTable(tournamentData, tables, schedule, headerText, document,
+    final Element ele = createPerformanceScheduleTable(runMetadataFactory, tables, schedule, headerText, document,
                                                        tablePerformanceTimes, displayAwardGroup, displayNotes);
     documentBody.appendChild(ele);
     ele.setAttribute("page-break-after", "always");
   }
 
-  private static Document createPerformanceSchedule(final TournamentData tournamentData,
+  private static Document createPerformanceSchedule(final RunMetadataFactory runMetadataFactory,
                                                     final List<TableInformation> tables,
                                                     final TournamentSchedule schedule) {
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
@@ -901,7 +903,7 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element ele = createPerformanceScheduleTable(tournamentData, tables, schedule, headerText, document,
+    final Element ele = createPerformanceScheduleTable(runMetadataFactory, tables, schedule, headerText, document,
                                                        performanceTimes, true, false);
     documentBody.appendChild(ele);
 
@@ -963,7 +965,7 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Element createPerformanceScheduleTable(final TournamentData tournamentData,
+  private static Element createPerformanceScheduleTable(final RunMetadataFactory runMetadataFactory,
                                                         final List<TableInformation> tables,
                                                         final TournamentSchedule schedule,
                                                         final String headerText,
@@ -1046,7 +1048,7 @@ public final class ScheduleWriter {
       final TeamScheduleInfo si = entry.getValue();
       final int runNumber = si.computeRound(performance)
           + 1;
-      final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
 
       // check if team is missing an opponent
       if (null == schedule.findOpponent(si, performance)) {
@@ -1156,18 +1158,18 @@ public final class ScheduleWriter {
   /**
    * Output the schedule for each team.
    *
-   * @param tournamentData used to get performance display names
+   * @param runMetadataFactory used to get performance display names
    * @param schedule the tournament schedule
    * @param stream where to write the schedule
    * @throws IOException if there is an error writing to the stream
    */
-  public static void outputTeamSchedules(final TournamentData tournamentData,
+  public static void outputTeamSchedules(final RunMetadataFactory runMetadataFactory,
                                          final TournamentSchedule schedule,
                                          final OutputStream stream)
       throws IOException {
 
     try {
-      final Document document = createTeamSchedules(tournamentData, schedule);
+      final Document document = createTeamSchedules(runMetadataFactory, schedule);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -1177,7 +1179,7 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Document createTeamSchedules(final TournamentData tournamentData,
+  private static Document createTeamSchedules(final RunMetadataFactory runMetadataFactory,
                                               final TournamentSchedule schedule) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -1204,7 +1206,7 @@ public final class ScheduleWriter {
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
     Collections.sort(scheduleEntries, TournamentSchedule.ComparatorByTeam.INSTANCE);
     for (final TeamScheduleInfo si : scheduleEntries) {
-      final Element teamSchedule = outputTeamSchedule(document, tournamentData, schedule, si);
+      final Element teamSchedule = outputTeamSchedule(document, runMetadataFactory, schedule, si);
       documentBody.appendChild(teamSchedule);
     }
 
@@ -1214,20 +1216,20 @@ public final class ScheduleWriter {
   /**
    * Output the schedule for the specified team.
    *
-   * @param tournamentData used to get performance display names
+   * @param runMetadataFactory used to get performance display names
    * @param schedule the tournament schedule
    * @param stream where to write the schedule
    * @param teamNumber the team to output the schedule for
    * @throws IOException if there is an error writing to the stream
    */
-  public static void outputTeamSchedule(final TournamentData tournamentData,
+  public static void outputTeamSchedule(final RunMetadataFactory runMetadataFactory,
                                         final TournamentSchedule schedule,
                                         final OutputStream stream,
                                         final int teamNumber)
       throws IOException {
 
     try {
-      final Document document = createTeamSchedule(tournamentData, schedule, teamNumber);
+      final Document document = createTeamSchedule(runMetadataFactory, schedule, teamNumber);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -1237,7 +1239,7 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Document createTeamSchedule(final TournamentData tournamentData,
+  private static Document createTeamSchedule(final RunMetadataFactory runMetadataFactory,
                                              final TournamentSchedule schedule,
                                              final int teamNumber) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -1264,7 +1266,7 @@ public final class ScheduleWriter {
 
     final @Nullable TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
     if (null != si) {
-      final Element teamSchedule = outputTeamSchedule(document, tournamentData, schedule, si);
+      final Element teamSchedule = outputTeamSchedule(document, runMetadataFactory, schedule, si);
       documentBody.appendChild(teamSchedule);
     } else {
       final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -1280,7 +1282,7 @@ public final class ScheduleWriter {
    * Output the detailed schedule for a team for the day.
    */
   private static Element outputTeamSchedule(final Document document,
-                                            final TournamentData tournamentData,
+                                            final RunMetadataFactory runMetadataFactory,
                                             final TournamentSchedule schedule,
                                             final TeamScheduleInfo si) {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
@@ -1313,7 +1315,7 @@ public final class ScheduleWriter {
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
-    appendTeamSchedule(document, tournamentData, schedule, si, container);
+    appendTeamSchedule(document, runMetadataFactory, schedule, si, container);
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
@@ -1337,14 +1339,14 @@ public final class ScheduleWriter {
    * Append the elements for the team schedule in time order to the specified
    * container. All styling is set at the container level.
    * 
-   * @param tournamentData get run display names
+   * @param runMetadataFactory get run display names
    * @param document used to create elements
    * @param schedule tournament schedule
    * @param si schedule information for the team
    * @param container the container for all of the elements
    */
   public static void appendTeamSchedule(final Document document,
-                                        final TournamentData tournamentData,
+                                        final RunMetadataFactory runMetadataFactory,
                                         final TournamentSchedule schedule,
                                         final TeamScheduleInfo si,
                                         final Element container) {
@@ -1366,7 +1368,7 @@ public final class ScheduleWriter {
     for (final PerformanceTime performance : si.getAllPerformances()) {
       final int runNumber = si.computeRound(performance)
           + 1;
-      final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
       final LocalTime start = performance.getTime();
 
       final String text = String.format("%s %s %d", runMetadata.getDisplayName(), performance.getTable(),

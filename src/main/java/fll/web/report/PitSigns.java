@@ -29,6 +29,7 @@ import fll.TournamentTeam;
 import fll.UserImages;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.RunMetadataFactory;
 import fll.db.TournamentParameters;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TeamScheduleInfo;
@@ -127,8 +128,9 @@ public class PitSigns extends BaseFLLServlet {
 
         for (final TournamentTeam team : Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                 .values()) {
-          final Element page = renderTeam(document, tournamentData, schedule, challengeImageBase64, partnerImageBase64,
-                                          firstImageBase64, team, topText, bottomText);
+          final Element page = renderTeam(document, tournamentData.getRunMetadataFactory(), schedule,
+                                          challengeImageBase64, partnerImageBase64, firstImageBase64, team, topText,
+                                          bottomText);
           documentBody.appendChild(page);
           page.setAttribute("page-break-after", "always");
         }
@@ -139,8 +141,9 @@ public class PitSigns extends BaseFLLServlet {
 
         final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament, teamNumber);
 
-        final Element page = renderTeam(document, tournamentData, schedule, challengeImageBase64, partnerImageBase64,
-                                        firstImageBase64, team, topText, bottomText);
+        final Element page = renderTeam(document, tournamentData.getRunMetadataFactory(), schedule,
+                                        challengeImageBase64, partnerImageBase64, firstImageBase64, team, topText,
+                                        bottomText);
         documentBody.appendChild(page);
       }
 
@@ -158,7 +161,7 @@ public class PitSigns extends BaseFLLServlet {
   }
 
   private Element renderTeam(final Document document,
-                             final TournamentData tournamentData,
+                             final RunMetadataFactory runMetadataFactory,
                              final @Nullable TournamentSchedule schedule,
                              final @Nullable String challengeImageBase64,
                              final @Nullable String partnerImageBase64,
@@ -239,7 +242,7 @@ public class PitSigns extends BaseFLLServlet {
       if (null == si) {
         scheduleContainer.appendChild(document.createTextNode("No schedule"));
       } else {
-        ScheduleWriter.appendTeamSchedule(document, tournamentData, schedule, si, scheduleContainer);
+        ScheduleWriter.appendTeamSchedule(document, runMetadataFactory, schedule, si, scheduleContainer);
       }
     }
 

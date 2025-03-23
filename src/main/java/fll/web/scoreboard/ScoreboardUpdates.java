@@ -33,6 +33,7 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -89,7 +90,7 @@ public final class ScoreboardUpdates {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     try {
-      sendAllScores(tournamentData, datasource, challengeDescription, uuid, client);
+      sendAllScores(tournamentData.getRunMetadataFactory(), datasource, challengeDescription, uuid, client);
     } catch (final UnknownDisplayException e) {
       LOGGER.error("Cannot find display {} that was just added as a new client", uuid);
     }
@@ -97,7 +98,7 @@ public final class ScoreboardUpdates {
     return uuid;
   }
 
-  private static void sendAllScores(final TournamentData tournamentData,
+  private static void sendAllScores(final RunMetadataFactory runMetadataFactory,
                                     final DataSource datasource,
                                     final ChallengeDescription challengeDescription,
                                     final String displayUuid,
@@ -128,7 +129,7 @@ public final class ScoreboardUpdates {
           while (rs.next()) {
             final int teamNumber = rs.getInt("teamNumber");
             final int runNumber = rs.getInt("runNumber");
-            final RunMetadata runMetadata = tournamentData.getRunMetadata(runNumber);
+            final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
             if (!runMetadata.isScoreboardDisplay()) {
               continue;
             }
@@ -247,20 +248,20 @@ public final class ScoreboardUpdates {
   /**
    * Notify all clients of a new verified score. Messages are sent asynchronously.
    * 
-   * @param tournamentData tournament data cache
+   * @param runMetadataFactory run metadata cache
    * @param datasource database connection
    * @param team {@link ScoreUpdateMessage#getTeam()}
    * @param score {@link ScoreUpdateMessage#getScore()}
    * @param formattedScore {@link ScoreUpdateMessage#getFormattedScore()}
    * @param teamScore used to get some score information
    */
-  public static void newScore(final TournamentData tournamentData,
+  public static void newScore(final RunMetadataFactory runMetadataFactory,
                               final DataSource datasource,
                               final TournamentTeam team,
                               final double score,
                               final String formattedScore,
                               final TeamScore teamScore) {
-    final RunMetadata runMetadata = tournamentData.getRunMetadata(teamScore.getRunNumber());
+    final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(teamScore.getRunNumber());
     if (runMetadata.isScoreboardDisplay()) {
       final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
                                                                runMetadata.getDisplayName());

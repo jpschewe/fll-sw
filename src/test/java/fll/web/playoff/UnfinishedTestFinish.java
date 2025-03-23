@@ -55,7 +55,8 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
     assertThat(before, is(true));
 
     final TournamentData tournamentData = new TournamentData(getDatasource());
-    Playoff.finishBracket(tournamentData, getConnection(), getDatasource(), challenge, getTournament(), bracketName);
+    Playoff.finishBracket(tournamentData.getRunMetadataFactory(), getConnection(), getDatasource(), challenge,
+                          getTournament(), bracketName);
 
     final boolean after = Playoff.isPlayoffBracketUnfinished(getConnection(), getTournament().getTournamentID(),
                                                              bracketName);

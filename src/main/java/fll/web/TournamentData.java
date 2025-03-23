@@ -9,17 +9,16 @@ package fll.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import fll.Tournament;
 import fll.db.Queries;
 import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.util.FLLInternalException;
 
 /**
@@ -35,9 +34,24 @@ public class TournamentData {
   public TournamentData(final DataSource datasource) {
     this.datasource = datasource;
     this.currentTournament = null;
+    this.runMetadataFactory = null;
   }
 
   private final DataSource datasource;
+
+  private @MonotonicNonNull RunMetadataFactory runMetadataFactory;
+
+  /**
+   * @return {@link RunMetadataFactory} for the current tournament
+   */
+  public RunMetadataFactory getRunMetadataFactory() {
+    synchronized (this) {
+      if (null == runMetadataFactory) {
+        runMetadataFactory = new RunMetadataFactory(getDataSource(), getCurrentTournament());
+      }
+      return runMetadataFactory;
+    }
+  }
 
   /**
    * @return database datasource
@@ -46,7 +60,7 @@ public class TournamentData {
     return datasource;
   }
 
-  private @Nullable Tournament currentTournament;
+  private @MonotonicNonNull Tournament currentTournament;
 
   /**
    * @return the current tournament
@@ -86,88 +100,4 @@ public class TournamentData {
 
   private final Map<Integer, RunMetadata> runMetadata = new HashMap<>();
 
-  /**
-   * Get run metadata from cache or database.
-   * 
-   * @param runNumber run we are interested in
-   * @return the metadata
-   */
-  public RunMetadata getRunMetadata(final int runNumber) {
-    synchronized (this) {
-      final Integer runNumberObj = Integer.valueOf(runNumber);
-
-      if (runMetadata.containsKey(runNumberObj)) {
-        return runMetadata.get(runNumberObj);
-      } else {
-        try (Connection connection = getDataSource().getConnection()) {
-          final RunMetadata data = RunMetadata.getFromDatabase(connection, getCurrentTournament(), runNumber);
-          runMetadata.put(runNumberObj, data);
-          return data;
-        } catch (final SQLException e) {
-          throw new FLLInternalException("Unable to get run metadata from database", e);
-        }
-      }
-    }
-  }
-
-  /**
-   * @return the metadata for all runs that any team has completed, sorted by
-   *         round
-   */
-  public List<RunMetadata> getAllRunMetadata() {
-    final List<RunMetadata> allMetadata = new LinkedList<>();
-    try (Connection connection = getDataSource().getConnection()) {
-      final int maxPerfRounds = Queries.getMaxRunNumber(connection, getCurrentTournament());
-      final int maxMetadataRound = RunMetadata.getMaxRunNumber(connection, getCurrentTournament());
-
-      for (int round = 1; round <= Math.max(maxPerfRounds, maxMetadataRound); ++round) {
-        final RunMetadata metadata = getRunMetadata(round);
-        allMetadata.add(metadata);
-      }
-    } catch (final SQLException e) {
-      throw new FLLInternalException("Error getting maximum number of performance rounds", e);
-    }
-    return allMetadata;
-  }
-
-  /**
-   * @return regular match play run metadata
-   * @see #getAllRunMetadata()
-   */
-  public List<RunMetadata> getRegularMatchPlayRunMetadata() {
-    return getAllRunMetadata().stream() //
-                              .filter(RunMetadata::isRegularMatchPlay) //
-                              .toList();
-  }
-
-  /**
-   * Store run metadata and update the cache.
-   * 
-   * @param metadata the new meta data
-   */
-  public void storeRunMetadata(final RunMetadata metadata) {
-    synchronized (this) {
-      // clear cache on write
-      this.runMetadata.put(metadata.getRunNumber(), metadata);
-
-      try (Connection connection = getDataSource().getConnection()) {
-        RunMetadata.storeToDatabase(connection, getCurrentTournament(), metadata);
-      } catch (final SQLException e) {
-        throw new FLLInternalException("Error storing run metadata to database", e);
-      }
-    }
-  }
-
-  public void deleteRunMetadata(final int runNumber) {
-    synchronized (this) {
-      this.runMetadata.remove(runNumber);
-
-      try (Connection connection = getDataSource().getConnection()) {
-        RunMetadata.deleteFromDatabase(connection, getCurrentTournament(), runNumber);
-      } catch (final SQLException e) {
-        throw new FLLInternalException("Error delete run metadata", e);
-      }
-
-    }
-  }
 }
