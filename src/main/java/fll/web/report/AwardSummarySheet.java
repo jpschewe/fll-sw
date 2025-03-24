@@ -36,6 +36,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.report.awards.AwardCategory;
@@ -93,20 +94,17 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
     final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-
     try (Connection connection = datasource.getConnection()) {
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final int tournamentID = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
-
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=awardSummarySheet.pdf");
 
       try {
-        final Document document = generateReport(connection, challengeDescription, tournament, groupName);
+        final Document document = generateReport(connection, challengeDescription, tournamentData, groupName);
         final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
         FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
@@ -122,12 +120,9 @@ public class AwardSummarySheet extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private Document generateReport(final Connection connection,
                                   final ChallengeDescription challengeDescription,
-                                  final Tournament tournament,
+                                  final TournamentData tournamentData,
                                   final String groupName)
       throws SQLException, IOException {
-    if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
-      throw new FLLRuntimeException("Cannot generate report for a tournament other than the current tournament");
-    }
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -174,7 +169,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
       switch (category) {
       case PerformanceScoreCategory awardCategory -> {
         final @Nullable Element performance = createPerformanceBlock(document, connection, challengeDescription,
-                                                                     tournament, groupName, category);
+                                                                     tournamentData, groupName, category);
         if (null != performance) {
           if (!first) {
             report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
@@ -185,7 +180,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
         }
       }
       case NonNumericCategory awardCategory -> {
-        if (!CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(), awardCategory)) {
+        if (!CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournamentData.getCurrentTournament().getLevel(),
+                                                           awardCategory)) {
           if (!first) {
             report.appendChild(FOPUtils.createHorizontalLineBlock(document, SEPARATOR_THICKNESS));
           } else {
@@ -197,7 +193,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
       }
       case SubjectiveScoreCategory awardCategory -> {
         final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                          challengeDescription.getWinner(), tournament,
+                                                                          challengeDescription.getWinner(),
+                                                                          tournamentData.getCurrentTournament(),
                                                                           groupName, awardCategory.getName(),
                                                                           awardCategory.getTitle());
         if (null != subjectiveElement) {
@@ -212,7 +209,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
       }
       case VirtualSubjectiveScoreCategory awardCategory -> {
         final @Nullable Element subjectiveElement = createSubjectiveBlock(document, connection,
-                                                                          challengeDescription.getWinner(), tournament,
+                                                                          challengeDescription.getWinner(),
+                                                                          tournamentData.getCurrentTournament(),
                                                                           groupName, awardCategory.getName(),
                                                                           awardCategory.getTitle());
         if (null != subjectiveElement) {
@@ -285,13 +283,16 @@ public class AwardSummarySheet extends BaseFLLServlet {
   private @Nullable Element createPerformanceBlock(final Document document,
                                                    final Connection connection,
                                                    final ChallengeDescription description,
-                                                   final Tournament tournament,
+                                                   final TournamentData tournamentData,
                                                    final String groupName,
                                                    final AwardCategory awardCategory)
       throws SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
-                                                                                    tournament.getTournamentID());
-    final List<Team> teamsNeedingSeeding = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, true);
+                                                                                    tournamentData.getCurrentTournament()
+                                                                                                  .getTournamentID());
+    final Set<Team> teamsNeedingSeeding = Queries.getTeamsNeedingSeedingRuns(connection,
+                                                                             tournamentData.getRunMetadataFactory(),
+                                                                             tournamentTeams, true);
 
     final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
@@ -320,8 +321,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
 
     final Map<String, List<Top10.ScoreEntry>> performanceData = Top10.getTableAsMapByJudgingStation(connection,
                                                                                                     description,
-                                                                                                    tournament, true,
-                                                                                                    false);
+                                                                                                    tournamentData.getCurrentTournament(),
+                                                                                                    true, false);
 
     final List<Top10.ScoreEntry> scores = performanceData.get(groupName);
     if (null == scores) {

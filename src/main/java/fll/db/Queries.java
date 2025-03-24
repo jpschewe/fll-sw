@@ -919,6 +919,7 @@ public final class Queries {
    * double-checked will show up in this report as not entered.
    *
    * @param connection connection to the database
+   * @param runMetadataFactory run metadata
    * @param tournamentTeams keyed by team number
    * @param verifiedScoresOnly True if the database query should use only
    *          verified scores, false if it should use all scores.
@@ -926,31 +927,40 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
-  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
-                                                      final Map<Integer, ? extends Team> tournamentTeams,
-                                                      final boolean verifiedScoresOnly)
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Handle verified column or not")
+  public static Set<Team> getTeamsNeedingSeedingRuns(final Connection connection,
+                                                     final RunMetadataFactory runMetadataFactory,
+                                                     final Map<Integer, ? extends Team> tournamentTeams,
+                                                     final boolean verifiedScoresOnly)
       throws SQLException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
-    final String view;
 
+    final StringBuilder sql = new StringBuilder();
+    sql.append("SELECT TeamNumber FROM TournamentTeams ");
+    sql.append(" WHERE Tournament = ?"); // tournament
+    sql.append(" AND NOT EXISTS (SELECT 1 FROM performance ");
+    sql.append("   WHERE performance.Tournament = ?"); // tournament
+    sql.append("   AND performance.RunNumber = ?"); // run number
+    sql.append("   AND performance.TeamNumber = TournamentTeams.TeamNumber");
     if (verifiedScoresOnly) {
-      view = "verified_performance";
-    } else {
-      view = "Performance";
+      sql.append("   AND performance.verified = TRUE");
     }
+    sql.append(")");
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
-        + view //
-        + " WHERE Tournament = ? GROUP BY TeamNumber" //
-        + " HAVING Count(*) < ?")) {
+    final Set<Team> teamsNeedingRuns = new HashSet<>();
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
       prep.setInt(1, currentTournament);
-      prep.setInt(2, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
+      prep.setInt(2, currentTournament);
+      for (final RunMetadata runMetadata : runMetadataFactory.getRegularMatchPlayRunMetadata()) {
+        prep.setInt(3, runMetadata.getRunNumber());
 
-      try (ResultSet rs = prep.executeQuery()) {
-        return collectTeamsFromQuery(tournamentTeams, rs);
+        try (ResultSet rs = prep.executeQuery()) {
+          teamsNeedingRuns.addAll(collectTeamsFromQuery(tournamentTeams, rs));
+        }
       }
     }
+
+    return teamsNeedingRuns;
   }
 
   /**
@@ -961,21 +971,21 @@ public final class Queries {
    * @throws RuntimeException if a team couldn't be found in the map
    * @throws SQLException on a database error
    */
-  private static List<Team> collectTeamsFromQuery(final Map<Integer, ? extends Team> tournamentTeams,
-                                                  final ResultSet rs)
+  private static Set<Team> collectTeamsFromQuery(final Map<Integer, ? extends Team> tournamentTeams,
+                                                 final ResultSet rs)
       throws SQLException {
-    final List<Team> list = new LinkedList<>();
+    final Set<Team> teams = new HashSet<>();
     while (rs.next()) {
       final int teamNumber = rs.getInt(1);
       final Team team = tournamentTeams.get(teamNumber);
       if (null == team) {
-        throw new RuntimeException("Couldn't find team number "
+        throw new FLLRuntimeException("Couldn't find team number "
             + teamNumber
             + " in the list of tournament teams!");
       }
-      list.add(team);
+      teams.add(team);
     }
-    return list;
+    return teams;
   }
 
   /**

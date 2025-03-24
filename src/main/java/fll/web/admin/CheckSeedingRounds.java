@@ -8,8 +8,8 @@ package fll.web.admin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -20,6 +20,7 @@ import fll.Team;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -41,12 +42,14 @@ public final class CheckSeedingRounds {
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
 
-      final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, true);
+      final Set<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentData.getRunMetadataFactory(),
+                                                                tournamentTeams, true);
       page.setAttribute("teamsNeedingSeedingRounds", less);
 
     } catch (final SQLException e) {
