@@ -81,6 +81,7 @@ import fll.db.CategoryColumnMapping;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
+import fll.db.RunMetadata;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.web.developer.QueryHandler;
@@ -208,9 +209,6 @@ public class FullTournamentTest {
     final Tournament sourceTournament = Tournament.findTournamentByName(testDataConn, testTournamentName);
     assertNotNull(sourceTournament);
 
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(testDataConn,
-                                                                          sourceTournament.getTournamentID());
-
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(testDataConn,
                                                                                 sourceTournament.getTournamentID());
 
@@ -290,7 +288,9 @@ public class FullTournamentTest {
       LOGGER.info("Bracket starting rounds: {}", bracketStartingRounds);
 
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-        if (runNumber > numSeedingRounds) {
+        final RunMetadata runMetadata = RunMetadata.getFromDatabase(testDataConn, sourceTournament, runNumber);
+
+        if (runMetadata.isHeadToHead()) {
           if (!postSeedingActions) {
             IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
                 + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
@@ -337,7 +337,7 @@ public class FullTournamentTest {
           }
         }
 
-        if (runNumber > numSeedingRounds
+        if (runMetadata.isHeadToHead()
             && runNumber != maxRuns) {
           for (final String bracketName : initializedBracketNames) {
             printPlayoffScoresheets(bracketName);
