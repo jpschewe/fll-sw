@@ -887,7 +887,6 @@ public final class GenerateDB {
       perfRoundsSql.append(" ,perf_time TIME NOT NULL");
       perfRoundsSql.append(" ,table_color LONGVARCHAR NOT NULL");
       perfRoundsSql.append(" ,table_side INTEGER NOT NULL");
-      perfRoundsSql.append(" ,practice BOOLEAN NOT NULL");
       perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, perf_time)");
       if (createConstraints) {
         perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number) ON DELETE CASCADE");

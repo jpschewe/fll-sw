@@ -69,15 +69,11 @@ public final class PerformanceRunsVsSchedule {
           final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                    tsi.getTeamNumber());
 
-          int nextRunNumber = 1;
-          for (final PerformanceTime pt : tsi.getAllPerformances()) {
-            if (!pt.isPractice()) {
-              final Data d = new Data(team, nextRunNumber, pt);
-              data.add(d);
-
-              ++nextRunNumber;
-            }
-          }
+          final List<Data> teamData = tsi.enumeratePerformances() //
+                                         .map(p -> new Data(team, (int) (p.getRight()
+                                             + 1), p.getLeft())) //
+                                         .toList();
+          data.addAll(teamData);
         }
       }
 

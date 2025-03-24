@@ -1008,13 +1008,7 @@ public final class ImportDB {
   private static void upgrade17To18(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 17 to 18");
 
-    try (Statement stmt = connection.createStatement()) {
-      // need to check if practice column exists as this can be added in the upgrade
-      // from 1 to 2
-      if (!checkForColumnInTable(connection, "sched_perf_rounds", "practice")) {
-        stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD COLUMN practice BOOLEAN DEFAULT FALSE NOT NULL");
-      }
-    }
+    // no longer anything to do
 
     setDBVersion(connection, 18);
   }
@@ -1434,45 +1428,7 @@ public final class ImportDB {
   private static void upgrade33To34(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 33 to 34");
 
-    try (
-        PreparedStatement findTournaments = connection.prepareStatement("SELECT tournament_id FROM tournaments WHERE tournament_id != ?");
-        PreparedStatement getNumPracticeRounds = connection.prepareStatement("SELECT MAX(num_practice_rounds) FROM (" //
-            + "SELECT COUNT(team_number) AS num_practice_rounds FROM" //
-            + " sched_perf_rounds WHERE tournament = ?" //
-            + " AND practice = TRUE" //
-            + " GROUP BY team_number)")) {
-
-      findTournaments.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
-      try (ResultSet tournamentIds = findTournaments.executeQuery()) {
-        while (tournamentIds.next()) {
-          final int tournamentId = tournamentIds.getInt(1);
-          LOGGER.debug("Processing tournament {}", tournamentId);
-
-          getNumPracticeRounds.setInt(1, tournamentId);
-          try (ResultSet practiceRounds = getNumPracticeRounds.executeQuery()) {
-            final int numPracticeRounds;
-            if (practiceRounds.next()) {
-              final int num = practiceRounds.getInt(1);
-              if (practiceRounds.wasNull()) {
-                LOGGER.debug("practice rounds is null");
-                numPracticeRounds = 0;
-              } else {
-                LOGGER.debug("practice rounds is {}", num);
-                numPracticeRounds = num;
-              }
-            } else {
-              LOGGER.debug("no results from practice rounds");
-              numPracticeRounds = 0;
-            }
-
-            LOGGER.debug("Computed number of practice rounds: {}", numPracticeRounds);
-            TournamentParameters.setNumPracticeRounds(connection, tournamentId, numPracticeRounds);
-            LOGGER.debug("After setting practice rounds: {}",
-                         TournamentParameters.getNumPracticeRounds(connection, tournamentId));
-          } // practice rounds
-        } // foreach tournament
-      } // tournamentIds
-    } // prepared statement
+    // nothing to do now that practice rounds are handled by RunMetadata
 
     setDBVersion(connection, 34);
   }
@@ -2419,11 +2375,11 @@ public final class ImportDB {
     }
 
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, practice, perf_time, table_color, table_side" //
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, perf_time, table_color, table_side" //
             + " FROM sched_perf_rounds WHERE tournament=?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO sched_perf_rounds" //
-            + " (tournament, team_number, practice, perf_time, table_color, table_side)" //
-            + " VALUES (?, ?, ?, ?, ?, ?)")) {
+            + " (tournament, team_number, perf_time, table_color, table_side)" //
+            + " VALUES (?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);

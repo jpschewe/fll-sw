@@ -1605,7 +1605,7 @@ public class GreedySolver {
                     + 1));
                 final int displayedSide = side
                     + 1;
-                perfTimes.add(new PerformanceTime(time, tableName, displayedSide, false));
+                perfTimes.add(new PerformanceTime(time, tableName, displayedSide));
               }
             }
           }

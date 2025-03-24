@@ -217,29 +217,4 @@ public final class TeamScheduleInfo implements Serializable {
                  .intValue();
   }
 
-  /**
-   * Compute a display name for the specified performance round.
-   *
-   * @param performance the performance information
-   * @return the name to display
-   * @throws IndexOutOfBoundsException if the computed round index is less than
-   *           zero
-   */
-  public String getRoundName(final PerformanceTime performance) {
-    final int roundIndex = computeRound(performance);
-    if (roundIndex < 0) {
-      throw new IndexOutOfBoundsException("Computed round index for "
-          + performance
-          + " is "
-          + roundIndex);
-    } else {
-      if (performance.isPractice()) {
-        return String.format("Practice %d", roundIndex
-            + 1);
-      } else {
-        return String.valueOf(roundIndex
-            + 1);
-      }
-    }
-  }
 }

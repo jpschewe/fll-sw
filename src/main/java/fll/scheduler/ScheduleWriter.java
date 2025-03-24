@@ -940,11 +940,7 @@ public final class ScheduleWriter {
       }
 
       final int sideCompare = Integer.compare(perf1.getSide(), perf2.getSide());
-      if (sideCompare != 0) {
-        return sideCompare;
-      }
-
-      return Boolean.compare(perf1.isPractice(), perf2.isPractice());
+      return sideCompare;
     }
 
   }

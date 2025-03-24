@@ -411,7 +411,7 @@ public class TournamentSchedule implements Serializable {
         + " FROM schedule" //
         + " WHERE schedule.tournament = ?");
 
-        PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
+        PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side" //
             + " FROM sched_perf_rounds" //
             + " WHERE tournament = ? AND team_number = ?");
 
@@ -453,8 +453,7 @@ public class TournamentSchedule implements Serializable {
                     + " team: "
                     + teamNumber);
               }
-              final boolean practice = perfRounds.getBoolean(4);
-              final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide, practice);
+              final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide);
               ti.addPerformance(performance);
             } // foreach performance round
           } // allocate performance ResultSet
@@ -1064,7 +1063,7 @@ public class TournamentSchedule implements Serializable {
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide, false);
+        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide);
 
         ti.addPerformance(performance);
         if (performance.getSide() > 2
@@ -1147,8 +1146,8 @@ public class TournamentSchedule implements Serializable {
         + " (tournament, team_number)"//
         + " VALUES(?, ?)");
         PreparedStatement insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
-            + " (tournament, team_number, practice, perf_time, table_color, table_side)"//
-            + " VALUES(?, ?, ?, ?, ?, ?)");
+            + " (tournament, team_number, perf_time, table_color, table_side)"//
+            + " VALUES(?, ?, ?, ?, ?)");
         PreparedStatement insertSubjective = connection.prepareStatement("INSERT INTO sched_subjective" //
             + " (tournament, team_number, name, subj_time)" //
             + " VALUES(?, ?, ?, ?)");
@@ -1170,10 +1169,9 @@ public class TournamentSchedule implements Serializable {
 
         insertPerfRounds.setInt(2, si.getTeamNumber());
         for (final PerformanceTime performance : si.getAllPerformances()) {
-          insertPerfRounds.setBoolean(3, performance.isPractice());
-          insertPerfRounds.setTime(4, Time.valueOf(performance.getTime()));
-          insertPerfRounds.setString(5, performance.getTable());
-          insertPerfRounds.setInt(6, performance.getSide());
+          insertPerfRounds.setTime(3, Time.valueOf(performance.getTime()));
+          insertPerfRounds.setString(4, performance.getTable());
+          insertPerfRounds.setInt(5, performance.getSide());
           insertPerfRounds.executeUpdate();
         }
 

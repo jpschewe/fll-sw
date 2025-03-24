@@ -22,25 +22,13 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
    * @param time see {@link #getTime()}
    * @param table see {@link #getTable()}
    * @param side see {@link #getTable()}
-   * @param practice see {@link #isPractice()}
    */
   public PerformanceTime(final LocalTime time,
                          final String table,
-                         final int side,
-                         final boolean practice) {
+                         final int side) {
     this.table = table;
     this.side = side;
     this.time = time;
-    this.practice = practice;
-  }
-
-  private final boolean practice;
-
-  /**
-   * @return true if this is a practice round
-   */
-  public boolean isPractice() {
-    return practice;
   }
 
   private final String table;
@@ -117,11 +105,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
         return timeCompare;
       } else {
         final int tableCompare = compareTable(other);
-        if (0 == tableCompare) {
-          return Boolean.compare(this.practice, other.practice);
-        } else {
-          return tableCompare;
-        }
+        return tableCompare;
       }
     } else if (null == other.time) {
       return compareTable(other);
