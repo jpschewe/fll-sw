@@ -746,7 +746,7 @@ public class TournamentSchedule implements Serializable {
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, ScoresheetGenerator.AWARD_GROUP_LABEL, si.getAwardGroup());
       scoresheets.setName(sheetIndex, si.getTeamName());
-      scoresheets.setPractice(sheetIndex, performance.isPractice());
+      scoresheets.setPractice(sheetIndex, runMetadata.isPractice());
 
       ++sheetIndex;
     }
