@@ -25,16 +25,6 @@ public final class TournamentParameters {
   }
 
   /**
-   * Parameter name for {@link #getNumSeedingRounds(Connection, int)}.
-   */
-  public static final String SEEDING_ROUNDS = "SeedingRounds";
-
-  /**
-   * Default value for {@link #SEEDING_ROUNDS}.
-   */
-  public static final int SEEDING_ROUNDS_DEFAULT = 3;
-
-  /**
    * Parameter name for {@link #getNumPracticeRounds(Connection, int)}.
    */
   public static final String PRACTICE_ROUNDS = "PracticeRounds";
@@ -426,31 +416,6 @@ public final class TournamentParameters {
     prep.setInt(2, tournament);
     prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
     return prep;
-  }
-
-  /**
-   * @param connection database connection
-   * @param tournament the tournament ID
-   * @return the number of seeding rounds
-   * @throws SQLException on a database error
-   */
-  public static int getNumSeedingRounds(final Connection connection,
-                                        final int tournament)
-      throws SQLException {
-    return getIntTournamentParameter(connection, tournament, SEEDING_ROUNDS);
-  }
-
-  /**
-   * Set the default value for the number of seeding rounds.
-   * 
-   * @param connection database connection
-   * @param newSeedingRounds the new value
-   * @throws SQLException on a database error
-   */
-  public static void setDefaultNumSeedingRounds(final Connection connection,
-                                                final int newSeedingRounds)
-      throws SQLException {
-    setIntParameterDefault(connection, SEEDING_ROUNDS, newSeedingRounds);
   }
 
   /**

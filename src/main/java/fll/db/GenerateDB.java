@@ -711,10 +711,6 @@ public final class GenerateDB {
       }
 
       // Tournament Parameters
-      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.SEEDING_ROUNDS)) {
-        TournamentParameters.setDefaultNumSeedingRounds(connection, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-      }
-
       if (!TournamentParameters.defaultParameterExists(connection,
                                                        TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE)) {
         TournamentParameters.setDefaultPerformanceAdvancementPercentage(connection,
