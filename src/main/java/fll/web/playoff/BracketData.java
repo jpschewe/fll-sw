@@ -536,7 +536,9 @@ public final class BracketData extends BracketInfo {
           baseRunNumber = minRunNumber.getInt(1)
               - 1;
         } else {
-          baseRunNumber = TournamentParameters.getNumSeedingRounds(pConnection, currentTournament);
+          // methods called prior to this assume that PlayoffData is already populated
+          throw new FLLInternalException(String.format("Cannot find the minimum run number for playoff round '%s', this is a bug in the software and should not happen. Send the database to the developers with a description of what you were doing.",
+                                                       getBracketName()));
         }
       }
 
