@@ -41,7 +41,6 @@ import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
 import fll.db.TableInformation;
-import fll.db.TournamentParameters;
 import fll.util.DummyTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
