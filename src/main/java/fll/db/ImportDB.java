@@ -1941,17 +1941,40 @@ public final class ImportDB {
       // need to create prepared statement after adding column
       try (
           PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound WHERE tournament = ?")) {
-        for (final Tournament tournament : Tournament.getTournaments(connection)) {
-          final int maxRunNumber = Queries.getMaxRunNumber(connection, tournament);
 
-          prep.setInt(1, maxRunNumber);
-          prep.setInt(2, tournament.getTournamentID());
-          prep.executeUpdate();
+        // can't use Tournament.getTournaments because the table may not be complete
+        try (ResultSet tournamentIds = stmt.executeQuery("SELECT tournament_id FROM tournaments")) {
+          while (tournamentIds.next()) {
+            final int tournamentId = tournamentIds.getInt(1);
+            final int maxRunNumber = getMaxRunNumber(connection, tournamentId);
+
+            prep.setInt(1, maxRunNumber);
+            prep.setInt(2, tournamentId);
+            prep.executeUpdate();
+          }
         }
       } // prepared statement
-
-      setDBVersion(connection, 8);
     } // statement
+
+    setDBVersion(connection, 8);
+  }
+
+  private static int getMaxRunNumber(final Connection connection,
+                                     final int tournamentId)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
+      prep.setInt(1, tournamentId);
+      try (ResultSet rs = prep.executeQuery()) {
+        final int runNumber;
+        if (rs.next()) {
+          runNumber = rs.getInt(1);
+        } else {
+          runNumber = 0;
+        }
+        return runNumber;
+      }
+    }
   }
 
   /**
