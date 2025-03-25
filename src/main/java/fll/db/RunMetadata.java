@@ -168,14 +168,6 @@ public class RunMetadata {
       LOGGER.error("Error getting run metadata from database, synthesizing best guess data", e);
     }
 
-    boolean runningHeadToHead;
-    try {
-      runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID());
-    } catch (final SQLException e) {
-      LOGGER.error("Error checking if tournament is running head to head, defaulting to false", e);
-      runningHeadToHead = false;
-    }
-
     // TODO what to do if not found or a database error
     // Synthesize it to be "Run #", regular=false,
     // scoreboard=true
