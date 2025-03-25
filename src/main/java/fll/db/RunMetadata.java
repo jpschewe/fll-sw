@@ -180,7 +180,7 @@ public class RunMetadata {
     // Synthesize it to be "Run #", regular=false,
     // scoreboard=true
     return new RunMetadata(runNumber, String.format(TournamentSchedule.PERF_HEADER_FORMAT, runNumber), true,
-                           runningHeadToHead ? RunType.HEAD_TO_HEAD : RunType.OTHER);
+                           RunType.OTHER);
   }
 
   /**
