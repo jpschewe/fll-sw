@@ -451,8 +451,7 @@ public final class Playoff {
     final int maxRoundForTeams = Playoff.getMaxPerformanceRound(connection, tournament.getTournamentID());
 
     // the performance run number that is equal to playoff round 0, the round
-    // before the first playoff round
-    // for the teams
+    // before the first playoff round for the teams
     final int baseRunNumber;
     if (0 == maxRoundForTeams) {
       baseRunNumber = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
