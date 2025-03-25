@@ -24,7 +24,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TableInformation;
-import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import net.mtu.eggplant.util.StringUtils;
 

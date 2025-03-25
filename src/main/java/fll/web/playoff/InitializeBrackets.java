@@ -14,12 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Team;
@@ -31,9 +25,16 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Initialize playoff brackets.
@@ -62,6 +63,7 @@ public class InitializeBrackets extends BaseFLLServlet {
      * 'yes' if we are to have 3rd/4th place brackets, null otherwise.
      */
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -107,8 +109,8 @@ public class InitializeBrackets extends BaseFLLServlet {
             }
           }).collect(Collectors.toList());
 
-          Playoff.initializeBrackets(connection, challengeDescription, bracket, data.getEnableThird(), teams,
-                                     data.getSort());
+          Playoff.initializeBrackets(connection, challengeDescription, tournamentData, bracket, data.getEnableThird(),
+                                     teams, data.getSort());
           message.append("<p id='success'>Playoffs have been successfully initialized for division "
               + data.getBracket()
               + ".</p>");

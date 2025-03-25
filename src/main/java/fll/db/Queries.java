@@ -914,7 +914,7 @@ public final class Queries {
   }
 
   /**
-   * Get a list of team numbers that have fewer runs than seeding rounds. This
+   * Get a list of team numbers that are missing regular match play runs. This
    * uses only verified performance scores, so scores that have not been
    * double-checked will show up in this report as not entered.
    *
@@ -928,10 +928,10 @@ public final class Queries {
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Handle verified column or not")
-  public static Set<Team> getTeamsNeedingSeedingRuns(final Connection connection,
-                                                     final RunMetadataFactory runMetadataFactory,
-                                                     final Map<Integer, ? extends Team> tournamentTeams,
-                                                     final boolean verifiedScoresOnly)
+  public static Set<Team> getTeamsNeedingRegularMatchPlayRuns(final Connection connection,
+                                                              final RunMetadataFactory runMetadataFactory,
+                                                              final Map<Integer, ? extends Team> tournamentTeams,
+                                                              final boolean verifiedScoresOnly)
       throws SQLException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
 

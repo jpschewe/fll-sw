@@ -290,7 +290,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection,
                                                                                     tournamentData.getCurrentTournament()
                                                                                                   .getTournamentID());
-    final Set<Team> teamsNeedingSeeding = Queries.getTeamsNeedingSeedingRuns(connection,
+    final Set<Team> teamsNeedingSeeding = Queries.getTeamsNeedingRegularMatchPlayRuns(connection,
                                                                              tournamentData.getRunMetadataFactory(),
                                                                              tournamentTeams, true);
 

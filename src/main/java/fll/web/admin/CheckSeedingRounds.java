@@ -48,7 +48,7 @@ public final class CheckSeedingRounds {
 
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
 
-      final Set<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentData.getRunMetadataFactory(),
+      final Set<Team> less = Queries.getTeamsNeedingRegularMatchPlayRuns(connection, tournamentData.getRunMetadataFactory(),
                                                                 tournamentTeams, true);
       page.setAttribute("teamsNeedingSeedingRounds", less);
 
