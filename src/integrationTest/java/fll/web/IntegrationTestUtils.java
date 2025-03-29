@@ -67,6 +67,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -86,6 +87,7 @@ import fll.Launcher;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.RunMetadata;
 import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -758,6 +760,59 @@ public final class IntegrationTestUtils {
     final WebDriver selenium = new ChromeDriver();
 
     return selenium;
+  }
+
+  /**
+   * Configure the server using the specified {@link RunMetadata}.
+   * 
+   * @param selenium test driver
+   * @param seleniumWait test waiter
+   * @param runMetadata metadata to configure on the server
+   */
+  public static void configureRunMetadata(final WebDriver selenium,
+                                          final WebDriverWait seleniumWait,
+                                          final RunMetadata runMetadata) {
+    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
+        + "admin/edit_run_metadata.jsp");
+
+    final String displayNameInputId = String.format("%d_name", runMetadata.getRunNumber());
+    // ensure the run exists
+    final WebElement addRowButton = selenium.findElement(By.id("addRow"));
+
+    while (true) {
+      try {
+        seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id(displayNameInputId)));
+        break;
+      } catch (final TimeoutException e) {
+        LOGGER.debug("Didn't find element {}, adding a row", displayNameInputId, e);
+        addRowButton.click();
+      }
+    }
+
+    // configure page
+    final WebElement nameInput = selenium.findElement(By.id(displayNameInputId));
+    nameInput.clear();
+    nameInput.sendKeys(runMetadata.getDisplayName());
+
+    final WebElement runTypeInput = selenium.findElement(By.id(String.format("%d_runType",
+                                                                             runMetadata.getRunNumber())));
+    final Select runTypeSelect = new Select(runTypeInput);
+    runTypeSelect.selectByValue(runMetadata.getRunType().name());
+
+    final WebElement scoreboardDisplayInput = selenium.findElement(By.id(String.format("%d_scoreboardDisplay",
+                                                                                       runMetadata.getRunNumber())));
+    if (runMetadata.isScoreboardDisplay()
+        && !scoreboardDisplayInput.isSelected()) {
+      scoreboardDisplayInput.click();
+    } else if (!runMetadata.isScoreboardDisplay()
+        && scoreboardDisplayInput.isSelected()) {
+      scoreboardDisplayInput.click();
+    }
+
+    selenium.findElement(By.id("submit_data")).click();
+
+    // wait for positive response
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
   }
 
   /**
