@@ -48,6 +48,11 @@ public class EditRunMetadata extends BaseFLLServlet {
                                      final PageContext page) {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final List<RunMetadata> allRunMetadata = tournamentData.getRunMetadataFactory().getAllRunMetadata();
+    if (allRunMetadata.isEmpty()) {
+      // ensure there is always 1 run displayed on the edit page
+      // this is required for the javascript logic to add rows
+      allRunMetadata.add(tournamentData.getRunMetadataFactory().getRunMetadata(1));
+    }
     page.setAttribute("allRunMetadata", allRunMetadata);
     page.setAttribute("runTypes", RunMetadata.RunType.values());
 
