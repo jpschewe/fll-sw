@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type='button' id='cancel'
                             class='fll-sw-button'>Cancel</button>
 
-                        <c:if test="${EditFlag and isLastRun}">
+                        <c:if test="${canDelete}">
                             <button type='button' id='submit_delete'
                                 name='submit_delete'
                                 class='fll-sw-button'>Delete

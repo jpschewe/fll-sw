@@ -249,7 +249,7 @@ public final class ScoreEntry {
 
         // check if this is the last run a team has completed
         final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
-        pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
+        pageContext.setAttribute("canDelete", Boolean.valueOf(lRunNumber == maxRunCompleted && edit));
 
         // check if the score being edited is a bye
         pageContext.setAttribute("isBye",
