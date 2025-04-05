@@ -1,3 +1,4 @@
+* #1220 - Add metadata to runs so that they can be named and the user can control what runs are displayed on the scoreboard
 * #1232 - Allow the user to delete all advancing teams
 
 Release 19.2.0
