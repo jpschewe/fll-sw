@@ -89,7 +89,7 @@ span.sliderTickMark {
 }
 
 #side-panel_server-status.online {
-    background: lightgreen;
+    background-color: lightgreen;
 }
 
 #side-panel_open {
