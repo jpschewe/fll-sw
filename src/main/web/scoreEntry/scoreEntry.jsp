@@ -136,13 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <body>
 
-  <form
-    action="SubmitScoreEntry"
-    method="POST"
-    name="scoreEntry"
-    id="scoreEntry"
-     class="fll-sw-ui-body"
-    >
+    <form action="SubmitScoreEntry" method="POST" name="scoreEntry"
+        id="scoreEntry" class="fll-sw-ui-body">
         <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
                 <input type='hidden' name='tablename'
@@ -153,16 +148,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </c:otherwise>
         </c:choose>
 
-        <input
-      type='hidden'
-      id='NoShow'
-      name='NoShow'
-      value="false" />
-    <input
-      type='hidden'
-      id='delete'
-      name='delete'
-      value="false" />
+        <input type='hidden' id='NoShow' name='NoShow' value="false" />
+        <input type='hidden' id='delete' name='delete' value="false" />
 
         <input type='hidden' name='EditFlag' id='EditFlag'
             value='${EditFlag}' readonly />
