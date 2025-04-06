@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import fll.db.GlobalParameters;
+import fll.web.TournamentData;
 import fll.xml.ChallengeDescription;
 
 /**
@@ -46,9 +47,11 @@ public final class UnfinishedTestTieBrackets extends UnfinishedBaseTest {
     final ChallengeDescription challenge = GlobalParameters.getChallengeDescription(getConnection());
     assertThat(challenge, notNullValue());
 
+    final TournamentData tournamentData = new TournamentData(getDatasource());
+
     // should get false for all ties
-    final boolean result = Playoff.finishBracket(getConnection(), getDatasource(), challenge, getTournament(),
-                                                 bracketName);
+    final boolean result = Playoff.finishBracket(tournamentData.getRunMetadataFactory(), getConnection(),
+                                                 getDatasource(), challenge, getTournament(), bracketName);
     assertThat(result, is(false));
   }
 }

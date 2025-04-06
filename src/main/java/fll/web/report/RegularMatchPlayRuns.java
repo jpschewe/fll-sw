@@ -10,20 +10,24 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
@@ -43,27 +47,40 @@ public final class RegularMatchPlayRuns {
    *          "data" a sorted map of {@link TournamentTeam} to a list of formatted
    *          scores
    */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "List of regular match play runs is input as a string")
   public static void populateContext(final ServletContext application,
                                      final PageContext page) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     try (Connection connection = datasource.getConnection()) {
-      final Tournament currentTournament = Tournament.getCurrentTournament(connection);
+      final Tournament currentTournament = tournamentData.getCurrentTournament();
 
-      final int numRegularMatchPlayRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                                     currentTournament.getTournamentID());
+      final List<RunMetadata> regularMatchPlayRounds = tournamentData.getRunMetadataFactory()
+                                                                     .getRegularMatchPlayRunMetadata() //
+                                                                     .stream() //
+                                                                     .sorted(Comparator.comparing(RunMetadata::getRunNumber)) //
+                                                                     .toList();
+      page.setAttribute("regularMatchPlayRounds", regularMatchPlayRounds);
+
+      final String regularMatchPlayRunNumbers = regularMatchPlayRounds.stream() //
+                                                                      .map(RunMetadata::getRunNumber) //
+                                                                      .sorted() //
+                                                                      .map(String::valueOf) //
+                                                                      .collect(Collectors.joining(","));
 
       final SortedMap<TournamentTeam, List<String>> data = new TreeMap<>(TournamentTeam.TEAM_NUMBER_COMPARATOR);
 
       try (
           PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, computedtotal, noshow, bye FROM performance" //
               + " WHERE tournament = ?" //
-              + "   AND runnumber <= ?" //
+              + "   AND runnumber IN ("
+              + regularMatchPlayRunNumbers
+              + " )" //
               + " ORDER BY teamnumber ASC, runnumber ASC")) {
         prep.setInt(1, currentTournament.getTournamentID());
-        prep.setInt(2, numRegularMatchPlayRounds);
 
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
@@ -103,9 +120,7 @@ public final class RegularMatchPlayRuns {
           performanceData.add("&nbsp;");
         }
       });
-
       page.setAttribute("data", data);
-      page.setAttribute("maxScoresPerTeam", maxScoresPerTeam);
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error getting data for performance runs", e);

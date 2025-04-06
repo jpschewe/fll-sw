@@ -61,18 +61,18 @@ table .score-entry {
 .score-entry .y-n-button input+span {
     display: inline-block;
     width: 100%;
-    background: #DDDDDD;
+    background-color: #DDDDDD;
     text-align: center;
 }
 
 .score-entry .enum-button input+span {
-    background: #DDDDDD;
+    background-color: #DDDDDD;
     text-align: center;
     display: block;
 }
 
 .score-entry input:checked+span {
-    background: #00FF00;
+    background-color: #00FF00;
 }
 
 #floating-messages {
@@ -113,7 +113,7 @@ input[type=range] {
     margin: 0;
     padding: 0;
     border: 0;
-    background: transparent;
+    background-color: transparent;
     cursor: pointer;
 }
 
@@ -122,12 +122,12 @@ input[type=range] {
 }
 
 .verify-score-unverified {
-    background: red;
+    background-color: red;
     text-shadow: none;
 }
 
 .verify-score-verified {
-    background: #00ff00;
+    background-color: #00ff00;
     text-shadow: none;
 }
 
@@ -145,4 +145,8 @@ input[type=range] {
 
 #scoreEntry footer {
     border-top: 2px solid black;
+}
+
+.restriction-error {
+    background-color: red;
 }

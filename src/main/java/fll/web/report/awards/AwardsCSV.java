@@ -391,7 +391,8 @@ public class AwardsCSV extends BaseFLLServlet {
 
     final String awardName = "Robot Performance Award";
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     // make sure all groups are in the sort
     final List<String> localSortedAwardGroups = new LinkedList<>(sortedAwardGroups);

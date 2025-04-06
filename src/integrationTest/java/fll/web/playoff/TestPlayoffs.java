@@ -23,6 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
+import fll.db.RunMetadata;
 import fll.web.IntegrationTestUtils;
 
 /**
@@ -62,8 +63,9 @@ public class TestPlayoffs {
             + teamNumber, "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
 
-      // set seeding rounds to 1
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, seleniumWait, 1);
+      // 1 regular match plan run
+      final RunMetadata run1Metadata = new RunMetadata(1, "Run 1", true, RunMetadata.RunType.REGULAR_MATCH_PLAY);
+      IntegrationTestUtils.configureRunMetadata(selenium, seleniumWait, run1Metadata);
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {

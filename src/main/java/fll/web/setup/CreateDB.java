@@ -28,6 +28,7 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Authentication;
 import fll.db.DumpDB;
@@ -96,6 +97,9 @@ public class CreateDB extends BaseFLLServlet {
         }
       }
 
+      // make sure that we clear any cache in the Application
+      ApplicationAttributes.clearDatabaseAttributes(application);
+
       boolean success = false;
       if (null != request.getParameter("chooseDescription")) {
         final String description = WebUtils.getNonNullRequestParameter(request, "description");
@@ -108,8 +112,6 @@ public class CreateDB extends BaseFLLServlet {
           DumpDB.automaticBackup(connection, "before-create-from-description");
 
           GenerateDB.generateDB(challengeDescription, connection);
-
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           success = true;
         } catch (final URISyntaxException e) {
@@ -130,8 +132,6 @@ public class CreateDB extends BaseFLLServlet {
           DumpDB.automaticBackup(connection, "before-create-from-xml");
 
           GenerateDB.generateDB(challengeDescription, connection);
-
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           success = true;
         }
@@ -155,8 +155,8 @@ public class CreateDB extends BaseFLLServlet {
                                          importResult.getImportDirectory()));
           }
 
-          // remove application variables that depend on the database
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
+          ApplicationAttributes.getTournamentData(application)
+                               .setCurrentTournament(Tournament.getCurrentTournament(connection));
 
           final Collection<String> newDbUsers = Authentication.getUsers(connection);
           final Iterator<UserAccount> accountIter = accounts.iterator();

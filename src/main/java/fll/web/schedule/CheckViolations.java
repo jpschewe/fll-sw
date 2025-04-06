@@ -12,17 +12,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import fll.Team;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
 import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
 import fll.scheduler.ScheduleChecker;
@@ -35,6 +27,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Read the uploaded file, then check for constraint
@@ -74,14 +72,6 @@ public class CheckViolations extends BaseFLLServlet {
       final ScheduleChecker checker = new ScheduleChecker(schedParams, schedule);
       violations.addAll(checker.verifySchedule());
 
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentID);
-      if (uploadScheduleData.getNumPerformanceRuns() < numSeedingRounds) {
-        violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, Team.NULL_TEAM_NUMBER, null, null, null,
-                                               String.format("number of performance (%d) runs must be greater than or equal to the number of seeding rounds (%d)",
-                                                             uploadScheduleData.getNumPerformanceRuns(),
-                                                             numSeedingRounds)));
-      }
-      
       if (violations.isEmpty()) {
         WebUtils.sendRedirect(application, response, "/schedule/GatherTeamInformationChanges");
         return;

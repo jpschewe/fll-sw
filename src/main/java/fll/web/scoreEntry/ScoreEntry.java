@@ -26,11 +26,12 @@ import fll.Team;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.util.FLLInternalException;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.playoff.Playoff;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
@@ -129,31 +130,32 @@ public final class ScoreEntry {
     final boolean tabletEntry = isTabletEntry(request, session);
     final boolean showScores = !tabletEntry
         || Boolean.parseBoolean(request.getParameter("showScores"));
-
-    final boolean practice = Boolean.parseBoolean(request.getParameter("practice"));
-
-    pageContext.setAttribute("practice", practice);
-    pageContext.setAttribute("EditFlag", edit);
     pageContext.setAttribute("showScores", showScores);
+
+    final boolean practiceParameter = Boolean.parseBoolean(request.getParameter("practice"));
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final double minimumAllowedScore = challengeDescription.getPerformance().getMinimumScore();
     pageContext.setAttribute("minimumAllowedScore", minimumAllowedScore);
 
-    final boolean previousVerified;
-    final boolean regularMatchPlay;
-    if (practice) {
-      pageContext.setAttribute("isBye", false);
-      pageContext.setAttribute("isNoShow", false);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final int tournamentId = tournamentData.getCurrentTournament().getTournamentID();
 
-      regularMatchPlay = true;
+    final boolean previousVerified;
+    final boolean isBye;
+    final boolean isNoShow;
+    if (practiceParameter) {
+      isBye = false;
+      isNoShow = false;
+
       previousVerified = true;
+      pageContext.setAttribute("practiceEntryOnly", true);
+      pageContext.setAttribute("runType", RunMetadata.RunType.PRACTICE.name());
     } else {
+      pageContext.setAttribute("practiceEntryOnly", false);
 
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       try (Connection connection = datasource.getConnection()) {
-
-        // support the unverified runs select box
         final String lTeamNum = request.getParameter("TeamNumber");
         if (null == lTeamNum) {
           SessionAttributes.appendToMessage(session,
@@ -161,36 +163,40 @@ public final class ScoreEntry {
           response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
           return false;
         }
+
         final int dashIndex = lTeamNum.indexOf('-');
         final int teamNumber;
         final String runNumberStr;
         if (dashIndex > 0) {
+          // this came from the verified runs select
+
           // teamNumber - runNumber
           final String teamStr = lTeamNum.substring(0, dashIndex);
           teamNumber = Integer.parseInt(teamStr);
           runNumberStr = lTeamNum.substring(dashIndex
               + 1);
         } else {
+          // this came from the team select
+          // RunNumber parameter is non-null if the user selected edit
+
           runNumberStr = request.getParameter("RunNumber");
           teamNumber = Utilities.getIntegerNumberFormat().parse(lTeamNum).intValue();
         }
-        final int tournament = Queries.getCurrentTournament(connection);
-        final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
+
         final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
         if (!tournamentTeams.containsKey(Integer.valueOf(teamNumber))) {
           throw new RuntimeException("Selected team number is not valid: "
               + teamNumber);
         }
+
         final Team team = tournamentTeams.get(Integer.valueOf(teamNumber));
         pageContext.setAttribute("team", team);
 
         // the next run the team will be competing in
         final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
 
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament);
-
         // what run number we're going to edit/enter
-        int lRunNumber;
+        final int lRunNumber;
         if (edit) {
           if (null == runNumberStr) {
             SessionAttributes.appendToMessage(session,
@@ -198,8 +204,10 @@ public final class ScoreEntry {
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return false;
           }
+
           final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
           if (runNumber == 0) {
+            // 0 is the value of the parameter when the user selected "Last Run"
             lRunNumber = nextRunNumber
                 - 1;
             if (lRunNumber < 1) {
@@ -209,7 +217,7 @@ public final class ScoreEntry {
               return false;
             }
           } else {
-            if (!Queries.performanceScoreExists(connection, tournament, teamNumber, runNumber)) {
+            if (!Queries.performanceScoreExists(connection, tournamentId, teamNumber, runNumber)) {
               SessionAttributes.appendToMessage(session,
                                                 "<p name='error' class='error'>Team has not yet competed in run "
                                                     + runNumber
@@ -217,63 +225,60 @@ public final class ScoreEntry {
               response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
               return false;
             }
+
             lRunNumber = runNumber;
           }
+
+          isBye = Queries.isBye(connection, tournamentId, teamNumber, lRunNumber);
+          isNoShow = Queries.isNoShow(connection, tournamentId, teamNumber, lRunNumber);
         } else {
-          if (runningHeadToHead
-              && nextRunNumber > numSeedingRounds) {
-            if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
-                                                            Collections.singletonList(teamNumber))) {
-              SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Selected team ("
-                  + teamNumber
-                  + ") is not involved in an unfinished head to head bracket. Please double check that the head to head brackets were properly initialized"
-                  + " If you were intending to double check a score, you probably just forgot to check"
-                  + " the box for doing so.</p>");
-              response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-              return false;
-            } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
-              SessionAttributes.appendToMessage(session,
-                                                "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
-              response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-              return false;
-            }
-          }
+          // entering a score
           lRunNumber = nextRunNumber;
+
+          // cannot be a bye or no show already when entering a new score
+          isBye = false;
+          isNoShow = false;
         }
         pageContext.setAttribute("lRunNumber", lRunNumber);
 
-        regularMatchPlay = lRunNumber <= numSeedingRounds;
+        final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(lRunNumber);
 
-        final String roundText;
-        if (runningHeadToHead
-            && !regularMatchPlay) {
-          final String division = Playoff.getPlayoffDivision(connection, tournament, teamNumber, lRunNumber);
-          final int playoffRun = Playoff.getPlayoffRound(connection, tournament, division, lRunNumber);
-          roundText = "Playoff&nbsp;Round&nbsp;"
-              + playoffRun;
-        } else {
-          roundText = "Run&nbsp;Number&nbsp;"
-              + lRunNumber;
+        if (!edit
+            && runMetadata.isHeadToHead()) {
+          if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournamentId,
+                                                          Collections.singletonList(teamNumber))) {
+            SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Selected team ("
+                + teamNumber
+                + ") is not involved in an unfinished head to head bracket. Please double check that the head to head brackets were properly initialized"
+                + " If you were intending to double check a score, you probably just forgot to check"
+                + " the box for doing so.</p>");
+            response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+            return false;
+          } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
+            SessionAttributes.appendToMessage(session,
+                                              "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
+            response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+            return false;
+          }
         }
+
+        final String roundText = runMetadata.getDisplayName();
         pageContext.setAttribute("roundText", roundText);
 
         // check if this is the last run a team has completed
         final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
-        pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
-
-        // check if the score being edited is a bye
-        pageContext.setAttribute("isBye",
-                                 Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
-        pageContext.setAttribute("isNoShow",
-                                 Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
+        pageContext.setAttribute("canDelete", Boolean.valueOf(lRunNumber == maxRunCompleted
+            && edit));
 
         // check if previous run is verified
         if (lRunNumber > 1) {
-          previousVerified = Queries.isVerified(connection, tournament, teamNumber, lRunNumber
+          previousVerified = Queries.isVerified(connection, tournamentId, teamNumber, lRunNumber
               - 1);
         } else {
           previousVerified = true;
         }
+
+        pageContext.setAttribute("runType", runMetadata.getRunType().name());
       } catch (final ParseException pe) {
         throw new FLLInternalException(pe);
       } catch (final SQLException e) {
@@ -284,24 +289,10 @@ public final class ScoreEntry {
 
     } // not practice
 
+    pageContext.setAttribute("isBye", isBye);
+    pageContext.setAttribute("isNoShow", isNoShow);
     pageContext.setAttribute("previousVerified", previousVerified);
-
-    if (practice
-        || regularMatchPlay) {
-      if (edit) {
-        pageContext.setAttribute("top_info_color", "yellow");
-      } else {
-        pageContext.setAttribute("top_info_color", "#e0e0e0");
-      }
-    } else {
-      pageContext.setAttribute("top_info_color", "#00ff00");
-    }
-
-    if (edit) {
-      pageContext.setAttribute("body_background", "yellow");
-    } else {
-      pageContext.setAttribute("body_background", "transparent");
-    }
+    pageContext.setAttribute("EditFlag", edit);
 
     return true;
   }

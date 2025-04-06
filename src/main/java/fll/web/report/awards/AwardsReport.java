@@ -602,7 +602,8 @@ public class AwardsReport extends BaseFLLServlet {
 
     categoryTitleBlock.appendChild(document.createTextNode("Robot Performance Award - top score from regular match play"));
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     final Element table = FOPUtils.createBasicTable(document);
 

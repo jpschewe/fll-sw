@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * PDF of top performance scores organized by award group.
+ * PDF of top regular match play performance scores organized by award group.
  */
 @WebServlet("/report/TopScoreReportPerAwardGroupPdf")
 public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
@@ -53,7 +53,8 @@ public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
-      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                         false);
       outputReport(response.getOutputStream(), challengeDescription, tournament, "Award Group", scores);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);

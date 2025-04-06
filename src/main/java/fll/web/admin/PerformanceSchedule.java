@@ -20,6 +20,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
@@ -30,8 +31,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputPerformanceScheduleByTime(Connection, Tournament,
- *      TournamentSchedule, java.io.OutputStream)
+ * @see ScheduleWriter#outputPerformanceScheduleByTime(Connection,
+ *      TournamentData, TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/PerformanceSchedule")
 public class PerformanceSchedule extends BaseFLLServlet {
@@ -50,9 +51,10 @@ public class PerformanceSchedule extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final int currentTournamentID = tournament.getTournamentID();
 
@@ -68,7 +70,7 @@ public class PerformanceSchedule extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
                          String.format("attachment; filename=\"%s_performanceSchedule.pdf\"", tournament.getName()));
-      ScheduleWriter.outputPerformanceScheduleByTime(connection, tournament, schedule, response.getOutputStream());
+      ScheduleWriter.outputPerformanceScheduleByTime(connection, tournamentData, schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);

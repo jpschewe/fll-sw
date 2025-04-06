@@ -106,8 +106,7 @@ public class TournamentScheduleTest {
                                                     TournamentSchedule.ORGANIZATION_HEADER,
                                                     TournamentSchedule.TEAM_NAME_HEADER, "Div",
                                                     TournamentSchedule.JUDGE_GROUP_HEADER, null,
-                                                    subjectiveColumnMappings, perfColumn, perfTableColumn,
-                                                    new String[0], new String[0]);
+                                                    subjectiveColumnMappings, perfColumn, perfTableColumn);
   }
 
   /**
@@ -213,8 +212,7 @@ public class TournamentScheduleTest {
                                                     TournamentSchedule.ORGANIZATION_HEADER,
                                                     TournamentSchedule.TEAM_NAME_HEADER, "Div",
                                                     TournamentSchedule.JUDGE_GROUP_HEADER, null,
-                                                    subjectiveColumnMappings, perfColumn, perfTableColumn,
-                                                    new String[0], new String[0]);
+                                                    subjectiveColumnMappings, perfColumn, perfTableColumn);
   }
 
   /**

@@ -51,10 +51,6 @@ class ChooseScheduleHeadersDialog extends JDialog {
 
   private final JComboBox<String> wave;
 
-  private final List<JComboBox<String>> practiceRounds;
-
-  private final List<JComboBox<String>> practiceRoundTables;
-
   private final List<JComboBox<String>> performanceRounds;
 
   private final List<JComboBox<String>> performanceRoundTables;
@@ -66,15 +62,13 @@ class ChooseScheduleHeadersDialog extends JDialog {
   /**
    * @param owner the owner for the dialog
    * @param headerNames the header names to choose from
-   * @param numPracticeRounds number of practice rounds
-   * @param numRegularMatchRounds number of regular match play rounds
+   * @param numPerformanceRounds number of scheduled performance rounds
    * @param description the challenge description to get the subjective categories
    *          from
    */
   ChooseScheduleHeadersDialog(final JFrame owner,
                               final Collection<String> headerNames,
-                              final int numPracticeRounds,
-                              final int numRegularMatchRounds,
+                              final int numPerformanceRounds,
                               final ChallengeDescription description) {
     super(owner, "Choose schedule columns", true);
 
@@ -122,43 +116,9 @@ class ChooseScheduleHeadersDialog extends JDialog {
     panel.add(wave);
     wave.setSelectedItem(TournamentSchedule.WAVE_HEADER);
 
-    practiceRounds = new ArrayList<>(numPracticeRounds);
-    practiceRoundTables = new ArrayList<>(numPracticeRounds);
-    for (int i = 0; i < numPracticeRounds; ++i) {
-      final int roundNumber = i
-          + 1;
-      panel.add(new JLabel(String.format("Practice %d", roundNumber)));
-      final JComboBox<String> time = new JComboBox<>(requiredHeaderNames);
-      panel.add(time);
-      practiceRounds.add(time);
-
-      panel.add(new JLabel(String.format("Practice %d table", roundNumber)));
-      final JComboBox<String> table = new JComboBox<>(requiredHeaderNames);
-      panel.add(table);
-      practiceRoundTables.add(table);
-
-      // be smart about picking columns
-      if (roundNumber == 1) {
-        // try the short version
-        if (requiredHeaderNames.contains(TournamentSchedule.BASE_PRACTICE_HEADER_SHORT)) {
-          time.setSelectedItem(TournamentSchedule.BASE_PRACTICE_HEADER_SHORT);
-        } else {
-          time.setSelectedItem(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
-        }
-        if (requiredHeaderNames.contains(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT_SHORT)) {
-          table.setSelectedItem(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT_SHORT);
-        } else {
-          table.setSelectedItem(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
-        }
-      } else {
-        time.setSelectedItem(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, roundNumber));
-        table.setSelectedItem(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, roundNumber));
-      }
-    }
-
-    performanceRounds = new ArrayList<>(numRegularMatchRounds);
-    performanceRoundTables = new ArrayList<>(numRegularMatchRounds);
-    for (int i = 0; i < numRegularMatchRounds; ++i) {
+    performanceRounds = new ArrayList<>(numPerformanceRounds);
+    performanceRoundTables = new ArrayList<>(numPerformanceRounds);
+    for (int i = 0; i < numPerformanceRounds; ++i) {
       final int roundNumber = i
           + 1;
       panel.add(new JLabel(String.format("Performance %d", roundNumber)));
@@ -236,18 +196,13 @@ class ChooseScheduleHeadersDialog extends JDialog {
     final String[] perfTableColumn = performanceRoundTables.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
                                                            .collect(Collectors.toList()).toArray(new String[0]);
 
-    final String[] practiceColumn = practiceRounds.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
-                                                  .collect(Collectors.toList()).toArray(new String[0]);
-    final String[] practiceTableColumn = practiceRoundTables.stream().map(c -> c.getItemAt(c.getSelectedIndex()))
-                                                            .collect(Collectors.toList()).toArray(new String[0]);
-
     return new ColumnInformation(headerRowIndex, headerRow, teamNumber.getItemAt(teamNumber.getSelectedIndex()),
                                  organization.getItemAt(organization.getSelectedIndex()),
                                  teamName.getItemAt(teamName.getSelectedIndex()),
                                  awardGroup.getItemAt(awardGroup.getSelectedIndex()),
                                  judgingGroup.getItemAt(judgingGroup.getSelectedIndex()),
                                  wave.getItemAt(wave.getSelectedIndex()), subjectiveColumnMappings, perfColumn,
-                                 perfTableColumn, practiceColumn, practiceTableColumn);
+                                 perfTableColumn);
   }
 
 }

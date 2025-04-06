@@ -20,6 +20,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
@@ -31,7 +32,7 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * @see ScheduleWriter#outputPerformanceSchedulePerTableByTime(Connection,
- *      Tournament, TournamentSchedule, java.io.OutputStream)
+ *      TournamentData, TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/PerformanceSchedulePerTable")
 public class PerformanceSchedulePerTable extends BaseFLLServlet {
@@ -50,9 +51,10 @@ public class PerformanceSchedulePerTable extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
       final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
@@ -68,7 +70,7 @@ public class PerformanceSchedulePerTable extends BaseFLLServlet {
       response.setHeader("Content-Disposition",
                          String.format("attachment; filename=\"%s_performanceSchedulePerTable.pdf\"",
                                        tournament.getName()));
-      ScheduleWriter.outputPerformanceSchedulePerTableByTime(connection, tournament, schedule,
+      ScheduleWriter.outputPerformanceSchedulePerTableByTime(connection, tournamentData, schedule,
                                                              response.getOutputStream());
 
     } catch (final SQLException sqle) {

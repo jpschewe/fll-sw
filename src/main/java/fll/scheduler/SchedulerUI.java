@@ -89,7 +89,6 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
-import fll.db.TournamentParameters;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
@@ -1070,14 +1069,10 @@ public class SchedulerUI extends JFrame {
       throw new FLLRuntimeException("No data in the file");
     }
 
-    final int numPracticeRounds = promptUserForInt(owner, "Enter the number of practice rounds",
-                                                   TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
+    final int numPerformanceRounds = promptUserForInt(owner, "Enter the number of scheduled performance rounds", 1);
 
-    final int numRegularMatchRounds = promptUserForInt(owner, "Enter the number of performance rounds",
-                                                       TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-
-    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(owner, headerNames, numPracticeRounds,
-                                                                               numRegularMatchRounds, description);
+    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(owner, headerNames, numPerformanceRounds,
+                                                                               description);
     dialog.setLocationRelativeTo(owner);
     dialog.setVisible(true);
 
@@ -1411,24 +1406,14 @@ public class SchedulerUI extends JFrame {
           } else if (null != violation.getPerformance()) {
             final LocalTime violationPerformanceTime = violation.getPerformance();
 
-            final Pair<PerformanceTime, Long> practiceResult = schedInfo.enumeratePracticePerformances()
-                                                                        .filter(p -> p.getLeft().getTime()
-                                                                                      .equals(violationPerformanceTime))
-                                                                        .findFirst().orElse(null);
-
-            final Pair<PerformanceTime, Long> regularMatchPlayResult = schedInfo.enumerateRegularMatchPlayPerformances()
+            final Pair<PerformanceTime, Long> performanceRoundResult = schedInfo.enumeratePerformances()
                                                                                 .filter(p -> p.getLeft().getTime()
                                                                                               .equals(violationPerformanceTime))
                                                                                 .findFirst().orElse(null);
             final int firstIdx;
-            if (null != practiceResult) {
-              firstIdx = practiceResult.getRight().intValue()
+            if (null != performanceRoundResult) {
+              firstIdx = performanceRoundResult.getRight().intValue()
                   * SchedulerTableModel.NUM_COLUMNS_PER_ROUND;
-            } else if (null != regularMatchPlayResult) {
-              firstIdx = (getScheduleData().getNumberOfPracticeRounds()
-                  * SchedulerTableModel.NUM_COLUMNS_PER_ROUND)
-                  + (regularMatchPlayResult.getRight().intValue()
-                      * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             } else {
               throw new RuntimeException("Internal error, cannot find performance at time "
                   + violationPerformanceTime);

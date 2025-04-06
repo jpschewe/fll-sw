@@ -1,3 +1,4 @@
+* #1220 - Add metadata to runs so that they can be named and the user can control what runs are displayed on the scoreboard
 * #1259 - Fix bug switching between full scoreboard and all teams / most recent scores
 * #1242 - Don't stomp awards script when saving presenters
 * #1253 - fix error uploading delibration winners a second time

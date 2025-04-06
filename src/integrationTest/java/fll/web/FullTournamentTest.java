@@ -81,6 +81,7 @@ import fll.db.CategoryColumnMapping;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
+import fll.db.RunMetadata;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.web.developer.QueryHandler;
@@ -208,12 +209,6 @@ public class FullTournamentTest {
     final Tournament sourceTournament = Tournament.findTournamentByName(testDataConn, testTournamentName);
     assertNotNull(sourceTournament);
 
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(testDataConn,
-                                                                          sourceTournament.getTournamentID());
-
-    final int numPracticeRounds = TournamentParameters.getNumPracticeRounds(testDataConn,
-                                                                            sourceTournament.getTournamentID());
-
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(testDataConn,
                                                                                 sourceTournament.getTournamentID());
 
@@ -234,12 +229,6 @@ public class FullTournamentTest {
 
     LOGGER.info("Setting head to head parameter");
     IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, runningHeadToHead);
-
-    LOGGER.info("Setting number of regular match play rounds");
-    IntegrationTestUtils.setNumRegularMatchPlayRounds(selenium, seleniumWait, numSeedingRounds);
-
-    LOGGER.info("Setting number of practice rounds");
-    IntegrationTestUtils.setNumPracticeRounds(selenium, seleniumWait, numPracticeRounds);
 
     LOGGER.info("Loading the schedule");
     uploadSchedule(selenium, seleniumWait, testDataConn, sourceTournament, outputDirectory);
@@ -299,7 +288,9 @@ public class FullTournamentTest {
       LOGGER.info("Bracket starting rounds: {}", bracketStartingRounds);
 
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-        if (runNumber > numSeedingRounds) {
+        final RunMetadata runMetadata = RunMetadata.getFromDatabase(testDataConn, sourceTournament, runNumber);
+
+        if (runMetadata.isHeadToHead()) {
           if (!postSeedingActions) {
             IntegrationTestUtils.downloadFile(new URI(TestUtils.URL_ROOT
                 + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
@@ -346,7 +337,7 @@ public class FullTournamentTest {
           }
         }
 
-        if (runNumber > numSeedingRounds
+        if (runMetadata.isHeadToHead()
             && runNumber != maxRuns) {
           for (final String bracketName : initializedBracketNames) {
             printPlayoffScoresheets(bracketName);
@@ -443,6 +434,8 @@ public class FullTournamentTest {
 
       // accept default schedule constraints
       seleniumWait.until(ExpectedConditions.urlContains("scheduleConstraints"));
+      LOGGER.info("Setting number of performance runs to {}", String.valueOf(schedule.getTotalNumberOfRounds()));
+      selenium.findElement(By.id("numPerformanceRuns")).sendKeys(String.valueOf(schedule.getTotalNumberOfRounds()));
       selenium.findElement(By.id("submit_data")).click();
 
       // map column names
@@ -455,26 +448,14 @@ public class FullTournamentTest {
       new Select(selenium.findElement(By.name("judgingGroup"))).selectByVisibleText(TournamentSchedule.JUDGE_GROUP_HEADER);
       new Select(selenium.findElement(By.name("wave"))).selectByVisibleText(TournamentSchedule.WAVE_HEADER);
 
-      for (int i = 0; i < schedule.getNumberOfPracticeRounds(); ++i) {
+      for (int i = 0; i < schedule.getTotalNumberOfRounds(); ++i) {
         final int round = i
             + 1;
-        new Select(selenium.findElement(By.name(String.format("practice%d",
-                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT,
-                                                                                                          round));
-
-        new Select(selenium.findElement(By.name(String.format("practiceTable%d",
-                                                              round)))).selectByVisibleText(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT,
-                                                                                                          round));
-      }
-
-      for (int i = 0; i < schedule.getNumberOfRegularMatchPlayRounds(); ++i) {
-        final int round = i
-            + 1;
-        new Select(selenium.findElement(By.name(String.format("perf%d",
+        new Select(selenium.findElement(By.name(String.format("perf%d_time",
                                                               round)))).selectByVisibleText(String.format(TournamentSchedule.PERF_HEADER_FORMAT,
                                                                                                           round));
 
-        new Select(selenium.findElement(By.name(String.format("perfTable%d",
+        new Select(selenium.findElement(By.name(String.format("perf%d_table",
                                                               round)))).selectByVisibleText(String.format(TournamentSchedule.TABLE_HEADER_FORMAT,
                                                                                                           round));
       }

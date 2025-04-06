@@ -221,7 +221,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <input type="file" size="32" id='scheduleFile'
                     name="file" />
                 <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/schedule/CheckScheduleExists'/>" />
+                    value="<c:url value='/schedule/CheckPerformanceScoresExist'/>" />
                 <input id="upload-schedule" type="submit"
                     value="Upload Schedule" />
             </form>
@@ -398,6 +398,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <br>
                 <a href='javascript:hide("JudgingGroupHelp")'>[hide]</a>
             </div>
+        </li>
+
+        <li>
+            <a href="<c:url value='/admin/edit_run_metadata.jsp'/>">Edit
+                Performance Run Data</a>
         </li>
 
         <li>

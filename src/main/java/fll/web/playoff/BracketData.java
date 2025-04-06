@@ -24,7 +24,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TableInformation;
-import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import net.mtu.eggplant.util.StringUtils;
 
@@ -396,8 +395,6 @@ public final class BracketData extends BracketInfo {
 
   /**
    * The last performance run number before the first playoff round.
-   * Not equal to num seeding rounds because of the possibility of a team being
-   * in multiple playoff brackets.
    */
   private final int baseRunNumber;
 
@@ -538,7 +535,9 @@ public final class BracketData extends BracketInfo {
           baseRunNumber = minRunNumber.getInt(1)
               - 1;
         } else {
-          baseRunNumber = TournamentParameters.getNumSeedingRounds(pConnection, currentTournament);
+          // methods called prior to this assume that PlayoffData is already populated
+          throw new FLLInternalException(String.format("Cannot find the minimum run number for playoff round '%s', this is a bug in the software and should not happen. Send the database to the developers with a description of what you were doing.",
+                                                       getBracketName()));
         }
       }
 
@@ -1396,7 +1395,8 @@ public final class BracketData extends BracketInfo {
     final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
                                                                                                    tournament);
 
-    final List<TableInformation> tablesToUse = TableInformation.filterToTablesForBracket(tournamentTables, pConnection, tournament, division);
+    final List<TableInformation> tablesToUse = TableInformation.filterToTablesForBracket(tournamentTables, pConnection,
+                                                                                         tournament, division);
 
     Iterator<TableInformation> tAssignIt = tablesToUse.iterator();
 
