@@ -267,8 +267,8 @@ function addToAllTeams(scoreUpdate) {
 
     // populate the cells
     const runCell = document.getElementById(allTeamsRunCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
-    runCell.innerText = scoreUpdate.runDisplayName;
-    
+    runCell.innerText = scoreUpdate.runMetadata.displayName;
+
     const scoreCell = document.getElementById(allTeamsScoreCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
     scoreCell.innerText = scoreUpdate.formattedScore;
 
@@ -426,7 +426,10 @@ function messageReceived(event) {
             const mostRecentTableBody = document.getElementById("most_recent_table_body");
             addToMostRecent(mostRecentTableBody, message);
             addToAllTeams(message);
-            topScoresAddScore(message);
+
+            if (message.runMetadata.regularMatchPlay) {
+                topScoresAddScore(message);
+            }
         }
     } else if (message.type == DELETE_MESSAGE_TYPE) {
         location.reload();

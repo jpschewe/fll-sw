@@ -145,7 +145,7 @@ public final class ScoreboardUpdates {
             final double score = performanceElement.evaluate(teamScore);
             final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
             final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
-                                                                     runMetadata.getDisplayName());
+                                                                     runMetadata);
 
             try {
               final String updateStr = jsonMapper.writeValueAsString(update);
@@ -263,8 +263,7 @@ public final class ScoreboardUpdates {
                               final TeamScore teamScore) {
     final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(teamScore.getRunNumber());
     if (runMetadata.isScoreboardDisplay()) {
-      final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
-                                                               runMetadata.getDisplayName());
+      final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore, runMetadata);
       newScore(datasource, update);
     }
   }

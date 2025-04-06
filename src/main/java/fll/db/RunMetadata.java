@@ -6,6 +6,7 @@
 
 package fll.db;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +23,7 @@ import fll.util.FLLRuntimeException;
 /**
  * Metadata for performance runs.
  */
-public class RunMetadata {
+public class RunMetadata implements Serializable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
