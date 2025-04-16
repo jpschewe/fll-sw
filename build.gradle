@@ -297,7 +297,7 @@ dependencies {
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
-  integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-java", version: "4.27.0")
+  integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-java", version: "4.31.0")
   integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "5.9.2")
   
   // make selenium log to log4j
