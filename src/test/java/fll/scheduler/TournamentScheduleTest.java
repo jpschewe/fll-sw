@@ -83,7 +83,6 @@ public class TournamentScheduleTest {
   /**
    * Column information for 16-16-test.xls.
    */
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private TournamentSchedule.ColumnInformation createColumnInformation1616Test(final int headerRowIndex,
                                                                                final @Nullable String[] headerRow) {
     final int numRounds = 3;
@@ -189,7 +188,6 @@ public class TournamentScheduleTest {
   /**
    * Column information for 12-hour-format.xls and 24-hour-format.xls.
    */
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   private TournamentSchedule.ColumnInformation createColumnInformationTimeFormatTest(final int headerRowIndex,
                                                                                      final @Nullable String[] headerRow) {
     final int numRounds = 3;
