@@ -285,6 +285,7 @@ dependencies {
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
   testRuntimeOnly(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: project.junit_version)
+  testRuntimeOnly(group: "org.junit.platform", name: "junit-platform-launcher", version: "1.12.2")
     
   testImplementation(group: "org.hamcrest", name: "hamcrest", version: "3.0")
     
