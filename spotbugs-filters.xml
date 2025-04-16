@@ -47,5 +47,18 @@
         <Bug pattern="CT_CONSTRUCTOR_THROW" />
     </Match>
 
+
+    <!-- it's OK to throw RuntimeException or Exception in test code --> 
+    <Match>
+      <or>
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+      </or>
+      <or>
+        <Source name="**/integrationTest/**" />
+        <Source name="**/test/**" />
+      </or>
+    </Match>
+    
 </FindBugsFilter>
 
