@@ -43,7 +43,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -145,7 +145,7 @@ public class PerformanceRunsEndpoint {
    * @param connection database connection to retrieve data
    * @throws SQLException on a database error
    */
-  public static void notifyToUpdate(Connection connection) throws SQLException {
+  public static void notifyToUpdate(final Connection connection) throws SQLException {
     final Collection<UnverifiedRunData> unverifiedData = getUnverifiedRunData(connection);
     final List<SelectTeamData> teamSelectData = getTeamSelectData(connection);
     sendData(teamSelectData, unverifiedData);
@@ -240,7 +240,7 @@ public class PerformanceRunsEndpoint {
     return maxRunNumbers;
   }
 
-  private static PerformanceRunsEndpoint.SelectTeamData teamToTeamSelectData(Connection connection,
+  private static PerformanceRunsEndpoint.SelectTeamData teamToTeamSelectData(final Connection connection,
                                                                              final Tournament tournament,
                                                                              final Map<Integer, Integer> maxRunNumbers,
                                                                              final @Nullable TournamentSchedule schedule,
@@ -249,11 +249,13 @@ public class PerformanceRunsEndpoint {
     final int nextRunNumber = maxRunNumbers.getOrDefault(team.getTeamNumber(), 0)
         + 1;
     final @Nullable PerformanceTime nextPerformance = getNextPerformance(schedule, team.getTeamNumber(), nextRunNumber);
+    final RunMetadata nextRunMetadata = RunMetadata.getFromDatabase(connection, tournament, nextRunNumber);
     if (null != nextPerformance) {
-      return new PerformanceRunsEndpoint.SelectTeamData(team, nextPerformance, nextRunNumber);
+      return new PerformanceRunsEndpoint.SelectTeamData(team, nextPerformance, nextRunNumber,
+                                                        nextRunMetadata.getDisplayName());
     } else {
-
-      final String nextTableAndSide = getNextTableAndSide(connection, tournament, team.getTeamNumber(), nextRunNumber);
+      final String nextTableAndSide = getNextTableAndSide(connection, tournament, team.getTeamNumber(),
+                                                          nextRunMetadata);
 
       try {
         final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection, team.getTeamNumber()).stream() //
@@ -261,22 +263,20 @@ public class PerformanceRunsEndpoint {
                                                  .findFirst() //
                                                  .orElse("");
         final String runNumberDisplay;
-        if (!playoffBracketName.isEmpty()) {
-          final int playoffRound = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), playoffBracketName,
-                                                           nextRunNumber);
-
+        if (nextRunMetadata.isHeadToHead()
+            && !playoffBracketName.isEmpty()) {
           final int playoffMatch = Playoff.getPlayoffMatch(connection, tournament.getTournamentID(), playoffBracketName,
                                                            nextRunNumber);
-          runNumberDisplay = String.format("%s P%d M%d", playoffBracketName, playoffRound, playoffMatch);
+          runNumberDisplay = String.format("%s M%d", nextRunMetadata.getDisplayName(), playoffMatch);
         } else {
-          runNumberDisplay = String.valueOf(nextRunNumber);
+          runNumberDisplay = nextRunMetadata.getDisplayName();
         }
         return new PerformanceRunsEndpoint.SelectTeamData(team, nextTableAndSide, nextRunNumber, runNumberDisplay);
       } catch (final SQLException e) {
         LOGGER.warn("Got error retrieving playoff bracket information for team {} run {}", team.getTeamNumber(),
                     nextRunNumber, e);
         return new PerformanceRunsEndpoint.SelectTeamData(team, nextTableAndSide, nextRunNumber,
-                                                          String.valueOf(nextRunNumber));
+                                                          nextRunMetadata.getDisplayName());
       }
     }
   }
@@ -288,17 +288,18 @@ public class PerformanceRunsEndpoint {
   private static String getNextTableAndSide(final Connection connection,
                                             final Tournament tournament,
                                             final int teamNumber,
-                                            final int nextRunNumber) {
+                                            final RunMetadata nextRunMetadata) {
     try {
-      if (nextRunNumber <= TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID())) {
+      if (nextRunMetadata.isHeadToHead()) {
         // no schedule, not going to know the table
         return "";
       } else {
         // get information from the playoffs
-        return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunNumber);
+        return Playoff.getTableForRun(connection, tournament, teamNumber, nextRunMetadata.getRunNumber());
       }
     } catch (final SQLException e) {
-      LOGGER.warn("Got error retrieving next table and side for team {} run {}", teamNumber, nextRunNumber, e);
+      LOGGER.warn("Got error retrieving next table and side for team {} run {}", teamNumber,
+                  nextRunMetadata.getRunNumber(), e);
       return "";
     }
   }
@@ -314,7 +315,7 @@ public class PerformanceRunsEndpoint {
         return null;
       } else {
         // subtract 1 from the run number to get to a zero based index
-        final @Nullable PerformanceTime time = sched.enumerateRegularMatchPlayPerformances()//
+        final @Nullable PerformanceTime time = sched.enumeratePerformances()//
                                                     .filter(p -> p.getRight().longValue() == (nextRunNumber
                                                         - 1))//
                                                     .findFirst().map(Pair::getLeft).orElse(null);
@@ -338,8 +339,6 @@ public class PerformanceRunsEndpoint {
         + "       ORDER BY Performance.RunNumber, Teams.TeamNumber")) {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final List<String> unfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection,
-                                                                                   tournament.getTournamentID());
 
       prep.setInt(1, tournament.getTournamentID());
 
@@ -350,23 +349,12 @@ public class PerformanceRunsEndpoint {
           final String name = castNonNull(rs.getString(3));
           final String trimmedName = StringUtils.trimString(name, Team.MAX_TEAM_NAME_LEN);
           final String escapedName = StringEscapeUtils.escapeEcmaScript(trimmedName);
+          final RunMetadata runMetadata = RunMetadata.getFromDatabase(connection, tournament, runNumber);
 
-          final String playoffBracketName = Playoff.getPlayoffBracketsForTeam(connection, teamNumber).stream() //
-                                                   .filter(b -> unfinishedBrackets.contains(b)) //
-                                                   .findFirst() //
-                                                   .orElse("");
-
-          final String runNumberDisplay;
-          if (!playoffBracketName.isEmpty()) {
-            final int playoffRound = Playoff.getPlayoffRound(connection, tournament.getTournamentID(),
-                                                             playoffBracketName, runNumber);
-            runNumberDisplay = String.format("%s P%d", playoffBracketName, playoffRound);
-          } else {
-            runNumberDisplay = String.valueOf(runNumber);
-          }
+          final String runNumberDisplay = runMetadata.getDisplayName();
 
           final String displayString;
-          displayString = String.format("Run %s - %d [%s]", runNumberDisplay, teamNumber, escapedName);
+          displayString = String.format("%s - %d [%s]", runNumberDisplay, teamNumber, escapedName);
 
           final UnverifiedRunData d = new UnverifiedRunData(teamNumber, runNumber, displayString);
           data.add(d);
@@ -470,12 +458,13 @@ public class PerformanceRunsEndpoint {
 
     SelectTeamData(final TournamentTeam team,
                    final PerformanceTime nextPerformance,
-                   final int nextRunNumber) {
+                   final int nextRunNumber,
+                   final String runNumberDisplay) {
       this.team = team;
       this.nextPerformance = nextPerformance;
       this.nextRunNumber = nextRunNumber;
       this.nextTableAndSide = nextPerformance.getTableAndSide();
-      this.runNumberDisplay = String.valueOf(nextRunNumber);
+      this.runNumberDisplay = runNumberDisplay;
     }
 
     SelectTeamData(final TournamentTeam team,

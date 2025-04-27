@@ -1520,7 +1520,7 @@ public class GreedySolver {
                                                     TournamentSchedule.TEAM_NAME_HEADER, null,
                                                     TournamentSchedule.JUDGE_GROUP_HEADER,
                                                     /* solver doesn't handle wave */null, subjectiveColumnMappings,
-                                                    perfColumn, perfTableColumn, new String[0], new String[0]);
+                                                    perfColumn, perfTableColumn);
   }
 
   private String[] createHeaderRow() {
@@ -1605,7 +1605,7 @@ public class GreedySolver {
                     + 1));
                 final int displayedSide = side
                     + 1;
-                perfTimes.add(new PerformanceTime(time, tableName, displayedSide, false));
+                perfTimes.add(new PerformanceTime(time, tableName, displayedSide));
               }
             }
           }

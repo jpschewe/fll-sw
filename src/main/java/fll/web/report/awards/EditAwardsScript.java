@@ -33,6 +33,7 @@ import fll.db.AwardsScript.Layer;
 import fll.db.CategoriesIgnored;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.db.RunMetadataFactory;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -111,12 +112,14 @@ public class EditAwardsScript extends BaseFLLServlet {
       page.setAttribute("tournamentLevel", tournamentLevel);
       page.setAttribute("tournament", tournament);
 
+      final RunMetadataFactory runMetadataFactory = new RunMetadataFactory(datasource, tournament);
+
       loadSubjectiveCategoryInfo(page, description, connection, tournamentLevel, tournament, layer);
       loadVirtualSubjectiveCategoryInfo(page, description, connection, tournamentLevel, tournament, layer);
 
       loadNonNumericCategoryInfo(page, description, connection, tournamentLevel, tournament, layer);
 
-      loadMacroInformation(page, connection, tournamentLevel, tournament, layer);
+      loadMacroInformation(page, connection, tournamentLevel, runMetadataFactory, layer);
 
       loadSectionInformation(page, connection, tournamentLevel, tournament, layer);
 
@@ -404,7 +407,7 @@ public class EditAwardsScript extends BaseFLLServlet {
   private static void loadMacroInformation(final PageContext page,
                                            final Connection connection,
                                            final TournamentLevel tournamentLevel,
-                                           final Tournament tournament,
+                                           final RunMetadataFactory runMetadataFactory,
                                            final AwardsScript.Layer layer)
       throws SQLException {
     page.setAttribute("macros", AwardsScript.Macro.values());
@@ -425,8 +428,8 @@ public class EditAwardsScript extends BaseFLLServlet {
         value = AwardsScript.getMacroValueForSeason(connection, macro);
         break;
       case TOURNAMENT:
-        specified = AwardsScript.isMacroSpecifiedForTournament(connection, tournament, macro);
-        value = AwardsScript.getMacroValueForTournament(connection, tournament, macro);
+        specified = AwardsScript.isMacroSpecifiedForTournament(connection, runMetadataFactory.getTournament(), macro);
+        value = AwardsScript.getMacroValueForTournament(connection, runMetadataFactory.getTournament(), macro);
         break;
       case TOURNAMENT_LEVEL:
         specified = AwardsScript.isMacroSpecifiedForTournamentLevel(connection, tournamentLevel, macro);
@@ -438,7 +441,7 @@ public class EditAwardsScript extends BaseFLLServlet {
       }
 
       if (!specified) {
-        value = AwardsScript.getMacroValue(connection, tournament, macro);
+        value = AwardsScript.getMacroValue(connection, runMetadataFactory, macro);
       }
 
       macroSpecified.put(macro, specified);

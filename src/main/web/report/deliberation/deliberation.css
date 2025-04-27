@@ -16,30 +16,30 @@ and mark draggable things as movable. */
 }
 
 #deliberation_header .performance {
-    background: #00ff00;
+    background-color: #00ff00;
     color: black;
 }
 
 #deliberation_header .scheduled {
-    background: #0070c0;
+    background-color: #0070c0;
     color: white;
 }
 
 #deliberation_header .non-scheduled {
-    background: #00b0f0;
+    background-color: #00b0f0;
     color: white;
 }
 
 .rTableCell.separator {
-    background: black;
+    background-color: black;
 }
 
 .rTableCell.unavailable {
-    background: #bfbfbf;
+    background-color: #bfbfbf;
 }
 
 .rTableCell.dropzone {
-    background: #00ff00;
+    background-color: #00ff00;
 }
 
 .potential_winner_row .winner {
@@ -60,7 +60,7 @@ and mark draggable things as movable. */
 
 #header_row .rTableHead, .rTableRow .rTableCell:first-child {
     position: sticky;
-    background: #ddd;
+    background-color: #ddd;
     top: 0px;
     left: 0px;
 }

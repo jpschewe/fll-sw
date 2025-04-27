@@ -43,11 +43,14 @@ import com.google.common.collect.Iterables;
 import fll.Tournament;
 import fll.UserImages;
 import fll.Utilities;
+import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.db.TableInformation;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByAwardGroup;
 import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
+import fll.web.TournamentData;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -64,15 +67,17 @@ public final class ScheduleWriter {
    * Output the schedule sorted by team number. This schedule looks much like
    * the input spreadsheet.
    *
+   * @param runMetadataFactory used to get names of runs
    * @param schedule where to write the schedule
    * @param stream where to write the schedule
    * @throws IOException error writing to the stream
    */
-  public static void outputScheduleByTeam(final TournamentSchedule schedule,
+  public static void outputScheduleByTeam(final RunMetadataFactory runMetadataFactory,
+                                          final TournamentSchedule schedule,
                                           final OutputStream stream)
       throws IOException {
     try {
-      final Document performanceDoc = createScheduleByTeam(schedule);
+      final Document performanceDoc = createScheduleByTeam(runMetadataFactory, schedule);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, stream);
@@ -84,16 +89,16 @@ public final class ScheduleWriter {
   /**
    * Output the schedule sorted by wave and then team number.
    *
-   * @param tournament the tournament information
+   * @param tournamentData the tournament information
    * @param schedule where to write the schedule
    * @param stream where to write the schedule
    * @throws IOException error writing to the stream
    */
-  public static void outputScheduleByWaveAndTeam(final Tournament tournament,
+  public static void outputScheduleByWaveAndTeam(final TournamentData tournamentData,
                                                  final TournamentSchedule schedule,
                                                  final OutputStream stream)
       throws IOException {
-    final Document performanceDoc = createScheduleByWaveAndTeam(tournament, schedule);
+    final Document performanceDoc = createScheduleByWaveAndTeam(tournamentData, schedule);
     final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
     try {
       FOPUtils.renderPdf(fopFactory, performanceDoc, stream);
@@ -124,7 +129,8 @@ public final class ScheduleWriter {
     return staticContent;
   }
 
-  private static Document createScheduleByTeam(final TournamentSchedule schedule) {
+  private static Document createScheduleByTeam(final RunMetadataFactory runMetadataFactory,
+                                               final TournamentSchedule schedule) {
     final Set<String> subjectiveStations = schedule.getSubjectiveStations();
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -168,11 +174,7 @@ public final class ScheduleWriter {
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
     }
-    for (int i = 0; i < schedule.getNumberOfPracticeRounds(); ++i) {
-      table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
-      table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
-    }
-    for (int i = 0; i < schedule.getNumberOfRegularMatchPlayRounds(); ++i) {
+    for (int i = 0; i < schedule.getTotalNumberOfRounds(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
     }
@@ -223,27 +225,11 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(subjHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     }
-    for (int round = 0; round < schedule.getNumberOfPracticeRounds(); ++round) {
-      final Element headerCell1 = FOPUtils.createTableCell(document, null,
-                                                           String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT,
-                                                                         round
-                                                                             + 1));
-      headerRow.appendChild(headerCell1);
-      FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
-      final Element headerCell2 = FOPUtils.createTableCell(document, null,
-                                                           String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT,
-                                                                         round
-                                                                             + 1));
-      headerRow.appendChild(headerCell2);
-      FOPUtils.addBorders(headerCell2, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-    }
-    for (int round = 0; round < schedule.getNumberOfRegularMatchPlayRounds(); ++round) {
-      final Element headerCell1 = FOPUtils.createTableCell(document, null,
-                                                           String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
-                                                               + 1));
+    for (int round = 0; round < schedule.getTotalNumberOfRounds(); ++round) {
+      final int runNumber = round
+          + 1;
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
+      final Element headerCell1 = FOPUtils.createTableCell(document, null, runMetadata.getDisplayName());
       headerRow.appendChild(headerCell1);
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -309,23 +295,7 @@ public final class ScheduleWriter {
                             FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
       }
 
-      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
-        final PerformanceTime perf = pair.getLeft();
-
-        final Element cell1 = FOPUtils.createTableCell(document, null,
-                                                       TournamentSchedule.humanFormatTime(perf.getTime()));
-        row.appendChild(cell1);
-        FOPUtils.addBorders(cell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
-        final Element cell2 = FOPUtils.createTableCell(document, null,
-                                                       String.format("%s %s", perf.getTable(), perf.getSide()));
-        row.appendChild(cell2);
-        FOPUtils.addBorders(cell2, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-      }));
-
-      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+      si.enumeratePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
         final PerformanceTime perf = pair.getLeft();
 
         final Element cell1 = FOPUtils.createTableCell(document, null,
@@ -346,7 +316,7 @@ public final class ScheduleWriter {
     return document;
   }
 
-  private static Document createScheduleByWaveAndTeam(final Tournament tournament,
+  private static Document createScheduleByWaveAndTeam(final TournamentData tournamentData,
                                                       final TournamentSchedule schedule) {
     final String nonCenteredSidePadding = "0.02in";
     final String tableFontSize = "7pt";
@@ -373,6 +343,7 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
+    final Tournament tournament = tournamentData.getCurrentTournament();
     final @Nullable String tournamentDescription = tournament.getDescription();
     final Element header = createHeader(document,
                                         null == tournamentDescription ? tournament.getName() : tournamentDescription);
@@ -397,11 +368,7 @@ public final class ScheduleWriter {
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
     }
-    for (int i = 0; i < schedule.getNumberOfPracticeRounds(); ++i) {
-      table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
-      table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
-    }
-    for (int i = 0; i < schedule.getNumberOfRegularMatchPlayRounds(); ++i) {
+    for (int i = 0; i < schedule.getTotalNumberOfRounds(); ++i) {
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // time
       table.appendChild(FOPUtils.createTableColumn(document, 2)); // table
     }
@@ -448,27 +415,12 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(subjHeaderCell, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
     }
-    for (int round = 0; round < schedule.getNumberOfPracticeRounds(); ++round) {
-      final Element headerCell1 = FOPUtils.createTableCell(document, null,
-                                                           String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT,
-                                                                         round
-                                                                             + 1));
-      headerRow.appendChild(headerCell1);
-      FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-
-      final Element headerCell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                           String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT,
-                                                                         round
-                                                                             + 1));
-      headerRow.appendChild(headerCell2);
-      FOPUtils.addBorders(headerCell2, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                          FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
-    }
-    for (int round = 0; round < schedule.getNumberOfRegularMatchPlayRounds(); ++round) {
+    for (int round = 0; round < schedule.getTotalNumberOfRounds(); ++round) {
+      final int runNumber = round
+          + 1;
+      final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
       final Element headerCell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                           String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
-                                                               + 1));
+                                                           runMetadata.getDisplayName());
       headerRow.appendChild(headerCell1);
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -548,23 +500,7 @@ public final class ScheduleWriter {
                             FOPUtils.STANDARD_BORDER_WIDTH);
       }
 
-      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
-        final PerformanceTime perf = pair.getLeft();
-
-        final Element cell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                       TournamentSchedule.humanFormatTime(perf.getTime()));
-        row.appendChild(cell1);
-        FOPUtils.addBorders(cell1, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH);
-
-        final Element cell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                       String.format("%s %s", perf.getTable(), perf.getSide()));
-        row.appendChild(cell2);
-        FOPUtils.addBorders(cell2, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
-                            FOPUtils.STANDARD_BORDER_WIDTH);
-      }));
-
-      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+      si.enumeratePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
         final PerformanceTime perf = pair.getLeft();
 
         final Element cell1 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
@@ -782,19 +718,21 @@ public final class ScheduleWriter {
    * Output the performance schedule, sorted by time.
    *
    * @param connection database
-   * @param tournament the tournament, used to get table sort information
+   * @param tournamentData the tournament data
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
    */
   public static void outputPerformanceScheduleByTime(final Connection connection,
-                                                     final Tournament tournament,
+                                                     final TournamentData tournamentData,
                                                      final TournamentSchedule schedule,
                                                      final OutputStream pdfFos)
       throws IOException, SQLException {
     try {
-      final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection, tournament);
-      final Document performanceDoc = createPerformanceSchedule(tables, schedule);
+      final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection,
+                                                                                           tournamentData.getCurrentTournament());
+      final Document performanceDoc = createPerformanceSchedule(tournamentData.getRunMetadataFactory(), tables,
+                                                                schedule);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -807,19 +745,20 @@ public final class ScheduleWriter {
    * Output the performance schedule per table, sorted by time.
    *
    * @param connection database
-   * @param tournament the tournament
+   * @param tournamentData the tournament data
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
    * @throws SQLException on a database error
    */
   public static void outputPerformanceSchedulePerTableByTime(final Connection connection,
-                                                             final Tournament tournament,
+                                                             final TournamentData tournamentData,
                                                              final TournamentSchedule schedule,
                                                              final OutputStream pdfFos)
       throws IOException, SQLException {
     try {
-      final Document performanceDoc = createPerformanceSchedulePerTable(connection, tournament, schedule, true, false);
+      final Document performanceDoc = createPerformanceSchedulePerTable(connection, tournamentData, schedule, true,
+                                                                        false);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -829,24 +768,26 @@ public final class ScheduleWriter {
   }
 
   /**
-   * Like {@link #outputPerformanceSchedulePerTableByTime(Connection, Tournament,
-   * TournamentSchedule, OutputStream)}, only drops the award group column and
+   * Like
+   * {@link #outputPerformanceSchedulePerTableByTime(Connection, TournamentData, TournamentSchedule, OutputStream)},
+   * only drops the award group column and
    * adds a notes column.
    *
    * @param connection database
-   * @param tournament the tournament
+   * @param tournamentData the tournament data
    * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
    * @throws SQLException on a database error
    */
   public static void outputPerformanceSchedulePerTableByTimeForNotes(final Connection connection,
-                                                                     final Tournament tournament,
+                                                                     final TournamentData tournamentData,
                                                                      final TournamentSchedule schedule,
                                                                      final OutputStream pdfFos)
       throws IOException, SQLException {
     try {
-      final Document performanceDoc = createPerformanceSchedulePerTable(connection, tournament, schedule, false, true);
+      final Document performanceDoc = createPerformanceSchedulePerTable(connection, tournamentData, schedule, false,
+                                                                        true);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
@@ -856,13 +797,14 @@ public final class ScheduleWriter {
   }
 
   private static Document createPerformanceSchedulePerTable(final Connection connection,
-                                                            final Tournament tournament,
+                                                            final TournamentData tournamentData,
                                                             final TournamentSchedule schedule,
                                                             final boolean displayAwardGroup,
                                                             final boolean displayNotes)
       throws SQLException {
 
-    final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection, tournament);
+    final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection,
+                                                                                         tournamentData.getCurrentTournament());
 
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
@@ -895,16 +837,17 @@ public final class ScheduleWriter {
     pageSequence.appendChild(documentBody);
 
     tables.forEach(tableInfo -> {
-      addScheduleForTableSide(tables, schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideA(),
-                              document, documentBody);
-      addScheduleForTableSide(tables, schedule, displayAwardGroup, displayNotes, performanceTimes, tableInfo.getSideB(),
-                              document, documentBody);
+      addScheduleForTableSide(tournamentData.getRunMetadataFactory(), tables, schedule, displayAwardGroup, displayNotes,
+                              performanceTimes, tableInfo.getSideA(), document, documentBody);
+      addScheduleForTableSide(tournamentData.getRunMetadataFactory(), tables, schedule, displayAwardGroup, displayNotes,
+                              performanceTimes, tableInfo.getSideB(), document, documentBody);
     });
 
     return document;
   }
 
-  private static void addScheduleForTableSide(final List<TableInformation> tables,
+  private static void addScheduleForTableSide(final RunMetadataFactory runMetadataFactory,
+                                              final List<TableInformation> tables,
                                               final TournamentSchedule schedule,
                                               final boolean displayAwardGroup,
                                               final boolean displayNotes,
@@ -920,13 +863,14 @@ public final class ScheduleWriter {
                                                                                          .collect(Collectors.toMap(Map.Entry::getKey,
                                                                                                                    Map.Entry::getValue));
 
-    final Element ele = createPerformanceScheduleTable(tables, schedule, headerText, document, tablePerformanceTimes,
-                                                       displayAwardGroup, displayNotes);
+    final Element ele = createPerformanceScheduleTable(runMetadataFactory, tables, schedule, headerText, document,
+                                                       tablePerformanceTimes, displayAwardGroup, displayNotes);
     documentBody.appendChild(ele);
     ele.setAttribute("page-break-after", "always");
   }
 
-  private static Document createPerformanceSchedule(final List<TableInformation> tables,
+  private static Document createPerformanceSchedule(final RunMetadataFactory runMetadataFactory,
+                                                    final List<TableInformation> tables,
                                                     final TournamentSchedule schedule) {
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
@@ -959,8 +903,8 @@ public final class ScheduleWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element ele = createPerformanceScheduleTable(tables, schedule, headerText, document, performanceTimes, true,
-                                                       false);
+    final Element ele = createPerformanceScheduleTable(runMetadataFactory, tables, schedule, headerText, document,
+                                                       performanceTimes, true, false);
     documentBody.appendChild(ele);
 
     return document;
@@ -996,11 +940,7 @@ public final class ScheduleWriter {
       }
 
       final int sideCompare = Integer.compare(perf1.getSide(), perf2.getSide());
-      if (sideCompare != 0) {
-        return sideCompare;
-      }
-
-      return Boolean.compare(perf1.isPractice(), perf2.isPractice());
+      return sideCompare;
     }
 
   }
@@ -1021,7 +961,8 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Element createPerformanceScheduleTable(final List<TableInformation> tables,
+  private static Element createPerformanceScheduleTable(final RunMetadataFactory runMetadataFactory,
+                                                        final List<TableInformation> tables,
                                                         final TournamentSchedule schedule,
                                                         final String headerText,
                                                         final Document document,
@@ -1101,6 +1042,9 @@ public final class ScheduleWriter {
 
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
+      final int runNumber = si.computeRound(performance)
+          + 1;
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
 
       // check if team is missing an opponent
       if (null == schedule.findOpponent(si, performance)) {
@@ -1160,7 +1104,7 @@ public final class ScheduleWriter {
                           FOPUtils.STANDARD_BORDER_WIDTH);
 
       final Element perfRoundCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                             si.getRoundName(performance));
+                                                             runMetadata.getDisplayName());
       row.appendChild(perfRoundCell);
       FOPUtils.addBorders(perfRoundCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                           FOPUtils.STANDARD_BORDER_WIDTH);
@@ -1210,16 +1154,18 @@ public final class ScheduleWriter {
   /**
    * Output the schedule for each team.
    *
+   * @param runMetadataFactory used to get performance display names
    * @param schedule the tournament schedule
    * @param stream where to write the schedule
    * @throws IOException if there is an error writing to the stream
    */
-  public static void outputTeamSchedules(final TournamentSchedule schedule,
+  public static void outputTeamSchedules(final RunMetadataFactory runMetadataFactory,
+                                         final TournamentSchedule schedule,
                                          final OutputStream stream)
       throws IOException {
 
     try {
-      final Document document = createTeamSchedules(schedule);
+      final Document document = createTeamSchedules(runMetadataFactory, schedule);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -1229,7 +1175,8 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Document createTeamSchedules(final TournamentSchedule schedule) {
+  private static Document createTeamSchedules(final RunMetadataFactory runMetadataFactory,
+                                              final TournamentSchedule schedule) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -1255,7 +1202,7 @@ public final class ScheduleWriter {
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
     Collections.sort(scheduleEntries, TournamentSchedule.ComparatorByTeam.INSTANCE);
     for (final TeamScheduleInfo si : scheduleEntries) {
-      final Element teamSchedule = outputTeamSchedule(document, schedule, si);
+      final Element teamSchedule = outputTeamSchedule(document, runMetadataFactory, schedule, si);
       documentBody.appendChild(teamSchedule);
     }
 
@@ -1265,18 +1212,20 @@ public final class ScheduleWriter {
   /**
    * Output the schedule for the specified team.
    *
+   * @param runMetadataFactory used to get performance display names
    * @param schedule the tournament schedule
    * @param stream where to write the schedule
    * @param teamNumber the team to output the schedule for
    * @throws IOException if there is an error writing to the stream
    */
-  public static void outputTeamSchedule(final TournamentSchedule schedule,
+  public static void outputTeamSchedule(final RunMetadataFactory runMetadataFactory,
+                                        final TournamentSchedule schedule,
                                         final OutputStream stream,
                                         final int teamNumber)
       throws IOException {
 
     try {
-      final Document document = createTeamSchedule(schedule, teamNumber);
+      final Document document = createTeamSchedule(runMetadataFactory, schedule, teamNumber);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -1286,7 +1235,8 @@ public final class ScheduleWriter {
     }
   }
 
-  private static Document createTeamSchedule(final TournamentSchedule schedule,
+  private static Document createTeamSchedule(final RunMetadataFactory runMetadataFactory,
+                                             final TournamentSchedule schedule,
                                              final int teamNumber) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -1312,7 +1262,7 @@ public final class ScheduleWriter {
 
     final @Nullable TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
     if (null != si) {
-      final Element teamSchedule = outputTeamSchedule(document, schedule, si);
+      final Element teamSchedule = outputTeamSchedule(document, runMetadataFactory, schedule, si);
       documentBody.appendChild(teamSchedule);
     } else {
       final Element emptyBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -1328,6 +1278,7 @@ public final class ScheduleWriter {
    * Output the detailed schedule for a team for the day.
    */
   private static Element outputTeamSchedule(final Document document,
+                                            final RunMetadataFactory runMetadataFactory,
                                             final TournamentSchedule schedule,
                                             final TeamScheduleInfo si) {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
@@ -1360,7 +1311,7 @@ public final class ScheduleWriter {
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
-    appendTeamSchedule(document, schedule, si, container);
+    appendTeamSchedule(document, runMetadataFactory, schedule, si, container);
 
     container.appendChild(FOPUtils.createBlankLine(document));
 
@@ -1384,12 +1335,14 @@ public final class ScheduleWriter {
    * Append the elements for the team schedule in time order to the specified
    * container. All styling is set at the container level.
    * 
+   * @param runMetadataFactory get run display names
    * @param document used to create elements
    * @param schedule tournament schedule
    * @param si schedule information for the team
    * @param container the container for all of the elements
    */
   public static void appendTeamSchedule(final Document document,
+                                        final RunMetadataFactory runMetadataFactory,
                                         final TournamentSchedule schedule,
                                         final TeamScheduleInfo si,
                                         final Element container) {
@@ -1409,11 +1362,12 @@ public final class ScheduleWriter {
     }
 
     for (final PerformanceTime performance : si.getAllPerformances()) {
-      final String roundName = si.getRoundName(performance);
-
+      final int runNumber = si.computeRound(performance)
+          + 1;
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
       final LocalTime start = performance.getTime();
 
-      final String text = String.format("Performance %s %s %d", roundName, performance.getTable(),
+      final String text = String.format("%s %s %d", runMetadata.getDisplayName(), performance.getTable(),
                                         performance.getSide());
       scheduleElements.put(start, text);
     }

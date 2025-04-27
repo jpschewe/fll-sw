@@ -1,5 +1,11 @@
 * Scale weighted rank by number of teams in group per category
+* #1245 - Sort the finalist schedule report in the same order as the deliberation category order
+* #1220 - Add metadata to runs so that they can be named and the user can control what runs are displayed on the scoreboard
+* #1259 - Fix bug switching between full scoreboard and all teams / most recent scores
+* #1242 - Don't stomp awards script when saving presenters
+* #1253 - fix error uploading delibration winners a second time
 * Fix finalist schedule link missing
+* #1232 - Allow the user to delete all advancing teams
 
 Release 19.2.0
 ==============

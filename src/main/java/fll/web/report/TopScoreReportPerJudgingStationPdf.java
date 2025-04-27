@@ -27,7 +27,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * PDF of top performance scores organized by judging station.
+ * PDF of top regular match play performance scores organized by judging
+ * station.
  */
 @WebServlet("/report/TopScoreReportPerJudgingStationPdf")
 public class TopScoreReportPerJudgingStationPdf extends TopScoreReportPdf {
@@ -54,7 +55,7 @@ public class TopScoreReportPerJudgingStationPdf extends TopScoreReportPdf {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByJudgingStation(connection, description,
-                                                                                             tournament);
+                                                                                             tournament, true, false);
       outputReport(response.getOutputStream(), challengeDescription, tournament, "Judging Station", scores);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);

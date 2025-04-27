@@ -4,7 +4,7 @@ OPTION {
 
 SELECT {
     font-weight: bold;
-    background: black;
+    background-color: black;
     color: #e0e0e0;
 }
 

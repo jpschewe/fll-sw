@@ -130,12 +130,17 @@ public class SubjectiveAwardWinners extends HttpServlet {
       final boolean virtualCategory = description.getVirtualSubjectiveCategoryByTitle(putPathInfo.get()
                                                                                                  .getCategoryName()) != null;
 
-      final @Nullable AwardWinner existingWinner = AwardWinners.getSubjectiveAwardWinner(connection,
-                                                                                         tournament.getTournamentID(),
-                                                                                         putPathInfo.get()
-                                                                                                    .getCategoryName(),
-                                                                                         putPathInfo.get()
-                                                                                                    .getTeamNumber());
+      final @Nullable AwardWinner existingWinner;
+      if (virtualCategory) {
+        existingWinner = AwardWinners.getVirtualSubjectiveAwardWinner(connection, tournament.getTournamentID(),
+                                                                      putPathInfo.get().getCategoryName(),
+                                                                      putPathInfo.get().getTeamNumber());
+      } else {
+        existingWinner = AwardWinners.getSubjectiveAwardWinner(connection, tournament.getTournamentID(),
+                                                               putPathInfo.get().getCategoryName(),
+                                                               putPathInfo.get().getTeamNumber());
+      }
+
       if (null == existingWinner) {
         final AwardWinner winner = new AwardWinner(putPathInfo.get().getCategoryName(), awardGroup,
                                                    putPathInfo.get().getTeamNumber(), data.description, data.place);

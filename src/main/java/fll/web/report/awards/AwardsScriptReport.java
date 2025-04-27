@@ -54,6 +54,7 @@ import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
+import fll.db.RunMetadataFactory;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -62,6 +63,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.FinalComputedScores;
@@ -109,7 +111,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -118,7 +121,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=awardsScript.pdf");
 
       try {
-        final Document document = generateDocument(description, connection);
+        final Document document = generateDocument(tournamentData, description, connection);
 
         if (LOGGER.isTraceEnabled()) {
           try (StringWriter writer = new StringWriter()) {
@@ -141,22 +144,23 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private void addMacrosToTemplateContext(final Connection connection,
-                                          final Tournament tournament,
+                                          final RunMetadataFactory runMetadataFactory,
                                           final VelocityContext templateContext)
       throws SQLException {
     for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
-      final String value = AwardsScript.getMacroValue(connection, tournament, macro);
+      final String value = AwardsScript.getMacroValue(connection, runMetadataFactory, macro);
       templateContext.put(macro.getText(), value);
     }
   }
 
-  private Document generateDocument(final ChallengeDescription description,
+  private Document generateDocument(final TournamentData tournamentData,
+                                    final ChallengeDescription description,
                                     final Connection connection)
       throws SQLException {
-    final Tournament tournament = Tournament.getCurrentTournament(connection);
+    final Tournament tournament = tournamentData.getCurrentTournament();
 
     final VelocityContext templateContext = new VelocityContext();
-    addMacrosToTemplateContext(connection, tournament, templateContext);
+    addMacrosToTemplateContext(connection, tournamentData.getRunMetadataFactory(), templateContext);
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -604,7 +608,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     final int numAwards = AwardsScript.getNumPerformanceAwards(connection, tournament);
 

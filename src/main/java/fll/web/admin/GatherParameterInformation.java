@@ -22,7 +22,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Gather parameter information for edit_all_parameters.jsp.
+ * Gather parameter information for edit_global_parameters.jsp.
  */
 public final class GatherParameterInformation {
 
@@ -43,17 +43,6 @@ public final class GatherParameterInformation {
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       pageContext.setAttribute("tournaments", tournaments);
-
-      pageContext.setAttribute("numSeedingRounds_default", TournamentParameters.getDefaultNumSeedingRounds(connection));
-      final Map<Integer, Integer> numSeedingRounds = new HashMap<>();
-      for (final Tournament tournament : tournaments) {
-        if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
-                                                                TournamentParameters.SEEDING_ROUNDS)) {
-          numSeedingRounds.put(tournament.getTournamentID(),
-                               TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID()));
-        }
-      }
-      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
       pageContext.setAttribute("performanceAdvancementPercentage_default",
                                TournamentParameters.getDefaultPerformanceAdvancementPercentage(connection));

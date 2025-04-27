@@ -2,10 +2,6 @@
 
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
-<%
-fll.web.schedule.ProcessScheduleConstraints.populateContext(application, pageContext);
-%>
-
 <html>
 <head>
 <title>Specify schedule constraints (Upload Schedule)</title>
@@ -59,10 +55,9 @@ fll.web.schedule.ProcessScheduleConstraints.populateContext(application, pageCon
         </div>
 
         <div>
-            Number of non-practice performance runs:
+            Number of scheduled performance runs:
             <input name="numPerformanceRuns" id="numPerformanceRuns"
-                type="number" min="${numSeedingRounds}"
-                value="${numSeedingRounds}" required />
+                type="number" min="0" required />
             <br />
         </div>
 

@@ -11,29 +11,29 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
- * @see TournamentSchedule#outputPerformanceSheets(String, java.io.OutputStream,
- *      fll.xml.ChallengeDescription)
+ * @see TournamentSchedule#outputPerformanceSheets(TournamentData,
+ *      java.io.OutputStream, ChallengeDescription)
  */
 @WebServlet("/admin/PerformanceSheets")
 public class PerformanceSheets extends BaseFLLServlet {
@@ -52,11 +52,13 @@ public class PerformanceSheets extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
+      final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -66,13 +68,11 @@ public class PerformanceSheets extends BaseFLLServlet {
 
       final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournamentID);
 
-      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournamentID);
-
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
                          String.format("attachment; filename=\"%s_performance-sheets.pdf\"", tournament.getName()));
-      schedule.outputPerformanceSheets(tournament.getName(), response.getOutputStream(), description);
+      schedule.outputPerformanceSheets(tournamentData, response.getOutputStream(), description);
 
     } catch (final IOException e) {
       LOGGER.error(e.getMessage(), e);

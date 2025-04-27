@@ -21,30 +21,29 @@ if (!fll.web.scoreEntry.ScoreEntry.populateContext(application, request, respons
     </c:otherwise>
 </c:choose>
 
-<!-- is practice ${practice} -->
+<!--  runtype : ${runType} -->
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
 <link rel="stylesheet" type="text/css" href="scoreEntry.css" />
 
-<!-- a couple of things come from the JSP, so need to be inline -->
-<style type='text/css'>
-table#top_info {
-    background-color: ${top_info_color
-}
+<c:if test="${EditFlag}">
+    <link rel="stylesheet" type="text/css" href="edit-score.css" />
+</c:if>
 
-;
-}
-body {
-    background-color: ${body_background
-}
-
-;
-}
-.restriction-error {
-    background-color: red;
-}
-</style>
+<c:choose>
+    <c:when test="${runType == 'PRACTICE'}">
+        <link rel="stylesheet" type="text/css"
+            href="runType-practice.css" />
+    </c:when>
+    <c:when test="${runType == 'REGULAR_MATCH_PLAY'}">
+        <link rel="stylesheet" type="text/css"
+            href="runType-regularMatchPlay.css" />
+    </c:when>
+    <c:otherwise>
+        <link rel="stylesheet" type="text/css" href="runType-other.css" />
+    </c:otherwise>
+</c:choose>
 
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
@@ -131,18 +130,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script type='text/javascript' src='scoreEntry.js'></script>
-
 </head>
 
 <body>
 
-  <form
-    action="SubmitScoreEntry"
-    method="POST"
-    name="scoreEntry"
-    id="scoreEntry"
-     class="fll-sw-ui-body"
-    >
+    <form action="SubmitScoreEntry" method="POST" name="scoreEntry"
+        id="scoreEntry" class="fll-sw-ui-body">
         <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
                 <input type='hidden' name='tablename'
@@ -153,16 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </c:otherwise>
         </c:choose>
 
-        <input
-      type='hidden'
-      id='NoShow'
-      name='NoShow'
-      value="false" />
-    <input
-      type='hidden'
-      id='delete'
-      name='delete'
-      value="false" />
+        <input type='hidden' id='NoShow' name='NoShow' value="false" />
+        <input type='hidden' id='delete' name='delete' value="false" />
 
         <input type='hidden' name='EditFlag' id='EditFlag'
             value='${EditFlag}' readonly />
@@ -209,7 +194,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         color='#0000ff'>
 
                                         <c:choose>
-                                            <c:when test="${practice}">
+                                            <c:when
+                                                test="${practiceEntryOnly}">
                       Practice
                       </c:when>
                                             <c:otherwise>
@@ -332,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <span class='float_right'>&nbsp;</span>
                 <c:choose>
-                    <c:when test="${practice}">
+                    <c:when test="${practiceEntryOnly}">
                         <button type='button' id='reset_score'
                             class='fll-sw-button'>Reset Form</button>
                     </c:when>
@@ -346,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type='button' id='cancel'
                             class='fll-sw-button'>Cancel</button>
 
-                        <c:if test="${EditFlag and isLastRun}">
+                        <c:if test="${canDelete}">
                             <button type='button' id='submit_delete'
                                 name='submit_delete'
                                 class='fll-sw-button'>Delete

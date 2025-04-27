@@ -130,18 +130,6 @@ const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
                                 <table
                                     id="all_teams_${team.teamNumber}_scores"
                                     class='runs'>
-                                    <tr class='center'>
-                                        <td>
-                                            <img class='run_spacer'
-                                                src='<c:url value="/images/blank.gif"/>' />
-                                        </td>
-                                        <td>Run #</td>
-                                        <td>
-                                            <img class='score_spacer'
-                                                src='<c:url value="/images/blank.gif"/>' />
-                                        </td>
-                                        <td>Score</td>
-                                    </tr>
                                 </table>
                             </td>
                         </tr>

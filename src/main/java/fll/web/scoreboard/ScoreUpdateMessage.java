@@ -7,6 +7,7 @@
 package fll.web.scoreboard;
 
 import fll.TournamentTeam;
+import fll.db.RunMetadata;
 import fll.web.playoff.TeamScore;
 
 /**
@@ -20,11 +21,13 @@ import fll.web.playoff.TeamScore;
    * @param formattedScore {@link #formattedScore}
    * @param teamScore used to gather {@link #isBye()} {@link #isNoShow()}
    *          {@link #getRunNumber()}
+   * @param runMetadata {@link #getRunMetadata()}
    */
   ScoreUpdateMessage(final TournamentTeam team,
-                            final double score,
-                            final String formattedScore,
-                            final TeamScore teamScore) {
+                     final double score,
+                     final String formattedScore,
+                     final TeamScore teamScore,
+                     final RunMetadata runMetadata) {
     super(Message.MessageType.UPDATE);
     this.team = team;
     this.score = score;
@@ -32,6 +35,7 @@ import fll.web.playoff.TeamScore;
     this.runNumber = teamScore.getRunNumber();
     this.bye = teamScore.isBye();
     this.noShow = teamScore.isNoShow();
+    this.runMetadata = runMetadata;
   }
 
   /**
@@ -69,6 +73,15 @@ import fll.web.playoff.TeamScore;
   }
 
   private final int runNumber;
+
+  private final RunMetadata runMetadata;
+
+  /**
+   * @return information about the run
+   */
+  public RunMetadata getRunMetadata() {
+    return runMetadata;
+  }
 
   /**
    * @return if this is a bye

@@ -81,14 +81,19 @@ function displayPage(urlStr) {
         return;
     }
 
-    if (null == displayWindow || displayWindow.location.pathname != urlStr) {
-        // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
-        const url = new URL(urlStr, window.location);
-        const params = new URLSearchParams(url.search);
-        params.append(DISPLAY_UUID_PARAMETER_NAME, displayUuid);
-        url.search = params;
+    // compare search parameters (excluding the display_uuid) and the pathname
+    const currentParams = null == displayWindow ? new URLSearchParams() : new URLSearchParams(displayWindow.location.search);
+    currentParams.delete("display_uuid");
 
-        displayWindow = window.open(url, 'displayWindow', windowOptions);
+    const newUrl = new URL(urlStr, window.location);
+    const newParams = new URLSearchParams(newUrl.search);
+
+    if (null == displayWindow || displayWindow.location.pathname != newUrl.pathname || currentParams != newParams) {
+        // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
+        newParams.append(DISPLAY_UUID_PARAMETER_NAME, displayUuid);
+        newUrl.search = newParams;
+
+        displayWindow = window.open(newUrl, 'displayWindow', windowOptions);
         if (!displayWindow || displayWindow.closed || typeof displayWindow.closed == 'undefined') {
             alert("For this page to work you need to disable the popup blocker for this site");
         }

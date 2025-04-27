@@ -36,6 +36,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
@@ -69,6 +70,7 @@ public class TeamResults extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
@@ -87,7 +89,7 @@ public class TeamResults extends BaseFLLServlet {
           final TournamentTeam team = entry.getValue();
           if (Team.NULL_TEAM_NUMBER == selectedTeamNumber
               || selectedTeamNumber == team.getTeamNumber()) {
-            writeTeamEntries(zipOut, description, connection, tournament, team);
+            writeTeamEntries(zipOut, description, connection, tournamentData, tournament, team);
           }
         }
       }
@@ -100,6 +102,7 @@ public class TeamResults extends BaseFLLServlet {
   private void writeTeamEntries(final ZipOutputStream zipOut,
                                 final ChallengeDescription description,
                                 final Connection connection,
+                                final TournamentData tournamentData,
                                 final Tournament tournament,
                                 final TournamentTeam team)
       throws SQLException, IOException {
@@ -117,18 +120,18 @@ public class TeamResults extends BaseFLLServlet {
       zipOut.closeEntry();
     } // foreach subjective category
 
-    writePerformance(zipOut, description, connection, tournament, team, directory);
+    writePerformance(zipOut, description, tournamentData, connection, team, directory);
   }
 
   private void writePerformance(final ZipOutputStream zipOut,
                                 final ChallengeDescription description,
+                                final TournamentData tournamentData,
                                 final Connection connection,
-                                final Tournament tournament,
                                 final TournamentTeam team,
                                 final String directory)
       throws SQLException, IOException {
     try {
-      final Document document = PerformanceScoreReport.createDocument(connection, description, tournament,
+      final Document document = PerformanceScoreReport.createDocument(tournamentData, connection, description,
                                                                       Collections.singleton(team));
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();

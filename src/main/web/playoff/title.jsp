@@ -9,7 +9,7 @@
 <meta http-equiv='refresh' content='90'>
 
 </head>
-<body style="background: white">
+<body style="background-color: white">
 
     <div align='center'>
         <font face='arial' size='3'>

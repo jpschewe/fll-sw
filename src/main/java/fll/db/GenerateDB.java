@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 50;
+  public static final int DATABASE_VERSION = 51;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -354,32 +354,20 @@ public final class GenerateDB {
 
       createAwardDeterminationTable(connection, true);
 
-      // --------------- create views ---------------
+      createRunMetadataTable(connection, true);
 
-      // number of seeding rounds for each tournament
-      stmt.executeUpdate("DROP VIEW IF EXISTS tournament_seeding_rounds");
-      stmt.executeUpdate("CREATE VIEW tournament_seeding_rounds AS" //
-          + " SELECT T1.tournament_id, " //
-          + "      (SELECT TP3.param_value FROM tournament_parameters AS TP3" //
-          + "   WHERE TP3.param = 'SeedingRounds'" //
-          + "      AND TP3.tournament = ( " //
-          + "      SELECT MAX(TP2.tournament) FROM tournament_parameters AS TP2 " //
-          + "           WHERE TP2.param = '"
-          + TournamentParameters.SEEDING_ROUNDS
-          + "' " //
-          + "           AND TP2.tournament IN (-1, T1.tournament_id ) )) as seeding_rounds" //
-          + "      FROM tournaments as T1");
+      // --------------- create views ---------------
 
       // max seeding round score for all tournaments
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
-      stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + "    SELECT MAX(Performance.TeamNumber) AS TeamNumber" //
-          + "         , MAX(Performance.ComputedTotal) AS score" //
-          + "         , AVG(Performance.ComputedTotal) AS average" //
-          + "         , Performance.tournament" //
-          + "    FROM Performance, tournament_seeding_rounds AS TSR" //
-          + "    WHERE Performance.RunNumber <= TSR.seeding_rounds" //
-          + "    GROUP BY Performance.tournament, Performance.TeamNumber");
+      stmt.executeUpdate("CREATE VIEW performance_seeding_max AS" //
+          + " SELECT MAX(Performance.TeamNumber) AS TeamNumber" //
+          + "     , MAX(Performance.ComputedTotal) AS score" //
+          + "     , AVG(Performance.ComputedTotal) AS average" //
+          + "     , Performance.tournament AS tournament" //
+          + " FROM Performance" //
+          + " WHERE Performance.RunNumber IN ( SELECT run_number FROM run_metadata WHERE run_type = 'REGULAR_MATCH_PLAY' AND tournament_id = Performance.tournament )" //
+          + " GROUP BY Performance.tournament, Performance.TeamNumber");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
@@ -723,10 +711,6 @@ public final class GenerateDB {
       }
 
       // Tournament Parameters
-      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.SEEDING_ROUNDS)) {
-        TournamentParameters.setDefaultNumSeedingRounds(connection, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-      }
-
       if (!TournamentParameters.defaultParameterExists(connection,
                                                        TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE)) {
         TournamentParameters.setDefaultPerformanceAdvancementPercentage(connection,
@@ -899,7 +883,6 @@ public final class GenerateDB {
       perfRoundsSql.append(" ,perf_time TIME NOT NULL");
       perfRoundsSql.append(" ,table_color LONGVARCHAR NOT NULL");
       perfRoundsSql.append(" ,table_side INTEGER NOT NULL");
-      perfRoundsSql.append(" ,practice BOOLEAN NOT NULL");
       perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, perf_time)");
       if (createConstraints) {
         perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number) ON DELETE CASCADE");
@@ -1605,6 +1588,33 @@ public final class GenerateDB {
       // store sponsor order
       createAwardsScriptRankTable(connection, createConstraints, "awards_script_sponsor_order", "sponsor",
                                   "sponsor_rank");
+    }
+  }
+
+  /**
+   * @param connection database
+   * @param createConstraints if foreign key constraints should be created
+   * @throws SQLException on an error
+   */
+  /* package */ static void createRunMetadataTable(final Connection connection,
+                                                   final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+
+      final StringBuilder createTable = new StringBuilder();
+      createTable.append("CREATE TABLE run_metadata (");
+      createTable.append("  tournament_id INTEGER NOT NULL");
+      createTable.append(" ,run_number INTEGER NOT NULL");
+      createTable.append(" ,display_name VARCHAR DEFAULT NULL");
+      createTable.append(" ,scoreboard_display BOOLEAN NOT NULL");
+      createTable.append(" ,run_type VARCHAR NOT NULL");
+      if (createConstraints) {
+        createTable.append(" ,CONSTRAINT run_metadata_pk PRIMARY KEY (tournament_id, run_number)");
+        createTable.append(" ,CONSTRAINT run_metadata_fk1 FOREIGN KEY (tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+      }
+      createTable.append(")");
+      stmt.executeUpdate(createTable.toString());
+
     }
   }
 

@@ -10,25 +10,23 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
-import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Set the current tournament.
@@ -54,10 +52,7 @@ public class SetCurrentTournament extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
+    try (Connection connection = datasource.getConnection()) {
       final String currentTournamentParam = request.getParameter("currentTournament");
       if (null != currentTournamentParam
           && !"".equals(currentTournamentParam)) {
@@ -66,7 +61,7 @@ public class SetCurrentTournament extends BaseFLLServlet {
           message.append(String.format("<p class='error'>Tournament with id %d is unknown</p>", newTournamentID));
         } else {
           final Tournament newTournament = Tournament.findTournamentByID(connection, newTournamentID);
-          Queries.setCurrentTournament(connection, newTournamentID);
+          ApplicationAttributes.getTournamentData(application).setCurrentTournament(newTournament);
           message.append(String.format("<p id='success'><i>Tournament changed to %s</i></p>", newTournament.getName()));
         }
       } else {
@@ -76,8 +71,6 @@ public class SetCurrentTournament extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     session.setAttribute("message", message.toString());

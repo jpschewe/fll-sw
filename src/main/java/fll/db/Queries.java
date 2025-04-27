@@ -37,6 +37,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
+import fll.web.TournamentData;
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
@@ -279,7 +280,8 @@ public final class Queries {
    * 
    * @param connection database connection
    * @param teamNumber team number
-   * @return the highest run number that the team has completed
+   * @return the highest run number that the team has completed at the current
+   *         tournament
    * @throws SQLException on a database error
    */
   public static int getMaxRunNumber(final Connection connection,
@@ -309,7 +311,7 @@ public final class Queries {
    * 
    * @param connection database connection
    * @param tournament the tournament to check
-   * @return the highest run number that the team has completed
+   * @return the highest run number that any team has completed
    * @throws SQLException on a database error
    */
   public static int getMaxRunNumber(final Connection connection,
@@ -334,6 +336,7 @@ public final class Queries {
    * Insert a performance score into the database and do all appropriate updates
    * to the playoff tables and notifications to the UI code.
    *
+   * @param runMetadataFactory run metadata cache
    * @param connection the database connection
    * @param datasource used to create background database connections
    * @param description the challenge description
@@ -344,7 +347,8 @@ public final class Queries {
    * @throws ParseException on an error parsing the score data
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static void insertPerformanceScore(final Connection connection,
+  public static void insertPerformanceScore(final RunMetadataFactory runMetadataFactory,
+                                            final Connection connection,
                                             final DataSource datasource,
                                             final ChallengeDescription description,
                                             final Tournament tournament,
@@ -428,16 +432,15 @@ public final class Queries {
                                                                                teamScore.getTeamNumber());
       final ScoreType performanceScoreType = description.getPerformance().getScoreType();
       final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-      ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+      ScoreboardUpdates.newScore(runMetadataFactory, datasource, team, score, formattedScore, teamScore);
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
                                                                                 tournament.getTournamentID());
-    if (teamScore.getRunNumber() > numSeedingRounds) {
-
-      if (runningHeadToHead) {
+    if (runningHeadToHead) {
+      final boolean isPlayoffRound = Playoff.isPlayoffRound(connection, tournament, teamScore.getRunNumber());
+      if (isPlayoffRound) {
         if (verified) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Updating playoff score from insert");
@@ -453,8 +456,10 @@ public final class Queries {
           H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
                                            teamScore.getRunNumber());
         }
-      } // running head to head
-    } else {
+      }
+    }
+
+    if (runMetadataFactory.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
       tournament.recordPerformanceSeedingModified(connection);
     }
 
@@ -466,6 +471,7 @@ public final class Queries {
    * Update a performance score in the database. All of the values are expected
    * to be in request.
    *
+   * @param runMetadataFactory get run information
    * @param description
    *          description of the challenge
    * @param connection database connection
@@ -477,7 +483,8 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static int updatePerformanceScore(final ChallengeDescription description,
+  public static int updatePerformanceScore(final RunMetadataFactory runMetadataFactory,
+                                           final ChallengeDescription description,
                                            final Connection connection,
                                            final DataSource datasource,
                                            final TeamScore teamScore)
@@ -573,15 +580,16 @@ public final class Queries {
                                                                                    teamScore.getTeamNumber());
           final ScoreType performanceScoreType = description.getPerformance().getScoreType();
           final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
-          ScoreboardUpdates.newScore(datasource, team, score, formattedScore, teamScore);
+          ScoreboardUpdates.newScore(runMetadataFactory, datasource, team, score, formattedScore, teamScore);
         }
       }
 
       // Check if we need to update the PlayoffData table
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
-      if (runNumber > numSeedingRounds) {
-        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
-        if (runningHeadToHead) {
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                  tournament.getTournamentID());
+      if (runningHeadToHead) {
+        final boolean isPlayoffRound = Playoff.isPlayoffRound(connection, tournament, teamScore.getRunNumber());
+        if (isPlayoffRound) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Updating playoff score from updatePerformanceScore");
           }
@@ -589,9 +597,12 @@ public final class Queries {
           Playoff.updatePlayoffScore(connection, currentTournament, winnerCriteria, performanceElement,
                                      tiebreakerElement, teamNumber, runNumber, teamScore);
         }
-      } else {
+      }
+
+      if (runMetadataFactory.getRunMetadata(teamScore.getRunNumber()).isRegularMatchPlay()) {
         tournament.recordPerformanceSeedingModified(connection);
       }
+
     }
 
     // notify that there may be more runs to verify
@@ -603,26 +614,26 @@ public final class Queries {
   /**
    * Delete a performance score in the database in the current tournament.
    *
+   * @param tournamentData stored tournament data
    * @param connection database connection
    * @param teamNumber team to delete the score for
    * @param runNumber run number to delete
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
-  public static void deletePerformanceScore(final Connection connection,
+  public static void deletePerformanceScore(final TournamentData tournamentData,
+                                            final Connection connection,
                                             final int teamNumber,
                                             final int runNumber)
       throws SQLException {
-    final int currentTournament = getCurrentTournament(connection);
+    final Tournament currentTournament = tournamentData.getCurrentTournament();
+    final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
 
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
-    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
-
-    final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
-    final String division = runningHeadToHead
-        && runNumber > numSeedingRounds
-            ? Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber)
-            : "not in playoffs or no playoffs";
+    final int dbLine = getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), teamNumber,
+                                                 runNumber);
+    final String division = runMetadata.isHeadToHead()
+        ? Playoff.getPlayoffDivision(connection, currentTournament.getTournamentID(), teamNumber, runNumber)
+        : "not in playoffs or no playoffs";
 
     // Check if we need to update the PlayoffData table
     try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM Performance" //
@@ -630,24 +641,24 @@ public final class Queries {
         + " AND RunNumber > ?" //
         + " AND Tournament = ?")) {
 
-      if (runNumber > numSeedingRounds) {
+      if (runMetadata.isHeadToHead()) {
         if (dbLine > 0) {
           final int siblingDbLine = dbLine
               % 2 == 0 ? dbLine
                   - 1
                   : dbLine
                       + 1;
-          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingDbLine,
-                                                             runNumber);
+          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament.getTournamentID(), division,
+                                                             siblingDbLine, runNumber);
 
           if (siblingTeam != Team.NULL_TEAM_NUMBER) {
             // See if either teamNumber or siblingTeam has a score entered in
             // subsequent rounds
-            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber
+            if (getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), teamNumber, runNumber
                 + 1) > 0) {
               prep.setInt(1, teamNumber);
               prep.setInt(2, runNumber);
-              prep.setInt(3, currentTournament);
+              prep.setInt(3, currentTournament.getTournamentID());
               try (ResultSet rs = prep.executeQuery()) {
                 if (rs.next()) {
                   throw new RuntimeException("Unable to delete score for team number "
@@ -661,11 +672,11 @@ public final class Queries {
               }
             }
             if (siblingTeam != Team.BYE_TEAM_NUMBER
-                && getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
+                && getPlayoffTableLineNumber(connection, currentTournament.getTournamentID(), siblingTeam, runNumber
                     + 1) > 0) {
               prep.setInt(1, siblingTeam);
               prep.setInt(2, runNumber);
-              prep.setInt(3, currentTournament);
+              prep.setInt(3, currentTournament.getTournamentID());
               try (ResultSet rs = prep.executeQuery()) {
                 if (rs.next()) {
                   throw new RuntimeException("Unable to delete score for team number "
@@ -697,13 +708,13 @@ public final class Queries {
         + " WHERE Tournament = ?"
         + " AND TeamNumber = ?"
         + " AND RunNumber = ?")) {
-      deletePrep.setInt(1, currentTournament);
+      deletePrep.setInt(1, currentTournament.getTournamentID());
       deletePrep.setInt(2, teamNumber);
       deletePrep.setInt(3, runNumber);
 
       deletePrep.executeUpdate();
 
-      if (runNumber > numSeedingRounds) {
+      if (runMetadata.isHeadToHead()) {
         final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
         final PerformanceScoreCategory performance = description.getPerformance();
         final ScoreType performanceScoreType = performance.getScoreType();
@@ -712,7 +723,7 @@ public final class Queries {
 
         // if the delete of the performance score succeeded it's save to remove the
         // information from the playoff table
-        Playoff.removePlayoffScore(connection, division, currentTournament, runNumber, dbLine);
+        Playoff.removePlayoffScore(connection, division, currentTournament.getTournamentID(), runNumber, dbLine);
 
         // update the display for the deleted score
         H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, runNumber);
@@ -903,11 +914,12 @@ public final class Queries {
   }
 
   /**
-   * Get a list of team numbers that have fewer runs than seeding rounds. This
+   * Get a list of team numbers that are missing regular match play runs. This
    * uses only verified performance scores, so scores that have not been
    * double-checked will show up in this report as not entered.
    *
    * @param connection connection to the database
+   * @param runMetadataFactory run metadata
    * @param tournamentTeams keyed by team number
    * @param verifiedScoresOnly True if the database query should use only
    *          verified scores, false if it should use all scores.
@@ -915,31 +927,40 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
-  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
-                                                      final Map<Integer, ? extends Team> tournamentTeams,
-                                                      final boolean verifiedScoresOnly)
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Handle verified column or not")
+  public static Set<Team> getTeamsNeedingRegularMatchPlayRuns(final Connection connection,
+                                                              final RunMetadataFactory runMetadataFactory,
+                                                              final Map<Integer, ? extends Team> tournamentTeams,
+                                                              final boolean verifiedScoresOnly)
       throws SQLException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
-    final String view;
 
+    final StringBuilder sql = new StringBuilder();
+    sql.append("SELECT TeamNumber FROM TournamentTeams ");
+    sql.append(" WHERE Tournament = ?"); // tournament
+    sql.append(" AND NOT EXISTS (SELECT 1 FROM performance ");
+    sql.append("   WHERE performance.Tournament = ?"); // tournament
+    sql.append("   AND performance.RunNumber = ?"); // run number
+    sql.append("   AND performance.TeamNumber = TournamentTeams.TeamNumber");
     if (verifiedScoresOnly) {
-      view = "verified_performance";
-    } else {
-      view = "Performance";
+      sql.append("   AND performance.verified = TRUE");
     }
+    sql.append(")");
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
-        + view //
-        + " WHERE Tournament = ? GROUP BY TeamNumber" //
-        + " HAVING Count(*) < ?")) {
+    final Set<Team> teamsNeedingRuns = new HashSet<>();
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
       prep.setInt(1, currentTournament);
-      prep.setInt(2, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
+      prep.setInt(2, currentTournament);
+      for (final RunMetadata runMetadata : runMetadataFactory.getRegularMatchPlayRunMetadata()) {
+        prep.setInt(3, runMetadata.getRunNumber());
 
-      try (ResultSet rs = prep.executeQuery()) {
-        return collectTeamsFromQuery(tournamentTeams, rs);
+        try (ResultSet rs = prep.executeQuery()) {
+          teamsNeedingRuns.addAll(collectTeamsFromQuery(tournamentTeams, rs));
+        }
       }
     }
+
+    return teamsNeedingRuns;
   }
 
   /**
@@ -950,21 +971,21 @@ public final class Queries {
    * @throws RuntimeException if a team couldn't be found in the map
    * @throws SQLException on a database error
    */
-  private static List<Team> collectTeamsFromQuery(final Map<Integer, ? extends Team> tournamentTeams,
-                                                  final ResultSet rs)
+  private static Set<Team> collectTeamsFromQuery(final Map<Integer, ? extends Team> tournamentTeams,
+                                                 final ResultSet rs)
       throws SQLException {
-    final List<Team> list = new LinkedList<>();
+    final Set<Team> teams = new HashSet<>();
     while (rs.next()) {
       final int teamNumber = rs.getInt(1);
       final Team team = tournamentTeams.get(teamNumber);
       if (null == team) {
-        throw new RuntimeException("Couldn't find team number "
+        throw new FLLRuntimeException("Couldn't find team number "
             + teamNumber
             + " in the list of tournament teams!");
       }
-      list.add(team);
+      teams.add(team);
     }
-    return list;
+    return teams;
   }
 
   /**

@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
@@ -59,9 +58,6 @@ public final class AdminIndex {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       pageContext.setAttribute("currentTournament", Tournament.findTournamentByID(connection, currentTournamentID));
-
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentID);
-      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       pageContext.setAttribute("tournaments", tournaments);
