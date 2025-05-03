@@ -170,6 +170,14 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
         }
       }
     }
+
+    // ensure that all award groups are in the list
+    for (final String group : Queries.getAwardGroups(connection, tournamentId)) {
+      if (!result.contains(group)) {
+        result.add(group);
+      }
+    }
+
     return result;
   }
 

@@ -229,6 +229,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     </div>
 
+    <a class='wide'
+        href='<c:url value="/report/edit-award-group-order.jsp"/>'>Edit
+        award group order</a>
 
 
     <h2>Finalist scheduling</h2>
