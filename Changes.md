@@ -1,3 +1,4 @@
+* Display practice scores on the scoreboard by default
 * #1245 - Sort the finalist schedule report in the same order as the deliberation category order
 * #1220 - Add metadata to runs so that they can be named and the user can control what runs are displayed on the scoreboard
 * #1259 - Fix bug switching between full scoreboard and all teams / most recent scores
