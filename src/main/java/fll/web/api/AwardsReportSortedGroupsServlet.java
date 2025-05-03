@@ -41,7 +41,9 @@ import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
 
 /**
- * Collection of names of the groups used in the awards report in sorted order.
+ * List of names of the groups used in the awards report in sorted order.
+ * This contains the award groups that are used in the awards report, which may
+ * include more groups than returned from {@link AwardGroupsServlet}.
  */
 @WebServlet("/api/AwardsReportSortedGroups")
 public class AwardsReportSortedGroupsServlet extends HttpServlet {
