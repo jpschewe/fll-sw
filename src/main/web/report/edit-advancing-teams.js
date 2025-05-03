@@ -7,12 +7,12 @@
 "use strict";
 
 // list of names
-var _awardGroups = [];
+let _awardGroups = [];
 
 // list of AdvancingTeam
-var _advancingTeams = [];
+let _advancingTeams = [];
 // list of AdvancingTeamData
-var _advancingTeamData = [];
+let _advancingTeamData = [];
 
 function AwardWinnerData(nameFunc, awardGroup, teamElement, descriptionElement) {
     this.nameFunc = nameFunc;
@@ -28,9 +28,9 @@ function AwardWinnerData(nameFunc, awardGroup, teamElement, descriptionElement) 
  * @returns AwardWinner or null if the team number is not set
  */
 function createAwardWinner(data) {
-    var teamNumber = data.teamElement.value;
+    const teamNumber = data.teamElement.value;
     if (teamNumber && teamNumber != "") {
-        var categoryName = data.nameFunc();
+        const categoryName = data.nameFunc();
         return new AwardWinner(categoryName, data.awardGroup, teamNumber,
             data.descriptionElement.value);
     } else {
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert(msg);
         };
 
-        var promises = [];
+        const promises = [];
         const advancingPromise = storeAdvancingTeams(fail_callback);
         promises.push(advancingPromise);
 
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
-    var advancingGroupCount = 1;
+    let advancingGroupCount = 1;
     document.getElementById("advancing-teams_add-group").addEventListener('click', function() {
         addAdvancingGroup("Group " + advancingGroupCount, true);
         advancingGroupCount = advancingGroupCount + 1;
@@ -79,9 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
  * @return a promise that stores the advancing teams
  */
 function storeAdvancingTeams() {
-    var advancing = [];
+    const advancing = [];
     _advancingTeamData.forEach(function(data) {
-        var adTeam = createAdvancingTeam(data);
+        const adTeam = createAdvancingTeam(data);
         if (adTeam) {
             advancing.push(adTeam);
         }
@@ -126,27 +126,27 @@ function loadFromServer(doneCallback, failCallback) {
 
     _log("Loading from server");
 
-    var waitList = []
+    const waitList = []
 
-    var teamsPromise = fllTeams.loadTeams();
+    const teamsPromise = fllTeams.loadTeams();
     teamsPromise.catch(function() {
         failCallback("Teams");
     });
     waitList.push(teamsPromise);
 
-    var loadAwardGroupsPromise = loadAwardGroups();
+    const loadAwardGroupsPromise = loadAwardGroups();
     loadAwardGroupsPromise.catch(function() {
         failCallback("Award groups");
     });
     waitList.push(loadAwardGroupsPromise);
 
-    var loadAdvancingTeamsPromise = loadAdvancingTeams();
+    const loadAdvancingTeamsPromise = loadAdvancingTeams();
     loadAdvancingTeamsPromise.catch(function() {
         failCallback("Advancing Teams");
     });
     waitList.push(loadAdvancingTeamsPromise);
 
-    var loadSortedGroupsPromise = loadSortedGroups();
+    const loadSortedGroupsPromise = loadSortedGroups();
     loadSortedGroupsPromise.catch(function() {
         failCallback("Sorted groups");
     });
@@ -169,9 +169,9 @@ function AdvancingTeamData(nameFunc, teamElement) {
  * @returns AdvancingTeam or null if the team number is not set
  */
 function createAdvancingTeam(data) {
-    var teamNumber = data.teamElement.value;
+    const teamNumber = data.teamElement.value;
     if (teamNumber && teamNumber != "") {
-        var groupName = data.nameFunc();
+        const groupName = data.nameFunc();
         return new AdvancingTeam(teamNumber, groupName);
     } else {
         return null;
@@ -181,7 +181,7 @@ function createAdvancingTeam(data) {
 function initPage() {
     _advancingTeamData = [];
 
-    var advancingTeamsEle = document.getElementById("advancing-teams");
+    const advancingTeamsEle = document.getElementById("advancing-teams");
     while (advancingTeamsEle.firstChild) {
         advancingTeamsEle.removeChild(advancingTeamsEle.firstChild);
     }
@@ -190,7 +190,7 @@ function initPage() {
         addAdvancingGroup(group, false);
     });
 
-    var knownGroups = [];
+    const knownGroups = [];
     _advancingTeams.forEach(function(advancing) {
         if (!knownGroups.includes(advancing.group)
             && !_awardGroups.includes(advancing.group)) {
@@ -219,12 +219,12 @@ function initPage() {
 }
 
 function addAdvancingGroup(group, editable) {
-    var groupItem = document.createElement("li");
+    const groupItem = document.createElement("li");
 
     document.getElementById("advancing-teams").appendChild(groupItem);
 
-    var nameFunc;
-    var groupEle;
+    let nameFunc;
+    let groupEle;
     if (editable) {
         groupEle = document.createElement("input");
         groupEle.setAttribute("type", "text");
@@ -235,17 +235,17 @@ function addAdvancingGroup(group, editable) {
 
         groupEle.data = group;
         groupEle.onchange = function() {
-            var newName = groupEle.value;
-            var oldValue = groupEle.data;
+            const newName = groupEle.value;
+            const oldValue = groupEle.data;
             if (null == newName || "" == newName) {
                 alert("All groups must have non-empty names");
                 groupEle.value = oldValue;
             } else {
                 // check that the group name isn't a duplicate
-                var duplicate = false;
+                let duplicate = false;
                 Array.from(document.getElementById("award-group-order").children).forEach(function(le) {
                     if ("LI" == le.tagName) {
-                        var inputEle = le.getElementsByTagName("span")[0];
+                        const inputEle = le.getElementsByTagName("span")[0];
                         if (inputEle != groupEle) {
                             if (newName == inputEle.textContent) {
                                 duplicate = true;
@@ -277,21 +277,21 @@ function addAdvancingGroup(group, editable) {
     }
     groupItem.appendChild(groupEle);
 
-    var groupList = document.createElement("ul");
+    const groupList = document.createElement("ul");
     groupItem.appendChild(groupList);
 
-    var addTeamButton = document.createElement("button");
+    const addTeamButton = document.createElement("button");
     addTeamButton.innerHTML = "Add Team";
     groupItem.appendChild(addTeamButton);
 
-    var teamList = document.createElement("ul");
+    const teamList = document.createElement("ul");
     groupItem.appendChild(teamList);
 
     addTeamButton.addEventListener('click', function() {
         addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList, editable ? null : group);
     });
 
-    var enterNewTeam = true;
+    let enterNewTeam = true;
     if (group) {
         _advancingTeams.forEach(function(advancing) {
             if (advancing.group == group) {
@@ -325,27 +325,27 @@ function addAdvancingGroup(group, editable) {
  */
 function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList, awardGroup) {
 
-    var teamEle = document.createElement("li");
+    const teamEle = document.createElement("li");
     teamList.appendChild(teamEle);
 
-    var numEle = document.createElement("input");
+    const numEle = document.createElement("input");
     numEle.setAttribute("type", "text");
     teamEle.appendChild(numEle);
 
-    var nameEle = document.createElement("input");
+    const nameEle = document.createElement("input");
     nameEle.readOnly = true;
     nameEle.disabled = true;
     teamEle.appendChild(nameEle);
-    var prevTeam = "";
+    let prevTeam = "";
     numEle.addEventListener(
         'change',
         function() {
             const newTeamNumber = numEle.value;
 
-            var duplicate = false;
+            let duplicate = false;
             _advancingTeamData.forEach(function(data) {
                 if (data.teamElement != numEle) {
-                    var compareTeamNumber = data.teamElement.value;
+                    const compareTeamNumber = data.teamElement.value;
                     if (compareTeamNumber == newTeamNumber) {
                         duplicate = true;
                     }
@@ -359,27 +359,27 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList, awardGro
             }
         });
 
-    var orgEle = document.createElement("input");
+    const orgEle = document.createElement("input");
     orgEle.readOnly = true;
     orgEle.disabled = true;
     teamEle.appendChild(orgEle);
 
-    var agEle = document.createElement("input");
+    const agEle = document.createElement("input");
     agEle.readOnly = true;
     agEle.disabled = true;
     teamEle.appendChild(agEle);
 
-    var data = new AdvancingTeamData(groupNameFunc, numEle);
+    const data = new AdvancingTeamData(groupNameFunc, numEle);
     dataList.push(data);
 
     fllTeams.autoPopulate(numEle, nameEle, orgEle, agEle, awardGroup)
 
-    var deleteButton = document.createElement("button");
+    const deleteButton = document.createElement("button");
     deleteButton.innerHTML = "Delete";
     teamEle.appendChild(deleteButton);
     deleteButton.addEventListener('click', function() {
-        var teamNum = numEle.value;
-        var reallyDelete = false;
+        const teamNum = numEle.value;
+        let reallyDelete = false;
         if ("" != teamNum) {
             reallyDelete = confirm("Are you sure you want to delete this team?");
         } else {
@@ -398,7 +398,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList, awardGro
 
 }
 
-var _initialSortedGroups = [];
+let _initialSortedGroups = [];
 
 function loadSortedGroups() {
     return fetch("/api/AwardsReportSortedGroups").then(checkJsonResponse).then(function(data) {
@@ -407,7 +407,7 @@ function loadSortedGroups() {
 }
 
 function initSortedGroups(sortedGroups) {
-    var ele = document.getElementById("award-group-order");
+    const ele = document.getElementById("award-group-order");
     while (ele.firstChild) {
         ele.removeChild(ele.firstChild);
     }
@@ -423,11 +423,11 @@ function initSortedGroups(sortedGroups) {
 }
 
 function addGroupToSort(group) {
-    var numGroups = 0;
-    var addGroup = true;
+    let numGroups = 0;
+    let addGroup = true;
     Array.from(document.getElementById("award-group-order").children).forEach(function(le) {
         if ("LI" == le.tagName) {
-            var leGroup = le.getAttribute("data-group-name");
+            const leGroup = le.getAttribute("data-group-name");
             if (leGroup == group) {
                 addGroup = false;
             }
@@ -436,28 +436,28 @@ function addGroupToSort(group) {
     });
 
     if (addGroup) {
-        var listElement = document.createElement("li");
+        const listElement = document.createElement("li");
         listElement.setAttribute("data-group-name", group);
         document.getElementById("award-group-order").appendChild(listElement);
 
-        var indexElement = document.createElement("input");
+        const indexElement = document.createElement("input");
         indexElement.setAttribute("type", "number");
         indexElement.setAttribute("step", "1");
         indexElement.value = numGroups + 1;
         listElement.appendChild(indexElement);
 
-        var nameElement = document.createElement("span");
+        const nameElement = document.createElement("span");
         nameElement.innerHTML = group;
         listElement.appendChild(nameElement);
     }
 }
 
 function removeGroupToSort(group) {
-    var toRemove = null;
+    let toRemove = null;
 
     Array.from(document.getElementById("award-group-order").children).forEach(function(le) {
         if ("LI" == le.tagName) {
-            var leGroup = le.getAttribute("data-group-name");
+            const leGroup = le.getAttribute("data-group-name");
             if (leGroup == group) {
                 toRemove = le;
             }
@@ -470,10 +470,10 @@ function removeGroupToSort(group) {
 }
 
 function renameGroupToSort(oldName, newName) {
-    var element = null;
+    let element = null;
     Array.from(document.getElementById("award-group-order").children).forEach(function(le) {
         if ("LI" == le.tagName) {
-            var leGroup = le.getAttribute("data-group-name");
+            const leGroup = le.getAttribute("data-group-name");
             if (leGroup == oldName) {
                 element = le;
             }
@@ -495,7 +495,7 @@ function renameGroupToSort(oldName, newName) {
  */
 function storeSortedGroups() {
     // gather list elements that have the group sort information
-    var groupElements = [];
+    const groupElements = [];
     Array.from(document.getElementById("award-group-order").children).forEach(function(le) {
         if ("LI" == le.tagName) {
             groupElements.push(le);
@@ -504,15 +504,15 @@ function storeSortedGroups() {
 
     // sort the elements
     groupElements.sort(function(a, b) {
-        var aIndex = a.getElementsByTagName("input")[0].value;
-        var bIndex = b.getElementsByTagName("input")[0].value;
+        const aIndex = a.getElementsByTagName("input")[0].value;
+        const bIndex = b.getElementsByTagName("input")[0].value;
         return aIndex - bIndex;
     });
 
     // convert to a list of strings
-    var groups = [];
+    const groups = [];
     groupElements.forEach(function(le) {
-        var group = le.getAttribute("data-group-name");
+        const group = le.getAttribute("data-group-name");
         groups.push(group);
     });
 
