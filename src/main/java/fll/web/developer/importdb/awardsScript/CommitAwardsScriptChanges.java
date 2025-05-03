@@ -81,8 +81,7 @@ public class CommitAwardsScriptChanges extends BaseFLLServlet {
       throw new RuntimeException("Error talking to the database", sqle);
     }
 
-    session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/awardsScript/CheckAwardsScriptInfo");
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, "/developer/importdb/awardsScript/CheckAwardsScriptInfo");
   }
 
 }

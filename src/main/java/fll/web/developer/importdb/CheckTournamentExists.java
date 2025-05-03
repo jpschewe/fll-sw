@@ -10,22 +10,22 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
-
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Servlet to check if the tournament exists in the dest database.
@@ -81,6 +81,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
       }
     }
 
+    final String redirectUrl;
     if (null != selectedTournament) {
       sessionInfo.setTournamentName(selectedTournament);
 
@@ -88,22 +89,22 @@ public class CheckTournamentExists extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       try (Connection connection = datasource.getConnection()) {
         if (!Tournament.doesTournamentExist(connection, selectedTournament)) {
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateTournament.jsp");
+          redirectUrl = "promptCreateTournament.jsp";
         } else {
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "FindMissingTeams");
+          redirectUrl = "FindMissingTeams";
         }
       } catch (final SQLException sqle) {
         LOG.error(sqle, sqle);
-        throw new RuntimeException("Error talking to the database", sqle);
+        throw new FLLRuntimeException("Error talking to the database", sqle);
       }
 
       session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
     } else {
-      message.append("<p class='error'>Can't find the 'tournament' parameter</p>");
+      throw new FLLRuntimeException("Can't find the 'tournament' parameter");
     }
 
     session.setAttribute("message", message.toString());
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, redirectUrl);
   }
 
 }

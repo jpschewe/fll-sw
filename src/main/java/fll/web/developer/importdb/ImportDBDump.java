@@ -16,6 +16,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -88,6 +89,7 @@ public class ImportDBDump extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     Utilities.loadDBDriver();
+    final String redirectUrl;
     try {
       if (null != request.getPart("importdb")) {
 
@@ -120,7 +122,7 @@ public class ImportDBDump extends BaseFLLServlet {
             try (Connection destConnection = destDataSource.getConnection()) {
               final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
               if (null == docMessage) {
-                session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
+                redirectUrl = "selectTournament.jsp";
                 session.setAttribute(IMPORT_DB_SESSION_KEY, sessionInfo);
               } else {
                 message.append("<p class='error'>");
@@ -131,16 +133,15 @@ public class ImportDBDump extends BaseFLLServlet {
                 final String redirect = SessionAttributes.getAttribute(session, IMPORT_DB_FINAL_REDIRECT_KEY,
                                                                        String.class);
                 session.removeAttribute(IMPORT_DB_FINAL_REDIRECT_KEY);
-                session.setAttribute(SessionAttributes.REDIRECT_URL, redirect);
+                redirectUrl = redirect;
               }
             } // allocate destConnection
           } // allocate zipfile
         } // allocate memConnection
 
       } else {
-        message.append("<p class='error'>Unknown form state, expected form fields not seen: "
-            + request
-            + "</p>");
+        throw new FLLRuntimeException("Unknown form state, expected form fields not seen: "
+            + request);
       }
     } catch (final FileUploadException fue) {
       LOG.error(fue);
@@ -151,7 +152,7 @@ public class ImportDBDump extends BaseFLLServlet {
     }
 
     SessionAttributes.appendToMessage(session, message.toString());
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, redirectUrl);
   }
 
   /**

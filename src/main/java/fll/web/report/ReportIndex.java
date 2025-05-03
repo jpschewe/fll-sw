@@ -26,6 +26,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.finalist.FinalistSchedule;
@@ -100,6 +101,8 @@ public final class ReportIndex {
       pageContext.setAttribute("awardGroups", AwardsScriptReport.getAwardGroupOrder(connection, tournament));
       pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournamentId));
       pageContext.setAttribute("sortOrders", FinalComputedScores.SortOrder.values());
+
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "/report/index.jsp");
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

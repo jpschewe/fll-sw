@@ -97,8 +97,7 @@ public class EditAwardGroupOrder extends BaseFLLServlet {
                                                          tournamentData.getCurrentTournament().getTournamentID(),
                                                          sortedGroups);
 
-      // FIXME need to specify where to send the user
-
+      WebUtils.sendRedirect(response, session);
     } catch (final SQLException e) {
       throw new FLLRuntimeException(e);
     }
