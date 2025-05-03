@@ -134,7 +134,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
     for (final String header : practiceTimeHeaders) {
       performanceRoundValues.put(roundNumber, header);
       performanceRoundRunType.put(roundNumber, RunMetadata.RunType.PRACTICE);
-      performanceRoundScoreboard.put(roundNumber, false);
+      performanceRoundScoreboard.put(roundNumber, true);
       ++roundNumber;
     }
 
