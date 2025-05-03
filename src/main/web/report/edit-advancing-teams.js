@@ -491,7 +491,7 @@ function renameGroupToSort(oldName, newName) {
 }
 
 /**
- * @return a Promise for storing the sorted gruops
+ * @return a Promise for storing the sorted groups
  */
 function storeSortedGroups() {
     // gather list elements that have the group sort information
