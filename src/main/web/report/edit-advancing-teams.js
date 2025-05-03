@@ -187,9 +187,11 @@ function initPage() {
     }
 
     _awardGroups.forEach(function(group) {
+        // cannot modify the names of the award groups
         addAdvancingGroup(group, false);
     });
 
+    // groups for the awards report that are not award groups.
     const knownGroups = [];
     _advancingTeams.forEach(function(advancing) {
         if (!knownGroups.includes(advancing.group)
@@ -199,6 +201,7 @@ function initPage() {
     });
 
     knownGroups.forEach(function(group) {
+        // all non-award groups can have the name edited and can be deleted
         addAdvancingGroup(group, true);
     });
 
