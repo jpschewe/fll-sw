@@ -56,6 +56,6 @@ CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
 
 "CommitTeamInformationChanges" -> "CommitSchedule";
 
-
+"CommitSchedule" -> "edit-award-group-order.jsp";
 
 }

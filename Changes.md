@@ -1,3 +1,4 @@
+* #1261 - prompt the user for award group sort after uploading a schedule
 * Scale weighted rank by number of teams in group per category
 * Display practice scores on the scoreboard by default
 * #1245 - Sort the finalist schedule report in the same order as the deliberation category order

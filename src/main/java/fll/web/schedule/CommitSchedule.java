@@ -28,6 +28,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -94,6 +95,8 @@ public class CommitSchedule extends BaseFLLServlet {
       SessionAttributes.appendToMessage(session,
                                         "<p id='success' class='success'>Schedule successfully stored in the database</p>");
       session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
+
+      WebUtils.sendRedirect(response, "/report/edit-award-group-order.jsp");
       return;
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
