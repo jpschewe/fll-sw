@@ -85,6 +85,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private record ScoreData(AwardCategory category,
                            int rank,
+                           double rankFraction,
                            String scoreText,
                            boolean missing) {
   }
@@ -968,7 +969,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * catRank;
+                      * scoreData.rankFraction();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -995,7 +996,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * catRank;
+                      * scoreData.rankFraction();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -1016,7 +1017,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           if (perfRank > 0) {
 
             weightedRankSum += performanceCategory.getWeight()
-                * perfRank;
+                * perfScaledData.rankFraction();
           } else {
             weightedRankSum = Double.NaN;
           }
@@ -1062,7 +1063,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (-1 == rank) {
       rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
     } else {
-      rankText = String.format("%1$s(%2$d)", Utilities.NON_BREAKING_SPACE, rank);
+      rankText = String.format("%1$s(%2$d/%3$d)", Utilities.NON_BREAKING_SPACE, rank, rankInCategory.size());
     }
 
     final String overallScoreText;
@@ -1075,7 +1076,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final String scoreText = overallScoreText
         + rankText;
 
-    return new ScoreData(category, rank, scoreText, Double.isNaN(scaledScore));
+    final double rankFraction = (double) rank
+        / (double) rankInCategory.size();
+    return new ScoreData(category, rank, rankFraction, scoreText, Double.isNaN(scaledScore));
   }
 
   private ScoreData computeRawPerformanceScore(final Connection connection,
@@ -1113,7 +1116,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           text = Utilities.getFormatForScoreType(performanceScoreType).format(rawScore);
         }
 
-        return new ScoreData(category, -1, text, Double.isNaN(rawScore));
+        return new ScoreData(category, -1, Double.NaN, text, Double.isNaN(rawScore));
 
       } // ResultSet
     } // PreparedStatement
@@ -1277,7 +1280,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 scoreText = rawScoreText.toString();
               }
 
-              subjScoreData.add(new ScoreData(awardCategory, -1, scoreText, !scoreSeen));
+              subjScoreData.add(new ScoreData(awardCategory, -1, Double.NaN, scoreText, !scoreSeen));
             } // ResultSet
           } // category weight greater than 0
         }
@@ -1310,7 +1313,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 scoreText = rawScoreText.toString();
               }
 
-              subjScoreData.add(new ScoreData(awardCategory, -1, scoreText, !scoreSeen));
+              subjScoreData.add(new ScoreData(awardCategory, -1, Double.NaN, scoreText, !scoreSeen));
             } // ResultSet
           } // category weight greater than 0
         }
