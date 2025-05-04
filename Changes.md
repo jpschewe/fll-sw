@@ -1,3 +1,4 @@
+* #1262 - 2 column layout for macro buttons on edit awards script
 * #1261 - prompt the user for award group sort after uploading a schedule
 * Scale weighted rank by number of teams in group per category
 * Display practice scores on the scoreboard by default

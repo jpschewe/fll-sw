@@ -6,3 +6,12 @@ textarea, .macro-buttons {
 textarea:disabled, input:disabled {
     background-color: lightgrey;
 }
+
+.macro-button {
+    width: 100%;
+}
+
+.macros-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
