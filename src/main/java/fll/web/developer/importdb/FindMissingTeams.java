@@ -67,16 +67,17 @@ public class FindMissingTeams extends BaseFLLServlet {
 
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
+    final String redirectUrl;
     try (Connection sourceConnection = sourceDataSource.getConnection();
         Connection destConnection = destDataSource.getConnection()) {
 
       final List<Team> missingTeams = ImportDB.findMissingTeams(sourceConnection, destConnection, tournament);
       if (missingTeams.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
+        redirectUrl = "CheckTeamInfo";
       } else {
         sessionInfo.setMissingTeams(missingTeams);
         session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateMissingTeams.jsp");
+        redirectUrl = "promptCreateMissingTeams.jsp";
       }
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
@@ -84,7 +85,7 @@ public class FindMissingTeams extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, redirectUrl);
   }
 
 }

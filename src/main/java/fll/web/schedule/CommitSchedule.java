@@ -94,7 +94,9 @@ public class CommitSchedule extends BaseFLLServlet {
 
       SessionAttributes.appendToMessage(session,
                                         "<p id='success' class='success'>Schedule successfully stored in the database</p>");
-      WebUtils.sendRedirect(application, response, "/admin/index.jsp");
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
+
+      WebUtils.sendRedirect(response, "/report/edit-award-group-order.jsp");
       return;
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);

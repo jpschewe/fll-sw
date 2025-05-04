@@ -64,6 +64,7 @@ public class ProcessImportFinalist extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     Utilities.loadDBDriver();
+    final String redirectUrl;
     try {
       if (null != request.getPart("finalistFile")) {
 
@@ -101,10 +102,8 @@ public class ProcessImportFinalist extends BaseFLLServlet {
                 if (!destTournamentName.equals(sourceTournamentName)) {
                   message.append(String.format("<p class='error'>The tournament being imported is %s, but the selected tournament is %s. Import of performance data cannot continue.</p>",
                                                sourceTournamentName, destTournamentName));
-                  session.setAttribute(SessionAttributes.REDIRECT_URL,
-                                       SessionAttributes.getAttribute(session,
-                                                                      ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
-                                                                      String.class));
+                  redirectUrl = SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                               String.class);
                   session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
                 } else {
                   sessionInfo.setTournamentName(sourceTournamentName);
@@ -114,16 +113,15 @@ public class ProcessImportFinalist extends BaseFLLServlet {
                   sessionInfo.setImportAwardsScript(false);
                   session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
 
-                  session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckSubjectiveEmptyForJudgeImport");
+                  redirectUrl = "CheckSubjectiveEmptyForJudgeImport";
                 }
               } else {
                 message.append("<p class='error'>");
                 message.append("Import failed: Challenge descriptors are incompatible. This finalist dump is not from the same tournament.");
                 message.append(docMessage);
                 message.append("</p>");
-                session.setAttribute(SessionAttributes.REDIRECT_URL,
-                                     SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
-                                                                    String.class));
+                redirectUrl = SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                                                             String.class);
                 session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
               }
             } // allocate destConnection
@@ -131,15 +129,13 @@ public class ProcessImportFinalist extends BaseFLLServlet {
         } // allocate memConnection
       } else {
         message.append("<p class='error'>Missing finalist data file</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL,
-                             SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
-                                                            String.class));
+        redirectUrl = SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY, String.class);
         session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
       }
 
       SessionAttributes.appendToMessage(session, message.toString());
 
-      WebUtils.sendRedirect(response, session);
+      WebUtils.sendRedirect(response, redirectUrl);
     } catch (final FileUploadException fue) {
       LOG.error(fue);
       throw new RuntimeException("Error handling the file upload", fue);

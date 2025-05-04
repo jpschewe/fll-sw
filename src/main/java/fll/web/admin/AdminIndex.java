@@ -89,6 +89,7 @@ public final class AdminIndex {
 
       pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
 
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage()

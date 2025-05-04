@@ -65,6 +65,7 @@ public class CheckAwardsScriptInfo extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
+    final String redirectUrl;
     try {
       final List<AwardsScriptDifference> differences = ImportDB.checkAwardsScriptInfo(description, sourceDataSource,
                                                                                       destDataSource, tournament);
@@ -72,17 +73,16 @@ public class CheckAwardsScriptInfo extends BaseFLLServlet {
       session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
 
       if (differences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/ExecuteImport");
+        redirectUrl = "/developer/importdb/ExecuteImport";
       } else {
-        session.setAttribute(SessionAttributes.REDIRECT_URL,
-                             "/developer/importdb/awardsScript/resolveAwardsScriptDifferences.jsp");
+        redirectUrl = "/developer/importdb/awardsScript/resolveAwardsScriptDifferences.jsp";
       }
     } catch (final SQLException sqle) {
       LOGGER.error(sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     }
 
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, redirectUrl);
   }
 
 }
