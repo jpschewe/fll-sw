@@ -19,6 +19,8 @@ fll.web.report.EditAwardGroupOrder.populateContext(application, pageContext);
 
 <body>
 
+    <%@ include file="/WEB-INF/jspf/message.jspf"%>
+
     <h1>Order of award groups</h1>
     <p>Specify the sort order for the award groups for display and
         printing. This is used in both the awards report and the awards
