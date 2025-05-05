@@ -353,6 +353,15 @@ function addGoalHeaderToScoreEntry(table, totalColumns, goal, rowClass) {
     const goalDescTable = document.createElement("table");
     const goalDescRow = document.createElement("tr");
 
+    if (subjective_module.isReferencedInVirtualCategory(goal)) {
+        const gear = document.createElement("td");
+        goalDescRow.appendChild(gear);
+        const gearImage = document.createElement("img");
+        gear.appendChild(gearImage);
+        gearImage.setAttribute("src", "/images/gear-empty.png");
+        gearImage.classList.add("virtual-category-gear");
+    }
+
     const goalTitle = document.createElement("td");
     goalDescRow.appendChild(goalTitle);
     goalTitle.innerText = goal.title;

@@ -18,6 +18,7 @@ const subjective_module = {}
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
     let _subjectiveCategories; // category.name -> category
+    let _virtualSubjectiveCategories; // array of virtual category
     let _nonNumericCategories; // category.title -> category
     let _tournament;
     let _teams;
@@ -37,6 +38,7 @@ const subjective_module = {}
 
     function _init_variables() {
         _subjectiveCategories = {};
+        _virtualSubjectiveCategories = [];
         _nonNumericCategories = {};
         _tournament = null;
         _teams = {};
@@ -59,6 +61,11 @@ const subjective_module = {}
         let value = fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories");
         if (null != value) {
             _subjectiveCategories = value;
+        }
+
+        value = fllStorage.get(STORAGE_PREFIX, "_virtualSubjectiveCategories");
+        if (null != value) {
+            _virtualSubjectiveCategories = value;
         }
 
         value = fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories");
@@ -134,6 +141,8 @@ const subjective_module = {}
     function _save() {
         fllStorage.set(STORAGE_PREFIX, "_subjectiveCategories",
             _subjectiveCategories);
+        fllStorage.set(STORAGE_PREFIX, "_virtualSubjectiveCategories",
+            _virtualSubjectiveCategories);
         fllStorage.set(STORAGE_PREFIX, "_nonNumericCategories",
             _nonNumericCategories);
         fllStorage.set(STORAGE_PREFIX, "_tournament", _tournament);
@@ -228,6 +237,19 @@ const subjective_module = {}
         });
     }
 
+    /**
+     * Load the virtual subjective categories.
+     * 
+     * @returns the promise for the ajax query
+     */
+    function _loadVirtualSubjectiveCategories() {
+        _virtualSubjectiveCategories = [];
+
+        return fetch("../api/ChallengeDescription/VirtualSubjectiveCategories").then(checkJsonResponse).then(function(data) {
+            _virtualSubjectiveCategories = data;
+        });
+    }
+
     function loadNonNumericCategories() {
         _nonNumericCategories = {};
 
@@ -298,6 +320,12 @@ const subjective_module = {}
             });
             waitList.push(subjectiveCategoriesPromise);
 
+            const virtualSubjectiveCategoriesPromise = _loadVirtualSubjectiveCategories();
+            virtualSubjectiveCategoriesPromise.catch(function() {
+                failCallback("Virtual Subjective Categories");
+            });
+            waitList.push(virtualSubjectiveCategoriesPromise);
+
             const nonNumericCategoriesPromise = loadNonNumericCategories();
             nonNumericCategoriesPromise.catch(function() {
                 failCallback("NonNumeric Categories");
@@ -355,6 +383,27 @@ const subjective_module = {}
                 retval.push(category);
             }
             return retval;
+        },
+
+        /**
+         * @param goal a goal in the current subjective category
+         * @return true if the goal is referenced in a virtual subjective category
+         */
+        subjective_module.isReferencedInVirtualCategory = function(goal) {
+            if (_currentCategory == null) {
+                return false;
+            }
+
+            for (const virt of _virtualSubjectiveCategories) {
+                for (const ref of virt.goalReferences) {
+                    if (ref.category.name == _currentCategory.name
+                        && ref.goalName == goal.name) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         },
 
         /**
