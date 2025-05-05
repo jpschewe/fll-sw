@@ -1028,9 +1028,9 @@ public final class SubjectivePdfWriter {
             virtualReferenced = true;
             break;
           }
-          if (virtualReferenced) {
-            break;
-          }
+        }
+        if (virtualReferenced) {
+          break;
         }
       }
       final Element rangeCell = createRubricRangeCell(document, rubricRange, virtualReferenced, checked, goalComment);
