@@ -181,5 +181,5 @@ footer button {
 }
 
 .virtual-category-gear {
-    transform: scale(0.5);
+    height: 20px;
 }
