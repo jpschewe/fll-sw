@@ -179,3 +179,7 @@ footer button {
     font-family: monospace;
     font-size: larger;
 }
+
+.virtual-category-gear {
+    height: 20px;
+}

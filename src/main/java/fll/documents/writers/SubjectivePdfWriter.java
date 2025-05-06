@@ -49,6 +49,7 @@ import fll.Utilities;
 import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -220,8 +221,12 @@ public final class SubjectivePdfWriter {
   private static String getGearEmptyImageAsBase64() {
     final Base64.Encoder encoder = Base64.getEncoder();
 
-    final ClassLoader loader = castNonNull(UserImages.class.getClassLoader());
-    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/gear-empty.png")) {
+    final @Nullable Path webroot = TomcatLauncher.findWebappRoot(TomcatLauncher.getClassesPath());
+    if (null == webroot) {
+      throw new FLLInternalException("Cannot find web root when looking for gear-empty.png");
+    }
+
+    try (InputStream input = Files.newInputStream(webroot.resolve("images").resolve("gear-empty.png"))) {
       if (null == input) {
         throw new FLLInternalException("Cannot find gear empty image");
       }
@@ -1028,9 +1033,9 @@ public final class SubjectivePdfWriter {
             virtualReferenced = true;
             break;
           }
-          if (virtualReferenced) {
-            break;
-          }
+        }
+        if (virtualReferenced) {
+          break;
         }
       }
       final Element rangeCell = createRubricRangeCell(document, rubricRange, virtualReferenced, checked, goalComment);
