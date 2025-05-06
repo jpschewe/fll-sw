@@ -9,31 +9,25 @@ package fll.web.report;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
-import fll.web.BaseFLLServlet;
 import fll.web.FormParameterStorage;
 import fll.web.SessionAttributes;
-import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
- * Support for and handle the result from promptSummarizeScores.jsp.
+ * Check when scores need to be summarized.
  */
-@WebServlet("/report/PromptSummarizeScores")
-public class PromptSummarizeScores extends BaseFLLServlet {
+public final class PromptSummarizeScores {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -42,30 +36,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
    */
   public static final String SUMMARY_REDIRECT_KEY = "summary_redirect";
 
-  @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session)
-      throws IOException, ServletException {
-    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
-
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.HEAD_JUDGE, UserRole.REPORT_GENERATOR), false)) {
-      return;
-    }
-
-    if (null != request.getParameter("recompute")) {
-      WebUtils.sendRedirect(application, response, "summarizePhase1.jsp");
-    } else {
-      final String url = SessionAttributes.getAttribute(session, SUMMARY_REDIRECT_KEY, String.class);
-      LOGGER.debug("redirect is {}", url);
-
-      if (null == url) {
-        WebUtils.sendRedirect(application, response, "index.jsp");
-      } else {
-        WebUtils.sendRedirect(application, response, url);
-      }
-    }
+  private PromptSummarizeScores() {
   }
 
   /**
