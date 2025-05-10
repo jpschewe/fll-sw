@@ -35,6 +35,7 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -51,10 +52,10 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.PlayoffReport;
-import fll.web.report.PromptSummarizeScores;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
@@ -93,14 +94,14 @@ public class AwardsReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/AwardsReport")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                          tournamentData.getCurrentTournament());
+
       final Document doc = createReport(connection, description);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 

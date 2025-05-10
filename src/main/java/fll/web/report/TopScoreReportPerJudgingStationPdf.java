@@ -14,9 +14,11 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
@@ -39,24 +41,21 @@ public class TopScoreReportPerJudgingStationPdf extends TopScoreReportPdf {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/TopScoreReportPerJudgingStationPdf")) {
-      return;
-    }
-
     response.reset();
     response.setContentType("application/pdf");
     response.setHeader("Content-Disposition", "filename=TopScoreReportPerJudgingStation.pdf");
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                          tournamentData.getCurrentTournament());
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByJudgingStation(connection, description,
                                                                                              tournament, true, false);
-      outputReport(response.getOutputStream(), challengeDescription, tournament, "Judging Station", scores);
+      outputReport(response.getOutputStream(), description, tournament, "Judging Station", scores);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }

@@ -3,10 +3,7 @@
 <fll-sw:required-roles roles="HEAD_JUDGE" allowSetup="false" />
 
 <%
-if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-		"/report/deliberation/index.jsp")) {
-	return;
-}
+fll.ScoreStandardization.computeSummarizedScoresIfNeeded(application);
 %>
 
 <!DOCTYPE HTML>
