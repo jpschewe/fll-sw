@@ -13,10 +13,15 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
+import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -24,6 +29,7 @@ import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
 
 /**
  * Does score standardization routines from the web.
@@ -132,6 +138,47 @@ public final class ScoreStandardization {
           }
         }
       }
+    }
+  }
+
+  /**
+   * Get all information from application attributes and wrap the
+   * {@link SQLException} in {@link FLLRuntimeException}.
+   * 
+   * @param application get all variables
+   */
+  public static void computeSummarizedScoresIfNeeded(final ServletContext application) {
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final DataSource datasource = tournamentData.getDataSource();
+    final Tournament tournament = tournamentData.getCurrentTournament();
+    try (Connection connection = datasource.getConnection()) {
+      computeSummarizedScoresIfNeeded(connection, description, tournament);
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException(e);
+    }
+
+  }
+
+  /**
+   * If score summarization is needed, do it.
+   * Does not create a transaction.
+   * 
+   * @param connection database
+   * @param challengeDescription challenge
+   * @param tournament tournament
+   * @throws SQLException on a database error
+   * @see Tournament#checkTournamentNeedsSummaryUpdate(Connection)
+   */
+  public static void computeSummarizedScoresIfNeeded(final Connection connection,
+                                                     final ChallengeDescription challengeDescription,
+                                                     final Tournament tournament)
+      throws SQLException {
+    if (tournament.checkTournamentNeedsSummaryUpdate(connection)) {
+      ScoreStandardization.updateScoreTotals(challengeDescription, connection, tournament.getTournamentID());
+
+      ScoreStandardization.summarizeScores(connection, challengeDescription, tournament.getTournamentID());
+      ScoreStandardization.updateTeamTotalScores(connection, challengeDescription, tournament.getTournamentID());
     }
   }
 

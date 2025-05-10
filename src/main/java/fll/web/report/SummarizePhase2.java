@@ -11,12 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +24,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Final steps of score summarization.
@@ -60,13 +60,7 @@ public class SummarizePhase2 extends BaseFLLServlet {
 
       SessionAttributes.appendToMessage(session, "<p id='success'><i>Successfully summarized scores</i></p>");
 
-      final String redirect = SessionAttributes.getAttribute(session, PromptSummarizeScores.SUMMARY_REDIRECT_KEY,
-                                                             String.class);
-      if (null == redirect) {
-        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-      } else {
-        response.sendRedirect(response.encodeRedirectURL(redirect));
-      }
+      response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);

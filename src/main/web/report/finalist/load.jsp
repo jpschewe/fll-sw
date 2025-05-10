@@ -1,12 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="HEAD_JUDGE, REPORT_GENERATOR" allowSetup="false" />
+<fll-sw:required-roles roles="HEAD_JUDGE, REPORT_GENERATOR"
+    allowSetup="false" />
 
 <%
-if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-		"/report/finalist/load.jsp")) {
-	return;
-}
+fll.ScoreStandardization.computeSummarizedScoresIfNeeded(application);
 %>
 
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
@@ -14,8 +12,7 @@ if (fll.web.report.PromptSummarizeScores.checkIfSummaryUpdated(request, response
 <head>
 <title>Finalist Schedule Load</title>
 
-<script type='text/javascript'
-    src='../../extlib/js-joda/js-joda.min.js'></script>
+<script type='text/javascript' src='../../extlib/js-joda/js-joda.min.js'></script>
 
 <script type='text/javascript' src='../../js/fll-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>

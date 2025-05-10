@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -38,6 +39,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.AwardsScriptReport;
@@ -73,17 +75,15 @@ public class ScaledSubjectiveByAwardGroup extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/ScaledSubjectiveByAwardGroup")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
+                                                          tournamentData.getCurrentTournament());
 
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       response.reset();
       response.setContentType("application/pdf");

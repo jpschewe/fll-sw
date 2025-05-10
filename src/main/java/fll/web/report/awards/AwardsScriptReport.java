@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
 import com.diffplug.common.base.Errors;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -68,7 +69,6 @@ import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.FinalComputedScores;
 import fll.web.report.PlayoffReport;
-import fll.web.report.PromptSummarizeScores;
 import fll.web.report.finalist.FinalistDBRow;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.web.scoreboard.Top10;
@@ -106,15 +106,12 @@ public class AwardsScriptReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/awards/AwardsScriptReport")) {
-      return;
-    }
-
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                          tournamentData.getCurrentTournament());
 
       response.reset();
       response.setContentType("application/pdf");

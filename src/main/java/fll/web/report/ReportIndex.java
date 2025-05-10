@@ -53,9 +53,6 @@ public final class ReportIndex {
                                      final HttpSession session,
                                      final PageContext pageContext) {
 
-    // clear out some variables
-    session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
-
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {

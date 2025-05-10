@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.AwardDeterminationOrder;
@@ -53,6 +54,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
@@ -199,24 +201,22 @@ public final class FinalComputedScores extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/FinalComputedScores")) {
-      return;
-    }
-
     final ReportSelector selector = ReportSelector.valueOf(WebUtils.getNonNullRequestParameter(request, "selector"));
     final SortOrder sortOrder = SortOrder.valueOf(WebUtils.getNonNullRequestParameter(request, "sortOrder"));
     final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
+                                                          tournamentData.getCurrentTournament());
 
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final int tournamentID = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
-      final int percentageHurdle = TournamentParameters.getPerformanceAdvancementPercentage(connection, tournamentID);
+      final int percentageHurdle = TournamentParameters.getPerformanceAdvancementPercentage(connection,
+                                                                                            tournament.getTournamentID());
       final double performanceHurdle;
       if (percentageHurdle > 0
           && percentageHurdle < 100) {
@@ -227,7 +227,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
         performanceHurdle = 0;
       }
 
-      final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection, tournamentID,
+      final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection,
+                                                                            tournament.getTournamentID(),
                                                                             challengeDescription.getWinner());
 
       response.reset();

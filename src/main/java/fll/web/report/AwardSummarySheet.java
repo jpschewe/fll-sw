@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -87,18 +88,15 @@ public class AwardSummarySheet extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/AwardSummarySheet")) {
-      return;
-    }
-
     final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
+                                                          tournamentData.getCurrentTournament());
 
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=awardSummarySheet.pdf");
@@ -291,8 +289,8 @@ public class AwardSummarySheet extends BaseFLLServlet {
                                                                                     tournamentData.getCurrentTournament()
                                                                                                   .getTournamentID());
     final Set<Team> teamsNeedingSeeding = Queries.getTeamsNeedingRegularMatchPlayRuns(connection,
-                                                                             tournamentData.getRunMetadataFactory(),
-                                                                             tournamentTeams, true);
+                                                                                      tournamentData.getRunMetadataFactory(),
+                                                                                      tournamentTeams, true);
 
     final Element section = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 

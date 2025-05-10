@@ -5,7 +5,7 @@
     allowSetup="false" />
 
 <%
-SummarizePhase1.populateContext(request, application, session, pageContext);
+SummarizePhase1.populateContext(application, pageContext);
 %>
 
 <html>

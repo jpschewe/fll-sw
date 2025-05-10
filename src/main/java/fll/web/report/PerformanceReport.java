@@ -5,8 +5,6 @@
  */
 package fll.web.report;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.Connection;
@@ -27,10 +25,12 @@ import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -38,6 +38,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
@@ -71,16 +72,14 @@ public class PerformanceReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/PerformanceReport")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final int tournamentID = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
+                                                          tournamentData.getCurrentTournament());
+
+      final Tournament tournament = tournamentData.getCurrentTournament();
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=performanceScoreReport.pdf");
