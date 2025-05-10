@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.ScoreStandardization;
@@ -35,8 +33,6 @@ import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
 /**
@@ -62,23 +58,12 @@ public final class SummarizePhase1 {
   public static final String MISSING_CATEGORIES = "missingCategories";
 
   /**
-   * @param request http request to access parameters and headers
    * @param application application variables
-   * @param session session variables
    * @param pageContext page variables
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
-  public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
-                                     final HttpSession session,
+  public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
-    // clear the redirect if sent here directly from index.jsp
-    final String referrer = request.getHeader("Referer");
-    if (StringUtils.isEmpty(referrer)
-        || referrer.endsWith("index.jsp")) {
-      session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
-    }
-
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
