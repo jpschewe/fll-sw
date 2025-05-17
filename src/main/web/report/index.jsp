@@ -134,6 +134,30 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class='wide' href='ScaledSubjectiveByAwardGroup' target="_blank">Subjective
         scaled scores by award group</a>
 
+    <!-- VirtualSubjectiveCategoryReport -->
+    <c:if
+        test="${not empty challengeDescription.virtualSubjectiveCategories}">
+        <div class="wide">
+            <form
+                action="<c:url value='/report/VirtualSubjectiveCategoryReport'/>"
+                method="POST" target="_blank">
+                Detailed score report for virtual subjective score
+                category
+
+                <select name="categoryName">
+                    <c:forEach
+                        items="${challengeDescription.virtualSubjectiveCategories}"
+                        var="category">
+                        <option value="${category.name}">${category.title}</option>
+                    </c:forEach>
+                </select>
+
+                <input type='submit' value='Create Report' />
+            </form>
+        </div>
+    </c:if>
+    <!-- end VirtualSubjectiveCategoryReport -->
+
     <a class="wide" href="PerformanceReport" target="_blank">
         Performance scores - full tournament </a>
 
