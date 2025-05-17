@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-fll.report.awards.EditCategoriesAwarded.populateContext(application, pageContext);
+fll.web.report.awards.EditCategoriesAwarded.populateContext(application, pageContext);
 %>
 
 <!DOCTYPE HTML>
