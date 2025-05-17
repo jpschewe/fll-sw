@@ -499,7 +499,7 @@ public final class SubjectivePdfWriter {
           inlineCheckbox.appendChild(document.createTextNode(String.format("%cX%c", Utilities.NON_BREAKING_SPACE,
                                                                            Utilities.NON_BREAKING_SPACE)));
         } else {
-          inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+          inlineCheckbox.appendChild(document.createTextNode(Utilities.NON_BREAKING_SPACE_STRING.repeat(4)));
         }
         final Element title = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
         block.appendChild(title);
@@ -1083,7 +1083,7 @@ public final class SubjectivePdfWriter {
                                                                          Utilities.NON_BREAKING_SPACE)));
 
       } else {
-        inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+        inlineCheckbox.appendChild(document.createTextNode(Utilities.NON_BREAKING_SPACE_STRING.repeat(4)));
       }
     }
 
@@ -1241,19 +1241,19 @@ public final class SubjectivePdfWriter {
     final String commentThinkAbout;
     if (null == score) {
       rowElement.setAttribute("height", String.format("%fin", height));
-      commentGreatJob = String.valueOf(Utilities.NON_BREAKING_SPACE);
-      commentThinkAbout = String.valueOf(Utilities.NON_BREAKING_SPACE);
+      commentGreatJob = Utilities.NON_BREAKING_SPACE_STRING;
+      commentThinkAbout = Utilities.NON_BREAKING_SPACE_STRING;
     } else {
       final String greatJobRaw = score.getCommentGreatJob();
       if (null == greatJobRaw) {
-        commentGreatJob = String.valueOf(Utilities.NON_BREAKING_SPACE);
+        commentGreatJob = Utilities.NON_BREAKING_SPACE_STRING;
       } else {
         commentGreatJob = greatJobRaw;
       }
 
       final String thinkAboutRaw = score.getCommentThinkAbout();
       if (null == thinkAboutRaw) {
-        commentThinkAbout = String.valueOf(Utilities.NON_BREAKING_SPACE);
+        commentThinkAbout = Utilities.NON_BREAKING_SPACE_STRING;
       } else {
         commentThinkAbout = thinkAboutRaw;
       }
@@ -1301,7 +1301,7 @@ public final class SubjectivePdfWriter {
       final Element blankRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
       tableBody.appendChild(blankRow);
       final Element blankCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                         String.valueOf(Utilities.NON_BREAKING_SPACE));
+                                                         Utilities.NON_BREAKING_SPACE_STRING);
       blankRow.appendChild(blankCell);
       blankCell.setAttribute("number-columns-spanned", "2");
 
