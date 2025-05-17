@@ -9,11 +9,15 @@ package fll.web.report;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
@@ -25,8 +29,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.SubjectiveScore;
+import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -85,10 +91,7 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
       return;
     }
 
-    // TODO: decide if I need to compute summarized scores here
-
     try (Connection connection = datasource.getConnection()) {
-
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition",
@@ -136,12 +139,17 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     documentBody.setAttribute("font-size", "8pt");
 
     final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
+    final Set<SubjectiveScoreCategory> referencedCategories = getReferencedCategories(category);
 
     for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
-      final Element ele = generateTeamTable(connection, tournament, document, entry.getValue(), category);
+      final TournamentTeam team = entry.getValue();
+      final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores = getReferencedScores(connection,
+                                                                                                             tournament,
+                                                                                                             referencedCategories,
+                                                                                                             team);
+      final Element ele = generateTeamTable(document, team, category, referencedScores);
 
       documentBody.appendChild(ele);
-      // ele.setAttribute("page-break-after", "always");
       ele.setAttribute("space-after", "10");
     }
 
@@ -150,13 +158,13 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
 
   private static final double BORDER_WIDTH = 1.0;
 
-  private static Element generateTeamTable(Connection connection,
-                                           Tournament tournament,
-                                           final Document document,
+  private static Element generateTeamTable(final Document document,
                                            final TournamentTeam team,
-                                           final VirtualSubjectiveScoreCategory category)
+                                           final VirtualSubjectiveScoreCategory category,
+                                           final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores)
       throws SQLException {
-    final List<String> judges = collectJudges(connection, tournament, category, team);
+    final List<String> judges = referencedScores.values().stream().flatMap(Collection::stream)
+                                                .map(SubjectiveScore::getJudge).distinct().sorted().toList();
 
     final Element teamTable = FOPUtils.createBasicTable(document);
 
@@ -195,6 +203,8 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     teamTable.appendChild(tableBody);
 
     // --- goal rows
+    final NumberFormat scoreFormatter = Utilities.getFormatForScoreType(category.getScoreType());
+    double scoreTotal = 0;
     for (final SubjectiveGoalRef goalRef : category.getGoalReferences()) {
       final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);
@@ -204,53 +214,88 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
       row.appendChild(goalCell);
       FOPUtils.addBorders(goalCell, BORDER_WIDTH);
 
+      final SubjectiveScoreCategory referencedCategory = goalRef.getCategory();
+      final Collection<SubjectiveScore> scores = referencedScores.getOrDefault(referencedCategory,
+                                                                               Collections.emptyList());
+      final NumberFormat referencedCategoryScoreFormatter = Utilities.getFormatForScoreType(referencedCategory.getScoreType());
+      int scoresCount = 0;
+      double scoresSum = 0;
       for (final String judge : judges) {
-        // FIXME need scores
+        final Optional<SubjectiveScore> score = scores.stream().filter(s -> s.getJudge().equals(judge)).findAny();
 
-        final Element scoreCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                           String.format("Score for judge %s", judge));
+        final String formattedScore;
+        if (score.isPresent()) {
+          if (!score.get().getNoShow()) {
+            final double rawScore = score.get().getStandardSubScores().getOrDefault(goalRef.getGoal().getName(), 0D);
+            ++scoresCount;
+            scoresSum += rawScore;
+
+            formattedScore = referencedCategoryScoreFormatter.format(rawScore);
+          } else {
+            formattedScore = "No Show";
+          }
+        } else {
+          formattedScore = Utilities.NON_BREAKING_SPACE_STRING;
+        }
+
+        final Element scoreCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, formattedScore);
         row.appendChild(scoreCell);
         FOPUtils.addBorders(scoreCell, BORDER_WIDTH);
       }
 
-      final Element averageCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "AVG");
+      final String formattedAverage;
+      if (scoresCount > 0) {
+        final double average = scoresSum
+            / scoresCount;
+        formattedAverage = scoreFormatter.format(average);
+
+        scoreTotal += average;
+      } else {
+        formattedAverage = Utilities.NON_BREAKING_SPACE_STRING;
+      }
+
+      final Element averageCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, formattedAverage);
       row.appendChild(averageCell);
       FOPUtils.addBorders(averageCell, BORDER_WIDTH);
     }
     // --- end goal rows
 
     // --- totals row
+    final Element totalRow = FOPUtils.createTableRow(document);
+    tableBody.appendChild(totalRow);
+
+    final Element totalCellHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Total Score");
+    totalRow.appendChild(totalCellHeader);
+
+    totalCellHeader.setAttribute("number-columns-spanned", String.valueOf(judges.size()
+        + 1));
+    FOPUtils.addBorders(totalCellHeader, BORDER_WIDTH);
+
+    final String formattedTotal = scoreFormatter.format(scoreTotal);
+    final Element totalCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, formattedTotal);
+    totalRow.appendChild(totalCell);
+    FOPUtils.addBorders(totalCell, BORDER_WIDTH);
     // --- end totals row
 
     return teamTable;
   }
 
-  /**
-   * Collect the list of judges for a category and team.
-   * 
-   * @return list of judges sorted by name
-   */
-  private static List<String> collectJudges(final Connection connection,
-                                            final Tournament tournament,
-                                            final VirtualSubjectiveScoreCategory category,
-                                            final TournamentTeam team)
-      throws SQLException {
-    final Set<String> judges = new HashSet<>();
-    for (final SubjectiveGoalRef goalRef : category.getGoalReferences()) {
-      final Collection<String> categoryJudges = collectJudges(connection, tournament, goalRef.getCategory(), team);
-      judges.addAll(categoryJudges);
-    }
-
-    return judges.stream().sorted().toList();
+  private static Set<SubjectiveScoreCategory> getReferencedCategories(final VirtualSubjectiveScoreCategory category) {
+    return category.getGoalReferences().stream().map(SubjectiveGoalRef::getCategory).collect(Collectors.toSet());
   }
 
-  private static Collection<String> collectJudges(final Connection connection,
-                                                  final Tournament tournament,
-                                                  final SubjectiveScoreCategory category,
-                                                  final TournamentTeam team)
+  private static Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> getReferencedScores(final Connection connection,
+                                                                                               final Tournament tournament,
+                                                                                               final Set<SubjectiveScoreCategory> referencedCategories,
+                                                                                               final Team team)
       throws SQLException {
-    final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, category, tournament, team);
-    return scores.stream().map(SubjectiveScore::getJudge).toList();
+    final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores = new HashMap<>();
+    for (final SubjectiveScoreCategory referencedCategory : referencedCategories) {
+      final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, referencedCategory,
+                                                                                  tournament, team);
+      referencedScores.put(referencedCategory, scores);
+    }
+    return referencedScores;
   }
 
 }

@@ -153,6 +153,11 @@ public final class Utilities {
    */
   public static final char NON_BREAKING_SPACE = '\u00a0';
 
+  /**
+   * {@link #NON_BREAKING_SPACE} as a string.
+   */
+  public static final String NON_BREAKING_SPACE_STRING = String.valueOf(NON_BREAKING_SPACE);
+
   private Utilities() {
   }
 
