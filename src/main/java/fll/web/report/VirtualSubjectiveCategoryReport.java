@@ -158,11 +158,14 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
 
   private static final double BORDER_WIDTH = 1.0;
 
+  private static final String SIDE_PADDING = "0.02in";
+
   private static Element generateTeamTable(final Document document,
                                            final TournamentTeam team,
                                            final VirtualSubjectiveScoreCategory category,
                                            final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores)
       throws SQLException {
+
     final List<String> judges = referencedScores.values().stream().flatMap(Collection::stream)
                                                 .map(SubjectiveScore::getJudge).distinct().sorted().toList();
 
@@ -187,6 +190,8 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
                                                                         team.getTeamName()));
     headerRow.appendChild(teamInfoCell);
     FOPUtils.addBorders(teamInfoCell, BORDER_WIDTH);
+    teamInfoCell.setAttribute("padding-left", SIDE_PADDING);
+    teamInfoCell.setAttribute("padding-right", SIDE_PADDING);
 
     for (final String judge : judges) {
       final Element judgeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, judge);
@@ -213,6 +218,8 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
                                                         goalRef.getGoal().getTitle());
       row.appendChild(goalCell);
       FOPUtils.addBorders(goalCell, BORDER_WIDTH);
+      goalCell.setAttribute("padding-left", SIDE_PADDING);
+      goalCell.setAttribute("padding-right", SIDE_PADDING);
 
       final SubjectiveScoreCategory referencedCategory = goalRef.getCategory();
       final Collection<SubjectiveScore> scores = referencedScores.getOrDefault(referencedCategory,
@@ -270,11 +277,15 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     totalCellHeader.setAttribute("number-columns-spanned", String.valueOf(judges.size()
         + 1));
     FOPUtils.addBorders(totalCellHeader, BORDER_WIDTH);
+    totalCellHeader.setAttribute("padding-left", SIDE_PADDING);
+    totalCellHeader.setAttribute("padding-right", SIDE_PADDING);
+    totalCellHeader.setAttribute("font-weight", "bold");
 
     final String formattedTotal = scoreFormatter.format(scoreTotal);
     final Element totalCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, formattedTotal);
     totalRow.appendChild(totalCell);
     FOPUtils.addBorders(totalCell, BORDER_WIDTH);
+
     // --- end totals row
 
     return teamTable;
