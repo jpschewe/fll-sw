@@ -828,7 +828,7 @@ public class AwardsReport extends BaseFLLServlet {
     // add some spacing
     final Element emptyRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(emptyRow);
-    final Element emptyCell = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    final Element emptyCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_STRING);
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 

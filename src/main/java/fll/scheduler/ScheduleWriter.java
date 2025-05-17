@@ -665,15 +665,13 @@ public final class ScheduleWriter {
         final Element blankRow = FOPUtils.createTableRow(document);
         scheduleTableBody.appendChild(blankRow);
 
-        final Element blankTitleCell = FOPUtils.createTableCell(document, null,
-                                                                String.valueOf(Utilities.NON_BREAKING_SPACE));
+        final Element blankTitleCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_STRING);
         blankRow.appendChild(blankTitleCell);
         FOPUtils.addLeftBorder(blankTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
         FOPUtils.addRightBorder(blankTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
         FOPUtils.addBottomBorder(blankTitleCell, FOPUtils.STANDARD_BORDER_WIDTH);
 
-        final Element blankTimeCell = FOPUtils.createTableCell(document, null,
-                                                               String.valueOf(Utilities.NON_BREAKING_SPACE));
+        final Element blankTimeCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_STRING);
         blankRow.appendChild(blankTimeCell);
         FOPUtils.addLeftBorder(blankTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
         FOPUtils.addRightBorder(blankTimeCell, FOPUtils.STANDARD_BORDER_WIDTH);
@@ -1111,7 +1109,7 @@ public final class ScheduleWriter {
 
       if (displayNotes) {
         final Element notesCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                           String.valueOf(Utilities.NON_BREAKING_SPACE));
+                                                           Utilities.NON_BREAKING_SPACE_STRING);
         row.appendChild(notesCell);
         FOPUtils.addBorders(notesCell, topBorderWidth, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
                             FOPUtils.STANDARD_BORDER_WIDTH);

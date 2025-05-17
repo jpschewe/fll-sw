@@ -348,7 +348,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
           if (null != rankData) {
             text = String.format("%d - %s", rankData.rank, rankData.rawScore);
           } else {
-            text = String.valueOf(Utilities.NON_BREAKING_SPACE);
+            text = Utilities.NON_BREAKING_SPACE_STRING;
           }
           teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text),
                                                   FOPUtils.STANDARD_BORDER_WIDTH));

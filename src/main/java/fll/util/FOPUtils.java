@@ -1164,7 +1164,7 @@ public final class FOPUtils {
     for (final String paragraph : text.split("\\R+")) {
       final String t;
       if (paragraph.isEmpty()) {
-        t = String.valueOf(Utilities.NON_BREAKING_SPACE);
+        t = Utilities.NON_BREAKING_SPACE_STRING;
       } else {
         t = paragraph;
       }

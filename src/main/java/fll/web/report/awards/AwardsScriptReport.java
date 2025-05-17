@@ -987,7 +987,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element blank = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     teamContainer.appendChild(blank);
-    blank.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
+    blank.appendChild(document.createTextNode(Utilities.NON_BREAKING_SPACE_STRING));
   }
 
   private static String suffixForPlace(final int place) {

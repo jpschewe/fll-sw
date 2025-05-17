@@ -217,7 +217,7 @@ public class PitSigns extends BaseFLLServlet {
       judgingGroupBlock.appendChild(waveText);
       waveText.setAttribute("font-size", "14pt");
       waveText.appendChild(document.createTextNode(String.format("%swave %s",
-                                                                 String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4),
+                                                                 Utilities.NON_BREAKING_SPACE_STRING.repeat(4),
                                                                  wave)));
     }
 

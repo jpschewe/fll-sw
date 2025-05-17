@@ -341,7 +341,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     } else {
       final Element e = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       cell.appendChild(e);
-      e.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
+      e.appendChild(document.createTextNode(Utilities.NON_BREAKING_SPACE_STRING));
     }
 
     FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH);
