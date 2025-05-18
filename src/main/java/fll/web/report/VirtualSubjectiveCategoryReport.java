@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +20,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -141,17 +142,20 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
     final Set<SubjectiveScoreCategory> referencedCategories = getReferencedCategories(category);
 
-    for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
-      final TournamentTeam team = entry.getValue();
-      final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores = getReferencedScores(connection,
-                                                                                                             tournament,
-                                                                                                             referencedCategories,
-                                                                                                             team);
-      final Element ele = generateTeamTable(document, team, category, referencedScores);
+    teams.values().stream().sorted(Comparator.comparing(TournamentTeam::getJudgingGroup)).forEach(team -> {
+      try {
+        final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores = getReferencedScores(connection,
+                                                                                                               tournament,
+                                                                                                               referencedCategories,
+                                                                                                               team);
+        final Element ele = generateTeamTable(document, team, category, referencedScores);
 
-      documentBody.appendChild(ele);
-      ele.setAttribute("space-after", "10");
-    }
+        documentBody.appendChild(ele);
+        ele.setAttribute("space-after", "10");
+      } catch (final SQLException e) {
+        throw new FLLRuntimeException(e);
+      }
+    });
 
     return document;
   }
@@ -186,8 +190,8 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     teamTable.appendChild(headerRow);
 
     final Element teamInfoCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                          String.format("Team %d %s", team.getTeamNumber(),
-                                                                        team.getTeamName()));
+                                                          String.format("Team %d %s - %s", team.getTeamNumber(),
+                                                                        team.getTeamName(), team.getJudgingGroup()));
     headerRow.appendChild(teamInfoCell);
     FOPUtils.addBorders(teamInfoCell, BORDER_WIDTH);
     teamInfoCell.setAttribute("padding-left", SIDE_PADDING);
