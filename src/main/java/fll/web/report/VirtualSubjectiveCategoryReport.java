@@ -172,7 +172,7 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     final Element teamTable = FOPUtils.createBasicTable(document);
 
     // --- table columns
-    teamTable.appendChild(FOPUtils.createTableColumn(document, 15)); // Team info, category goals
+    teamTable.appendChild(FOPUtils.createTableColumn(document, 25)); // Team info, category goals
 
     for (int i = 0; i < judges.size(); ++i) {
       teamTable.appendChild(FOPUtils.createTableColumn(document, 10)); // judge
@@ -215,7 +215,8 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
       tableBody.appendChild(row);
 
       final Element goalCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                        goalRef.getGoal().getTitle());
+                                                        String.format("%s: %s", goalRef.getCategory().getTitle(),
+                                                                      goalRef.getGoal().getTitle()));
       row.appendChild(goalCell);
       FOPUtils.addBorders(goalCell, BORDER_WIDTH);
       goalCell.setAttribute("padding-left", SIDE_PADDING);
