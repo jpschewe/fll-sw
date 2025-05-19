@@ -75,6 +75,7 @@ public final class SummarizePhase1 {
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
 
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
+      // judging group -> judge information
       final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();
 
       final Collection<JudgeInformation> judges = JudgeInformation.getJudges(connection, tournamentID);
