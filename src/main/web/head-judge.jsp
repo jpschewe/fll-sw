@@ -40,6 +40,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         onclick="return openMinimalBrowser(this)">Enter subjective
         scores. This is done through the subjective web application</a>
 
+    <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
+        target="_judge-summary">Judge summary. This shows which
+        judges have scores entered.</a>
+
     <a class="wide" target="_report"
         href="<c:url value='/report/index.jsp' />">Generate reports
         - this is done once all of the subjective scores are in.</a>

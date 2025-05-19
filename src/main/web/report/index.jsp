@@ -40,8 +40,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         summarized scores. This should not be needed anymore as the
         reports take care of this themselves.</a>
 
-    <a class="wide" href="<c:url value='/report/summarizePhase1.jsp'/>">Judge
-        summary. This shows which judges have scores entered.</a>
+    <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
+        target="_judge-summary">Judge summary. This shows which
+        judges have scores entered.</a>
 
     <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
         award nominations (from subjective judging rubrics)</a>

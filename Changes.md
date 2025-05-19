@@ -1,3 +1,4 @@
+* #1268 - Add a judges summary page
 * #1263 - Add report displaying raw scores from virtual subjective categories
 * #1251 - automatically compute summarized scores when needed for a report
 * #1264 - Put gear next to goals that double count in the subjective judging app
