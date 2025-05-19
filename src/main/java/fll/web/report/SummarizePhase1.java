@@ -52,12 +52,6 @@ public final class SummarizePhase1 {
   public static final String JUDGE_SUMMARY = "judgeSummary";
 
   /**
-   * Page key for missing categories. Type is a {@link Map} of station to
-   * {@link java.util.Collection} category titles.
-   */
-  public static final String MISSING_CATEGORIES = "missingCategories";
-
-  /**
    * @param application application variables
    * @param pageContext page variables
    */
