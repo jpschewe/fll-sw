@@ -701,7 +701,7 @@ public class FullTournamentTest {
       throws IOException {
     // compute final scores
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "report/ComputeSummarizedScores");
+        + "report/ComputeSummarizedScores", ExpectedConditions.urlContains("index.jsp"));
 
     assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.className("success")));
   }
