@@ -35,10 +35,13 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h2>All Tournaments</h2>
-    <a class="wide" href="summarizePhase1.jsp">Compute summarized
-        scores. This needs to be executed before any reports can be
-        generated. You will be returned to this page if there are no
-        errors summarizing scores.</a>
+    <a class="wide"
+        href="<c:url value='/report/ComputeSummarizedScores'/>">Compute
+        summarized scores. This should not be needed anymore as the
+        reports take care of this themselves.</a>
+
+    <a class="wide" href="<c:url value='/report/summarizePhase1.jsp'/>">Judge
+        summary. This shows which judges have scores entered.</a>
 
     <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
         award nominations (from subjective judging rubrics)</a>
