@@ -701,11 +701,9 @@ public class FullTournamentTest {
       throws IOException {
     // compute final scores
     IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "report/summarizePhase1.jsp");
+        + "report/ComputeSummarizedScores", ExpectedConditions.urlContains("index.jsp"));
 
-    selenium.findElement(By.id("finish")).click();
-
-    assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
+    assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.className("success")));
   }
 
   private void checkReports() throws IOException, InterruptedException, URISyntaxException {

@@ -172,7 +172,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
             final String judge = castNonNull(rs.getString("judge"));
             final String station = castNonNull(rs.getString("station"));
 
-            final int numScores = SummarizePhase1.getNumScoresEntered(connection, judge, category.getName(), station,
+            final int numScores = ComputeJudgeSummary.getNumScoresEntered(connection, judge, category.getName(), station,
                                                                       tournament.getTournamentID());
             if (numScores > 0) {
               judges.add(judge);

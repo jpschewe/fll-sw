@@ -1,18 +1,21 @@
-<%@page import="fll.web.report.SummarizePhase1"%>
+<%@page import="fll.web.report.ComputeJudgeSummary"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <fll-sw:required-roles roles="HEAD_JUDGE, REPORT_GENERATOR"
     allowSetup="false" />
 
 <%
-SummarizePhase1.populateContext(application, pageContext);
+ComputeJudgeSummary.populateContext(application, pageContext);
 %>
 
 <html>
 <head>
+
+<meta http-equiv="refresh" content="60" />
+
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>Subjective Score Summary</title>
+<title>Judge Summary</title>
 
 <style>
 .no-judge {
@@ -39,7 +42,7 @@ div.content table, div.content th, div.content td {
 
 <body>
     <div class='content'>
-        <h1>Subjective Score Summary</h1>
+        <h1>Judge Summary</h1>
 
         <p>
             Below is a list of judges found and what categories they
@@ -49,6 +52,11 @@ div.content table, div.content th, div.content td {
             judging groups for an award group, then the number of teams
             expected will be too high.
         </p>
+
+        <p>This page will refresh on it's own to show the most
+            recent judge information.</p>
+
+        <p>This page was generated at ${timestamp}.</p>
 
         <c:forEach items="${judgeSummary}" var="entry">
             <h2>${entry.key}</h2>
@@ -99,16 +107,6 @@ div.content table, div.content th, div.content td {
             </table>
 
         </c:forEach>
-
-        <form action="SummarizePhase2">
-            <p>
-                If this does not look correct, go back to the <a
-                    href="../index.jsp">main page and correct the
-                    scores</a>. Otherwise
-                <input type='submit' value="finish" id='finish' />
-                the score summarization.
-            </p>
-        </form>
     </div>
 </body>
 </html>
