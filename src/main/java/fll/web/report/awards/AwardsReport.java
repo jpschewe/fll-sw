@@ -100,7 +100,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       final Document doc = createReport(connection, description);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
@@ -276,6 +276,8 @@ public class AwardsReport extends BaseFLLServlet {
     if (null != category) {
       return category.isRanked();
     } else if (null != description.getSubjectiveCategoryByTitle(categoryTitle)) {
+      return true;
+    } else if (null != description.getVirtualSubjectiveCategoryByTitle(categoryTitle)) {
       return true;
     } else if (ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryTitle)) {
       return true;
