@@ -1,3 +1,4 @@
+* #1244 - Make the crossed off teams more visible on the deliberations page
 * #1243 - Display places for virtual subjective categories in the awards script
 * #1268 - Add a judges summary page
 * #1263 - Add report displaying raw scores from virtual subjective categories

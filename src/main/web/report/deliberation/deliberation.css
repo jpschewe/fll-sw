@@ -43,11 +43,15 @@ and mark draggable things as movable. */
 }
 
 .potential_winner_row .winner {
-    text-decoration: line-through;
+    background-image: linear-gradient( to top left, transparent 0 45%,
+        rgba(255, 255, 255, 1) 45% 50%, rgba(0, 0, 0, 1) 50% 55%,
+        transparent 55% 100%);
 }
 
 .nominee_row .potential_winner {
-    text-decoration: line-through;
+    background-image: linear-gradient( to top left, transparent 0 45%,
+        rgba(255, 255, 255, 1) 45% 50%, rgba(0, 0, 0, 1) 50% 55%,
+        transparent 55% 100%);
 }
 
 #add-team-dialog_container {
