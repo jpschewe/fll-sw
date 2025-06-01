@@ -1031,8 +1031,14 @@ public class TournamentSchedule implements Serializable {
         }
 
         // str is not null or empty, so parseTime cannot return null
-        final LocalTime time = castNonNull(parseTime(str));
-        ti.addSubjectiveTime(new SubjectiveTime(station, time));
+        try {
+          final LocalTime time = castNonNull(parseTime(str));
+          ti.addSubjectiveTime(new SubjectiveTime(station, time));
+        } catch (final DateTimeParseException e) {
+          throw new ScheduleParseException(String.format("Line %d column '%s' has an unparsable time '%s'",
+                                                         reader.getLineNumber(), station, str),
+                                           e);
+        }
       }
 
       // parse regular match play rounds
@@ -1056,20 +1062,26 @@ public class TournamentSchedule implements Serializable {
           throw new ScheduleParseException(String.format("Error parsing performance table information from: '%s', expecting 2 strings separated by a space",
                                                          table));
         }
-        // perfStr is not empty, so cannot be null
-        final LocalTime perfTime = castNonNull(parseTime(perfStr));
-
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide);
+        try {
+          // perfStr is not empty, so cannot be null
+          final LocalTime perfTime = castNonNull(parseTime(perfStr));
 
-        ti.addPerformance(performance);
-        if (performance.getSide() > 2
-            || performance.getSide() < 1) {
-          throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d performance round: %d line: %d",
-                                                         ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
+          final PerformanceTime performance = new PerformanceTime(perfTime, tableName, tableSide);
+
+          ti.addPerformance(performance);
+          if (performance.getSide() > 2
+              || performance.getSide() < 1) {
+            throw new ScheduleParseException(String.format("There are only two sides to the table, number must be 1 or 2. team: %d performance round: %d line: %d",
+                                                           ti.getTeamNumber(), roundNumber, reader.getLineNumber()));
+          }
+        } catch (final DateTimeParseException e) {
+          throw new ScheduleParseException(String.format("Line %d performance %d has an unparsable time '%s'",
+                                                         reader.getLineNumber(), roundNumber, perfStr),
+                                           e);
         }
       }
 

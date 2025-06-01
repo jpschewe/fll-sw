@@ -1,3 +1,4 @@
+* #1265 - Add more details to the exception message when a time in a schedule cannot be parsed
 * #1244 - Make the crossed off teams more visible on the deliberations page
 * #1243 - Display places for virtual subjective categories in the awards script
 * #1268 - Add a judges summary page
