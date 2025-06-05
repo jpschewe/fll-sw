@@ -213,6 +213,7 @@ public class TournamentSchedule implements Serializable {
    * @return the {@link LocalTime} object for the string
    * @throws DateTimeParseException if the string could not be parsed as a time
    *           for a schedule
+   * @see StringUtils#isBlank(CharSequence)
    */
   public static @Nullable LocalTime parseTime(final @Nullable String str) throws DateTimeParseException {
     if (StringUtils.isBlank(str)) {
