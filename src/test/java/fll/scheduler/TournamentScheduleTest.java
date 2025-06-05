@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -269,6 +272,83 @@ public class TournamentScheduleTest {
         assertEquals(str24, str12);
       }
     }
+  }
+
+  @Test
+  public void testParseTimeFormats1() {
+    // 11:23 AM
+    final LocalTime expected = LocalTime.of(11, 23);
+
+    final LocalTime result1 = TournamentSchedule.parseTime("11:23");
+    assertEquals(expected, result1);
+
+    final LocalTime result2 = TournamentSchedule.parseTime("11:23 AM");
+    assertEquals(expected, result2);
+
+    final LocalTime result3 = TournamentSchedule.parseTime("11:23:00 AM");
+    assertEquals(expected, result3);
+
+    final LocalTime result4 = TournamentSchedule.parseTime("11:23:00");
+    assertEquals(expected, result4);
+  }
+
+  @Test
+  public void testParseTimeFormats2() {
+    // 1:23 PM
+    final LocalTime expected = LocalTime.of(13, 23);
+
+    final LocalTime result1 = TournamentSchedule.parseTime("13:23");
+    assertEquals(expected, result1);
+
+    final LocalTime result2 = TournamentSchedule.parseTime("1:23");
+    assertEquals(expected, result2);
+
+    final LocalTime result6 = TournamentSchedule.parseTime("01:23 PM");
+    assertEquals(expected, result6);
+
+    final LocalTime result3 = TournamentSchedule.parseTime("1:23 PM");
+    assertEquals(expected, result3);
+
+    final LocalTime result4 = TournamentSchedule.parseTime("1:23:00");
+    assertEquals(expected, result4);
+
+    final LocalTime result5 = TournamentSchedule.parseTime("1:23:00 PM");
+    assertEquals(expected, result5);
+  }
+
+  @Test
+  public void testParseExcelTimeFormats() throws IOException {
+    // 1:23 PM
+    final LocalTime expected = LocalTime.of(13, 23);
+
+    final URL resource = TournamentScheduleTest.class.getResource("data/time-format-test.xls");
+    assertNotNull(resource);
+
+    InputStream workbookStream = resource.openStream();
+    final List<String> sheetNames = ExcelCellReader.getAllSheetNames(workbookStream);
+    workbookStream.close();
+    assertEquals(1, sheetNames.size(), "Expecting exactly 1 sheet in schedule spreadsheet");
+
+    final String sheetName = sheetNames.get(0);
+
+    workbookStream = resource.openStream();
+
+    final CellFileReader reader = new ExcelCellReader(workbookStream, sheetName);
+
+    @Nullable
+    String @Nullable [] line;
+    while (null != (line = reader.readNext())) {
+      try {
+        final LocalTime check = TournamentSchedule.parseTime(line[0]);
+        assertEquals(expected, check, String.format("Line %d '%s'", reader.getLineNumber()
+            + 1, line[0]));
+      } catch (final DateTimeParseException e) {
+        fail(String.format("Line %d '%s': %s", reader.getLineNumber()
+            + 1, line[0], e.getMessage()));
+      }
+    }
+
+    workbookStream.close();
   }
 
   private TournamentSchedule loadSchedule(final URL path,

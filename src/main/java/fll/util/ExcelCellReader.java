@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +35,7 @@ import org.apache.tika.Tika;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.scheduler.TournamentSchedule;
 
 /**
  * Read Excel files.
@@ -44,15 +43,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class ExcelCellReader extends CellFileReader {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  // See https://github.com/typetools/checker-framework/issues/979
-  @SuppressWarnings("nullness")
-  private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
-    @Override
-    protected DateFormat initialValue() {
-      return new SimpleDateFormat("hh:mm:ss a");
-    }
-  };
 
   private final DataFormatter formatter;
 
@@ -194,6 +184,9 @@ public class ExcelCellReader extends CellFileReader {
     return lineNumber;
   }
 
+  /**
+   * All date fields are parsed as only times.
+   */
   @Override
   @SuppressFBWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
   public @Nullable String @Nullable [] readNext() throws IOException {
@@ -218,9 +211,9 @@ public class ExcelCellReader extends CellFileReader {
           final double d = cell.getNumericCellValue();
           // test if a date!
           if (DateUtil.isCellDateFormatted(cell)) {
-            // make sure to format times like we expect them
-            final Date date = DateUtil.getJavaDate(d);
-            str = DATE_FORMAT_AM_PM_SS.get().format(date);
+            // make sure to format times like we expect them in schedules
+            final LocalDateTime date = DateUtil.getLocalDateTime(d);
+            str = TournamentSchedule.humanFormatTime(date.toLocalTime());
           } else {
             // check for integer
             if (FP.equals(d, Math.round(d), INTEGER_FP_CHECK)) {

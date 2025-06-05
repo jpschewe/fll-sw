@@ -82,6 +82,9 @@ import fll.xml.SubjectiveScoreCategory;
  * </p>
  */
 public class TournamentSchedule implements Serializable {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   /**
    * How wide to make the line between time separations in the "by time" schedule
    * outputs.
@@ -181,14 +184,21 @@ public class TournamentSchedule implements Serializable {
   /**
    * Use AM/PM for human readable dates.
    */
-  private static final DateTimeFormatter HUMAN_OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm a");
+  public static final DateTimeFormatter HUMAN_OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm a");
 
   /**
    * Parse times as 24-hour and then use
    * {@link TournamentSchedule#EARLIEST_HOUR} to decide if it's really
    * AM or PM.
    */
-  private static final DateTimeFormatter INPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("H:mm");
+  private static final DateTimeFormatter TIME_FORMAT_HOUR_MINUTE_SPECIAL = DateTimeFormatter.ofPattern("H:mm");
+
+  /**
+   * Parse times as 24-hour and then use
+   * {@link TournamentSchedule#EARLIEST_HOUR} to decide if it's really
+   * AM or PM.
+   */
+  private static final DateTimeFormatter TIME_FORMAT_HOUR_MINUTE_SECONDS_SPECIAL = DateTimeFormatter.ofPattern("H:mm:ss");
 
   /**
    * Any date with an hour before this needs to have 12 added to it as it must
@@ -199,7 +209,9 @@ public class TournamentSchedule implements Serializable {
   /**
    * The format used inside Excel spreadsheets.
    */
-  private static final DateTimeFormatter TIME_FORMAT_AM_PM_SS = DateTimeFormatter.ofPattern("hh:mm:ss a");
+  private static final DateTimeFormatter TIME_FORMAT_AM_PM_SS = DateTimeFormatter.ofPattern("h:mm:ss a");
+
+  private static final DateTimeFormatter TIME_FORMAT_AM_PM = DateTimeFormatter.ofPattern("h:mm a");
 
   /**
    * Parse a time from a schedule. This method allows only hours and minutes to
@@ -225,21 +237,46 @@ public class TournamentSchedule implements Serializable {
       final LocalTime time = LocalTime.parse(str);
       return time;
     } catch (final DateTimeParseException e) {
-      // try with seconds and AM/PM
-      try {
-        final LocalTime time = LocalTime.parse(str, TIME_FORMAT_AM_PM_SS);
-        return time;
-      } catch (final DateTimeParseException ampme) {
-        // then try with 24-hour clock
-        final LocalTime time = LocalTime.parse(str, INPUT_TIME_FORMAT);
-        if (time.getHour() < EARLIEST_HOUR) {
-          // no time should be this early, it must be the afternoon.
-          return time.plusHours(12);
-        } else {
-          return time;
-        }
-      }
+      LOGGER.trace("Didn't parse with generic parser", e);
     }
+
+    // try with seconds and AM/PM
+    try {
+      final LocalTime time = LocalTime.parse(str, TIME_FORMAT_AM_PM_SS);
+      return time;
+    } catch (final DateTimeParseException e) {
+      LOGGER.trace("Didn't parse as {}", TIME_FORMAT_AM_PM_SS, e);
+    }
+
+    try {
+      final LocalTime time = LocalTime.parse(str, TIME_FORMAT_AM_PM);
+      return time;
+    } catch (final DateTimeParseException e) {
+      LOGGER.trace("Didn't parse as {}", TIME_FORMAT_AM_PM, e);
+    }
+
+    try {
+      // then try with 24-hour clock and earliest hour
+      final LocalTime time = LocalTime.parse(str, TIME_FORMAT_HOUR_MINUTE_SPECIAL);
+      if (time.getHour() < EARLIEST_HOUR) {
+        // no time should be this early, it must be the afternoon.
+        return time.plusHours(12);
+      } else {
+        return time;
+      }
+    } catch (final DateTimeParseException e) {
+      LOGGER.trace("Didn't parse as {} with special check for earliest hour", TIME_FORMAT_HOUR_MINUTE_SPECIAL, e);
+    }
+
+    // then try with 24-hour clock and earliest hour
+    final LocalTime time = LocalTime.parse(str, TIME_FORMAT_HOUR_MINUTE_SECONDS_SPECIAL);
+    if (time.getHour() < EARLIEST_HOUR) {
+      // no time should be this early, it must be the afternoon.
+      return time.plusHours(12);
+    } else {
+      return time;
+    }
+
   }
 
   /**
