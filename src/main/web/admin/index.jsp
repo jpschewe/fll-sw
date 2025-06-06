@@ -180,39 +180,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 reports. Teams can be added directly to the current
                 tournament through a schedule as well. Column names are
                 not important, you will be given the opportunity to map
-                the column names to the fields that the sofware is
-                expecting. The columns needed are:
-                <ul>
-                    <li>Team number - this needs to be an integer
-                        and unique</li>
-                    <li>Practice - if the number of practice rounds
-                        in the tournament parameters is greater than
-                        zero there needs to be 2 columns for each
-                        practice round. One that contains a time
-                        (hour:minute) and one that contains the table in
-                        the format Blue 1 where "Blue" is the table and
-                        "1" is the side of the table. The side needs to
-                        be 1 or 2.</li>
-                    <li>Performance rounds - there must be 2
-                        columns for each regular match play (there may
-                        be additional rounds specified as well). See the
-                        description of practice for the format of the
-                        columns.</li>
-                    <li>Subjective categories - there needs to be a
-                        column for the subjective categories specifying
-                        the time (hour:minute) for the subjective
-                        judging. If all judging happens at the same
-                        time, a single column may be used for all
-                        subjective categories</li>
-                    <li>Team information - if the schedule is used
-                        to populate team information there may be
-                        columns for team name, organization</li>
-                    <li>judging group and award group - if the
-                        judging groups and award groups aren't assigned
-                        when the teams were uploaded, these columns may
-                        be specified in the schedule</li>
-                </ul>
-                <a href='javascript:hide("ScheduleHelp")'>[hide]</a>
+                the column names to the fields that the software is
+                expecting. A description of the <a
+                    href="schedule-format.jsp" target="_blank">schedule
+                    format</a> is available. <a
+                    href='javascript:hide("ScheduleHelp")'>[hide]</a>
             </div>
 
             <form id='uploadSchedule'
