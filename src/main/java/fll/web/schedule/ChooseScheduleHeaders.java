@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -119,10 +120,12 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
 
       final Collection<String> numberColumns = new LinkedList<>();
       final Collection<String> timeColumns = new LinkedList<>();
+      final Collection<String> tableColumns = new LinkedList<>();
       checkHeaders(headerNames, uploadScheduleData.getHeaderRowIndex(), uploadScheduleData.getScheduleFile(),
-                   uploadScheduleData.getSelectedSheet(), numberColumns, timeColumns);
+                   uploadScheduleData.getSelectedSheet(), numberColumns, timeColumns, tableColumns);
       pageContext.setAttribute("numberColumns", numberColumns);
       pageContext.setAttribute("timeColumns", timeColumns);
+      pageContext.setAttribute("tableColumns", tableColumns);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
@@ -134,13 +137,16 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
    *          contain the number columns (possibly empty)
    * @param returnTimeColumns pass in an empty mutable collect, upon return will
    *          contain the time columns (possibly empty)
+   * @param returnTableColumns pass in an empty mutable collect, upon return will
+   *          contain the table columns (possibly empty)
    */
   private static void checkHeaders(final Collection<String> allHeaders,
                                    final int headerRowIndex,
                                    final File scheduleFile,
                                    final @Nullable String sheetName,
                                    final Collection<String> returnNumberColumns,
-                                   final Collection<String> returnTimeColumns) {
+                                   final Collection<String> returnTimeColumns,
+                                   final Collection<String> returnTableColumns) {
 
     try (CellFileReader reader = CellFileReader.createCellReader(scheduleFile, sheetName)) {
       reader.skipRows(headerRowIndex);
@@ -149,6 +155,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
         LOGGER.error("No header row specified, returning all columns for all types");
         returnNumberColumns.addAll(allHeaders);
         returnTimeColumns.addAll(allHeaders);
+        returnTableColumns.addAll(allHeaders);
         return;
       }
 
@@ -157,15 +164,19 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       Arrays.fill(isNumberColumn, true);
       final boolean[] isTimeColumn = new boolean[headerRow.length];
       Arrays.fill(isTimeColumn, true);
+      final boolean[] isTableColumn = new boolean[headerRow.length];
+      Arrays.fill(isTableColumn, true);
 
       boolean someNumberColumns = true;
       boolean someTimeColumns = true;
+      boolean someTableColumns = true;
 
       try {
         @Nullable
         String @Nullable [] line;
         while (someNumberColumns
             && someTimeColumns
+            && someTableColumns
             && null != (line = reader.readNext())) {
 
           for (int i = 0; i < line.length; ++i) {
@@ -197,6 +208,17 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
                   }
                 }
               }
+
+              if (someTableColumns) {
+                if (StringUtils.isBlank(value)) {
+                  isTableColumn[i] = false;
+                } else {
+                  final @Nullable ImmutablePair<String, Number> tableInfo = TournamentSchedule.parseTable(value);
+                  if (null == tableInfo) {
+                    isTableColumn[i] = false;
+                  }
+                }
+              }
             }
 
             // check if done
@@ -208,6 +230,10 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
               // if any values are true, there are potentially some time columns
               someTimeColumns = BooleanUtils.or(isTimeColumn);
             }
+            if (someTableColumns) {
+              // if any values are true, there are potentially some table columns
+              someTableColumns = BooleanUtils.or(isTableColumn);
+            }
           }
         }
 
@@ -216,7 +242,8 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       } finally {
         // collect results
         if (someNumberColumns
-            || someTimeColumns) {
+            || someTimeColumns
+            || someTableColumns) {
 
           for (int i = 0; i < headerRow.length; ++i) {
             final @Nullable String header = headerRow[i];
@@ -226,6 +253,9 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
               }
               if (isTimeColumn[i]) {
                 returnTimeColumns.add(header);
+              }
+              if (isTableColumn[i]) {
+                returnTableColumns.add(header);
               }
             }
           }
@@ -237,6 +267,7 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       LOGGER.warn("Error reading header column, returning all columns for all types", e);
       returnNumberColumns.addAll(allHeaders);
       returnTimeColumns.addAll(allHeaders);
+      returnTableColumns.addAll(allHeaders);
     }
 
   }

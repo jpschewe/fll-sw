@@ -225,7 +225,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                     <td>
                         <select id='perf${perfLoopStatus.index}_table'
                             name='perf${perfLoopStatus.index}_table'>
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                            <c:forEach items="${tableColumns}"
                                 var="fileHeader">
                                 <option value="${fileHeader}">${fileHeader}</option>
                             </c:forEach>
