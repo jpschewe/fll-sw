@@ -1,3 +1,4 @@
+* #1267 - On schedule upload filter columns that have data of the incorrect type
 * #1266 - Add documentation of the schedule file format
 * #1265 - Add more details to the exception message when a time in a schedule cannot be parsed
 * #1244 - Make the crossed off teams more visible on the deliberations page

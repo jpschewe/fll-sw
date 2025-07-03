@@ -49,7 +49,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                 <td>Team Number</td>
                 <td>
                     <select id='teamNumber' name='teamNumber'>
-                        <c:forEach items="${spreadsheetHeaderNames}"
+                        <c:forEach items="${numberColumns}"
                             var="fileHeader">
                             <c:choose>
                                 <c:when
@@ -203,7 +203,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                     <td>
                         <select id='perf${perfLoopStatus.index}_time'
                             name='perf${perfLoopStatus.index}_time'>
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                            <c:forEach items="${timeColumns}"
                                 var="fileHeader">
                                 <c:set var="value"
                                     value="${performanceRound_values[perfLoopStatus.index]}" />
@@ -300,7 +300,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                     <td>
                         <select name='${subcat.name}:header'>
 
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                            <c:forEach items="${timeColumns}"
                                 var="subjHeader">
                                 <option value='${subjHeader}'>${subjHeader}</option>
                             </c:forEach>
@@ -313,7 +313,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                         <select name='${subcat.name}:header2'>
                             <option value="none">None</option>
 
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                            <c:forEach items="${timeColumns}"
                                 var="subjHeader">
                                 <option value='${subjHeader}'>${subjHeader}</option>
                             </c:forEach>
