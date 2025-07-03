@@ -6,9 +6,14 @@
 
 package fll.web.schedule;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,10 +23,13 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Utilities;
 import fll.db.CategoryColumnMapping;
 import fll.db.RunMetadata;
 import fll.scheduler.SchedParams;
@@ -52,6 +60,8 @@ import jakarta.servlet.jsp.PageContext;
  */
 @WebServlet("/schedule/ChooseScheduleHeaders")
 public final class ChooseScheduleHeaders extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Setup page variables used by the JSP.
@@ -103,9 +113,163 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
       pageContext.setAttribute("runTypes", RunMetadata.RunType.values());
 
       computePerformanceRoundValues(pageContext, headerNames);
+
+      final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session,
+                                                                                          UploadScheduleData.KEY,
+                                                                                          UploadScheduleData.class);
+
+      final Collection<String> numberColumns = new LinkedList<>();
+      final Collection<String> timeColumns = new LinkedList<>();
+      final Collection<String> tableColumns = new LinkedList<>();
+      checkHeaders(headerNames, uploadScheduleData.getHeaderRowIndex(), uploadScheduleData.getScheduleFile(),
+                   uploadScheduleData.getSelectedSheet(), numberColumns, timeColumns, tableColumns);
+      pageContext.setAttribute("numberColumns", numberColumns);
+      pageContext.setAttribute("timeColumns", timeColumns);
+      pageContext.setAttribute("tableColumns", tableColumns);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
+  }
+
+  /**
+   * @param allHeaders can be an immutable collection
+   * @param returnNumberColumns pass in an empty mutable collect, upon return will
+   *          contain the number columns (possibly empty)
+   * @param returnTimeColumns pass in an empty mutable collect, upon return will
+   *          contain the time columns (possibly empty)
+   * @param returnTableColumns pass in an empty mutable collect, upon return will
+   *          contain the table columns (possibly empty)
+   */
+  private static void checkHeaders(final Collection<String> allHeaders,
+                                   final int headerRowIndex,
+                                   final File scheduleFile,
+                                   final @Nullable String sheetName,
+                                   final Collection<String> returnNumberColumns,
+                                   final Collection<String> returnTimeColumns,
+                                   final Collection<String> returnTableColumns) {
+
+    try (CellFileReader reader = CellFileReader.createCellReader(scheduleFile, sheetName)) {
+      reader.skipRows(headerRowIndex);
+      final @Nullable String @Nullable [] headerRow = reader.readNext();
+      if (null == headerRow) {
+        LOGGER.error("No header row specified, returning all columns for all types");
+        returnNumberColumns.addAll(allHeaders);
+        returnTimeColumns.addAll(allHeaders);
+        returnTableColumns.addAll(allHeaders);
+        return;
+      }
+
+      // start all columns out as number and time columns
+      final boolean[] isNumberColumn = new boolean[headerRow.length];
+      Arrays.fill(isNumberColumn, true);
+      final boolean[] isTimeColumn = new boolean[headerRow.length];
+      Arrays.fill(isTimeColumn, true);
+      final boolean[] isTableColumn = new boolean[headerRow.length];
+      Arrays.fill(isTableColumn, true);
+
+      boolean someNumberColumns = true;
+      boolean someTimeColumns = true;
+      boolean someTableColumns = true;
+
+      try {
+        @Nullable
+        String @Nullable [] line;
+        while (someNumberColumns
+            && someTimeColumns
+            && someTableColumns
+            && null != (line = reader.readNext())) {
+
+          for (int i = 0; i < line.length; ++i) {
+            final @Nullable String value = line[i];
+            if (null == value) {
+              isNumberColumn[i] = false;
+              isTimeColumn[i] = false;
+            } else {
+              if (someTimeColumns) {
+                try {
+                  final @Nullable LocalTime parsed = TournamentSchedule.parseTime(value);
+                  if (null == parsed) {
+                    // don't allow null times
+                    isTimeColumn[i] = false;
+                  }
+                } catch (final DateTimeParseException e) {
+                  isTimeColumn[i] = false;
+                }
+              }
+
+              if (someNumberColumns) {
+                if (StringUtils.isBlank(value)) {
+                  isNumberColumn[i] = false;
+                } else {
+                  try {
+                    Utilities.getIntegerNumberFormat().parse(value);
+                  } catch (final ParseException e) {
+                    isNumberColumn[i] = false;
+                  }
+                }
+              }
+
+              if (someTableColumns) {
+                if (StringUtils.isBlank(value)) {
+                  isTableColumn[i] = false;
+                } else {
+                  final @Nullable ImmutablePair<String, Number> tableInfo = TournamentSchedule.parseTable(value);
+                  if (null == tableInfo) {
+                    isTableColumn[i] = false;
+                  }
+                }
+              }
+            }
+
+            // check if done
+            if (someNumberColumns) {
+              // if any values are true, there are potentially some number columns
+              someNumberColumns = BooleanUtils.or(isNumberColumn);
+            }
+            if (someTimeColumns) {
+              // if any values are true, there are potentially some time columns
+              someTimeColumns = BooleanUtils.or(isTimeColumn);
+            }
+            if (someTableColumns) {
+              // if any values are true, there are potentially some table columns
+              someTableColumns = BooleanUtils.or(isTableColumn);
+            }
+          }
+        }
+
+      } catch (final IOException e) {
+        LOGGER.warn("Error reading data for column types, returning the best guess at this point", e);
+      } finally {
+        // collect results
+        if (someNumberColumns
+            || someTimeColumns
+            || someTableColumns) {
+
+          for (int i = 0; i < headerRow.length; ++i) {
+            final @Nullable String header = headerRow[i];
+            if (null != header) {
+              if (isNumberColumn[i]) {
+                returnNumberColumns.add(header);
+              }
+              if (isTimeColumn[i]) {
+                returnTimeColumns.add(header);
+              }
+              if (isTableColumn[i]) {
+                returnTableColumns.add(header);
+              }
+            }
+          }
+
+        }
+      }
+
+    } catch (final InvalidFormatException | IOException e) {
+      LOGGER.warn("Error reading header column, returning all columns for all types", e);
+      returnNumberColumns.addAll(allHeaders);
+      returnTimeColumns.addAll(allHeaders);
+      returnTableColumns.addAll(allHeaders);
+    }
+
   }
 
   private static void computePerformanceRoundValues(final PageContext page,

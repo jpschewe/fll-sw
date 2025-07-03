@@ -1095,13 +1095,14 @@ public class TournamentSchedule implements Serializable {
                                                              + 1)));
         }
 
-        final String[] tablePieces = table.split(" ");
-        if (tablePieces.length != 2) {
-          throw new ScheduleParseException(String.format("Error parsing performance table information from: '%s', expecting 2 strings separated by a space",
+        final @Nullable ImmutablePair<String, Number> tableInfo = parseTable(table);
+        if (null == tableInfo) {
+          throw new ScheduleParseException(String.format("Error parsing performance table information from: '%s', expecting a string and a number separated by a space",
                                                          table));
         }
-        final String tableName = tablePieces[0];
-        final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
+
+        final String tableName = tableInfo.getLeft();
+        final int tableSide = tableInfo.getRight().intValue();
         final int roundNumber = perfIndex
             + 1;
         try {
@@ -1128,6 +1129,32 @@ public class TournamentSchedule implements Serializable {
       throw new ScheduleParseException(String.format("Error parsing line '%s': %s", Arrays.toString(line),
                                                      pe.getMessage(), pe));
     }
+  }
+
+  /**
+   * Parse the string as a table side value.
+   * 
+   * @param str the string to parse
+   * @return the table color and the table side, null on a parse error
+   */
+  public static @Nullable ImmutablePair<String, Number> parseTable(final String str) {
+
+    final String[] tablePieces = str.split(" ");
+    if (tablePieces.length != 2) {
+      LOGGER.debug("parseTable:Expecting 2 strings separated by a space '{}'", str);
+      return null;
+    }
+
+    final String tableName = tablePieces[0];
+
+    try {
+      final Number tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]);
+      return ImmutablePair.of(tableName, tableSide);
+    } catch (final ParseException e) {
+      LOGGER.debug("parseTable:Unable to parse {} as a number", tablePieces[1]);
+      return null;
+    }
+
   }
 
   /**
