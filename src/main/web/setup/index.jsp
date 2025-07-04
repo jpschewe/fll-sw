@@ -32,9 +32,8 @@ fll.web.setup.SetupIndex.populateContext(application, pageContext);
 <body>
     <h1>FLL (Database setup)</h1>
 
-    <p>
     <div class='status-message'>${message}</div>
-    </p>
+
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
@@ -59,12 +58,16 @@ fll.web.setup.SetupIndex.populateContext(application, pageContext);
 
         <hr />
 
-        <p>Initialize the database based upon a previously saved
-            database.</p>
+        <p>
+            Initialize the database based upon a previously saved
+            database. If you want to load a backup database you can
+            access them <a
+                href="<c:url value='/admin/database-backups.jsp' />"
+                target="_blank">here</a>.
+        </p>
 
         <input type='file' size='32' name='dbdump'>
-        <input type='submit' name='createdb'
-            value='Upload Database'
+        <input type='submit' name='createdb' value='Upload Database'
             onclick='return confirmOverwrite()' />
 
         <hr />
