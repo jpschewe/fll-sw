@@ -20,7 +20,7 @@ fll.web.admin.DatabaseBackupsIndex.populateContext(pageContext);
     <ul>
         <c:forEach items="${backups}" var="backup">
             <li>
-                <a href="${BASE_URL}/${backup}">${backup}</a>
+                <a href="<c:url value='/${BASE_URL}/${backup}' />">${backup}</a>
             </li>
         </c:forEach>
     </ul>
