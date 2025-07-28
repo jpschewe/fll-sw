@@ -1,3 +1,4 @@
+* Allow the user to access database backups from the setup page
 * Correct links to download database backups
 * #1267 - On schedule upload filter columns that have data of the incorrect type
 * #1266 - Add documentation of the schedule file format
