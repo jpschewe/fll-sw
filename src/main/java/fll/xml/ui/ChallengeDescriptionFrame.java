@@ -9,16 +9,11 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -42,8 +37,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
@@ -51,12 +44,10 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
-import fll.util.GuiExceptionHandler;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -70,70 +61,6 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 public class ChallengeDescriptionFrame extends JFrame {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  /**
-   * @param args ignored
-   * @throws IOException if there is an error reading the default challenge
-   *           description file
-   */
-  public static void main(final String[] args) throws IOException {
-    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
-
-    // Use cross platform look and feel so that things look right all of the
-    // time
-    try {
-      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-    } catch (final ClassNotFoundException e) {
-      LOGGER.warn("Could not find cross platform look and feel class", e);
-    } catch (final InstantiationException e) {
-      LOGGER.warn("Could not instantiate cross platform look and feel class", e);
-    } catch (final IllegalAccessException e) {
-      LOGGER.warn("Error loading cross platform look and feel", e);
-    } catch (final UnsupportedLookAndFeelException e) {
-      LOGGER.warn("Cross platform look and feel unsupported?", e);
-    }
-
-    try (
-        // final InputStream stream =
-        // ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2015_trash-trek.xml"))
-        // {
-        InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
-
-      if (null == stream) {
-        throw new RuntimeException("Cannot find default challenge description for testing");
-      }
-
-      final ChallengeDescription description = ChallengeParser.parse(new InputStreamReader(stream,
-                                                                                           Utilities.DEFAULT_CHARSET));
-
-      final ChallengeDescriptionFrame editor = new ChallengeDescriptionFrame();
-      editor.setCurrentFile(null, description);
-
-      editor.addWindowListener(new WindowAdapter() {
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void windowClosed(final WindowEvent e) {
-          System.exit(0);
-        }
-      });
-      // should be able to watch for window closing, but hidden works
-      editor.addComponentListener(new ComponentAdapter() {
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void componentHidden(final ComponentEvent e) {
-          System.exit(0);
-        }
-      });
-
-      editor.setLocationRelativeTo(null);
-      editor.setVisible(true);
-    } catch (final Throwable e) {
-      JOptionPane.showMessageDialog(null, "Unexpected error: "
-          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      LOGGER.fatal("Unexpected error", e);
-      System.exit(1);
-    }
-  }
 
   private @Nullable File mCurrentFile = null;
 
