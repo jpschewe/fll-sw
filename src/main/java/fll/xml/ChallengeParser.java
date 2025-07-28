@@ -690,7 +690,7 @@ public final class ChallengeParser {
   }
 
   /**
-   * Get all challenge descriptors build into the software.
+   * Get all challenge descriptors built into the software.
    *
    * @return a collection of all URLs to the challenge descriptions in the
    *         software
