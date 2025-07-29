@@ -348,6 +348,25 @@ public final class WebUtils {
   /**
    * @param request where to get the parameter from
    * @param parameter the parameter to get
+   * @param defaultValue the value to return if the parameter is not present
+   * @return the value
+   * @throws NumberFormatException if the value isn't parsable as an integer
+   */
+  public static boolean getBooleanRequestParameter(final HttpServletRequest request,
+                                                   final String parameter,
+                                                   final boolean defaultValue)
+      throws NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      return defaultValue;
+    }
+    final boolean value = Boolean.parseBoolean(str);
+    return value;
+  }
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
    * @return the value
    * @throws MissingRequiredParameterException if the parameter is missing
    */
