@@ -104,20 +104,15 @@ public class CreateDB extends BaseFLLServlet {
       if (null != request.getParameter("chooseDescription")) {
         final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
-        try {
-          final URL descriptionURL = new URI(description).toURL();
-          final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
-                                                                                                        Utilities.DEFAULT_CHARSET));
+        final URL descriptionURL = ChallengeParser.getKnownChallengeUrl(description);
+        final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
+                                                                                                      Utilities.DEFAULT_CHARSET));
 
-          DumpDB.automaticBackup(connection, "before-create-from-description");
+        DumpDB.automaticBackup(connection, "before-create-from-description");
 
-          GenerateDB.generateDB(challengeDescription, connection);
+        GenerateDB.generateDB(challengeDescription, connection);
 
-          success = true;
-        } catch (final URISyntaxException e) {
-          throw new FLLInternalException("Could not parse URL from choosen description: "
-              + description, e);
-        }
+        success = true;
       } else if (null != request.getPart("reinitializeDatabase")) {
         // create a new empty database from an XML descriptor
         final Part xmlFileItem = request.getPart("xmldocument");

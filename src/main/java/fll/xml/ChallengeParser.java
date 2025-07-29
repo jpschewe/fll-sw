@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -51,6 +52,7 @@ import org.xml.sax.SAXParseException;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.web.report.awards.HeadToHeadCategory;
@@ -785,6 +787,24 @@ public final class ChallengeParser {
 
     return urls;
 
+  }
+
+  /**
+   * Given a url, find the corresponding known challenge description URL.
+   * 
+   * @param url a string representation of a known challenge description URL
+   * @return the URL
+   * @throws FLLRuntimeException if the URL doesn't match a known challenge
+   *           description
+   */
+  public static URL getKnownChallengeUrl(final String url) {
+    final Collection<URL> knownDescriptions = ChallengeParser.getAllKnownChallengeDescriptorURLs();
+    final Optional<URL> found = knownDescriptions.stream().filter(u -> url.equals(u.toString())).findAny();
+    if (!found.isPresent()) {
+      throw new FLLRuntimeException(String.format("There is no known challenge description with the URL %s", url));
+    }
+
+    return found.get();
   }
 
   /**
