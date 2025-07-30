@@ -43,6 +43,7 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.DescriptionInfo;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -104,7 +105,7 @@ public class CreateDB extends BaseFLLServlet {
       if (null != request.getParameter("chooseDescription")) {
         final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
-        final URL descriptionURL = ChallengeParser.getKnownChallengeUrl(description);
+        final URL descriptionURL = DescriptionInfo.getKnownChallengeUrl(description);
         final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
                                                                                                       Utilities.DEFAULT_CHARSET));
 

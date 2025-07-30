@@ -77,11 +77,7 @@ fll.web.setup.SetupIndex.populateContext(application, pageContext);
         <select id='description' name='description'>
             <c:forEach items="${descriptions}" var="description">
                 <option value="${description.URL }">
-                    ${description.title }
-                    <c:if test='${not empty description.revision }'>
-     (${description.revision })
-     </c:if>
-                </option>
+                    ${description.display}</option>
             </c:forEach>
         </select>
         <input type='submit' name='chooseDescription'
