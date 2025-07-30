@@ -72,16 +72,18 @@ fll.web.setup.SetupIndex.populateContext(application, pageContext);
 
         <hr />
 
-        <p>Select a description that shipped with the software. Use
-            this option if a database has not been provided.</p>
+        <p>
+            Select a description that shipped with the software. Use
+            this option if a database has not been provided. If you want
+            to see the details of the challenge descriptions, you can
+            view them at <a
+                href="<c:url value='/challenge-descriptions.jsp'/>"
+                target="_blank">this page</a>.
+        </p>
         <select id='description' name='description'>
             <c:forEach items="${descriptions}" var="description">
                 <option value="${description.URL }">
-                    ${description.title }
-                    <c:if test='${not empty description.revision }'>
-     (${description.revision })
-     </c:if>
-                </option>
+                    ${description.display}</option>
             </c:forEach>
         </select>
         <input type='submit' name='chooseDescription'
@@ -91,8 +93,13 @@ fll.web.setup.SetupIndex.populateContext(application, pageContext);
 
         <hr />
 
-        <p>Provide your own custom challenge description file
-            (advanced users only)</p>
+        <p>
+            Provide your own custom challenge description file (advanced
+            users only). If you want to modify an existing challenge
+            description, you can view and download them at <a
+                href="<c:url value='/challenge-descriptions.jsp'/>"
+                target="_blank">this page</a>.
+        </p>
         <input type='file' size='32' name='xmldocument'>
         <input type='submit' name='reinitializeDatabase'
             value='Upload Description'
