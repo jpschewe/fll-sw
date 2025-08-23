@@ -227,8 +227,7 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH);
 
       final Element headerCell2 = FOPUtils.createTableCell(document, null,
-                                                           String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
-                                                               + 1));
+                                                           String.format("%s Table", runMetadata.getDisplayName()));
       headerRow.appendChild(headerCell2);
       FOPUtils.addBorders(headerCell2, FOPUtils.STANDARD_BORDER_WIDTH);
     }
@@ -402,8 +401,7 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(headerCell1, FOPUtils.STANDARD_BORDER_WIDTH);
 
       final Element headerCell2 = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
-                                                           String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
-                                                               + 1));
+                                                           String.format("%s Table", runMetadata.getDisplayName()));
       headerRow.appendChild(headerCell2);
       FOPUtils.addBorders(headerCell2, FOPUtils.STANDARD_BORDER_WIDTH);
     }
