@@ -619,14 +619,10 @@ spotbugs {
     excludeFilter = file("spotbugs-filters.xml")
 }
 
-tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
   reports {
-    xml {
-      enabled = true
-    }
-    html {
-      enabled = true
-    }
+    xml.required = true
+    html.required = true
   }
 }
 
