@@ -223,7 +223,7 @@ public class PitSigns extends BaseFLLServlet {
 
     // top text
     // read from tournament parameters and create a block for each carriage
-    // return separated pice
+    // return separated piece
     final Element topTextContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     page.appendChild(topTextContainer);
     topTextContainer.setAttribute("font-size", "14pt");
