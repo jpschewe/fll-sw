@@ -1337,7 +1337,7 @@ public final class ScheduleWriter {
       final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
       final LocalTime start = performance.getTime();
 
-      final String text = String.format("%s %s %d", runMetadata.getDisplayName(), performance.getTable(),
+      final String text = String.format("%s - %s %d", runMetadata.getDisplayName(), performance.getTable(),
                                         performance.getSide());
       scheduleElements.put(start, text);
     }
