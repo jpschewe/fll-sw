@@ -196,7 +196,7 @@ function uploadJsonData(url, method, payloadObject) {
     const dataToUpload = JSON.stringify(payloadObject);
     return fetch(url, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
         body: dataToUpload
     });
 }
