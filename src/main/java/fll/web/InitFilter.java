@@ -25,7 +25,6 @@ import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -42,11 +41,6 @@ import jakarta.servlet.http.HttpSession;
 public class InitFilter implements Filter {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  @Override
-  public void destroy() {
-    // nothing
-  }
 
   @Override
   public void doFilter(final ServletRequest request,
@@ -142,11 +136,6 @@ public class InitFilter implements Filter {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public void init(final FilterConfig filterConfig) throws ServletException {
-    // nothing
   }
 
   private static void possiblyInstallSetupAuthentication(final ServletContext application,

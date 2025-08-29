@@ -11,9 +11,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Formatter;
 
+import fll.Utilities;
+import fll.Version;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletRequest;
@@ -22,8 +23,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import fll.Utilities;
-import fll.Version;
 
 /**
  * Ensure that all HTML pages get the same navbar and footer.
@@ -32,11 +31,6 @@ import fll.Version;
 public class FooterFilter implements Filter {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  @Override
-  public void destroy() {
-    // nothing
-  }
 
   @Override
   public void doFilter(final ServletRequest request,
@@ -292,11 +286,6 @@ public class FooterFilter implements Filter {
     formatter.format("<table>%n");
     formatter.format("  <tr><td>Software version: %s</td></tr>%n", Version.getVersion());
     formatter.format("</table>%n");
-  }
-
-  @Override
-  public void init(final FilterConfig filterConfig) throws ServletException {
-    // nothing
   }
 
 }
