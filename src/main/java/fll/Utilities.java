@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -146,7 +147,7 @@ public final class Utilities {
   /**
    * Character set to use throughout the software. Currently set to UTF-8.
    */
-  public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
   /**
    * Unicode character for a non-breaking space.
