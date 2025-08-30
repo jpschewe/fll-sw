@@ -43,9 +43,9 @@ table#perf-data th, table#perf-data td {
             <th>Run</th>
             <th>Scheduled Time</th>
             <th>Scheduled Table</th>
-            <th>Last edited Time</th>
+            <th>Last Edited Time</th>
             <th>Score</th>
-            <th>Table</th>
+            <th>Table Edited At</th>
         </tr>
 
         <c:forEach items="${data}" var="entry">

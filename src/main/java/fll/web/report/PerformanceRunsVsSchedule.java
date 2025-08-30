@@ -190,7 +190,15 @@ public final class PerformanceRunsVsSchedule {
       this.perfTime = null;
       this.lastEdited = lastEdited;
       this.formattedScore = formattedScore;
-      this.table = table;
+      this.table = determineEditedTableDisplay(table);
+    }
+
+    private static String determineEditedTableDisplay(final String origTable) {
+      if ("ALL".equals(origTable)) {
+        return "UNKNOWN";
+      } else {
+        return origTable;
+      }
     }
 
     private final TournamentTeam team;
