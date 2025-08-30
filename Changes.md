@@ -1,3 +1,4 @@
+* #1271 - Ensure that the judges summary sees the number of teams scored as soon as a score comes in
 * #1272 - Use run display name in performance vs. scheduled report
 * #1270 - Add page displaying all known challenge descriptions
 * Allow the user to access database backups from the setup page
