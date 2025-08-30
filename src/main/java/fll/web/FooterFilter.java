@@ -18,7 +18,6 @@ import fll.Version;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
@@ -70,61 +69,63 @@ public class FooterFilter implements Filter {
 
                 final String origStr = wrapper.getString();
 
-                final PrintWriter writer = response.getWriter();
+                try (PrintWriter writer = response.getWriter()) {
 
-                final CharArrayWriter caw = new CharArrayWriter();
-                final String bodyTag = "<body>";
-                final int bodyIndex = origStr.indexOf(bodyTag);
-                final int bodyEndIndex = origStr.indexOf("</body>");
-                LOGGER.trace("Body index {} body end index {}", bodyIndex, bodyEndIndex);
+                  final CharArrayWriter caw = new CharArrayWriter();
+                  final String bodyTag = "<body>";
+                  final int bodyIndex = origStr.indexOf(bodyTag);
+                  final int bodyEndIndex = origStr.indexOf("</body>");
+                  LOGGER.trace("Body index {} body end index {}", bodyIndex, bodyEndIndex);
 
-                if (-1 != bodyIndex
-                    && -1 != bodyEndIndex) {
+                  if (-1 != bodyIndex
+                      && -1 != bodyEndIndex) {
 
-                  final int endOfBodyTagIndex = bodyIndex
-                      + bodyTag.length();
-                  caw.write(origStr.substring(0, endOfBodyTagIndex));
+                    final int endOfBodyTagIndex = bodyIndex
+                        + bodyTag.length();
+                    caw.write(origStr.substring(0, endOfBodyTagIndex));
 
-                  if (!noNavbar(url)) {
-                    addNavbar(caw, httpRequest);
+                    if (!noNavbar(url)) {
+                      addNavbar(caw, httpRequest);
+                    } else {
+                      LOGGER.debug("Skipping navbar");
+                    }
+
+                    caw.write(origStr.substring(endOfBodyTagIndex, bodyEndIndex
+                        - 1));
+
+                    if (path.startsWith(httpRequest.getContextPath()
+                        + "/public")) {
+                      addPublicFooter(caw);
+                    } else {
+                      addFooter(caw, httpRequest);
+                    }
+
+                    caw.write(origStr.substring(bodyEndIndex, origStr.length()));
+
+                    final String modified = caw.toString();
+                    response.setContentLength(modified.getBytes(Utilities.DEFAULT_CHARSET).length);
+                    writer.print(modified);
                   } else {
-                    LOGGER.debug("Skipping navbar");
+                    LOGGER.debug("No navbar/footer");
+
+                    writer.print(origStr);
                   }
 
-                  caw.write(origStr.substring(endOfBodyTagIndex, bodyEndIndex
-                      - 1));
-
-                  if (path.startsWith(httpRequest.getContextPath()
-                      + "/public")) {
-                    addPublicFooter(caw);
-                  } else {
-                    addFooter(caw, httpRequest);
-                  }
-
-                  caw.write(origStr.substring(bodyEndIndex, origStr.length()));
-
-                  final String modified = caw.toString();
-                  response.setContentLength(modified.getBytes(Utilities.DEFAULT_CHARSET).length);
-                  writer.print(modified);
-                } else {
-                  LOGGER.debug("No navbar/footer");
-
-                  writer.print(origStr);
-                }
-                writer.close();
+                } // writer allocation
               } else {
-                final String origStr = wrapper.getString();
                 LOGGER.debug("non-html text content type: {}", responseContentType);
 
-                final PrintWriter writer = response.getWriter();
-                writer.print(origStr);
-                writer.close();
+                final String origStr = wrapper.getString();
+                try (PrintWriter writer = response.getWriter()) {
+                  writer.print(origStr);
+                }
               }
             } else if (wrapper.isBinaryUsed()) {
               LOGGER.debug("binary content type: {}. Data written directly.", responseContentType);
             } else {
               LOGGER.debug("No output stream used?");
             }
+
           } else {
             LOGGER.debug("No footer filter. async?: {}", request.isAsyncStarted());
             chain.doFilter(request, response);
