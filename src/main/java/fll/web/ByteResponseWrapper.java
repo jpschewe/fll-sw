@@ -6,18 +6,13 @@
 
 package fll.web;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
-
-import fll.util.FLLRuntimeException;
 
 /**
  * Wrapper class for a response that stores everything in a local buffer to be
@@ -26,13 +21,9 @@ import fll.util.FLLRuntimeException;
  * @see HttpServletResponse
  */
 public class ByteResponseWrapper extends HttpServletResponseWrapper {
-  private final ByteArrayOutputStream binary;
-
   private final StringWriter string;
 
   private final PrintWriter writer;
-
-  private final ServletOutputStream stream;
 
   private boolean binaryUsed = false;
 
@@ -55,13 +46,6 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
   }
 
   /**
-   * @return the binary data that was written
-   */
-  public byte[] getBinary() {
-    return binary.toByteArray();
-  }
-
-  /**
    * @return the string that was written
    */
   public String getString() {
@@ -75,8 +59,6 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
     super(response);
     string = new StringWriter();
     writer = new PrintWriter(string);
-    binary = new ByteArrayOutputStream();
-    stream = new WrapperServletOutputStream(binary);
   }
 
   @Override
@@ -89,65 +71,13 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
   }
 
   @Override
-  public ServletOutputStream getOutputStream() {
+  public ServletOutputStream getOutputStream() throws IOException {
     if (stringUsed) {
       throw new IllegalStateException("Cannot call getOutputStream after calling getWriter");
     }
     binaryUsed = true;
-    return stream;
+    // let everything be written directly
+    return super.getOutputStream();
   }
 
-  /**
-   * Wrapper for a {@link ServletOutputStream} that delegates to another output
-   * stream.
-   */
-  private static class WrapperServletOutputStream extends ServletOutputStream {
-    private final OutputStream os;
-
-    WrapperServletOutputStream(final OutputStream os) {
-      this.os = os;
-    }
-
-    @Override
-    public void close() throws IOException {
-      os.close();
-    }
-
-    @Override
-    public void flush() throws IOException {
-      os.flush();
-    }
-
-    @Override
-    public void write(final byte[] b) throws IOException {
-      os.write(b);
-    }
-
-    @Override
-    public void write(final byte[] b,
-                      final int off,
-                      final int len)
-        throws IOException {
-      os.write(b, off, len);
-    }
-
-    @Override
-    public void write(final int i) throws IOException {
-      os.write(i);
-    }
-
-    @Override
-    public boolean isReady() {
-      return true;
-    }
-
-    /**
-     * Not supported.
-     */
-    @Override
-    public void setWriteListener(final WriteListener arg0) {
-      throw new FLLRuntimeException("Async I/O not supported by the wrapper");
-    }
-
-  }
 }

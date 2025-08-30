@@ -60,13 +60,13 @@ public class FooterFilter implements Filter {
 
             chain.doFilter(request, wrapper);
 
-            final String contentType = wrapper.getContentType();
+            final String responseContentType = wrapper.getContentType();
             LOGGER.debug("response content type: {} character encoding: {}", wrapper.getContentType(),
                          wrapper.getCharacterEncoding());
 
             if (wrapper.isStringUsed()) {
-              if (null != contentType
-                  && contentType.startsWith("text/html")) {
+              if (null != responseContentType
+                  && responseContentType.startsWith("text/html")) {
 
                 final String origStr = wrapper.getString();
 
@@ -114,21 +114,16 @@ public class FooterFilter implements Filter {
                 writer.close();
               } else {
                 final String origStr = wrapper.getString();
-                LOGGER.debug("non-html text content type: {}", contentType);
+                LOGGER.debug("non-html text content type: {}", responseContentType);
 
                 final PrintWriter writer = response.getWriter();
                 writer.print(origStr);
                 writer.close();
               }
             } else if (wrapper.isBinaryUsed()) {
-              LOGGER.debug("non-html content type: {}", contentType);
-
-              final byte[] origData = wrapper.getBinary();
-              final ServletOutputStream out = response.getOutputStream();
-              out.write(origData);
-              out.close();
+              LOGGER.debug("binary content type: {}. Data written directly.", responseContentType);
             } else {
-              LOGGER.debug("No output stream used, just returning page");
+              LOGGER.debug("No output stream used?");
             }
           } else {
             LOGGER.debug("No footer filter. async?: {}", request.isAsyncStarted());
