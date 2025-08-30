@@ -55,7 +55,7 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
   }
 
   /**
-   * @return th ebinary data that was written
+   * @return the binary data that was written
    */
   public byte[] getBinary() {
     return binary.toByteArray();
