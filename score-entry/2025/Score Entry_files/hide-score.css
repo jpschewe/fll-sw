@@ -1,0 +1,11 @@
+.score-cell {
+    background-color: black;
+}
+
+.score-cell * {
+    display: none;
+}
+
+.total-score-container {
+    display: none;
+}
