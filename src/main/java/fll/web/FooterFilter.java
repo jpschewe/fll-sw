@@ -57,6 +57,8 @@ public class FooterFilter implements Filter {
 
             final ByteResponseWrapper wrapper = new ByteResponseWrapper(httpResponse);
 
+            LOGGER.debug("Initial response character encoding: {}", response.getCharacterEncoding());
+            
             chain.doFilter(request, wrapper);
 
             final String responseContentType = wrapper.getContentType();
