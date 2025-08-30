@@ -26,11 +26,14 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
@@ -56,6 +59,8 @@ public final class PerformanceRunsVsSchedule {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final RunMetadataFactory runMetadataFactory = tournamentData.getRunMetadataFactory();
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament currentTournament = Tournament.getCurrentTournament(connection);
@@ -70,8 +75,13 @@ public final class PerformanceRunsVsSchedule {
                                                                                    tsi.getTeamNumber());
 
           final List<Data> teamData = tsi.enumeratePerformances() //
-                                         .map(p -> new Data(team, (int) (p.getRight()
-                                             + 1), p.getLeft())) //
+                                         .map(p -> {
+                                           final int runNumber = (int) (p.getRight()
+                                               + 1);
+                                           final String runName = runMetadataFactory.getRunMetadata(runNumber)
+                                                                                    .getDisplayName();
+                                           return new Data(team, runNumber, runName, p.getLeft());
+                                         }) //
                                          .toList();
           data.addAll(teamData);
         }
@@ -117,7 +127,9 @@ public final class PerformanceRunsVsSchedule {
             } else {
               final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                        teamNumber);
-              final Data entry = new Data(team, runNumber, lastEdited, value, tablename);
+              final String runName = runMetadataFactory.getRunMetadata(runNumber).getDisplayName();
+
+              final Data entry = new Data(team, runNumber, runName, lastEdited, value, tablename);
               data.add(entry);
             }
           }
@@ -141,13 +153,16 @@ public final class PerformanceRunsVsSchedule {
      *
      * @param team {@link #getTeam()}
      * @param roundNumber {@link #getRoundNumber()}
+     * @param runName {@link #getRunName()}
      * @param perfTime {@link #getPerformanceTime()}
      */
     Data(final TournamentTeam team,
          final int roundNumber,
+         final String runName,
          final PerformanceTime perfTime) {
       this.team = team;
       this.roundNumber = roundNumber;
+      this.runName = runName;
       this.perfTime = perfTime;
       this.lastEdited = null;
       this.formattedScore = "";
@@ -159,16 +174,19 @@ public final class PerformanceRunsVsSchedule {
      * 
      * @param team {@link #getTeam()}
      * @param roundNumber {@link #getRoundNumber()}
+     * @param runName {@link #getRunName()}
      * @param lastEdited {@link #getLastEdited()}
      * @param table {@link #getTable()}
      */
     Data(final TournamentTeam team,
          final int roundNumber,
+         final String runName,
          final LocalTime lastEdited,
          final String formattedScore,
          final String table) {
       this.team = team;
       this.roundNumber = roundNumber;
+      this.runName = runName;
       this.perfTime = null;
       this.lastEdited = lastEdited;
       this.formattedScore = formattedScore;
@@ -191,6 +209,16 @@ public final class PerformanceRunsVsSchedule {
      */
     public int getRoundNumber() {
       return roundNumber;
+    }
+
+    private final String runName;
+
+    /**
+     * @return display name for the run
+     * @see RunMetadata#getDisplayName()
+     */
+    public String getRunName() {
+      return runName;
     }
 
     private final @Nullable PerformanceTime perfTime;
