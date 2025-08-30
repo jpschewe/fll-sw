@@ -40,12 +40,12 @@ table#perf-data th, table#perf-data td {
             <th>Team Name</th>
             <th>Organization</th>
 
-            <th>Round</th>
-            <th>Scheduled Table</th>
+            <th>Run</th>
             <th>Scheduled Time</th>
-            <th>Last edited Time</th>
+            <th>Scheduled Table</th>
+            <th>Last Edited Time</th>
             <th>Score</th>
-            <th>Table</th>
+            <th>Table Edited At</th>
         </tr>
 
         <c:forEach items="${data}" var="entry">
@@ -55,7 +55,7 @@ table#perf-data th, table#perf-data td {
                 <td>${entry.team.teamName}</td>
                 <td>${entry.team.organization}</td>
 
-                <td>${entry.roundNumber}</td>
+                <td>${entry.runName}</td>
                 <c:choose>
                     <c:when test="${not empty entry.performanceTime}">
                         <td>
