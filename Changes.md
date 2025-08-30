@@ -1,3 +1,4 @@
+* #1258 - Handle UTF-8 content in all web pages. This allows special characters in the subjective judging application comments.
 * #1271 - Ensure that the judges summary sees the number of teams scored as soon as a score comes in
 * #1272 - Use run display name in performance vs. scheduled report
 * #1270 - Add page displaying all known challenge descriptions
