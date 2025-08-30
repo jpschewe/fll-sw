@@ -1,3 +1,4 @@
+* #1258 - Handle UTF-8 content in all web pages. This allows special characters in the subjective judging application comments.
 * #1270 - Add page displaying all known challenge descriptions
 * Allow the user to access database backups from the setup page
 * Correct links to download database backups
