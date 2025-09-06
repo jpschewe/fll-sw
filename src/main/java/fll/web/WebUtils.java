@@ -445,7 +445,8 @@ public final class WebUtils {
    *
    * @param application used to get the absolute path of the sponsor logos
    *          directory
-   * @return sorted sponsor logos list
+   * @return sorted sponsor logos filenames relative to the root of the web
+   *         application
    * @see Utilities#getGraphicFiles(File)
    */
   public static List<String> getSponsorLogos(final ServletContext application) {
