@@ -30,6 +30,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
     <h2>Before tournament day</h2>
     <ol>
         <li>
+            <a href="<c:url value='/report/awards/index.jsp'/>">Edit
+                awards report and awards script properties.</a>
+        </li>
+
+        <li>
             <form id='uploadTeams'
                 ACTION="<c:url value='/UploadSpreadsheet'/>"
                 METHOD="POST" ENCTYPE="multipart/form-data">
@@ -252,40 +257,38 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
                     </li>
 
                     <!-- subjective sheets -->
-                    <c:forEach
-                        items="${challengeDescription.subjectiveCategories}"
-                        var="category">
+        <c:forEach items="${challengeDescription.subjectiveCategories}"
+            var="category">
 
-                        <c:set var="columns"
-                            value="${categoryNameToColumn[category.name]}" />
+            <c:set var="columns"
+                value="${categoryNameToColumn[category.name]}" />
 
-                        <c:forEach items="${columns}" var="columnName">
+            <c:forEach items="${columns}" var="columnName">
 
-                            <c:choose>
-                                <c:when test="${columns.size() gt 1}">
-                                    <li>
-                                        <a
-                                            target="_${category.name}-${columnName}"
-                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                            sheets for ${category.title}
-                                            schedule ${columnName}</a>
-                                    </li>
-                                </c:when>
-                                <c:otherwise>
-                                    <li>
-                                        <a target="_${category.name}"
-                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                            sheets for ${category.title}</a>
-                                    </li>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:forEach>
+                <c:choose>
+                    <c:when test="${columns.size() gt 1}">
+                        <li>
+                            <a target="_${category.name}-${columnName}"
+                                href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                sheets for ${category.title} schedule
+                                ${columnName}</a>
+                        </li>
+                    </c:when>
+                    <c:otherwise>
+                        <li>
+                            <a target="_${category.name}"
+                                href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                sheets for ${category.title}</a>
+                        </li>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
 
-                    </c:forEach>
-                    <!-- end subjective sheets -->
+        </c:forEach>
+        <!-- end subjective sheets -->
 
-                    <!-- Team schedules -->
-                    <li>
+        <!-- Team schedules -->
+        <li>
                         <a href="<c:url value='/admin/TeamSchedules' />"
                             target="_blank">Team Schedules</a>
                     </li>
@@ -317,7 +320,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
                     </li>
                 </ul>
             </c:if>
-            <!-- end schedule loaded -->
+        <!-- end schedule loaded -->
         </li>
 
         <li>

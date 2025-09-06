@@ -207,11 +207,6 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Edit
         presenters for the awards ceremony.</a>
 
-    <c:if test="${authentication.admin}">
-        <a class="wide" href="<c:url value='/report/awards/index.jsp'/>">Edit
-            awards report and awards script properties.</a>
-    </c:if>
-
     <a class="wide" href="AwardsReport" target="_blank">Report of
         winners for the tournament. This can be published on the web.</a>
 
