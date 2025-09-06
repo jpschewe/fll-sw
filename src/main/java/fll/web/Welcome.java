@@ -60,7 +60,6 @@ public final class Welcome {
     final Formatter formatter = new Formatter(out);
 
     if (!logoFiles.isEmpty()) {
-      formatter.format("<td align='center' width='50%%'>%n");
       formatter.format("<table width='100%%'>%n");
 
       for (int index = 0; index < logoFiles.size(); ++index) {
@@ -93,7 +92,6 @@ public final class Welcome {
       }
 
       formatter.format("</table>%n");
-      formatter.format("</td>");
     } // if logo files
 
   }
