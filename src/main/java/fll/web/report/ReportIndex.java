@@ -48,10 +48,12 @@ public final class ReportIndex {
    * @param session session variables
    * @param application application context
    * @param pageContext page context, information is put in here
+   * @param setRedirect if true, set the redirect URL
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
-                                     final PageContext pageContext) {
+                                     final PageContext pageContext,
+                                     final boolean setRedirect) {
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -99,7 +101,9 @@ public final class ReportIndex {
       pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournamentId));
       pageContext.setAttribute("sortOrders", FinalComputedScores.SortOrder.values());
 
-      session.setAttribute(SessionAttributes.REDIRECT_URL, "/report/index.jsp");
+      if (setRedirect) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "/report/index.jsp");
+      }
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

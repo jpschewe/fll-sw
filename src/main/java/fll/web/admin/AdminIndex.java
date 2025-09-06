@@ -45,10 +45,12 @@ public final class AdminIndex {
    * @param application the application context
    * @param session the session context
    * @param pageContext populated with variables
+   * @param setRedirect if true, set the redirect url
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
-                                     final PageContext pageContext) {
+                                     final PageContext pageContext,
+                                     final boolean setRedirect) {
     final StringBuilder message = new StringBuilder();
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
@@ -89,7 +91,9 @@ public final class AdminIndex {
 
       pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
 
-      session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
+      if (setRedirect) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
+      }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage()

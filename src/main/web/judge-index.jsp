@@ -4,7 +4,7 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
 fll.web.JudgeIndex.populateContext(application, pageContext);
 %>
 

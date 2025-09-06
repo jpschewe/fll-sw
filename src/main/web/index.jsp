@@ -4,7 +4,7 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 %>
 
 
@@ -53,8 +53,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     </c:if>
 
     <a class="wide" href="public">Public landing page. A list of
-        pages that the public may want to visit if they are allowed to
-        connect to the network.</a>
+        pages that the public can visit.</a>
 
     <c:if test="${authentication.admin}">
         <h2>Pages for the head computer person</h2>
@@ -72,7 +71,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         test="${authentication.admin or authentication.reportGenerator or authentication.headJudge}">
         <a class="wide" href="report/index.jsp">Generate reports</a>
         <a class="wide" href='challenge.xml'>Challenge Descriptor.
-            One can use this to see the scoring and the tie breaker.</a>
+            One can use this to see the scoring rules and the tie
+            breaker.</a>
         <a class="wide" href='BlankScoresheet' target="_blankScoresheet">Blank
             performance score sheet, one regular match play and one
             practice (PDF)</a>

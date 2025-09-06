@@ -4,8 +4,8 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 %>
 
 <html>
@@ -63,6 +63,14 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     <a class="wide"
         href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
         the order that awards are determined.</a>
+
+    <a class="wide"
+        href="<c:url value='/report/non-numeric-nominees.jsp' />"
+        target="_blank">Enter non-numeric nominees. This is used to
+        enter the teams that are up for consideration for the non-scored
+        subjective categories. This information transfers over to the
+        finalist scheduling web application. This is also used in the
+        awards scripts report.</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
