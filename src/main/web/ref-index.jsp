@@ -4,8 +4,8 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 %>
 
 <html>

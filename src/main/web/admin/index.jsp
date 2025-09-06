@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true);
 %>
 
 <html>

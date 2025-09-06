@@ -3,7 +3,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, true);
 %>
 
 <html>
