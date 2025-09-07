@@ -85,6 +85,7 @@ public class TeamResults extends BaseFLLServlet {
         // go for speed and not compression
         zipOut.setLevel(Deflater.NO_COMPRESSION);
 
+        // if a team number is specified, only write that team, otherwise write all teams (NULL_TEAM_NUMBER)
         for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
           final TournamentTeam team = entry.getValue();
           if (Team.NULL_TEAM_NUMBER == selectedTeamNumber
