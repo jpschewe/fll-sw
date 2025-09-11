@@ -213,7 +213,7 @@ dependencies {
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.17.0")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.9.0")
   implementation(group: "org.hsqldb", name: "hsqldb", version: "2.7.4")
-  implementation(group: "org.apache.commons", name: "commons-collections4", version: "4.4")
+  implementation(group: "org.apache.commons", name: "commons-collections4", version: "4.5.0")
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j2-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
