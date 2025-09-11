@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
@@ -157,8 +157,12 @@ public class GreedySolver {
   }
 
   private static void usage(final Options options) {
-    final HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp("GreedySolver", options);
+    final HelpFormatter formatter = HelpFormatter.builder().get();
+    try {
+      formatter.printHelp("GreedySolver", null, options, null, true);
+    } catch (final IOException e) {
+      LOGGER.fatal(e);
+    }
   }
 
   /**
