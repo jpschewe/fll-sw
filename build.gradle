@@ -299,7 +299,7 @@ dependencies {
     exclude(group: "xml-apis", module: "xml-apis")
   }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-java", version: "4.31.0")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "6.0.1")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "6.3.1")
   
   // make selenium log to log4j
   integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
