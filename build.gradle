@@ -145,7 +145,7 @@ ext {
     tomcat_version = "11.0.6"
     junit_version = "5.12.2"
     log4j_version = "2.24.3"
-    spotbugs_version = "4.9.3"
+    spotbugs_version = "4.9.4"
     checker_framework_version = "3.42.0"
 
     web_build_dir = new File(project.buildDir, "web")
