@@ -57,6 +57,14 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
             [${tournament.name}]</b>
     </p>
 
+    <h2>Before tournament day</h2>
+    <ol>
+        <li>
+            <a href="<c:url value='/report/awards/index.jsp'/>">Edit
+                awards report and awards script properties.</a>
+        </li>
+    </ol>
+
     <h2>Tournament steps</h2>
     <ol>
 
