@@ -32,7 +32,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "4.1.0"
     id "eclipse"
     id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
-    id "com.github.spotbugs" version "6.1.7"
+    id "com.github.spotbugs" version "6.3.0"
     id "de.aaschmid.cpd" version "3.5"
     id "edu.sc.seis.launch4j" version "3.0.6"
     id "com.github.ben-manes.versions" version "0.52.0" // adds dependencyUpdates task
