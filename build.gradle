@@ -141,7 +141,7 @@ integrationTest {
 
 ext {
     slf4j_version = "2.0.17"
-    tomcat_version = "11.0.6"
+    tomcat_version = "11.0.11"
     junit_version = "5.13.4"
     log4j_version = "2.25.1"
     spotbugs_version = "4.9.4"
@@ -432,12 +432,16 @@ distributionDependencies.dependsOn(markdownToHtml)
 // write log4j config for JspC
 tasks.register("writeJspcProperties", WriteProperties) {
     destinationFile = new File(project.buildDir, "log4j.jspc.properties")
-    property("log4j.rootLogger", "WARN, jspout")
-    property("log4j.logger.org.apache", "INFO, jspout")
-    property("log4j.appender.jspout", "org.apache.log4j.ConsoleAppender")
-    property("log4j.appender.jspout.target", "System.out")
-    property("log4j.appender.jspout.layout", "org.apache.log4j.PatternLayout")
-    property("log4j.appender.jspout.layout.ConversionPattern", "%d [%C] %m%n")
+    property("rootLogger.level", "WARN")
+    property("rootLogger.appenderRef.ref", "jspout")
+    property("loggers", "apache")
+    property("logger.apache.name", "logger.org.apache")
+    property("logger.apache.level", "INFO")
+    property("appender.jspout.name", "jspout")
+    property("appender.jspout.type", "console")
+    property("appender.jspout.target", "System.out")
+    property("appender.jspout.layout.type", "PatternLayout")
+    property("appender.jspout.layout.pattern", "%d [%C] %m%n")
 }
 
 // call JspC to test compile the JSP files
