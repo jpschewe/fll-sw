@@ -25,6 +25,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -137,9 +138,9 @@ public final class DescriptionInfo implements Comparable<DescriptionInfo> {
       final String oneRevision = getRevision();
       final String twoRevision = other.getRevision();
 
-      final int titleCompare = StringUtils.compare(oneTitle, twoTitle);
+      final int titleCompare = Strings.CS.compare(oneTitle, twoTitle);
       if (0 == titleCompare) {
-        return StringUtils.compare(oneRevision, twoRevision);
+        return Strings.CS.compare(oneRevision, twoRevision);
       } else {
         return titleCompare;
       }
