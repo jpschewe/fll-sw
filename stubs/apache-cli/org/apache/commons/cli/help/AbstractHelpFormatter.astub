@@ -1,0 +1,12 @@
+package org.apache.commons.cli.help;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
+
+public abstract class AbstractHelpFormatter {
+
+  public void printHelp(String cmdLineSyntax, @Nullable String header, Iterable<Option> options, @Nullable String footer, boolean autoUsage);
+  public void printHelp(String cmdLineSyntax, @Nullable String header, Options options, @Nullable String footer, boolean autoUsage);
+
+
+}
