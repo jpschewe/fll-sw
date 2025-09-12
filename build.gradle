@@ -142,7 +142,7 @@ integrationTest {
 ext {
     slf4j_version = "2.0.17"
     tomcat_version = "11.0.6"
-    junit_version = "5.12.2"
+    junit_version = "5.13.4"
     log4j_version = "2.25.1"
     spotbugs_version = "4.9.4"
     checker_framework_version = "3.42.0"
