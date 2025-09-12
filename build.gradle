@@ -140,7 +140,6 @@ integrationTest {
 }
 
 ext {
-    jackson_version = "2.18.3"
     slf4j_version = "2.0.17"
     tomcat_version = "11.0.6"
     junit_version = "5.12.2"
@@ -232,10 +231,10 @@ dependencies {
   implementation(group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version)
   compileOnly(group: "com.google.code.findbugs", name: "jsr305", version: "3.0.2")
     
-  implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version)
-  implementation(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version)
-  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8", version: project.jackson_version)
-  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310", version: project.jackson_version)
+  implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.20.0")
+  implementation(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.20")
+  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8", version: "2.20.0")
+  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310", version: "2.20.0")
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
