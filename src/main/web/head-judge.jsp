@@ -10,7 +10,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 
 <html>
 <head>
-<title>Head Judge links</title>
+<title>Head Judge</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -20,13 +20,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 </head>
 
 <body>
-    <h1>Head Judge links</h1>
+    <h1>Head Judge</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
-    <p>This page contains links to the pages used in the judges
-        room. Most links open new tabs so that you can continue to
-        follow the workflow on this page.</p>
-
     <p>
         The current tournament is
         <b>${tournament.description} on ${tournament.dateString}
@@ -34,11 +30,11 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     </p>
 
 
-    <h2>Tournament steps</h2>
+    <h2>Deliberation reports</h2>
     <a class="wide" target="_subjective"
         href="<c:url value='/subjective/Auth'/>"
-        onclick="return openMinimalBrowser(this)">Enter subjective
-        scores. This is done through the subjective web application</a>
+        onclick="return openMinimalBrowser(this)">Judge Scoring</a>
+
 
     <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
         target="_judge-summary">Judge summary. This shows which
