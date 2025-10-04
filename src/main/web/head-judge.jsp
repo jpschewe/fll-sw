@@ -35,11 +35,82 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         href="<c:url value='/subjective/Auth'/>"
         onclick="return openMinimalBrowser(this)">Judge Scoring</a>
 
+    <!--  FIXME needs a page -->
+    <a class="wide" target="_blank">Team Schedules</a>
 
     <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
         target="_judge-summary">Judge summary. This shows which
         judges have scores entered.</a>
 
+    <!--  FinalComputedScores -->
+    <div class="wide">
+        Final Computed Scores
+        <form action="<c:url value='/report/FinalComputedScores' />"
+            target="_finalComputedScores" method="POST">
+            <input type="hidden" name="selector"
+                value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
+            <select name="groupName">
+                <option
+                    value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                <c:forEach items="${awardGroups}" var="awardGroup">
+                    <option value="${awardGroup}">${awardGroup}</option>
+                </c:forEach>
+            </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
+                </c:forEach>
+            </select>
+            <input type="submit" value="Report by Award Group" />
+        </form>
+
+        <c:if test="${awardGroups != judgingStations}">
+            <form action="FinalComputedScores"
+                target="_finalComputedScores" method="POST">
+                <input type="hidden" name="selector"
+                    value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
+                <select name="groupName">
+                    <option
+                        value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                    <c:forEach items="${judgingStations}"
+                        var="judgingStation">
+                        <option value="${judgingStation}">${judgingStation}</option>
+                    </c:forEach>
+                </select>
+                <select name="sortOrder">
+                    <c:forEach items="${sortOrders}" var="sortOrder">
+                        <option value="${sortOrder}">Sort by
+                            ${sortOrder}</option>
+                    </c:forEach>
+                </select>
+                <input type="submit" value="Report by Judging Station" />
+            </form>
+        </c:if>
+    </div>
+    <!-- end FinalComputedScores -->
+
+    <div class="wide">
+        <form action="<c:url value='/report/AwardSummarySheet'/>"
+            method="POST" target="award-summary-sheet">
+            Award Summary Sheet
+            <select name="groupName">
+                <c:forEach items="${judgingStations}"
+                    var="judgingStation">
+                    <option value="${judgingStation}">${judgingStation}</option>
+                </c:forEach>
+            </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
+                </c:forEach>
+            </select>
+            <input type='submit' value='Create Sheet' />
+        </form>
+    </div>
+
+    <!--  FIXME old below here -->
     <a class="wide" target="_report"
         href="<c:url value='/report/index.jsp' />">Generate reports
         - this is done once all of the subjective scores are in.</a>
