@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fll copyright="" revision="6" revisionComment="Remove Minecart Retriction" schemaVersion="3" title="2025 Minnesota FIRST LEGO League - Unearthed" winner="HIGH">
+<fll copyright="" revision="8" revisionComment="change mission 03" schemaVersion="3" title="2025 Minnesota FIRST LEGO League - Unearthed" winner="HIGH">
   <Performance maximumScore="545.00" minimumScore="0.00" weight="1.00">
     <goalGroup title="M00">
       <description>EQUIPMENT INSPECTION BONUS</description>
@@ -17,12 +17,46 @@
     <goalGroup title="UE03">
       <description>MINESHAFT EXPLORER</description>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="30.00" name="m03_team_cart_on_opposing_field" required="false" scoreType="INTEGER" title="Your Team's Minecart on the Opposing Team's Field"/>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m03_opposing_cart_on_your_field" required="false" scoreType="INTEGER" title="AND Opposing Minecart on Your Field"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="m03_opposing_cart_on_your_field" required="false" scoreType="INTEGER" title="AND Opposing Minecart on Your Field"/>
+      <computedGoal name="goal_2" title="Calc Minecart">
+        <switch>
+          <case>
+            <condition>
+              <left floatingPoint="truncate">
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m03_opposing_cart_on_your_field" scoreType="raw"/>
+                </term>
+                <term>
+                  <constant value="1.00"/>
+                  <goalRef goal="m03_team_cart_on_opposing_field" scoreType="raw"/>
+                </term>
+              </left>
+              <greater-than-or-equal/>
+              <right floatingPoint="truncate">
+                <term>
+                  <constant value="2.00"/>
+                </term>
+              </right>
+            </condition>
+            <result floatingPoint="truncate">
+              <term>
+                <constant value="10.00"/>
+              </term>
+            </result>
+          </case>
+          <default floatingPoint="truncate">
+            <term>
+              <constant value="0.00"/>
+            </term>
+          </default>
+        </switch>
+      </computedGoal>
     </goalGroup>
     <goalGroup title="UE04">
       <description>CAREFUL RECOVERY</description>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="30.00" name="m04_artifact_not_touching_mine" required="false" scoreType="INTEGER" title="Precious Artifact NOT Touching Mine - not touching equipment at end"/>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m04_both_support_structures_standing" required="false" scoreType="INTEGER" title="Both Support Structures Standing - not touching equipment at end"/>
+      <goal initialValue="1.00" max="1.00" min="0.00" multiplier="10.00" name="m04_both_support_structures_standing" required="false" scoreType="INTEGER" title="Both Support Structures Standing - not touching equipment at end"/>
     </goalGroup>
     <goalGroup title="UE05">
       <description>WHO LIVED HERE?</description>
@@ -52,12 +86,12 @@
     </goalGroup>
     <goalGroup title="UE11">
       <description>ANGLER ARTIFACTS</description>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m11_artifacts_raised" required="false" scoreType="INTEGER" title="Artifacts Raised - not touching equipment at end"/>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m11_flag_partly_lowered" required="false" scoreType="INTEGER" title="AND Crane Flag at Least Party Lowered - not touching equipment at end"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m11_artifacts_raised" required="false" scoreType="INTEGER" title="Artifacts Raised Above Ground Layer - not touching equipment at end"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m11_flag_partly_lowered" required="false" scoreType="INTEGER" title="AND Blue Crane Flag at Least Party Lowered - not touching equipment at end"/>
     </goalGroup>
     <goalGroup title="UE12">
       <description>SALVAGE OPERATION </description>
-      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m12_sand_cleared" required="false" scoreType="INTEGER" title="Sand Completely Cleared - not touching equipment at end"/>
+      <goal initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m12_sand_cleared" required="false" scoreType="INTEGER" title="Sand Completely Cleared (Red Lever Past Bold Line) - not touching equipment at end"/>
       <goal initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_ship_raised" required="false" scoreType="INTEGER" title="Ship Completely Raised - not touching equipment at end"/>
     </goalGroup>
     <goalGroup title="UE13">
