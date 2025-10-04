@@ -57,7 +57,8 @@ public final class AwardDeterminationOrder {
 
     // ensure that all categories are added.
     if (!order.contains(ChampionshipCategory.INSTANCE)) {
-      order.add(ChampionshipCategory.INSTANCE);
+      // always add as the first category
+      order.add(0, ChampionshipCategory.INSTANCE);
     }
     final PerformanceScoreCategory performance = description.getPerformance();
     if (!order.contains(performance)) {
