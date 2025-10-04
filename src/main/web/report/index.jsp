@@ -85,26 +85,28 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
             <input type="submit" value="Report by Award Group" />
         </form>
 
-        <form action="FinalComputedScores" target="_finalComputedScores"
-            method="POST">
-            <input type="hidden" name="selector"
-                value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
-            <select name="groupName">
-                <option
-                    value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
-                <c:forEach items="${judgingStations}"
-                    var="judgingStation">
-                    <option value="${judgingStation}">${judgingStation}</option>
-                </c:forEach>
-            </select>
-            <select name="sortOrder">
-                <c:forEach items="${sortOrders}" var="sortOrder">
-                    <option value="${sortOrder}">Sort by
-                        ${sortOrder}</option>
-                </c:forEach>
-            </select>
-            <input type="submit" value="Report by Judging Station" />
-        </form>
+        <c:if test="${awardGroups != judgingStations}">
+            <form action="FinalComputedScores"
+                target="_finalComputedScores" method="POST">
+                <input type="hidden" name="selector"
+                    value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
+                <select name="groupName">
+                    <option
+                        value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                    <c:forEach items="${judgingStations}"
+                        var="judgingStation">
+                        <option value="${judgingStation}">${judgingStation}</option>
+                    </c:forEach>
+                </select>
+                <select name="sortOrder">
+                    <c:forEach items="${sortOrders}" var="sortOrder">
+                        <option value="${sortOrder}">Sort by
+                            ${sortOrder}</option>
+                    </c:forEach>
+                </select>
+                <input type="submit" value="Report by Judging Station" />
+            </form>
+        </c:if>
     </div>
     <!-- end FinalComputedScores -->
 
