@@ -64,10 +64,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         Judging group (PDF)</a>
 
     <div class="wide">
-        Summarized numeric scores - by judging group aka "Final Computed
-        Scores"
-        <form action="FinalComputedScores" target="_finalComputedScores"
-            method="POST">
+        Final Computed Scores
+        <form action="<c:url value='/report/FinalComputedScores' />"
+            target="_finalComputedScores" method="POST">
             <input type="hidden" name="selector"
                 value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
             <select name="groupName">
@@ -110,9 +109,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     <!-- end FinalComputedScores -->
 
     <div class="wide">
-        <form action="AwardSummarySheet" method="POST"
-            target="award-summary-sheet">
-            Generate award summary sheet for judging group
+        <form action="<c:url value='/report/AwardSummarySheet'/>"
+            method="POST" target="award-summary-sheet">
+            Award Summary Sheet
             <select name="groupName">
                 <c:forEach items="${judgingStations}"
                     var="judgingStation">
@@ -129,14 +128,17 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         </form>
     </div>
 
-    <a class="wide" href="CategoryScoresByScoreGroup" target="_blank">Award
-        category scores - by category and judging group</a>
+    <a class="wide"
+        href="<c:url value='/report/CategoryScoresByScoreGroup'/>"
+        target="_blank">Award category scores - by category and
+        judging group</a>
 
-    <a class='wide' href='SubjectiveByJudge' target="_blank">Summarized
-        numeric scores - by judges </a>
+    <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
+        target="_blank">Summarized numeric scores - by judges </a>
 
-    <a class='wide' href='ScaledSubjectiveByAwardGroup' target="_blank">Subjective
-        scaled scores by award group</a>
+    <a class='wide'
+        href="<c:url value='/report/ScaledSubjectiveByAwardGroup'/>"
+        target="_blank">Subjective scaled scores by award group</a>
 
     <!-- VirtualSubjectiveCategoryReport -->
     <c:if
@@ -162,11 +164,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     </c:if>
     <!-- end VirtualSubjectiveCategoryReport -->
 
-    <a class="wide" href="PerformanceReport" target="_blank">
-        Performance scores - full tournament </a>
+    <a class="wide" href="<c:url value='/report/PerformanceReport'/>"
+        target="_blank"> Performance scores - full tournament </a>
 
-    <a class="wide" href="PerformanceScoreReport" target="_blank">Performance
-        scores - by team </a>
+    <a class="wide"
+        href="<c:url value='/report/PerformanceScoreReport'/>"
+        target="_blank">Performance scores - by team </a>
 
     <!-- performance ranks -->
     <div class="wide">
@@ -187,41 +190,49 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     </div>
     <!-- end performance ranks -->
 
-    <a class="wide" href="PlayoffReport" target="_blank">Winners of
-        each head to head bracket</a>
+    <a class="wide" href="<c:url value='/report/PlayoffReport'/>"
+        target="_blank">Winners of each head to head bracket</a>
 
-    <a class="wide" href="non-numeric-nominees.jsp" target="_blank">Entry:
-        Non-numeric nominations <br /> This is used to enter the teams
-        that are up for consideration for the non-scored subjective
-        categories. The information entered here transfers over to the
-        finalist scheduling web application.
+    <a class="wide"
+        href="<c:url value='/report/non-numeric-nominees.jsp'/>"
+        target="_blank">Entry: Non-numeric nominations <br /> This
+        is used to enter the teams that are up for consideration for the
+        non-scored subjective categories. The information entered here
+        transfers over to the finalist scheduling web application.
     </a>
 
-    <a class="wide" href="edit-award-winners.jsp" target="_blank">Entry:
-        Award winners </a>
+    <a class="wide"
+        href="<c:url value='/report/edit-award-winners.jsp'/>"
+        target="_blank">Entry: Award winners </a>
 
-    <a class="wide" href="edit-advancing-teams.jsp" target="_blank">Enter
-        the teams advancing to the next level of tournament</a>
+    <a class="wide"
+        href="<c:url value='/report/edit-advancing-teams.jsp'/>"
+        target="_blank">Enter the teams advancing to the next level
+        of tournament</a>
 
     <a class="wide"
         href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Edit
         presenters for the awards ceremony.</a>
 
-    <a class="wide" href="AwardsReport" target="_blank">Report of
-        winners for the tournament. This can be published on the web.</a>
+    <a class="wide" href="<c:url value='/report/AwardsReport'/>"
+        target="_blank">Report of winners for the tournament. This
+        can be published on the web.</a>
 
-    <a class="wide" href="Awards.csv">CSV file of award winners.</a>
+    <a class="wide" href="<c:url value='/report/Awards.csv'/>">CSV
+        file of award winners.</a>
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
         Script PDF </a>
 
-    <a class="wide" href="TeamResults" target="_blank">Team Results.
-        This is a zip file containing the results to return to the
-        teams. This will take some time to generate, be patient.</a>
+    <a class="wide" href="<c:url value='/report/TeamResults'/>"
+        target="_blank">Team Results. This is a zip file containing
+        the results to return to the teams. This will take some time to
+        generate, be patient.</a>
 
     <div class="wide">
-        <form action='TeamResults' method='post' target="_blank">
+        <form action="<c:url value='/report/TeamResults'/>"
+            method='post' target="_blank">
             Results for a single team
             <select name='TeamNumber'>
                 <c:forEach items="${tournamentTeams}" var="team">
@@ -236,7 +247,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     </div>
 
     <div class="wide">
-        <form action='JudgeRubrics' method='post' target='_blank'>
+        <form action="<c:url value='/report/JudgeRubrics'/>"
+            method='post' target='_blank'>
             Rubrics for a single judge
             <select name='category_name' id='rubric_category_name'>
                 <c:forEach
@@ -272,8 +284,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
 
     <c:if test="${not empty finalistDivisions}">
         <div class="wide">
-            <form ACTION='finalist/PdfFinalistSchedule' METHOD='POST'
-                target="_blank">
+            <form
+                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule'/>"
+                METHOD='POST' target="_blank">
                 <select name='division'>
                     <c:forEach var="division"
                         items="${finalistDivisions }">
@@ -286,30 +299,36 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         </div>
     </c:if>
 
-    <a class="wide" href="finalist/TeamFinalistSchedule" target="_blank">Finalist
-        Schedule for each team</a>
+    <a class="wide"
+        href="<c:url value='/report/finalist/TeamFinalistSchedule'/>"
+        target="_blank">Finalist Schedule for each team</a>
 
-    <a class="wide" href="deliberation/specify_category_order.jsp"
+    <a class="wide"
+        href="<c:url value='/report/deliberation/specify_category_order.jsp'/>"
         target="_blank">Specify Deliberation Category Order</a>
 
-    <a class="wide" href="deliberation/index.jsp" target="_blank">Deliberations</a>
+    <a class="wide"
+        href="<c:url value='/report/deliberation/index.jsp'/>"
+        target="_blank">Deliberations</a>
 
     <h2>Cross-tournament reports</h2>
     <p>Reports that use data across multiple tournaments.</p>
 
-    <a class="wide" href="TournamentAdvancement" target="_blank">Tournament
-        advancement report - this is a CSV file that contains
-        information about the teams that are advancing from each
-        tournament. For this to work all of the databases need to be
-        merged and the award winners need to be specified for each
-        tournament.</a>
+    <a class="wide"
+        href="<c:url value='/report/TournamentAdvancement'/>"
+        target="_blank">Tournament advancement report - this is a
+        CSV file that contains information about the teams that are
+        advancing from each tournament. For this to work all of the
+        databases need to be merged and the award winners need to be
+        specified for each tournament.</a>
 
     <h2>Other useful reports</h2>
     <p>Some reports that are handy for intermediate reporting and
         checking of the current tournament state.</p>
 
     <div class="wide">
-        <form ACTION='performanceRunReport.jsp' METHOD='POST'>
+        <form ACTION="<c:url value='/report/performanceRunReport.jsp'/>"
+            METHOD='POST'>
             Show scores for performance run
             <select name='RunNumber'>
                 <c:forEach var="index" begin="1" end="${maxRunNumber}">
@@ -321,7 +340,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     </div>
 
     <div class="wide">
-        <form action='teamPerformanceReport.jsp' method='post'>
+        <form
+            action="<c:url value='/report/teamPerformanceReport.jsp'/>"
+            method='post'>
             Show performance scores for team
             <select name='TeamNumber'>
                 <c:forEach items="${tournamentTeams}" var="team">
@@ -335,8 +356,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         </form>
     </div>
 
-    <a class="wide" href="unverifiedRuns.jsp">Unverified runs.
-        Unverfied performance runs.</a>
+    <a class="wide" href="<c:url value='/report/unverifiedRuns.jsp'/>">Unverified
+        runs. Unverified performance runs.</a>
 
     <a class="wide" href="PerformanceScoreDump">CSV file containing
         all performance scores, excluding byes. This is useful to
