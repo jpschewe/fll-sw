@@ -63,6 +63,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         href="TopScoreReportPerJudgingStationPdf"> Top performance -
         Judging group (PDF)</a>
 
+    <!--  FinalComputedScores -->
     <div class="wide">
         Final Computed Scores
         <form action="<c:url value='/report/FinalComputedScores' />"
