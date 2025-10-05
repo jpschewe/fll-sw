@@ -67,7 +67,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         </form>
 
         <c:if test="${awardGroups != judgingStations}">
-            <form action="FinalComputedScores"
+            <form
+                action="<c:url value='/report/FinalComputedScores'/>"
                 target="_finalComputedScores" method="POST">
                 <input type="hidden" name="selector"
                     value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />

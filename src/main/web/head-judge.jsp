@@ -40,8 +40,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         href='<c:url value="/report/team-schedules.jsp"/>'>Team
         Schedules</a>
 
-    <a class="wide"
-        href="<c:url value='/report/judge-summary.jsp'/>"
+    <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
         target="_judge-summary">Judge summary. This shows which
         judges have scores entered.</a>
 
@@ -69,7 +68,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         </form>
 
         <c:if test="${awardGroups != judgingStations}">
-            <form action="FinalComputedScores"
+            <form
+                action="<c:url value='/report/FinalComputedScores'/>"
                 target="_finalComputedScores" method="POST">
                 <input type="hidden" name="selector"
                     value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
@@ -94,7 +94,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <!-- end FinalComputedScores -->
 
     <div class="wide">
-        <form action="<c:url value='/report/AwardSummarySheet'/>"
+        <form
+            action="<c:url value='/report/AwardSummarySheet'/>"
             method="POST" target="award-summary-sheet">
             Award Summary Sheet
             <select name="groupName">
