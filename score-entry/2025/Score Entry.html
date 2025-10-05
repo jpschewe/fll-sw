@@ -71,7 +71,7 @@ function init() {
   m03_team_cart_on_opposing_field_raw = 0.0;
   m03_opposing_cart_on_your_field_raw = 0.0;
   m04_artifact_not_touching_mine_raw = 0.0;
-  m04_both_support_structures_standing_raw = 0.0;
+  m04_both_support_structures_standing_raw = 1.0;
   m05_structure_floor_upright_raw = 0.0;
   m06_count_ore_blocks_raw = 0.0;
   m07_millstone_not_touching_raw = 0.0;
@@ -168,9 +168,12 @@ if(m03_opposing_cart_on_your_field_raw == 0) {
   document.scoreEntry.m03_opposing_cart_on_your_field[1].checked = true
   document.scoreEntry.m03_opposing_cart_on_your_field_radioValue.value = 'YES'
 }
-m03_opposing_cart_on_your_field_computed = m03_opposing_cart_on_your_field_raw * 10.0;
+m03_opposing_cart_on_your_field_computed = m03_opposing_cart_on_your_field_raw * 0.0;
 score += m03_opposing_cart_on_your_field_computed;
 document.scoreEntry.score_m03_opposing_cart_on_your_field.value = m03_opposing_cart_on_your_field_computed;
+
+compute_goal_2();
+score += goal_2_computed;
 
 // m04_artifact_not_touching_mine
 if(m04_artifact_not_touching_mine_raw == 0) {
@@ -1264,6 +1267,16 @@ function check_m03_opposing_cart_on_your_field() {
 }
 
 
+// goal_2
+var goal_2_computed;
+function compute_goal_2() {
+  if(parseInt(1.000000* m03_opposing_cart_on_your_field_raw + 1.000000* m03_team_cart_on_opposing_field_raw) >= parseInt(2.000000)) {
+    goal_2_computed = parseInt(10.000000);
+  } else {
+    goal_2_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_goal_2.value = goal_2_computed;
+}
 // m04_artifact_not_touching_mine
 var m04_artifact_not_touching_mine_raw;
 var m04_artifact_not_touching_mine_computed;
@@ -1866,7 +1879,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script type="text/javascript" src="Score%20Entry_files/scoreEntry.js"></script>
-</head>
+<script src="Score%20Entry_files/prompt.js"></script></head>
 
 <body>
 
@@ -2132,6 +2145,18 @@ document.addEventListener('DOMContentLoaded', function() {
 </tr>
 <!-- end m03_opposing_cart_on_your_field -->
 
+<!-- goal_2 -->
+<tr id="goal_2_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calc Minecart:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_2" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_2 -->
+
 <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
 <tr>
 <td colspan="4" class="center truncate"><b>UE04 - CAREFUL RECOVERY</b></td>
@@ -2167,19 +2192,19 @@ document.addEventListener('DOMContentLoaded', function() {
   </td>
   <td>
         <label class="y-n-button">
-          <input type="radio" id="m04_both_support_structures_standing_no" name="m04_both_support_structures_standing" value="0" onclick="set_m04_both_support_structures_standing(0)" checked="checked">
+          <input type="radio" id="m04_both_support_structures_standing_no" name="m04_both_support_structures_standing" value="0" onclick="set_m04_both_support_structures_standing(0)">
         <span id="m04_both_support_structures_standing_no_span">No</span>
         </label>
         <label class="y-n-button">
-          <input type="radio" id="m04_both_support_structures_standing_yes" name="m04_both_support_structures_standing" value="1" onclick="set_m04_both_support_structures_standing(1)">
+          <input type="radio" id="m04_both_support_structures_standing_yes" name="m04_both_support_structures_standing" value="1" onclick="set_m04_both_support_structures_standing(1)" checked="checked">
         <span id="m04_both_support_structures_standing_yes_span">Yes</span>
         </label>
   </td>
   <td align="right">
-    <input type="text" name="m04_both_support_structures_standing_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+    <input type="text" name="m04_both_support_structures_standing_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="YES">
   </td>
   <td align="right" class="score-cell">
-    <input type="text" name="score_m04_both_support_structures_standing" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+    <input type="text" name="score_m04_both_support_structures_standing" size="3" align="right" readonly="readonly" tabindex="-1" value="10">
   </td>
 </tr>
 <!-- end m04_both_support_structures_standing -->
@@ -2405,7 +2430,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- m11_artifacts_raised -->
 <tr id="m11_artifacts_raised_row">
   <td class="goal-title">
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Artifacts Raised - not touching equipment at end:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Artifacts Raised Above Ground Layer - not touching equipment at end:
   </td>
   <td>
         <label class="y-n-button">
@@ -2429,7 +2454,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- m11_flag_partly_lowered -->
 <tr id="m11_flag_partly_lowered_row">
   <td class="goal-title">
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND Crane Flag at Least Party Lowered - not touching equipment at end:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND Blue Crane Flag at Least Party Lowered - not touching equipment at end:
   </td>
   <td>
         <label class="y-n-button">
@@ -2457,7 +2482,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- m12_sand_cleared -->
 <tr id="m12_sand_cleared_row">
   <td class="goal-title">
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sand Completely Cleared - not touching equipment at end:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sand Completely Cleared (Red Lever Past Bold Line) - not touching equipment at end:
   </td>
   <td>
         <label class="y-n-button">
@@ -2825,7 +2850,7 @@ Touching Mat and Partly in Forum - not touching equipment at end:
                             <td colspan="3" class="total-score-label">Total
                                 Score:</td>
                             <td align="right" class="score-cell">
-                                <input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="50">
+                                <input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="60">
                             </td>
                         </tr>
                     
@@ -2863,10 +2888,10 @@ Team Agrees with the above entries:
 
 
                 <span id="challenge_revision">Challenge revision:
-                    6</span>
+                    8</span>
                 <span id="software_version">
                     Software version:
-                    19.2.1-beta.194+gf9eae34</span>
+                    19.2.1-beta.265+g113727a</span>
 
                 <span class="float_right">&nbsp;</span>
                 
