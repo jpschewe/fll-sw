@@ -294,8 +294,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
                         <option value='${division }'>${division }</option>
                     </c:forEach>
                 </select>
-                <input type='submit' value='Finalist Schedule (PDF)' />
-                - Can be used for check-in
+                <input type='submit' value='Finalist Schedule by Time' />
             </form>
         </div>
     </c:if>

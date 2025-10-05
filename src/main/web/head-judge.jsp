@@ -156,7 +156,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
         Group Order</a>
 
-    <a class='wide' href='...'>STATE</a>
+    <h2>
+        <a class='wide' href="<c:url value='/head-judge-state.jsp'/>">STATE</a>
+    </h2>
 
 </body>
 </html>
