@@ -36,9 +36,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         onclick="return openMinimalBrowser(this)">Judge Scoring</a>
 
     <!--  FIXME needs a page -->
-    <a class="wide" target="_blank">Team Schedules</a>
+    <a class="wide" target="_TeamSchedules"
+        href='<c:url value="/report/team-schedules.jsp"/>'>Team
+        Schedules</a>
 
-    <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
+    <a class="wide"
+        href="<c:url value='/report/judge-summary.jsp'/>"
         target="_judge-summary">Judge summary. This shows which
         judges have scores entered.</a>
 

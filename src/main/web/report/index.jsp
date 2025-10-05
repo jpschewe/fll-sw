@@ -217,8 +217,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     <a class="wide" href="<c:url value='/report/AwardsReport'/>"
         target="_blank">Award Winners Report</a>
 
-    <a class="wide" href="<c:url value='/report/Awards.csv'/>">CSV
-        file of award winners.</a>
+    <a class="wide" href="<c:url value='/report/Awards.csv'/>">Export
+        Awards List CSV file of award winners</a>
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
@@ -226,7 +226,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
 
     <!-- Team Results -->
     <a class="wide" href="<c:url value='/report/TeamResults'/>"
-        target="_blank">Team Results. This is a zip file containing
+        target="_blank">Team Rubrics. This is a zip file containing
         the results to return to the teams. This will take some time to
         generate, be patient.</a>
 

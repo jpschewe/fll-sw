@@ -335,6 +335,10 @@ public class FLLFilter implements Filter {
       formatter.format("    <li><a href='%s/ref-index.jsp'>Ref</a></li>%n", contextPath);
     }
 
+    if (auth.isReportGenerator()) {
+      formatter.format("    <li><a href='%s/tournament-reporter.jsp'>Tournament Reporter</a></li>%n", contextPath);
+    }
+
     formatter.format("    <li class='dropdown'>%n");
     formatter.format("      <a href='' class='dropbtn'>Scoreboard</a>%n");
     formatter.format("      <div class='dropdown-content'>%n");
