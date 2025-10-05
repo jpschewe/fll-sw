@@ -44,24 +44,27 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         target="_judge-summary">Judge summary. This shows which
         judges have scores entered.</a>
 
-    <a class="wide" href="NonNumericNomineesReport" target="_blank">Optional
-        award nominations (from subjective judging rubrics)</a>
+    <a class="wide"
+        href="<c:url value='/report/NonNumericNomineesReport'/>"
+        target="_blank">Optional Award Nominations</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="topScoreReportPerAwardGroup.jsp">Top performance -
-        Award group (HTML)</a>
+        href="topScoreReportPerAwardGroup.jsp">Robot Match Scores
+        (HTML)</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="TopScoreReportPerAwardGroupPdf">Top performance -
-        Award group (PDF)</a>
+        href="TopScoreReportPerAwardGroupPdf">Robot Match Scores
+        (PDF)</a>
 
-    <a class="wide" target="_topScoreReportPerJudgingStation"
-        href="topScoreReportPerJudgingStation.jsp"> Top performance
-        - Judging group (HTML)</a>
+    <c:if test="${awardGroups != judgingStations}">
+        <a class="wide" target="_topScoreReportPerJudgingStation"
+            href="topScoreReportPerJudgingStation.jsp">Robot Match
+            Scores - Judging group (HTML)</a>
 
-    <a class="wide" target="_topScoreReportPerJudgingStation"
-        href="TopScoreReportPerJudgingStationPdf"> Top performance -
-        Judging group (PDF)</a>
+        <a class="wide" target="_topScoreReportPerJudgingStation"
+            href="TopScoreReportPerJudgingStationPdf"> Robot Match
+            Scores - Judging group (PDF)</a>
+    </c:if>
 
     <!--  FinalComputedScores -->
     <div class="wide">
@@ -137,7 +140,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         judging group</a>
 
     <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
-        target="_blank">Summarized numeric scores - by judges </a>
+        target="_blank">All Scores Comparison </a>
 
     <a class='wide'
         href="<c:url value='/report/ScaledSubjectiveByAwardGroup'/>"
@@ -146,24 +149,15 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     <!-- VirtualSubjectiveCategoryReport -->
     <c:if
         test="${not empty challengeDescription.virtualSubjectiveCategories}">
-        <div class="wide">
-            <form
-                action="<c:url value='/report/VirtualSubjectiveCategoryReport'/>"
-                method="POST" target="_blank">
-                Detailed score report for virtual subjective score
-                category
-
-                <select name="categoryName">
-                    <c:forEach
-                        items="${challengeDescription.virtualSubjectiveCategories}"
-                        var="category">
-                        <option value="${category.name}">${category.title}</option>
-                    </c:forEach>
-                </select>
-
-                <input type='submit' value='Create Report' />
-            </form>
-        </div>
+        <c:forEach
+            items="${challengeDescription.virtualSubjectiveCategories}"
+            var="category">
+            <a class="wide"
+                href="<c:url
+                    value='/report/VirtualSubjectiveCategoryReport' />?categoryName=${category.name}"
+                target="_blank"> ${category.title} Score Comparison
+            </a>
+        </c:forEach>
     </c:if>
     <!-- end VirtualSubjectiveCategoryReport -->
 

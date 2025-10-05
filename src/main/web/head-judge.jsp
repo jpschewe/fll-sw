@@ -30,7 +30,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     </p>
 
 
-    <h2>Deliberation reports</h2>
+    <h2>Deliberation Reports</h2>
     <a class="wide" target="_subjective"
         href="<c:url value='/subjective/Auth'/>"
         onclick="return openMinimalBrowser(this)">Judge Scoring</a>
@@ -109,6 +109,35 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
             <input type='submit' value='Create Sheet' />
         </form>
     </div>
+
+    <a class="wide"
+        href="<c:url value='/report/NonNumericNomineesReport'/>"
+        target="_blank">Optional Award Nominations</a>
+
+    <!-- VirtualSubjectiveCategoryReport -->
+    <c:if
+        test="${not empty challengeDescription.virtualSubjectiveCategories}">
+        <c:forEach
+            items="${challengeDescription.virtualSubjectiveCategories}"
+            var="category">
+            <a class="wide"
+                href="<c:url
+                    value='/report/VirtualSubjectiveCategoryReport' />?categoryName=${category.name}"
+                target="_blank"> ${category.title} Score Comparison
+            </a>
+        </c:forEach>
+    </c:if>
+    <!-- end VirtualSubjectiveCategoryReport -->
+
+    <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
+        target="_blank">All Scores Comparison </a>
+
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="topScoreReportPerAwardGroup.jsp">Robot Match Scores</a>
+
+    <!--  FIXME need page -->
+    <a class="wide" target="_additional_reports" href="...">Additional
+        Reports</a>
 
     <!--  FIXME old below here -->
     <a class="wide" target="_report"
