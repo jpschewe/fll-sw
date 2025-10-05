@@ -135,8 +135,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <a class="wide" target="_topScoreReportPerAwardGroup"
         href="topScoreReportPerAwardGroup.jsp">Robot Match Scores</a>
 
-    <!--  FIXME need page -->
-    <a class="wide" target="_additional_reports" href="...">Additional
+    <a class="wide" target="_additional_reports"
+        href="<c:url value='/report/additional-reports.jsp'/>'">Additional
         Reports</a>
 
     <h2>Awards</h2>

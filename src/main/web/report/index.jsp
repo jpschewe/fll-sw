@@ -2,6 +2,9 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<fll-sw:required-roles roles="HEAD_JUDGE,REPORT_GENERATOR"
+    allowSetup="false" />
+
 <%
 fll.web.report.ReportIndex.populateContext(application, session, pageContext, true);
 %>
@@ -221,6 +224,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
         Script</a>
 
+    <!-- Team Results -->
     <a class="wide" href="<c:url value='/report/TeamResults'/>"
         target="_blank">Team Results. This is a zip file containing
         the results to return to the teams. This will take some time to
@@ -241,6 +245,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
             <input type='submit' value='Get Results' />
         </form>
     </div>
+    <!-- end Team Results -->
 
     <div class="wide">
         <form action="<c:url value='/report/JudgeRubrics'/>"
