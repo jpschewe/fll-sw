@@ -139,99 +139,24 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <a class="wide" target="_additional_reports" href="...">Additional
         Reports</a>
 
-    <!--  FIXME old below here -->
-    <a class="wide" target="_report"
-        href="<c:url value='/report/index.jsp' />">Generate reports
-        - this is done once all of the subjective scores are in.</a>
-
-    <a class="wide" target="_subjectiveSchedule"
-        href="<c:url value='/admin/SubjectiveScheduleByTime'/>">Subjective
-        schedule sorted by time</a>
-
-    <a class="wide"
-        href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
-        Match Play performance scores</a>
-
-    <a class="wide" target="_performanceVsSchedule"
-        href="<c:url value='/report/performance-runs-vs-schedule.jsp'/>">
-        Performance runs compared with the schedule</a>
-
-    <a class="wide"
-        href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
-        the order that awards are determined.</a>
-
-    <a class="wide"
-        href="<c:url value='/report/non-numeric-nominees.jsp' />"
-        target="_blank">Enter non-numeric nominees. This is used to
-        enter the teams that are up for consideration for the non-scored
-        subjective categories. This information transfers over to the
-        finalist scheduling web application. This is also used in the
-        awards scripts report.</a>
-
+    <h2>Awards</h2>
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
-        target="_blank">Enter the winners of awards for use in the
-        awards report</a>
+        target="_blank">Award Winner Write-up</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-advancing-teams.jsp' />"
-        target="_blank">Enter the advancing teams for use in the
-        awards report</a>
-
-    <a class="wide" href="<c:url value='/report/AwardsReport' />"
-        target="_blank">Report of winners for the tournament. This
-        can be published on the web or used for the awards ceremony.</a>
+        target="_blank">Advancing Teams</a>
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
-        Script PDF </a>
+        Script </a>
 
+    <a class='wide'
+        href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
+        Group Order</a>
 
-    <h2>Finalist scheduling</h2>
-    <p>This is used at tournaments where there is more than 1
-        judging group in an award group. This is typically the case at a
-        state tournament where all teams are competing for first place
-        in each category, but there are too many teams for one judge to
-        see.</p>
-
-    <p>Before using these links the initial head to head brackets
-        need to be assigned in the performance area and the performance
-        dump needs to be imported into this server.</p>
-
-    <a class="wide"
-        href="<c:url value='/report/non-numeric-nominees.jsp' />"
-        target="_blank">Enter non-numeric nominees. This is used to
-        enter the teams that are up for consideration for the non-scored
-        subjective categories. This information transfers over to the
-        finalist scheduling web application. This is also used in the
-        awards scripts report.</a>
-
-    <a class="wide" href="<c:url value='/report/finalist/load.jsp' />"
-        target="_blank">Schedule Finalists. Before visiting this
-        page, all subjective scores need to be uploaded and any head to
-        head brackets that will occur during the finalist judging should
-        be created to avoid scheduling conflicts.</a>
-
-    <c:if test="${not empty finalistDivisions}">
-        <div class="wide">
-            <form
-                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
-                METHOD='POST' target="_blank">
-                <select name='division'>
-                    <c:forEach var="division"
-                        items="${finalistDivisions }">
-                        <option value='${division }'>${division }</option>
-                    </c:forEach>
-                </select>
-                <input type='submit' value='Finalist Schedule (PDF)' />
-            </form>
-        </div>
-    </c:if>
-
-    <a class="wide"
-        href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
-        target="_blank">Finalist Schedule for each team</a>
-
+    <a class='wide' href='...'>STATE</a>
 
 </body>
 </html>

@@ -204,8 +204,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
 
     <a class="wide"
         href="<c:url value='/report/edit-advancing-teams.jsp'/>"
-        target="_blank">Enter the teams advancing to the next level
-        of tournament</a>
+        target="_blank">Advancing Teams</a>
 
     <a class="wide"
         href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Edit
@@ -220,7 +219,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
-        Script PDF </a>
+        Script</a>
 
     <a class="wide" href="<c:url value='/report/TeamResults'/>"
         target="_blank">Team Results. This is a zip file containing
@@ -262,8 +261,13 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     </div>
 
     <a class='wide'
-        href='<c:url value="/report/edit-award-group-order.jsp"/>'>Edit
-        award group order</a>
+        href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
+        Group Order</a>
+
+
+    <a class="wide"
+        href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
+        the order that awards are determined.</a>
 
 
     <h2>Finalist scheduling</h2>
