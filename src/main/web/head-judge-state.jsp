@@ -101,6 +101,14 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         conflicts.
     </div>
 
+    <a class="wide"
+        href="<c:url value='/report/non-numeric-nominees.jsp'/>"
+        target="_blank">Optional Award Nominations <br /> This is
+        used to enter the teams that are up for consideration for the
+        non-scored subjective categories. The information entered here
+        transfers over to the finalist scheduling web application.
+    </a>
+
     <a class="wide" href="finalist/load.jsp" target="_blank">Schedule
         Finalists</a>
 
@@ -131,6 +139,31 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <a class="wide"
         href="<c:url value='/report/deliberation/index.jsp'/>"
         target="_blank">Deliberations</a>
+
+    <h2>Awards</h2>
+
+    <a class="wide"
+        href="<c:url value='/report/edit-award-winners.jsp'/>"
+        target="_blank">Award Winner Write-up </a>
+
+    <a class="wide"
+        href="<c:url value='/report/edit-advancing-teams.jsp'/>"
+        target="_blank">Advancing Teams</a>
+
+    <a class="wide"
+        href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Award
+        Presenters</a>
+
+    <a class="wide" target="_report"
+        href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
+        Script</a>
+
+    <a class="wide" href="<c:url value='/report/AwardsReport'/>"
+        target="_blank">Award Winners Report</a>
+
+    <a class='wide'
+        href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
+        Group Order</a>
 
 
 </body>

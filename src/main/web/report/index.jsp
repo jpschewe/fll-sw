@@ -192,27 +192,27 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
 
     <a class="wide"
         href="<c:url value='/report/non-numeric-nominees.jsp'/>"
-        target="_blank">Entry: Non-numeric nominations <br /> This
-        is used to enter the teams that are up for consideration for the
-        non-scored subjective categories. The information entered here
-        transfers over to the finalist scheduling web application.
+        target="_blank">Entry: Optional Award Nominations <br />
+        This is used to enter the teams that are up for consideration
+        for the non-scored subjective categories. The information
+        entered here transfers over to the finalist scheduling web
+        application.
     </a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp'/>"
-        target="_blank">Entry: Award winners </a>
+        target="_blank">Award Winner Write-up </a>
 
     <a class="wide"
         href="<c:url value='/report/edit-advancing-teams.jsp'/>"
         target="_blank">Advancing Teams</a>
 
     <a class="wide"
-        href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Edit
-        presenters for the awards ceremony.</a>
+        href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Award
+        Presenters</a>
 
     <a class="wide" href="<c:url value='/report/AwardsReport'/>"
-        target="_blank">Report of winners for the tournament. This
-        can be published on the web.</a>
+        target="_blank">Award Winners Report</a>
 
     <a class="wide" href="<c:url value='/report/Awards.csv'/>">CSV
         file of award winners.</a>
