@@ -1399,7 +1399,6 @@ public final class ScheduleWriter {
     final String pageMasterName = "simple";
     final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
     layoutMasterSet.appendChild(pageMaster);
-    // pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
