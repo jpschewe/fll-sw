@@ -1,3 +1,4 @@
+* #1273 - Allow users to see the password they have typed in
 * #1280 - Add tooltip to sync button in subjective scores app
 * #1274 - Show Award Group and Judging Group report selection only when they are different
 * #1279 - Highlight background of 1st place teams in subjective by judge report
