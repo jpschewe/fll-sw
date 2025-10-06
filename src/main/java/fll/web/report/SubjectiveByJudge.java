@@ -39,6 +39,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FP;
+import fll.util.FOPUtils.Margins;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -82,7 +83,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       final Tournament tournament = tournamentData.getCurrentTournament();
 
@@ -121,9 +122,11 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
+                                                               FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
+                                                               new Margins(0.2, 0.2, 0.2, 0.2), 0,
+                                                               FOPUtils.STANDARD_FOOTER_HEIGHT);
     layoutMasterSet.appendChild(pageMaster);
-    pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -172,8 +175,8 @@ public class SubjectiveByJudge extends BaseFLLServlet {
             final String judge = castNonNull(rs.getString("judge"));
             final String station = castNonNull(rs.getString("station"));
 
-            final int numScores = ComputeJudgeSummary.getNumScoresEntered(connection, judge, category.getName(), station,
-                                                                      tournament.getTournamentID());
+            final int numScores = ComputeJudgeSummary.getNumScoresEntered(connection, judge, category.getName(),
+                                                                          station, tournament.getTournamentID());
             if (numScores > 0) {
               judges.add(judge);
             }
