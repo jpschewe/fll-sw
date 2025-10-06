@@ -143,8 +143,8 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
       final Element ele = generateAwardGroupReport(connection, document, challengeDescription, tournament, teams,
                                                    judgingGroup);
+      ele.setAttribute("keep-together.within-page", "always");
       documentBody.appendChild(ele);
-      ele.setAttribute("page-break-after", "always");
     }
 
     return document;
