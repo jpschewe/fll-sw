@@ -64,6 +64,8 @@ import net.mtu.eggplant.xml.XMLUtils;
 public class SubjectiveByJudge extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private static final String HIGHLIGHT_BACKGROUND_COLOR = "yellow";
+
   @Override
   protected void processRequest(HttpServletRequest request,
                                 HttpServletResponse response,
@@ -347,14 +349,22 @@ public class SubjectiveByJudge extends BaseFLLServlet {
                                                .getOrDefault(category, Collections.emptyMap())//
                                                .get(judge);
 
+          final boolean highlight;
           final String text;
           if (null != rankData) {
+            highlight = rankData.rank == 1;
             text = String.format("%d - %s", rankData.rank, rankData.rawScore);
           } else {
+            highlight = false;
             text = Utilities.NON_BREAKING_SPACE_STRING;
           }
-          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text),
-                                                  FOPUtils.STANDARD_BORDER_WIDTH));
+          final Element dataCell = FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                                text),
+                                                       FOPUtils.STANDARD_BORDER_WIDTH);
+          if (highlight) {
+            dataCell.setAttribute("background-color", HIGHLIGHT_BACKGROUND_COLOR);
+          }
+          teamRow.appendChild(dataCell);
         } // foreach judge
       } // foreach category
     } // foreach team

@@ -1,3 +1,4 @@
+* #1279 - Highlight background of 1st place teams in subjective by judge report
 * #1276 - Ensure that the awards summary order is properly saved
 * #1258 - Handle UTF-8 content in all web pages. This allows special characters in the subjective judging application comments.
 * #1271 - Ensure that the judges summary sees the number of teams scored as soon as a score comes in
