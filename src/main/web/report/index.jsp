@@ -52,8 +52,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         target="_blank">Optional Award Nominations</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="topScoreReportPerAwardGroup.jsp">Robot Match Scores
-        (HTML)</a>
+        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
+        Match Scores (HTML)</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
         href="TopScoreReportPerAwardGroupPdf">Robot Match Scores
@@ -72,7 +72,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     <!--  FinalComputedScores -->
     <div class="wide">
         Final Computed Scores
-        <form action="<c:url value='/report/FinalComputedScores' />"
+        <form
+            action="<c:url value='/report/FinalComputedScores' />"
             target="_finalComputedScores" method="POST">
             <input type="hidden" name="selector"
                 value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />

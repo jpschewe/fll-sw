@@ -135,7 +135,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         target="_blank">Final Computed Score Consolidated</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="topScoreReportPerAwardGroup.jsp">Robot Match Scores</a>
+        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
+        Match Scores</a>
 
     <a class="wide" target="_additional_reports"
         href="<c:url value='/report/additional-reports.jsp'/>'">Additional
