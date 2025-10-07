@@ -68,8 +68,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         </form>
 
         <c:if test="${awardGroups != judgingStations}">
-            <form
-                action="<c:url value='/report/FinalComputedScores'/>"
+            <form action="<c:url value='/report/FinalComputedScores'/>"
                 target="_finalComputedScores" method="POST">
                 <input type="hidden" name="selector"
                     value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
@@ -94,8 +93,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <!-- end FinalComputedScores -->
 
     <div class="wide">
-        <form
-            action="<c:url value='/report/AwardSummarySheet'/>"
+        <form action="<c:url value='/report/AwardSummarySheet'/>"
             method="POST" target="award-summary-sheet">
             Award Summary Sheet
             <select name="groupName">
@@ -134,7 +132,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <!-- end VirtualSubjectiveCategoryReport -->
 
     <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
-        target="_blank">All Scores Comparison </a>
+        target="_blank">Final Computed Score Consolidated</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
         href="topScoreReportPerAwardGroup.jsp">Robot Match Scores</a>

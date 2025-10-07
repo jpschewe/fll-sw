@@ -143,7 +143,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
         judging group</a>
 
     <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
-        target="_blank">All Scores Comparison </a>
+        target="_blank">Final Computed Score Consolidated</a>
 
     <a class='wide'
         href="<c:url value='/report/ScaledSubjectiveByAwardGroup'/>"
