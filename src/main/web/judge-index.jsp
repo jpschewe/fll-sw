@@ -36,8 +36,7 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
-        target="_blank">Enter the winners of awards for use in the
-        awards report</a>
+        target="_blank">Award Winner Write Up</a>
 
     <div class="wide">
         <form method="POST"

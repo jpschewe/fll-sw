@@ -449,7 +449,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
             <ul>
                 <li>
                     <a href='<c:url value="/subjective/index.html"/>'
-                        target="_blank">Subjective Web application</a>
+                        target="_blank">Judge Scoring</a>
                 </li>
 
                 <li>
