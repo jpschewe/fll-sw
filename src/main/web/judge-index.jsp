@@ -62,8 +62,8 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
         </form>
     </div>
 
-    <a class="wide" href="<c:url value='/report/SubjectiveByJudge'/> ">Summarized
-        numeric scores - by judges</a>
+    <a class="wide" href="<c:url value='/report/SubjectiveByJudge'/> ">Final
+        Computed Scores Consolidated</a>
 
 </body>
 </html>

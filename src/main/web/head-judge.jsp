@@ -132,7 +132,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <!-- end VirtualSubjectiveCategoryReport -->
 
     <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
-        target="_blank">Final Computed Score Consolidated</a>
+        target="_blank">Final Computed Scores Consolidated</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
         href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
