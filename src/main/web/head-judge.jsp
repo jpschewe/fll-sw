@@ -139,7 +139,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         Match Scores</a>
 
     <a class="wide" target="_additional_reports"
-        href="<c:url value='/report/additional-reports.jsp'/>'">Additional
+        href="<c:url value='/report/additional-reports.jsp'/>">Additional
         Reports</a>
 
     <h2>Awards</h2>
