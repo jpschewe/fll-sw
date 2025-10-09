@@ -15,6 +15,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 <script type='text/javascript'
     src="<c:url value='/js/fll-functions.js'/>"></script>
 
+<script type='text/javascript' src="<c:url value='/report/index.js'/>"></script>
+
+<script type='text/javascript'>
+  var categoryJudges = JSON.parse('${categoryJudgesJson}');
+</script>
+
 </head>
 
 <body>
