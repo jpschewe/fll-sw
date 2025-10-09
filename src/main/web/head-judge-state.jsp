@@ -30,24 +30,23 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         Match Scores (HTML)</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="TopScoreReportPerAwardGroupPdf">Robot Match Scores
-        (PDF)</a>
+        href="<c:url value='/report/TopScoreReportPerAwardGroupPdf'/>">Robot
+        Match Scores (PDF)</a>
 
     <c:if test="${awardGroups != judgingStations}">
         <a class="wide" target="_topScoreReportPerJudgingStation"
-            href="topScoreReportPerJudgingStation.jsp">Robot Match
-            Scores - Judging group (HTML)</a>
+            href="<c:url value='/report/topScoreReportPerJudgingStation.jsp'/>">Robot
+            Match Scores - Judging group (HTML)</a>
 
         <a class="wide" target="_topScoreReportPerJudgingStation"
-            href="TopScoreReportPerJudgingStationPdf"> Robot Match
-            Scores - Judging group (PDF)</a>
+            href="<c:url value='/report/TopScoreReportPerJudgingStationPdf'/>">
+            Robot Match Scores - Judging group (PDF)</a>
     </c:if>
 
     <!--  FinalComputedScores -->
     <div class="wide">
         Final Computed Scores
-        <form
-            action="<c:url value='/report/FinalComputedScores' />"
+        <form action="<c:url value='/report/FinalComputedScores' />"
             target="_finalComputedScores" method="POST">
             <input type="hidden" name="selector"
                 value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
@@ -68,8 +67,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         </form>
 
         <c:if test="${awardGroups != judgingStations}">
-            <form
-                action="<c:url value='/report/FinalComputedScores'/>"
+            <form action="<c:url value='/report/FinalComputedScores'/>"
                 target="_finalComputedScores" method="POST">
                 <input type="hidden" name="selector"
                     value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
@@ -111,8 +109,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         transfers over to the finalist scheduling web application.
     </a>
 
-    <a class="wide" href="finalist/load.jsp" target="_blank">Schedule
-        Finalists</a>
+    <a class="wide" href="<c:url value='/report/finalist/load.jsp'/>"
+        target="_blank">Schedule Finalists</a>
 
     <c:if test="${not empty finalistDivisions}">
         <div class="wide">
@@ -152,7 +150,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
         href="<c:url value='/report/edit-advancing-teams.jsp'/>"
         target="_blank">Advancing Teams</a>
 
-    <a class="wide"
+    <a class="wide" target="_blank"
         href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Award
         Presenters</a>
 
@@ -163,7 +161,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     <a class="wide" href="<c:url value='/report/AwardsReport'/>"
         target="_blank">Award Winners Report</a>
 
-    <a class='wide'
+    <a class='wide' target="_blank"
         href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
         Group Order</a>
 
