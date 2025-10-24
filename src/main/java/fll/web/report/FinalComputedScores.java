@@ -970,7 +970,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * scoreData.rankFraction();
+                      * scoreData.rank();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -997,7 +997,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * scoreData.rankFraction();
+                      * scoreData.rank();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -1018,7 +1018,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           if (perfRank > 0) {
 
             weightedRankSum += performanceCategory.getWeight()
-                * perfScaledData.rankFraction();
+                * perfScaledData.rank();
           } else {
             weightedRankSum = Double.NaN;
           }
