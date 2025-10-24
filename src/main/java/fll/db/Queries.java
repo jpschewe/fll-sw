@@ -214,6 +214,39 @@ public final class Queries {
   }
 
   /**
+   * Get the list of judging stations in the specified award group for the
+   * specified tournament as a List of
+   * Strings.
+   *
+   * @param connection database connection
+   * @param tournament the tournament to get the stations for
+   * @param awardGroup award group to get the stations for
+   * @return the judging stations
+   * @throws SQLException on a database error
+   */
+  public static List<String> getJudgingGroupsInAwardGroup(final Connection connection,
+                                                          final Tournament tournament,
+                                                          final String awardGroup)
+      throws SQLException {
+    final List<String> result = new LinkedList<>();
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT DISTINCT judging_station FROM TournamentTeams" //
+        + " WHERE tournament = ?" //
+        + "  AND event_division = ?"
+        + " ORDER BY judging_station")) {
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, awardGroup);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String station = castNonNull(rs.getString(1));
+          result.add(station);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
    * Get the list of waves for the specified tournament as a List of
    * Strings.
    *
