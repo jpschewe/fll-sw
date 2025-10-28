@@ -211,7 +211,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
-                                                           tournamentData.getCurrentTournament());
+                                                          tournamentData.getCurrentTournament());
 
       final Tournament tournament = tournamentData.getCurrentTournament();
 
@@ -494,16 +494,12 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return gatherRankedPerformanceTeams(connection, winnerCriteria, tournament, awardGroup, ReportSelector.AWARD_GROUP);
   }
 
-  /**
-   * @return Team Number -> (rank, score)
-   * @throws SQLException
-   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort, group column determines the column")
-  private static Map<Integer, ImmutablePair<Integer, Double>> gatherRankedPerformanceTeams(final Connection connection,
-                                                                                           final WinnerType winnerCriteria,
-                                                                                           final Tournament tournament,
-                                                                                           final String groupName,
-                                                                                           final ReportSelector selector)
+  public static Map<Integer, ImmutablePair<Integer, Double>> gatherRankedPerformanceTeams(final Connection connection,
+                                                                                          final WinnerType winnerCriteria,
+                                                                                          final Tournament tournament,
+                                                                                          final String groupName,
+                                                                                          final ReportSelector selector)
       throws SQLException {
     final Map<Integer, ImmutablePair<Integer, Double>> rankedTeams = new HashMap<>();
 
@@ -886,9 +882,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return tableBody;
   }
 
-  /**
-   * Performance ranks are computed per judging station. 
-   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private List<TeamScoreData> gatherReportData(final Connection connection,
                                                final List<AwardCategory> awardOrder,
@@ -903,26 +896,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                                                           description,
                                                                                                                                           tournament);
 
-    final Map<Integer, ImmutablePair<Integer, Double>> teamPerformanceRanks;
-    if (ReportSelector.AWARD_GROUP == selector) {
-      // compute performance ranks based on judging station and merge them
-      final List<Map<Integer, ImmutablePair<Integer, Double>>> judgingRanks = new LinkedList<>();
-      final List<String> judgingGroups = Queries.getJudgingGroupsInAwardGroup(connection, tournament, groupName);
-      for (final String judgingGroup : judgingGroups) {
-        final Map<Integer, ImmutablePair<Integer, Double>> ranks = gatherRankedPerformanceTeams(connection,
-                                                                                                winnerCriteria,
-                                                                                                tournament,
-                                                                                                judgingGroup,
-                                                                                                ReportSelector.JUDGING_STATION);
-        judgingRanks.add(ranks);
-      }
-
-      teamPerformanceRanks = judgingRanks.stream() //
-                                         .flatMap(map -> map.entrySet().stream()) //
-                                         .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-    } else {
-      teamPerformanceRanks = gatherRankedPerformanceTeams(connection, winnerCriteria, tournament, groupName, selector);
-    }
+    final Map<Integer, ImmutablePair<Integer, Double>> teamPerformanceRanks = gatherRankedPerformanceTeams(connection,
+                                                                                                           winnerCriteria,
+                                                                                                           tournament,
+                                                                                                           groupName,
+                                                                                                           selector);
 
     final List<TeamScoreData> reportData = new LinkedList<>();
 
@@ -1086,7 +1064,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (-1 == rank) {
       rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
     } else {
-      rankText = String.format("%1$s(%2$d)", Utilities.NON_BREAKING_SPACE, rank);
+      rankText = String.format("%1$s(%2$d/%3$d)", Utilities.NON_BREAKING_SPACE, rank, rankInCategory.size());
     }
 
     final String overallScoreText;
