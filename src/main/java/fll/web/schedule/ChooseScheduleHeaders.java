@@ -179,7 +179,9 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
             && someTableColumns
             && null != (line = reader.readNext())) {
 
-          for (int i = 0; i < line.length; ++i) {
+          // TODO: should make headerRow longer if the line is longer?
+          for (int i = 0; i < line.length
+              && i < headerRow.length; ++i) {
             final @Nullable String value = line[i];
             if (null == value) {
               isNumberColumn[i] = false;
