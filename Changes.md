@@ -1,3 +1,6 @@
+Release 20.0.0
+==============
+
 * #1281 - Remove "out of" from final computed scores
 * #1273 - Allow users to see the password they have typed in
 * #1280 - Add tooltip to sync button in subjective scores app
