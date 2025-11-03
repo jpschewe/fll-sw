@@ -179,13 +179,19 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
             && someTableColumns
             && null != (line = reader.readNext())) {
 
-          for (int i = 0; i < line.length; ++i) {
+          // TODO: should make headerRow longer if the line is longer?
+          for (int i = 0; i < line.length
+              && i < headerRow.length; ++i) {
             final @Nullable String value = line[i];
-            if (null == value) {
+            if (null == value
+                && (isNumberColumn[i]
+                    || isTimeColumn[i])) {
+              LOGGER.trace("Column {} has a null value at row {}", i, reader.getLineNumber());
               isNumberColumn[i] = false;
               isTimeColumn[i] = false;
             } else {
-              if (someTimeColumns) {
+              if (someTimeColumns
+                  && isTimeColumn[i]) {
                 try {
                   final @Nullable LocalTime parsed = TournamentSchedule.parseTime(value);
                   if (null == parsed) {
@@ -193,28 +199,38 @@ public final class ChooseScheduleHeaders extends BaseFLLServlet {
                     isTimeColumn[i] = false;
                   }
                 } catch (final DateTimeParseException e) {
+                  LOGGER.trace("Column {} has an unparsable time value ({}) at row {}: {}", i, value,
+                               reader.getLineNumber(), e.getMessage());
                   isTimeColumn[i] = false;
                 }
               }
 
-              if (someNumberColumns) {
+              if (someNumberColumns
+                  && isNumberColumn[i]) {
                 if (StringUtils.isBlank(value)) {
                   isNumberColumn[i] = false;
                 } else {
                   try {
                     Utilities.getIntegerNumberFormat().parse(value);
                   } catch (final ParseException e) {
+                    LOGGER.trace("Column {} has an unparsable number value ({}) at row {}: {}", i, value,
+                                 reader.getLineNumber(), e.getMessage());
                     isNumberColumn[i] = false;
                   }
                 }
               }
 
-              if (someTableColumns) {
+              if (someTableColumns
+                  && isTableColumn[i]) {
                 if (StringUtils.isBlank(value)) {
+                  LOGGER.trace("Column {} has an blank value at row {} - not a table column", i,
+                               reader.getLineNumber());
                   isTableColumn[i] = false;
                 } else {
                   final @Nullable ImmutablePair<String, Number> tableInfo = TournamentSchedule.parseTable(value);
                   if (null == tableInfo) {
+                    LOGGER.trace("Column {} has an unparsable table value ({}) at row {} - not a table column", i,
+                                 value, reader.getLineNumber());
                     isTableColumn[i] = false;
                   }
                 }

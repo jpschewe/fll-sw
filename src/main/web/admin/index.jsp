@@ -169,6 +169,12 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
 
         <li>
             <a
+                href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
+                the order that awards are determined.</a>
+        </li>
+
+        <li>
+            <a
                 href="<c:url value='/report/awards/edit-categories-awarded.jsp'/>">Specify
                 which categories are awarded by tournament level</a>
         </li>
@@ -207,12 +213,15 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
                 <!--  downloads for the schedule -->
                 <ul>
                     <li>
-                        <a href="ScheduleByTeam" target="_blank">Full
-                            schedule sorted by team</a>
+                        <a href="<c:url value='/admin/ScheduleByTeam'/>"
+                            target="_blank">Full schedule sorted by
+                            team</a>
                     </li>
                     <li>
-                        <a href="ScheduleByWaveAndTeam" target="_blank">Full
-                            schedule sorted by wave and team</a>
+                        <a
+                            href="<c:url value='/admin/ScheduleByWaveAndTeam'/>"
+                            target="_blank">Full schedule sorted by
+                            wave and team</a>
                     </li>
                     <li>
                         <a href="SubjectiveScheduleByJudgingStation"
@@ -221,14 +230,14 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
                             group, then time</a>
                     </li>
                     <li>
-                        <a href="SubjectiveScheduleByCategory"
-                            target="_blank">Subjective schedule
-                            split by category and sorted by time</a>
+                        <a
+                            href="<c:url value='/admin/SubjectiveScheduleByCategory'/>"
+                            target="_blank">Judging Schedule by
+                            Category</a>
                     </li>
                     <li>
                         <a href="SubjectiveScheduleByTime"
-                            target="_blank">Subjective schedule
-                            sorted by time</a>
+                            target="_blank">Judging Schedule</a>
                     </li>
                     <li>
                         <a href="PerformanceSchedule" target="_blank">Performance
@@ -444,7 +453,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
             <ul>
                 <li>
                     <a href='<c:url value="/subjective/index.html"/>'
-                        target="_blank">Subjective Web application</a>
+                        target="_blank">Judge Scoring</a>
                 </li>
 
                 <li>

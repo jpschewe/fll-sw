@@ -1,3 +1,9 @@
+* #1281 - Remove "out of" from final computed scores
+* #1273 - Allow users to see the password they have typed in
+* #1280 - Add tooltip to sync button in subjective scores app
+* #1274 - Show Award Group and Judging Group report selection only when they are different
+* #1279 - Highlight background of 1st place teams in subjective by judge report
+* #1276 - Ensure that the awards summary order is properly saved
 * #1258 - Handle UTF-8 content in all web pages. This allows special characters in the subjective judging application comments.
 * #1271 - Ensure that the judges summary sees the number of teams scored as soon as a score comes in
 * #1272 - Use run display name in performance vs. scheduled report

@@ -10,7 +10,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 
 <html>
 <head>
-<title>Head Judge</title>
+<title>Head Judge State</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -20,29 +20,28 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 </head>
 
 <body>
-    <h1>Head Judge</h1>
+    <h1>Head Judge Sate</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
-    <p>
-        The current tournament is
-        <b>${tournament.description} on ${tournament.dateString}
-            [${tournament.name}]</b>
-    </p>
 
+    <h2>Preliminary Reports</h2>
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
+        Match Scores (HTML)</a>
 
-    <h2>Deliberation Reports</h2>
-    <a class="wide" target="_subjective"
-        href="<c:url value='/subjective/Auth'/>"
-        onclick="return openMinimalBrowser(this)">Judge Scoring</a>
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="<c:url value='/report/TopScoreReportPerAwardGroupPdf'/>">Robot
+        Match Scores (PDF)</a>
 
-    <!--  FIXME needs a page -->
-    <a class="wide" target="_TeamSchedules"
-        href='<c:url value="/report/team-schedules.jsp"/>'>Team
-        Schedules</a>
+    <c:if test="${awardGroups != judgingStations}">
+        <a class="wide" target="_topScoreReportPerJudgingStation"
+            href="<c:url value='/report/topScoreReportPerJudgingStation.jsp'/>">Robot
+            Match Scores - Judging group (HTML)</a>
 
-    <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
-        target="_judge-summary">Judge summary. This shows which
-        judges have scores entered.</a>
+        <a class="wide" target="_topScoreReportPerJudgingStation"
+            href="<c:url value='/report/TopScoreReportPerJudgingStationPdf'/>">
+            Robot Match Scores - Judging group (PDF)</a>
+    </c:if>
 
     <!--  FinalComputedScores -->
     <div class="wide">
@@ -92,76 +91,80 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
     </div>
     <!-- end FinalComputedScores -->
 
-    <div class="wide">
-        <form action="<c:url value='/report/AwardSummarySheet'/>"
-            method="POST" target="award-summary-sheet">
-            Award Summary Sheet
-            <select name="groupName">
-                <c:forEach items="${judgingStations}"
-                    var="judgingStation">
-                    <option value="${judgingStation}">${judgingStation}</option>
-                </c:forEach>
-            </select>
-            <select name="sortOrder">
-                <c:forEach items="${sortOrders}" var="sortOrder">
-                    <option value="${sortOrder}">Sort by
-                        ${sortOrder}</option>
-                </c:forEach>
-            </select>
-            <input type='submit' value='Create Sheet' />
-        </form>
+    <h2>Finalist Scheduling</h2>
+
+    <div>
+        <b>**Warning**</b>
+        Before visiting the links below, all subjective scores need to
+        be uploaded and any head to head brackets that will occur during
+        the finalist judging should be created to avoid scheduling
+        conflicts.
     </div>
 
     <a class="wide"
-        href="<c:url value='/report/NonNumericNomineesReport'/>"
-        target="_blank">Optional Award Nominations</a>
+        href="<c:url value='/report/non-numeric-nominees.jsp'/>"
+        target="_blank">Optional Award Nominations <br /> This is
+        used to enter the teams that are up for consideration for the
+        non-scored subjective categories. The information entered here
+        transfers over to the finalist scheduling web application.
+    </a>
 
-    <!-- VirtualSubjectiveCategoryReport -->
-    <c:if
-        test="${not empty challengeDescription.virtualSubjectiveCategories}">
-        <c:forEach
-            items="${challengeDescription.virtualSubjectiveCategories}"
-            var="category">
-            <a class="wide"
-                href="<c:url
-                    value='/report/VirtualSubjectiveCategoryReport' />?categoryName=${category.name}"
-                target="_blank"> ${category.title} Score Comparison
-            </a>
-        </c:forEach>
+    <a class="wide" href="<c:url value='/report/finalist/load.jsp'/>"
+        target="_blank">Schedule Finalists</a>
+
+    <c:if test="${not empty finalistDivisions}">
+        <div class="wide">
+            <form
+                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule'/>"
+                METHOD='POST' target="_blank">
+                <select name='division'>
+                    <c:forEach var="division"
+                        items="${finalistDivisions }">
+                        <option value='${division }'>${division }</option>
+                    </c:forEach>
+                </select>
+                <input type='submit' value='Finalist Schedule by Time' />
+            </form>
+        </div>
     </c:if>
-    <!-- end VirtualSubjectiveCategoryReport -->
 
-    <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
-        target="_blank">Final Computed Scores Consolidated</a>
+    <a class="wide"
+        href="<c:url value='/report/finalist/TeamFinalistSchedule'/>"
+        target="_blank">Finalist Schedule for each team</a>
 
-    <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
-        Match Scores</a>
+    <a class="wide"
+        href="<c:url value='/report/deliberation/specify_category_order.jsp'/>"
+        target="_blank">Specify Deliberation Category Order</a>
 
-    <a class="wide" target="_additional_reports"
-        href="<c:url value='/report/additional-reports.jsp'/>">Additional
-        Reports</a>
+    <a class="wide"
+        href="<c:url value='/report/deliberation/index.jsp'/>"
+        target="_blank">Deliberations</a>
 
     <h2>Awards</h2>
-    <a class="wide"
-        href="<c:url value='/report/edit-award-winners.jsp' />"
-        target="_blank">Award Winner Write-up</a>
 
     <a class="wide"
-        href="<c:url value='/report/edit-advancing-teams.jsp' />"
+        href="<c:url value='/report/edit-award-winners.jsp'/>"
+        target="_blank">Award Winner Write-up </a>
+
+    <a class="wide"
+        href="<c:url value='/report/edit-advancing-teams.jsp'/>"
         target="_blank">Advancing Teams</a>
+
+    <a class="wide" target="_blank"
+        href="<c:url value='/report/awards/edit-awards-presenters.jsp'/>">Award
+        Presenters</a>
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
-        Script </a>
+        Script</a>
 
-    <a class='wide'
+    <a class="wide" href="<c:url value='/report/AwardsReport'/>"
+        target="_blank">Award Winners Report</a>
+
+    <a class='wide' target="_blank"
         href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
         Group Order</a>
 
-    <h2>
-        <a class='wide' href="<c:url value='/head-judge-state.jsp'/>">STATE</a>
-    </h2>
 
 </body>
 </html>

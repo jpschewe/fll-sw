@@ -27,14 +27,14 @@ fll.web.report.EditAwardDeterminationOrder.populateContext(application, pageCont
         <input type="hidden" name="referer" value="${header. referer}" />
 
         <div id='award_order'>
-            <c:forEach items="${awards}" var="award">
+            <c:forEach items="${awardToParam}" var="entry">
                 <div class='award_container'>
                     <button type='button' class='move_up'>Move
                         Up</button>
                     <button type='button' class='move_down'>Move
                         Down</button>
-                    <input type='hidden' name='${award.title}' />
-                    ${award.title}
+                    <input type='hidden' name='${entry.value}' />
+                    ${entry.key.title}
                 </div>
             </c:forEach>
         </div>

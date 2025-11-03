@@ -211,7 +211,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       final Tournament tournament = tournamentData.getCurrentTournament();
 
@@ -970,7 +970,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * scoreData.rankFraction();
+                      * scoreData.rank();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -997,7 +997,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * scoreData.rankFraction();
+                      * scoreData.rank();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -1018,7 +1018,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           if (perfRank > 0) {
 
             weightedRankSum += performanceCategory.getWeight()
-                * perfScaledData.rankFraction();
+                * perfScaledData.rank();
           } else {
             weightedRankSum = Double.NaN;
           }
@@ -1064,7 +1064,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (-1 == rank) {
       rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
     } else {
-      rankText = String.format("%1$s(%2$d/%3$d)", Utilities.NON_BREAKING_SPACE, rank, rankInCategory.size());
+      rankText = String.format("%1$s(%2$d", Utilities.NON_BREAKING_SPACE, rank);
     }
 
     final String overallScoreText;

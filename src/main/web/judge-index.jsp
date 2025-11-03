@@ -32,13 +32,11 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
 
     <a class="wide" target="_subjective"
         href="<c:url value='/subjective/Auth' />"
-        onclick="return openMinimalBrowser(this)">Enter subjective
-        scores. This is done through the subjective web application</a>
+        onclick="return openMinimalBrowser(this)">Judge Scoring</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
-        target="_blank">Enter the winners of awards for use in the
-        awards report</a>
+        target="_blank">Award Winner Write Up</a>
 
     <div class="wide">
         <form method="POST"
@@ -64,8 +62,8 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
         </form>
     </div>
 
-    <a class="wide" href="<c:url value='/report/SubjectiveByJudge'/> ">Summarized
-        numeric scores - by judges</a>
+    <a class="wide" href="<c:url value='/report/SubjectiveByJudge'/> ">Final
+        Computed Scores Consolidated</a>
 
 </body>
 </html>
