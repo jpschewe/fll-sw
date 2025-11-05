@@ -307,7 +307,7 @@ public final class ImportDB {
    * <p>
    * Once the database has been loaded it will be upgraded to the current
    * version using
-   * {@link #upgradeDatabase(Connection, ChallengeDescription)}.
+   * {@link #upgradeDatabase(Connection, ChallengeDescription, boolean)}.
    * </p>
    * <p>
    * The created database does not have constraints, nor does it have the
