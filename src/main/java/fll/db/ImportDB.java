@@ -463,7 +463,7 @@ public final class ImportDB {
           + dbVersion);
     }
 
-    upgradeDatabase(connection, description);
+    upgradeDatabase(connection, description, false);
 
     return new ImportResult(importDirectory, hasBugs);
   }
@@ -598,12 +598,14 @@ public final class ImportDB {
    *          should read from the database
    * @param descriptionFor0to1Upgrade a developer friendly version of
    *          challengeDocument
+   * @param createConstraints if true, create constraints
    * @throws SQLException on an error
    * @throws IllegalArgumentException if the database cannot be upgraded for
    *           some reason
    */
-  private static void upgradeDatabase(final Connection connection,
-                                      final ChallengeDescription descriptionFor0to1Upgrade)
+  public static void upgradeDatabase(final Connection connection,
+                                     final ChallengeDescription descriptionFor0to1Upgrade,
+                                     final boolean createConstraints)
       throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
@@ -612,7 +614,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
-      upgrade1To2(connection);
+      upgrade1To2(connection, createConstraints);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 6) {
@@ -628,11 +630,11 @@ public final class ImportDB {
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 9) {
-      upgrade8To9(connection);
+      upgrade8To9(connection, createConstraints);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 10) {
-      upgrade9To10(connection);
+      upgrade9To10(connection, createConstraints);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 11) {
@@ -673,22 +675,22 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 19) {
-      upgrade18To19(connection);
+      upgrade18To19(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 20) {
-      upgrade19To20(connection);
+      upgrade19To20(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 21) {
-      upgrade20To21(connection);
+      upgrade20To21(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 22) {
-      upgrade21To22(connection);
+      upgrade21To22(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -703,12 +705,12 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 25) {
-      upgrade24To25(connection);
+      upgrade24To25(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 26) {
-      upgrade25To26(connection);
+      upgrade25To26(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -718,7 +720,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 28) {
-      upgrade27To28(connection);
+      upgrade27To28(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -728,17 +730,17 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 30) {
-      upgrade29To30(connection);
+      upgrade29To30(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 31) {
-      upgrade30To31(connection);
+      upgrade30To31(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 32) {
-      upgrade31To32(connection);
+      upgrade31To32(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -753,7 +755,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 35) {
-      upgrade34To35(connection);
+      upgrade34To35(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -768,12 +770,12 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 38) {
-      upgrade37To38(connection);
+      upgrade37To38(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 39) {
-      upgrade38To39(connection);
+      upgrade38To39(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -783,7 +785,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 41) {
-      upgrade40To41(connection);
+      upgrade40To41(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -798,22 +800,22 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 44) {
-      upgrade43To44(connection);
+      upgrade43To44(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 45) {
-      upgrade44To45(connection);
+      upgrade44To45(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 46) {
-      upgrade45to46(connection);
+      upgrade45to46(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 47) {
-      upgrade46to47(connection);
+      upgrade46to47(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -823,17 +825,17 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 49) {
-      upgrade48to49(connection);
+      upgrade48to49(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 50) {
-      upgrade49to50(connection);
+      upgrade49to50(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 51) {
-      upgrade50to51(connection);
+      upgrade50to51(connection, createConstraints);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -848,10 +850,12 @@ public final class ImportDB {
     }
   }
 
-  private static void upgrade1To2(final Connection connection) throws SQLException {
+  private static void upgrade1To2(final Connection connection,
+                                  final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 1 to 2");
 
-    GenerateDB.createScheduleTables(connection, false);
+    GenerateDB.createScheduleTables(connection, createConstraints);
 
     // set the version to 2 - this will have been set while creating
     // global_parameters, but we need to force it to 2 for later upgrade
@@ -859,18 +863,22 @@ public final class ImportDB {
     setDBVersion(connection, 2);
   }
 
-  private static void upgrade8To9(final Connection connection) throws SQLException {
+  private static void upgrade8To9(final Connection connection,
+                                  final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 8 to 9");
 
-    GenerateDB.createFinalistScheduleTables(connection, false);
+    GenerateDB.createFinalistScheduleTables(connection, createConstraints);
 
     setDBVersion(connection, 9);
   }
 
-  private static void upgrade9To10(final Connection connection) throws SQLException {
+  private static void upgrade9To10(final Connection connection,
+                                   final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 9 to 10");
 
-    GenerateDB.createTableDivision(connection, false);
+    GenerateDB.createTableDivision(connection, createConstraints);
 
     setDBVersion(connection, 10);
   }
@@ -1013,21 +1021,25 @@ public final class ImportDB {
     setDBVersion(connection, 18);
   }
 
-  private static void upgrade18To19(final Connection connection) throws SQLException {
+  private static void upgrade18To19(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 18 to 19");
 
-    GenerateDB.createSubjectiveComputedScoresTable(connection, false);
-    GenerateDB.createFinalScoresTable(connection, false);
-    GenerateDB.createOverallScoresTable(connection, false);
+    GenerateDB.createSubjectiveComputedScoresTable(connection, createConstraints);
+    GenerateDB.createFinalScoresTable(connection, createConstraints);
+    GenerateDB.createOverallScoresTable(connection, createConstraints);
 
     setDBVersion(connection, 19);
   }
 
-  private static void upgrade19To20(final Connection connection) throws SQLException {
+  private static void upgrade19To20(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 19 to 20");
 
-    GenerateDB.createSubjectiveAwardWinnerTables(connection, false);
-    GenerateDB.createAdvancingTeamsTable(connection, false);
+    GenerateDB.createSubjectiveAwardWinnerTables(connection, createConstraints);
+    GenerateDB.createAdvancingTeamsTable(connection, createConstraints);
 
     // add level and next_level to Tournaments
     try (Statement stmt = connection.createStatement()) {
@@ -1046,18 +1058,22 @@ public final class ImportDB {
     setDBVersion(connection, 20);
   }
 
-  private static void upgrade20To21(final Connection connection) throws SQLException {
+  private static void upgrade20To21(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 20 to 21");
 
-    GenerateDB.createAutomaticFinishedPlayoffTable(connection, false);
+    GenerateDB.createAutomaticFinishedPlayoffTable(connection, createConstraints);
 
     setDBVersion(connection, 21);
   }
 
-  private static void upgrade21To22(final Connection connection) throws SQLException {
+  private static void upgrade21To22(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 21 to 22");
 
-    GenerateDB.createAwardGroupOrder(connection, false);
+    GenerateDB.createAwardGroupOrder(connection, createConstraints);
 
     setDBVersion(connection, 22);
   }
@@ -1105,15 +1121,19 @@ public final class ImportDB {
     setDBVersion(connection, 24);
   }
 
-  private static void upgrade24To25(final Connection connection) throws SQLException {
+  private static void upgrade24To25(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 24 to 25");
 
-    GenerateDB.createDelayedPerformanceTable(connection, false);
+    GenerateDB.createDelayedPerformanceTable(connection, createConstraints);
 
     setDBVersion(connection, 25);
   }
 
-  private static void upgrade25To26(final Connection connection) throws SQLException {
+  private static void upgrade25To26(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 25 to 26");
 
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
@@ -1121,7 +1141,7 @@ public final class ImportDB {
       GenerateDB.createAuthentication(connection);
     }
 
-    GenerateDB.createAuthenticationRoles(connection, false);
+    GenerateDB.createAuthenticationRoles(connection, createConstraints);
 
     // all existing users have admin privileges
     for (final String user : Authentication.getUsers(connection)) {
@@ -1148,10 +1168,12 @@ public final class ImportDB {
     setDBVersion(connection, 27);
   }
 
-  private static void upgrade27To28(final Connection connection) throws SQLException {
+  private static void upgrade27To28(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 27 to 28");
 
-    GenerateDB.createFinalistParameterTables(connection, false);
+    GenerateDB.createFinalistParameterTables(connection, createConstraints);
 
     if (!checkForColumnInTable(connection, "finalist_schedule", "judge_end_time")) {
       try (Statement stmt = connection.createStatement()) {
@@ -1234,7 +1256,9 @@ public final class ImportDB {
     setDBVersion(connection, 29);
   }
 
-  private static void upgrade29To30(final Connection connection) throws SQLException {
+  private static void upgrade29To30(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 29 to 30");
 
     int mismatchCount = 0;
@@ -1244,7 +1268,7 @@ public final class ImportDB {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
     if (!tables.contains("tournament_level")) {
       // create the table and the default level
-      GenerateDB.createTournamentLevelsTable(connection, false);
+      GenerateDB.createTournamentLevelsTable(connection, createConstraints);
     }
 
     // the column can exist in a 0 to 1 upgrade
@@ -1355,10 +1379,12 @@ public final class ImportDB {
    * Adds categories_ignored table that tracks categories to ignore per tournament
    * level.
    */
-  private static void upgrade30To31(final Connection connection) throws SQLException {
+  private static void upgrade30To31(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 30 to 31");
 
-    GenerateDB.createCategoriesIgnored(connection, false);
+    GenerateDB.createCategoriesIgnored(connection, createConstraints);
 
     setDBVersion(connection, 31);
   }
@@ -1366,10 +1392,12 @@ public final class ImportDB {
   /**
    * Adds awards script tables.
    */
-  private static void upgrade31To32(final Connection connection) throws SQLException {
+  private static void upgrade31To32(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 31 to 32");
 
-    GenerateDB.createAwardsScriptTables(connection, false);
+    GenerateDB.createAwardsScriptTables(connection, createConstraints);
 
     setDBVersion(connection, 32);
   }
@@ -1436,10 +1464,12 @@ public final class ImportDB {
   /**
    * Split playoffData table into playoffData and playoffTableData.
    */
-  private static void upgrade34To35(final Connection connection) throws SQLException {
+  private static void upgrade34To35(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 34 to 35");
 
-    GenerateDB.createPlayoffTableData(connection, false);
+    GenerateDB.createPlayoffTableData(connection, createConstraints);
 
     try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("INSERT INTO PlayoffTableData (event_division, Tournament, PlayoffRound, LineNumber, AssignedTable)" //
@@ -1482,11 +1512,13 @@ public final class ImportDB {
   /**
    * Add deliberation tables.
    */
-  private static void upgrade37To38(final Connection connection) throws SQLException {
+  private static void upgrade37To38(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 37 to 38");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createDeliberationTables(connection, false);
+      GenerateDB.createDeliberationTables(connection, createConstraints);
     }
 
     setDBVersion(connection, 38);
@@ -1495,11 +1527,13 @@ public final class ImportDB {
   /**
    * Add deliberation category order table.
    */
-  private static void upgrade38To39(final Connection connection) throws SQLException {
+  private static void upgrade38To39(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 38 to 39");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createDeliberationCategoryOrder(connection, false);
+      GenerateDB.createDeliberationCategoryOrder(connection, createConstraints);
     }
 
     setDBVersion(connection, 39);
@@ -1522,10 +1556,12 @@ public final class ImportDB {
   /**
    * Add schedule duration table.
    */
-  private static void upgrade40To41(final Connection connection) throws SQLException {
+  private static void upgrade40To41(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 40 to 41");
 
-    GenerateDB.createScheduleDurationTable(connection, false);
+    GenerateDB.createScheduleDurationTable(connection, createConstraints);
 
     setDBVersion(connection, 41);
   }
@@ -1563,11 +1599,13 @@ public final class ImportDB {
   /**
    * Create virtual subjective category table.
    */
-  private static void upgrade43To44(final Connection connection) throws SQLException {
+  private static void upgrade43To44(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 43 to 44");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createVirtualSubjectiveCategoryTable(connection, false);
+      GenerateDB.createVirtualSubjectiveCategoryTable(connection, createConstraints);
     }
 
     setDBVersion(connection, 44);
@@ -1576,11 +1614,13 @@ public final class ImportDB {
   /**
    * Create finalist table for non-numeric nominees.
    */
-  private static void upgrade44To45(final Connection connection) throws SQLException {
+  private static void upgrade44To45(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 44 to 45");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createFinalistNonNumericNomineesTables(connection, false);
+      GenerateDB.createFinalistNonNumericNomineesTables(connection, createConstraints);
     }
 
     setDBVersion(connection, 45);
@@ -1589,11 +1629,13 @@ public final class ImportDB {
   /**
    * Add virtual category award winner table.
    */
-  private static void upgrade45to46(final Connection connection) throws SQLException {
+  private static void upgrade45to46(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 45 to 46");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createVirtualSubjectiveAwardWinnerTable(connection, false);
+      GenerateDB.createVirtualSubjectiveAwardWinnerTable(connection, createConstraints);
     }
     setDBVersion(connection, 46);
   }
@@ -1601,11 +1643,13 @@ public final class ImportDB {
   /**
    * Add award determination order table.
    */
-  private static void upgrade46to47(final Connection connection) throws SQLException {
+  private static void upgrade46to47(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 46 to 47");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createAwardDeterminationTable(connection, false);
+      GenerateDB.createAwardDeterminationTable(connection, createConstraints);
     }
     setDBVersion(connection, 47);
   }
@@ -1643,8 +1687,10 @@ public final class ImportDB {
    * Add wave checkin times.
    * Ensure all waves are non-null.
    */
-  private static void upgrade48to49(final Connection connection) throws SQLException {
-    GenerateDB.createScheduleWaveCheckin(connection, false);
+  private static void upgrade48to49(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
+    GenerateDB.createScheduleWaveCheckin(connection, createConstraints);
 
     // ensure waves are set to the empty string instead of null
     try (Statement stmt = connection.createStatement()) {
@@ -1657,8 +1703,10 @@ public final class ImportDB {
   /**
    * Add tables for finalist groups
    */
-  private static void upgrade49to50(final Connection connection) throws SQLException {
-    GenerateDB.createFinalistGroupTables(connection, false);
+  private static void upgrade49to50(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
+    GenerateDB.createFinalistGroupTables(connection, createConstraints);
 
     setDBVersion(connection, 50);
   }
@@ -1666,8 +1714,10 @@ public final class ImportDB {
   /**
    * Add run metadata.
    */
-  private static void upgrade50to51(final Connection connection) throws SQLException {
-    GenerateDB.createRunMetadataTable(connection, false);
+  private static void upgrade50to51(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
+    GenerateDB.createRunMetadataTable(connection, createConstraints);
 
     // migrate data
     try (PreparedStatement prep = connection.prepareStatement("SELECT TP3.param_value FROM tournament_parameters AS TP3" //
