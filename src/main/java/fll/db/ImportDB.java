@@ -592,24 +592,22 @@ public final class ImportDB {
    * we're only fixing up column names and the data in the column.
    *
    * @param connection the database to upgrade
-   * @param descriptionFor0to1Upgrade the challenge description read from the
+   * @param challengeDescription the challenge description read from the
    *          loaded file, only
    *          use this for adding to the database, any upgrades to the description
    *          should read from the database
-   * @param descriptionFor0to1Upgrade a developer friendly version of
-   *          challengeDocument
    * @param createConstraints if true, create constraints
    * @throws SQLException on an error
    * @throws IllegalArgumentException if the database cannot be upgraded for
    *           some reason
    */
   public static void upgradeDatabase(final Connection connection,
-                                     final ChallengeDescription descriptionFor0to1Upgrade,
+                                     final ChallengeDescription challengeDescription,
                                      final boolean createConstraints)
       throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
-      upgrade0To1(connection, descriptionFor0to1Upgrade);
+      upgrade0To1(connection, challengeDescription);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
