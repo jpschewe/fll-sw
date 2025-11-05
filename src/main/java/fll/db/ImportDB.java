@@ -598,13 +598,11 @@ public final class ImportDB {
    *          should read from the database
    * @param createConstraints if true, create constraints
    * @throws SQLException on an error
-   * @throws IllegalArgumentException if the database cannot be upgraded for
-   *           some reason
    */
   public static void upgradeDatabase(final Connection connection,
                                      final ChallengeDescription challengeDescription,
                                      final boolean createConstraints)
-      throws SQLException, IllegalArgumentException {
+      throws SQLException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDescription);
@@ -843,7 +841,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
-      throw new RuntimeException("Internal error, database version not updated to current instead was: "
+      throw new FLLRuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
     }
   }
