@@ -287,12 +287,6 @@ public class SchedulerUI extends JFrame {
     subjectiveChangeDuration.addPropertyChangeListener("value", durationChangeListener);
     performanceDuration.addPropertyChangeListener("value", durationChangeListener);
 
-    // Work around https://github.com/typetools/checker-framework/issues/4667 by
-    // putting all initialization inside the constructor
-    // Working with checker more I suspect this issue is because of
-    // https://github.com/typetools/checker-framework/issues/4667 and how
-    // @NotOnlyInitialized works
-    // final JMenuBar menubar = createMenubar();
     final JMenuBar menubar = createMenubar();
 
     setJMenuBar(menubar);
