@@ -27,6 +27,12 @@ import jakarta.servlet.ServletContext;
 public final class ApplicationAttributes {
 
   /**
+   * All attributes should be prefixed by this to avoid collisions with
+   * other software.
+   */
+  public static final String PREFIX = "fll-sw.";
+
+  /**
    * {@link javax.sql.DataSource} that is connected to the tournament database.
    * Initialized in 'jspf/init.jspf'.
    */

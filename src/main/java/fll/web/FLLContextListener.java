@@ -13,7 +13,13 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import fll.Utilities;
+import fll.db.DumpDB;
+import fll.db.GenerateDB;
+import fll.db.GlobalParameters;
+import fll.db.ImportDB;
+import fll.db.Queries;
 import fll.util.FLLInternalException;
+import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -26,6 +32,13 @@ import jakarta.servlet.annotation.WebListener;
 public class FLLContextListener implements ServletContextListener {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  /**
+   * {@link Boolean} attribute, true if the database upgrade failed and setup is
+   * required.
+   */
+  public static final String DATABASE_UPGRADE_FAILED = ApplicationAttributes.PREFIX
+      + "DATABASE_UPGRADE_FAILED";
 
   @Override
   public void contextInitialized(final ServletContextEvent event) {
@@ -63,7 +76,7 @@ public class FLLContextListener implements ServletContextListener {
     }
   }
 
-  private static void initDataSource(final ServletContext application) {
+  private synchronized static void initDataSource(final ServletContext application) {
     final String database = application.getRealPath("/WEB-INF/flldb");
 
     // initialize the datasource
@@ -73,12 +86,24 @@ public class FLLContextListener implements ServletContextListener {
       final DataSource datasource = Utilities.createFileDataSource(database);
       application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
 
-      // make sure that the database has started everything by doing a query on
-      // the database
       try (Connection connection = datasource.getConnection()) {
-        Utilities.testDatabaseInitialized(connection);
+        if (Utilities.testDatabaseInitialized(connection)) {
+
+          // upgrade the database if needed
+          final int dbVersion = Queries.getDatabaseVersion(connection);
+          if (dbVersion < GenerateDB.DATABASE_VERSION) {
+            DumpDB.automaticBackup(connection, "before-automatic-upgrade");
+
+            final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
+
+            ImportDB.upgradeDatabase(connection, challengeDescription, true);
+          }
+        }
+
+        application.setAttribute(DATABASE_UPGRADE_FAILED, Boolean.FALSE);
       } catch (final SQLException e) {
-        throw new FLLInternalException("Got an error starting up the database", e);
+        LOGGER.error("Got an error upgrading the database. Forcing setup.", e);
+        application.setAttribute(DATABASE_UPGRADE_FAILED, Boolean.TRUE);
       }
     }
   }

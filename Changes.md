@@ -1,3 +1,5 @@
+* #1117 - Upgrade database on software startup. Most users won't see any effect from this.
+
 Release 20.0.0
 ==============
 
