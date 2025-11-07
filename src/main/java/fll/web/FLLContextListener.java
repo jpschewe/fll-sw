@@ -76,34 +76,39 @@ public class FLLContextListener implements ServletContextListener {
     }
   }
 
-  private synchronized static void initDataSource(final ServletContext application) {
-    final String database = application.getRealPath("/WEB-INF/flldb");
+  // use lock object so that we know for sure what we are locking on
+  private static final Object LOCK = new Object();
 
-    // initialize the datasource
-    if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class)) {
-      LOGGER.trace("Datasource not available, creating");
+  private static void initDataSource(final ServletContext application) {
+    synchronized (LOCK) {
+      final String database = application.getRealPath("/WEB-INF/flldb");
 
-      final DataSource datasource = Utilities.createFileDataSource(database);
-      application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
+      // initialize the datasource
+      if (null == ApplicationAttributes.getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class)) {
+        LOGGER.trace("Datasource not available, creating");
 
-      try (Connection connection = datasource.getConnection()) {
-        if (Utilities.testDatabaseInitialized(connection)) {
+        final DataSource datasource = Utilities.createFileDataSource(database);
+        application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
 
-          // upgrade the database if needed
-          final int dbVersion = Queries.getDatabaseVersion(connection);
-          if (dbVersion < GenerateDB.DATABASE_VERSION) {
-            DumpDB.automaticBackup(connection, "before-automatic-upgrade");
+        try (Connection connection = datasource.getConnection()) {
+          if (Utilities.testDatabaseInitialized(connection)) {
 
-            final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
+            // upgrade the database if needed
+            final int dbVersion = Queries.getDatabaseVersion(connection);
+            if (dbVersion < GenerateDB.DATABASE_VERSION) {
+              DumpDB.automaticBackup(connection, "before-automatic-upgrade");
 
-            ImportDB.upgradeDatabase(connection, challengeDescription, true);
+              final ChallengeDescription challengeDescription = GlobalParameters.getChallengeDescription(connection);
+
+              ImportDB.upgradeDatabase(connection, challengeDescription, true);
+            }
           }
-        }
 
-        application.setAttribute(DATABASE_UPGRADE_FAILED, Boolean.FALSE);
-      } catch (final SQLException e) {
-        LOGGER.error("Got an error upgrading the database. Forcing setup.", e);
-        application.setAttribute(DATABASE_UPGRADE_FAILED, Boolean.TRUE);
+          application.setAttribute(DATABASE_UPGRADE_FAILED, Boolean.FALSE);
+        } catch (final SQLException e) {
+          LOGGER.error("Got an error upgrading the database. Forcing setup.", e);
+          application.setAttribute(DATABASE_UPGRADE_FAILED, Boolean.TRUE);
+        }
       }
     }
   }
