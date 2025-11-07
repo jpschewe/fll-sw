@@ -13,6 +13,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -30,8 +31,7 @@ public class FLLContextListener implements ServletContextListener {
   public void contextInitialized(final ServletContextEvent event) {
     final ServletContext application = event.getServletContext();
     if (null == application) {
-      LOGGER.error("Got null servlet context inside contextInitialized, this is odd");
-      return;
+      throw new FLLInternalException("Got null servlet context inside contextInitialized, this is odd");
     }
 
     // setup the character encoding
@@ -78,8 +78,7 @@ public class FLLContextListener implements ServletContextListener {
       try (Connection connection = datasource.getConnection()) {
         Utilities.testDatabaseInitialized(connection);
       } catch (final SQLException e) {
-        LOGGER.error("Got an error starting up the database, this is probably not good. Maybe it will work itself out",
-                     e);
+        throw new FLLInternalException("Got an error starting up the database", e);
       }
     }
   }
