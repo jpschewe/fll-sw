@@ -21,8 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -194,40 +192,6 @@ public final class Utilities {
         }
       }
       return false;
-    }
-  }
-
-  /**
-   * Get the name of the database driver class.
-   */
-  private static Driver getDBDriver() {
-    if (Boolean.getBoolean("inside.test")) {
-      return new net.sf.log4jdbc.DriverSpy();
-    } else {
-      return new org.hsqldb.jdbcDriver();
-    }
-  }
-
-  /**
-   * Load the database driver and throw a RuntimeException if there is an error.
-   */
-  public static void loadDBDriver() {
-    try {
-      DriverManager.registerDriver(getDBDriver());
-    } catch (final SQLException e) {
-      throw new RuntimeException("Unable to register database driver", e);
-    }
-  }
-
-  /**
-   * Unload the database driver and throw a RuntimeException if there is an
-   * error.
-   */
-  public static void unloadDBDriver() {
-    try {
-      DriverManager.deregisterDriver(getDBDriver());
-    } catch (final SQLException e) {
-      throw new RuntimeException("Unable to unload database driver", e);
     }
   }
 
