@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
@@ -85,7 +84,6 @@ public final class PlayoffSessionData implements Serializable {
     mUnfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
 
     mSort = BracketSortType.SEEDING;
-    mTeamsNeedingSeedingRuns = new LinkedList<>();
   }
 
   private boolean mEnableThird = false;
@@ -221,22 +219,6 @@ public final class PlayoffSessionData implements Serializable {
    */
   public @Nullable String getBracket() {
     return mBracket;
-  }
-
-  private List<Team> mTeamsNeedingSeedingRuns;
-
-  /**
-   * @return teams that needing to complete seeding rounds
-   */
-  public List<Team> getTeamsNeedingSeedingRuns() {
-    return mTeamsNeedingSeedingRuns;
-  }
-
-  /**
-   * @param v {@link #getTeamsNeedingSeedingRuns()}
-   */
-  public void setTeamsNeedingSeedingRounds(final List<Team> v) {
-    mTeamsNeedingSeedingRuns = v;
   }
 
   private final Collection<String> safeToUninitialize;

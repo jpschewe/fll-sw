@@ -198,7 +198,11 @@ function topScoresComparator(a, b) {
 }
 
 function allTeamsScoreCellId(teamNumber, runNumber) {
-    return "all_teams_" + teamNumber + "_run_" + runNumber + "_score";
+    return allTeamsScoreRowId(teamNumber, runNumber) + "_score";
+}
+
+function allTeamsRunCellId(teamNumber, runNumber) {
+    return allTeamsScoreRowId(teamNumber, runNumber) + "_runDisplay";
 }
 
 function allTeamsScoreRowId(teamNumber, runNumber) {
@@ -244,6 +248,7 @@ function allTeamsEnsureScoreRowExists(teamNumber, runNumber) {
 
         const runCell = row.insertCell();
         runCell.innerText = runNumber;
+        runCell.id = allTeamsRunCellId(teamNumber, runNumber);
 
         const scoreSpacerCell = row.insertCell();
         const scoreSpacer = document.createElement("img");
@@ -260,7 +265,10 @@ function addToAllTeams(scoreUpdate) {
     // make sure the row exists
     allTeamsEnsureScoreRowExists(scoreUpdate.team.teamNumber, scoreUpdate.runNumber);
 
-    // populate the score
+    // populate the cells
+    const runCell = document.getElementById(allTeamsRunCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
+    runCell.innerText = scoreUpdate.runMetadata.displayName;
+
     const scoreCell = document.getElementById(allTeamsScoreCellId(scoreUpdate.team.teamNumber, scoreUpdate.runNumber));
     scoreCell.innerText = scoreUpdate.formattedScore;
 
@@ -294,13 +302,13 @@ function allTeamsDoScroll(timestamp) {
 function addToMostRecent(tableBody, scoreUpdate) {
     const rowId = "most_recent_" + scoreUpdate.team.teamNumber + "_run_" + scoreUpdate.runNumber;
     const prevRow = document.getElementById(rowId);
-    if(prevRow) {
+    if (prevRow) {
         prevRow.parentNode.removeChild(prevRow);
     }
-    
+
     const trElement = tableBody.insertRow(0);
     trElement.id = rowId;
-    
+
     const teamNumElement = trElement.insertCell();
     teamNumElement.classList.add("left");
     teamNumElement.innerText = scoreUpdate.team.teamNumber;
@@ -418,7 +426,10 @@ function messageReceived(event) {
             const mostRecentTableBody = document.getElementById("most_recent_table_body");
             addToMostRecent(mostRecentTableBody, message);
             addToAllTeams(message);
-            topScoresAddScore(message);
+
+            if (message.runMetadata.regularMatchPlay) {
+                topScoresAddScore(message);
+            }
         }
     } else if (message.type == DELETE_MESSAGE_TYPE) {
         location.reload();
@@ -462,23 +473,28 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if ("top_scores" == layout) {
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
-        const allTeams = document.getElementById("top_scores");
+        const topScores = document.getElementById("top_scores");
         const container = document.getElementById("container");
-        container.appendChild(allTeams);
+        container.appendChild(topScores);
     } else if ("top_scores_all" == layout) {
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
-        const allTeams = document.getElementById("top_scores");
+        const topScores = document.getElementById("top_scores");
         const container = document.getElementById("container");
-        container.appendChild(allTeams);
+        container.appendChild(topScores);
 
         topScoresDisplayAllTeams = true;
     } else if ("most_recent" == layout) {
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
-        const allTeams = document.getElementById("most_recent");
+        const mostRecent = document.getElementById("most_recent");
         const container = document.getElementById("container");
-        container.appendChild(allTeams);
+        container.appendChild(mostRecent);
+    } else if ("most_recent_all_teams" == layout) {
+        document.getElementById("top_scores").classList.add("fll-sw-ui-inactive");
+
+        document.getElementById("all_teams").classList.add("automatic_scroll");
+        requestAnimationFrame(allTeamsDoScroll);
     } else {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);

@@ -70,8 +70,8 @@ import org.apache.catalina.LifecycleException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
@@ -185,8 +185,12 @@ public class Launcher extends JFrame {
   }
 
   private static void usage(final Options options) {
-    final HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp("Launcher", options);
+    final HelpFormatter formatter = HelpFormatter.builder().get();
+    try {
+      formatter.printHelp("Launcher", null, options, null, true);
+    } catch (final IOException e) {
+      LOGGER.fatal(e);
+    }
   }
 
   private static void setupGui() {

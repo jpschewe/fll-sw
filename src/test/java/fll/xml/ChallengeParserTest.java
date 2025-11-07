@@ -437,7 +437,7 @@ public class ChallengeParserTest {
    * @return urls to use for {@link #testAllDescriptors(URL)}
    */
   public static Stream<URL> knownChallengeDescriptors() {
-    return ChallengeParser.getAllKnownChallengeDescriptorURLs().stream().sorted(UrlStringComparator.INSTANCE);
+    return DescriptionInfo.getAllKnownChallengeDescriptorURLs().stream().sorted(UrlStringComparator.INSTANCE);
   }
 
   /**

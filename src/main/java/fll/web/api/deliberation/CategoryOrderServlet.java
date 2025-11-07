@@ -179,11 +179,21 @@ public class CategoryOrderServlet extends HttpServlet {
     }
   }
 
-  private static List<String> getCategoryOrder(final Connection connection,
-                                               final ChallengeDescription description,
-                                               final Tournament tournament,
-                                               final String awardGroup,
-                                               final Set<String> scheduledCategoryNames)
+  /**
+   * @param connection database
+   * @param description challenge
+   * @param tournament tournament
+   * @param awardGroup the award group to get the order for
+   * @param scheduledCategoryNames category titles that must be present
+   * @return category titles in the order that they are to be handled in
+   *         deliberations
+   * @throws SQLException on a database error
+   */
+  public static List<String> getCategoryOrder(final Connection connection,
+                                              final ChallengeDescription description,
+                                              final Tournament tournament,
+                                              final String awardGroup,
+                                              final Set<String> scheduledCategoryNames)
       throws SQLException {
     final List<String> categoryOrder = new LinkedList<>();
     try (PreparedStatement prep = connection.prepareStatement("SELECT category_name FROM deliberation_category_order" //

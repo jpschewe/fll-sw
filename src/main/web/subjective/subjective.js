@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2014 INSciTE.  All rights reserved
- * INSciTE is on the web at: http://www.hightechkids.org
- * This code is released under GPL; see LICENSE.txt for details.
- */
+* Copyright (c) 2014 INSciTE.  All rights reserved
+* INSciTE is on the web at: http://www.hightechkids.org
+* This code is released under GPL; see LICENSE.txt for details.
+*/
 
 "use strict";
 
@@ -18,6 +18,7 @@ const subjective_module = {}
     // //////////////////////// PRIVATE INTERFACE ////////////////////////
 
     let _subjectiveCategories; // category.name -> category
+    let _virtualSubjectiveCategories; // array of virtual category
     let _nonNumericCategories; // category.title -> category
     let _tournament;
     let _teams;
@@ -27,6 +28,7 @@ const subjective_module = {}
     let _currentCategoryColumn;
     let _judges;
     let _currentJudgeId;
+    // category name -> judge -> teamNumber -> score object
     let _allScores;
     let _teamTimeCache;
     let _currentTeam;
@@ -36,6 +38,7 @@ const subjective_module = {}
 
     function _init_variables() {
         _subjectiveCategories = {};
+        _virtualSubjectiveCategories = [];
         _nonNumericCategories = {};
         _tournament = null;
         _teams = {};
@@ -58,6 +61,11 @@ const subjective_module = {}
         let value = fllStorage.get(STORAGE_PREFIX, "_subjectiveCategories");
         if (null != value) {
             _subjectiveCategories = value;
+        }
+
+        value = fllStorage.get(STORAGE_PREFIX, "_virtualSubjectiveCategories");
+        if (null != value) {
+            _virtualSubjectiveCategories = value;
         }
 
         value = fllStorage.get(STORAGE_PREFIX, "_nonNumericCategories");
@@ -133,6 +141,8 @@ const subjective_module = {}
     function _save() {
         fllStorage.set(STORAGE_PREFIX, "_subjectiveCategories",
             _subjectiveCategories);
+        fllStorage.set(STORAGE_PREFIX, "_virtualSubjectiveCategories",
+            _virtualSubjectiveCategories);
         fllStorage.set(STORAGE_PREFIX, "_nonNumericCategories",
             _nonNumericCategories);
         fllStorage.set(STORAGE_PREFIX, "_tournament", _tournament);
@@ -227,6 +237,19 @@ const subjective_module = {}
         });
     }
 
+    /**
+     * Load the virtual subjective categories.
+     * 
+     * @returns the promise for the ajax query
+     */
+    function _loadVirtualSubjectiveCategories() {
+        _virtualSubjectiveCategories = [];
+
+        return fetch("../api/ChallengeDescription/VirtualSubjectiveCategories").then(checkJsonResponse).then(function(data) {
+            _virtualSubjectiveCategories = data;
+        });
+    }
+
     function loadNonNumericCategories() {
         _nonNumericCategories = {};
 
@@ -297,6 +320,12 @@ const subjective_module = {}
             });
             waitList.push(subjectiveCategoriesPromise);
 
+            const virtualSubjectiveCategoriesPromise = _loadVirtualSubjectiveCategories();
+            virtualSubjectiveCategoriesPromise.catch(function() {
+                failCallback("Virtual Subjective Categories");
+            });
+            waitList.push(virtualSubjectiveCategoriesPromise);
+
             const nonNumericCategoriesPromise = loadNonNumericCategories();
             nonNumericCategoriesPromise.catch(function() {
                 failCallback("NonNumeric Categories");
@@ -354,6 +383,27 @@ const subjective_module = {}
                 retval.push(category);
             }
             return retval;
+        },
+
+        /**
+         * @param goal a goal in the current subjective category
+         * @return true if the goal is referenced in a virtual subjective category
+         */
+        subjective_module.isReferencedInVirtualCategory = function(goal) {
+            if (_currentCategory == null) {
+                return false;
+            }
+
+            for (const virt of _virtualSubjectiveCategories) {
+                for (const ref of virt.goalReferences) {
+                    if (ref.category.name == _currentCategory.name
+                        && ref.goalName == goal.name) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         },
 
         /**
@@ -661,6 +711,28 @@ const subjective_module = {}
             return judgeScores[teamNumber];
         },
 
+        /**
+         * Get all scores for the specified team.
+         * @param teamNumber number of the team to find
+         * @return map of judge id to score or null if no scores
+         */
+        subjective_module.getOtherJudgeScores = function(teamNumber) {
+            const categoryScores = _allScores[_currentCategory.name];
+            if (null == categoryScores) {
+                return null;
+            }
+
+            const otherJudgeScores = new Map();
+            for (const [judgeId, teamScores] of Object.entries(categoryScores)) {
+                for (const [tnum, score] of Object.entries(teamScores)) {
+                    if (tnum == teamNumber && judgeId != subjective_module.getCurrentJudgeId()) {
+                        otherJudgeScores.set(judgeId, score);
+                    }
+                }
+            }
+            return otherJudgeScores;
+        },
+
         subjective_module.saveScore = function(score) {
             if (null == _currentJudgeId) {
                 return;
@@ -833,71 +905,38 @@ const subjective_module = {}
         },
 
         /**
-         * Upload all data to the server and then download the most recent data.
+         * Upload all data to the server.
          * 
-         * @param scoresSuccess
-         *          called with a SubjectiveScoresServlet.UploadResult object on
-         *          successful upload of scores
-         * @param scoresFail
-         *          called with a SubjectiveScoresServlet.UploadResult object on
-         *          failed upload of scores
-         * @param judgesSuccess
-         *          called with a JudgesServlet.UploadResult object on successful
-         *          upload of judges
-         * @param judgesFail
-         *          called with a JudgesServlet.UploadResult object on failed upload
-         *          of judges
-         * @param loadSuccess
-         *          called after all uploads and successful load of data (no
-         *          argument)
-         * @param loadFail
-         *          called after all uploads and failed load of data (string
-         *          message)
+         * @param successCallback called with no arguments on success
+         * @param failCallback called with ApiResult on failure
          */
-        subjective_module.uploadData = function(scoresSuccess, scoresFail, judgesSuccess, judgesFail,
-            loadSuccess, loadFail) {
-
-            fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
-                if (data.authenticated) {
-                    subjective_module
-                        .getServerTournament(function(serverTournament) {
-                            const storedTournament = subjective_module.getTournament();
-                            if (null == storedTournament) {
-                                loadFail("Internal error, no saved tournament");
-                            } else if (storedTournament.name != serverTournament.name
-                                || storedTournament.tournamentID != serverTournament.tournamentID) {
-                                loadFail("Tournament mismatch local: "
-                                    + storedTournament.name + "("
-                                    + storedTournament.tournamentID + ")"
-                                    + " server: " + serverTournament.name + "("
-                                    + serverTournament.tournamentID + ")");
-                            } else {
-                                const waitList = [];
-                                waitList.push(subjective_module.uploadScores(
-                                    scoresSuccess, scoresFail));
-                                waitList.push(subjective_module.uploadJudges(
-                                    judgesSuccess, judgesFail));
-
-                                Promise.all(waitList).then(function() {
-                                    subjective_module.loadFromServer(function() {
-                                        loadSuccess();
-                                    }, function(error) {
-                                        loadFail(`Error getting updated scores: ${error}`);
-                                    }, false);
-                                });
-                            }
+        subjective_module.uploadData = function(successCallback, failCallback) {
+            subjective_module
+                .getServerTournament(function(serverTournament) {
+                    const storedTournament = subjective_module.getTournament();
+                    if (null == storedTournament) {
+                        failCallback({ success: false, message: "Internal error, no saved tournament" });
+                    } else if (storedTournament.name != serverTournament.name
+                        || storedTournament.tournamentID != serverTournament.tournamentID) {
+                        failCallback({
+                            success: false, message: "Tournament mismatch local: "
+                                + storedTournament.name + "("
+                                + storedTournament.tournamentID + ")"
+                                + " server: " + serverTournament.name + "("
+                                + serverTournament.tournamentID + ")"
                         });
-                } else {
-                    alertCallback = function() {
-                        // hide the spinning animation
-                        loadSuccess();
+                    } else {
+                        const waitList = [];
+                        waitList.push(subjective_module.uploadScores(
+                            (result) => { subjective_module.log(`Uploaded scores: ${JSON.stringify(result)}`) }, failCallback));
+                        waitList.push(subjective_module.uploadJudges(
+                            (result) => { subjective_module.log(`Uploaded judges: ${JSON.stringify(result)}`) }, failCallback));
 
-                        window.open('../login.jsp', '_login');
+                        Promise.all(waitList).then(() => {
+                            successCallback();
+                        });
                     }
-                    document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
-                    document.getElementById("alert-dialog").classList.remove("fll-sw-ui-inactive");
-                }
-            });
+                });
         },
 
         /**
@@ -966,17 +1005,14 @@ const subjective_module = {}
                     if (!response.ok) {
                         throw new Error(`HTTP error: ${response.status}`);
                     } else {
-                        subjective_module.log('fetch good! ' + response);
-                        subjective_module.log("server online");
+                        subjective_module.log('fetch good, server online: ' + JSON.stringify(response));
                         onlineCallback();
                     }
                     // no need to resolve the response object as we know the server is online, we don't need the data in the response
                 }).
                 catch((err) => {
-                    subjective_module.log('Server offline (fetch error): ' + err);
-
                     // Error: response error, request timeout or runtime error
-                    subjective_module.log("server offline: " + err);
+                    subjective_module.log('Server offline (fetch error): ' + JSON.stringify(err));
                     offlineCallback();
                 }).
                 finally(() => {

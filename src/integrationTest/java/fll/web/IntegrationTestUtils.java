@@ -67,6 +67,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -86,6 +87,7 @@ import fll.Launcher;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.RunMetadata;
 import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -659,7 +661,7 @@ public final class IntegrationTestUtils {
       if (text.endsWith("[ "
           + tournamentName
           + " ]")) {
-        tournamentID = option.getAttribute("value");
+        tournamentID = option.getDomProperty("value");
       }
     }
     assertNotNull(tournamentID, "Could not find tournament with name: "
@@ -758,6 +760,59 @@ public final class IntegrationTestUtils {
     final WebDriver selenium = new ChromeDriver();
 
     return selenium;
+  }
+
+  /**
+   * Configure the server using the specified {@link RunMetadata}.
+   * 
+   * @param selenium test driver
+   * @param seleniumWait test waiter
+   * @param runMetadata metadata to configure on the server
+   */
+  public static void configureRunMetadata(final WebDriver selenium,
+                                          final WebDriverWait seleniumWait,
+                                          final RunMetadata runMetadata) {
+    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
+        + "admin/edit_run_metadata.jsp");
+
+    final String displayNameInputId = String.format("%d_name", runMetadata.getRunNumber());
+    // ensure the run exists
+    final WebElement addRowButton = selenium.findElement(By.id("addRow"));
+
+    while (true) {
+      try {
+        seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id(displayNameInputId)));
+        break;
+      } catch (final TimeoutException e) {
+        LOGGER.debug("Didn't find element {}, adding a row", displayNameInputId, e);
+        addRowButton.click();
+      }
+    }
+
+    // configure page
+    final WebElement nameInput = selenium.findElement(By.id(displayNameInputId));
+    nameInput.clear();
+    nameInput.sendKeys(runMetadata.getDisplayName());
+
+    final WebElement runTypeInput = selenium.findElement(By.id(String.format("%d_runType",
+                                                                             runMetadata.getRunNumber())));
+    final Select runTypeSelect = new Select(runTypeInput);
+    runTypeSelect.selectByValue(runMetadata.getRunType().name());
+
+    final WebElement scoreboardDisplayInput = selenium.findElement(By.id(String.format("%d_scoreboardDisplay",
+                                                                                       runMetadata.getRunNumber())));
+    if (runMetadata.isScoreboardDisplay()
+        && !scoreboardDisplayInput.isSelected()) {
+      scoreboardDisplayInput.click();
+    } else if (!runMetadata.isScoreboardDisplay()
+        && scoreboardDisplayInput.isSelected()) {
+      scoreboardDisplayInput.click();
+    }
+
+    selenium.findElement(By.id("submit_data")).click();
+
+    // wait for positive response
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
   }
 
   /**
@@ -894,29 +949,6 @@ public final class IntegrationTestUtils {
   }
 
   /**
-   * Change the number of seeding rounds for the current tournament.
-   *
-   * @param selenium the driver
-   * @param seleniumWait wait for elements
-   * @param newValue the new value
-   * @throws NoSuchElementException if there was a problem changing the value
-   * @throws IOException if there is an error talking to selenium
-   */
-  public static void changeNumSeedingRounds(final WebDriver selenium,
-                                            final WebDriverWait seleniumWait,
-                                            final int newValue)
-      throws NoSuchElementException, IOException {
-    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/edit_tournament_parameters.jsp");
-
-    selenium.findElement(By.id("seeding_rounds")).sendKeys(String.valueOf(newValue));
-
-    selenium.findElement(By.id("submit_data")).click();
-
-    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
-  }
-
-  /**
    * Get the id of the current tournament.
    *
    * @param seleniumWait wait for elements
@@ -935,7 +967,7 @@ public final class IntegrationTestUtils {
     final Select currentTournamentSel = new Select(currentTournament);
     for (final WebElement option : currentTournamentSel.getOptions()) {
       if (option.isSelected()) {
-        final String idStr = option.getAttribute("value");
+        final String idStr = option.getDomProperty("value");
         return Integer.parseInt(idStr);
       }
     }
@@ -1203,59 +1235,6 @@ public final class IntegrationTestUtils {
     if (runningHeadToHead != element.isSelected()) {
       element.click();
     }
-
-    selenium.findElement(By.id("submit_data")).click();
-
-    assertNotNull(selenium.findElement(By.id("success")));
-  }
-
-  /**
-   * Set the number of regular match play rounds tournament parameter. Make sure
-   * that the
-   * current
-   * tournament is set before calling this method.
-   *
-   * @param selenium the web driver
-   * @param seleniumWait wait for elements
-   * @param numRounds the value to use
-   * @throws IOException see {@link #loadPage(WebDriver, WebDriverWait, String)}
-   */
-  public static void setNumRegularMatchPlayRounds(final WebDriver selenium,
-                                                  final WebDriverWait seleniumWait,
-                                                  final int numRounds)
-      throws IOException {
-    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/edit_tournament_parameters.jsp");
-
-    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("seeding_rounds")));
-    element.clear();
-    element.sendKeys(String.valueOf(numRounds));
-
-    selenium.findElement(By.id("submit_data")).click();
-
-    assertNotNull(selenium.findElement(By.id("success")));
-  }
-
-  /**
-   * Set the number of practice rounds tournament parameter. Make sure that the
-   * current
-   * tournament is set before calling this method.
-   *
-   * @param selenium the web driver
-   * @param seleniumWait wait for elements
-   * @param numRounds the value to use
-   * @throws IOException see {@link #loadPage(WebDriver, WebDriverWait, String)}
-   */
-  public static void setNumPracticeRounds(final WebDriver selenium,
-                                          final WebDriverWait seleniumWait,
-                                          final int numRounds)
-      throws IOException {
-    loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-        + "admin/edit_tournament_parameters.jsp");
-
-    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("practice_rounds")));
-    element.clear();
-    element.sendKeys(String.valueOf(numRounds));
 
     selenium.findElement(By.id("submit_data")).click();
 

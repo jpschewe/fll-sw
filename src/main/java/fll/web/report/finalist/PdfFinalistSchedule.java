@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,11 +33,13 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
+import fll.util.FOPUtils.Margins;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.api.deliberation.CategoryOrderServlet;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -84,9 +85,9 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
       return;
     }
 
-    final String division = request.getParameter("division");
-    if (null == division
-        || "".equals(division)) {
+    final String awardGroup = request.getParameter("division");
+    if (null == awardGroup
+        || "".equals(awardGroup)) {
       throw new FLLRuntimeException("Parameter 'division' cannot be null");
     }
 
@@ -106,9 +107,9 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
       final OutputStream stream = response.getOutputStream();
 
       final FinalistSchedule schedule = new FinalistSchedule(connection, Queries.getCurrentTournament(connection),
-                                                             division);
+                                                             awardGroup);
 
-      outputSchedule(stream, connection, challengeDescription, schedule);
+      outputSchedule(stream, connection, challengeDescription, schedule, awardGroup);
 
       stream.flush();
 
@@ -166,11 +167,12 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
   private void outputSchedule(final OutputStream stream,
                               final Connection connection,
                               final ChallengeDescription challengeDescription,
-                              final FinalistSchedule schedule)
+                              final FinalistSchedule schedule,
+                              final String awardGroup)
       throws IOException, SQLException {
     try {
 
-      final Document document = createDocument(connection, challengeDescription, schedule);
+      final Document document = createDocument(connection, challengeDescription, schedule, awardGroup);
 
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -182,7 +184,8 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
   private Document createDocument(final Connection connection,
                                   final ChallengeDescription challengeDescription,
-                                  final FinalistSchedule schedule)
+                                  final FinalistSchedule schedule,
+                                  final String awardGroup)
       throws SQLException {
     final Tournament tournament = Tournament.getCurrentTournament(connection);
 
@@ -195,10 +198,10 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
-                                                               FOPUtils.STANDARD_MARGINS, 0.75, 0);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
+                                                               FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
+                                                               new Margins(0.2, 0.2, 0.2, 0.2), 0.75, 0);
     layoutMasterSet.appendChild(pageMaster);
-    pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -209,7 +212,8 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element mainTable = createMainTable(connection, document, schedule);
+    final Element mainTable = createMainTable(connection, document, challengeDescription, tournament, schedule,
+                                              awardGroup);
     documentBody.appendChild(mainTable);
 
     return document;
@@ -222,10 +226,18 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
 
   private Element createMainTable(final Connection connection,
                                   final Document document,
-                                  final FinalistSchedule schedule) {
+                                  final ChallengeDescription description,
+                                  final Tournament tournament,
+                                  final FinalistSchedule schedule,
+                                  final String awardGroup)
+      throws SQLException {
 
-    // convert to list to ensure we have a stable iteration order
-    final List<String> categories = new LinkedList<>(schedule.getCategoryNames());
+    final Set<String> scheduleCategories = schedule.getCategoryNames();
+    final List<String> categoryOrder = CategoryOrderServlet.getCategoryOrder(connection, description, tournament,
+                                                                             awardGroup, scheduleCategories);
+    // filter to only those in the schedule
+    final List<String> categories = categoryOrder.stream().filter(c -> scheduleCategories.contains(c)).toList();
+
     final Map<String, @Nullable String> categoryToRoom = schedule.getRooms();
 
     final Element mainTable = FOPUtils.createBasicTable(document);
@@ -330,7 +342,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     } else {
       final Element e = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       cell.appendChild(e);
-      e.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
+      e.appendChild(document.createTextNode(Utilities.NON_BREAKING_SPACE_STRING));
     }
 
     FOPUtils.addBorders(cell, FOPUtils.STANDARD_BORDER_WIDTH);

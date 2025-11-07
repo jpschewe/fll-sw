@@ -5,8 +5,7 @@
 
 <title>Finalist Scheduling</title>
 
-<script type='text/javascript'
-    src='../../extlib/js-joda/js-joda.min.js'></script>
+<script type='text/javascript' src='../../extlib/js-joda/js-joda.min.js'></script>
 
 <script type='text/javascript' src='../../js/fll-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>
@@ -45,12 +44,22 @@
         <br />
     </p>
 
-    <p>Choose the start and end time for each head to head bracket.
-        This ensures that teams aren't scheduled for finalist judging
-        when they are to be competing. You can leave the times blank if
-        you don't want to consider them when scheduling.
-    <div id='head_head_times'></div>
+    <div id='head_to_head'>
+        <p>Choose the start and end time for each head to head
+            bracket. This ensures that teams aren't scheduled for
+            finalist judging when they are to be competing. You can
+            leave the times blank if you don't want to consider them
+            when scheduling.
+        <div id='head_head_times'></div>
+    </div>
 
+    <div id='finalist_groups'>
+        <p>Optionally create finalist groups made up of judging
+            groups. If you don't want to liimt when teams are scheduled
+            for finalist callbacks, then don't create any finalist
+            groups.
+        <div id='finalist_group_times'></div>
+    </div>
 
 
 

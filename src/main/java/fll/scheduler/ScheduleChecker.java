@@ -198,7 +198,7 @@ public class ScheduleChecker {
 
     // constraint: team:4
     for (final PerformanceTime performance : ti.getAllPerformances()) {
-      final String performanceName = ti.getRoundName(performance);
+      final String performanceName = getRoundName(ti, performance);
       verifyPerformanceVsSubjective(violations, ti, performanceName, performance.getTime());
     }
 
@@ -255,7 +255,7 @@ public class ScheduleChecker {
           if (opponentSide == performance.getSide()) {
             final String message = String.format("Team %d and team %d are both on table %s side %d at the same time for round %s",
                                                  ti.getTeamNumber(), opponent.getTeamNumber(), performance.getTable(),
-                                                 performance.getSide(), ti.getRoundName(performance));
+                                                 performance.getSide(), getRoundName(ti, performance));
             violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
                                                    performance.getTime(), message));
           }
@@ -267,7 +267,7 @@ public class ScheduleChecker {
               && opponent.equals(otherOpponent)) {
             final String message = String.format("Team %d competes against %d more than once rounds: %s, %s",
                                                  ti.getTeamNumber(), opponent.getTeamNumber(),
-                                                 ti.getRoundName(performance), ti.getRoundName(p));
+                                                 getRoundName(ti, performance), getRoundName(ti, p));
             violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
                                                    performance.getTime(), message));
             violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
@@ -280,7 +280,7 @@ public class ScheduleChecker {
         });
       } else {
         final String message = String.format("Team %d has no opponent for round %s", ti.getTeamNumber(),
-                                             ti.getRoundName(performance));
+                                             getRoundName(ti, performance));
         violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
                                                performance.getTime(), message));
       }
@@ -308,8 +308,8 @@ public class ScheduleChecker {
         final LocalTime roundStart = performance.getTime();
         if (prevRoundEnd.isAfter(roundStart)) {
           final String message = String.format("Team %d is still in performance %s when they are to start performance %s: %s - %s", //
-                                               ti.getTeamNumber(), ti.getRoundName(prevPerformance),
-                                               ti.getRoundName(performance),
+                                               ti.getTeamNumber(), getRoundName(ti, prevPerformance),
+                                               getRoundName(ti, performance),
                                                TournamentSchedule.formatTime(prevPerformance.getTime()),
                                                TournamentSchedule.formatTime(performance.getTime()));
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
@@ -317,7 +317,7 @@ public class ScheduleChecker {
         } else if (prevRoundEnd.plus(perfChangetime).isAfter(roundStart)) {
           final String message = String.format("Team %d doesn't have enough time (%s) between performance %s and performance %s: %s - %s", //
                                                ti.getTeamNumber(), perfChangetime.toString(),
-                                               ti.getRoundName(prevPerformance), ti.getRoundName(performance),
+                                               getRoundName(ti, prevPerformance), getRoundName(ti, performance),
                                                TournamentSchedule.formatTime(prevPerformance.getTime()),
                                                TournamentSchedule.formatTime(performance.getTime()));
           violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
@@ -518,6 +518,29 @@ public class ScheduleChecker {
    */
   private Duration getPerformanceChangetime() {
     return Duration.ofMinutes(params.getPerformanceChangetimeMinutes());
+  }
+
+  /**
+   * Compute a display name for the specified performance round.
+   *
+   * @param si the schedule info that the performance round comes from
+   * @param performance the performance information
+   * @return the name to display
+   * @throws IndexOutOfBoundsException if the computed round index is less than
+   *           zero
+   */
+  private static String getRoundName(final TeamScheduleInfo si,
+                                     final PerformanceTime performance) {
+    final int roundIndex = si.computeRound(performance);
+    if (roundIndex < 0) {
+      throw new IndexOutOfBoundsException("Computed round index for "
+          + performance
+          + " is "
+          + roundIndex);
+    } else {
+      return String.format("Run %d", roundIndex
+          + 1);
+    }
   }
 
 }

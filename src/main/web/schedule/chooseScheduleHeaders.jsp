@@ -22,20 +22,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 <script type='text/javascript'>
   "use strict";
 
-  const TEAM_NUMBER_HEADER = "${TEAM_NUMBER_HEADER}";
-  const TEAM_NAME_HEADER = "${TEAM_NAME_HEADER}";
-  const ORGANIZATION_HEADER = "${ORGANIZATION_HEADER}";
-  const AWARD_GROUP_HEADER = "${AWARD_GROUP_HEADER}";
-  const JUDGE_GROUP_HEADER = "${JUDGE_GROUP_HEADER}";
-  const WAVE_HEADER = "${WAVE_HEADER}";
   const numPerformanceRuns = parseInt("${uploadScheduleData.numPerformanceRuns}");
-  const numPracticeRounds = parseInt("${numPracticeRounds}");
-  const perfHeaders = JSON.parse('${perfHeaders}');
-  const perfTableHeaders = JSON.parse('${perfTableHeaders}');
-  const practiceHeaders = JSON.parse('${practiceHeaders}');
-  const practiceTableHeaders = JSON.parse('${practiceTableHeaders}');
-  const BASE_PRACTICE_HEADER_SHORT = "${BASE_PRACTICE_HEADER_SHORT}";
-  const PRACTICE_TABLE_HEADER_FORMAT_SHORT = "${PRACTICE_TABLE_HEADER_FORMAT_SHORT}";
 </script>
 
 </head>
@@ -43,15 +30,8 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 <body>
     <h1>Choose Headers (Upload Schedule)</h1>
 
-    <p>
-        If the number of performance rounds or practice rounds does not
-        match what is expected, <a
-            href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">edit
-            the tournament parameters</a> and then upload the schedule
-        again.
-    </p>
-
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
+
     <form name="choose_headers" id="choose_headers" method='POST'
         action="<c:url value='/schedule/ChooseScheduleHeaders'/>">
 
@@ -69,9 +49,18 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                 <td>Team Number</td>
                 <td>
                     <select id='teamNumber' name='teamNumber'>
-                        <c:forEach items="${spreadsheetHeaderNames}"
+                        <c:forEach items="${numberColumns}"
                             var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
+                            <c:choose>
+                                <c:when
+                                    test="${fileHeader == teamNumber_value}">
+                                    <option value="${fileHeader}"
+                                        selected>${fileHeader}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${fileHeader}">${fileHeader}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </td>
@@ -85,7 +74,16 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
+                            <c:choose>
+                                <c:when
+                                    test="${fileHeader == teamName_value }">
+                                    <option value="${fileHeader}"
+                                        selected>${fileHeader}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${fileHeader}">${fileHeader}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </td>
@@ -99,7 +97,16 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
+                            <c:choose>
+                                <c:when
+                                    test="${fileHeader == organization_value}">
+                                    <option value="${fileHeader}"
+                                        selected>${fileHeader}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${fileHeader}">${fileHeader}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </td>
@@ -113,7 +120,16 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
+                            <c:choose>
+                                <c:when
+                                    test="${fileHeader == awardGroup_value }">
+                                    <option value="${fileHeader}"
+                                        selected>${fileHeader}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${fileHeader}">${fileHeader}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </td>
@@ -127,7 +143,16 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
+                            <c:choose>
+                                <c:when
+                                    test="${fileHeader == judgingGroup_value }">
+                                    <option value="${fileHeader}"
+                                        selected>${fileHeader}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${fileHeader}">${fileHeader}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </td>
@@ -141,71 +166,112 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
 
                         <c:forEach items="${spreadsheetHeaderNames}"
                             var="fileHeader">
-                            <option value="${fileHeader}">${fileHeader}</option>
+                            <c:choose>
+                                <c:when
+                                    test="${fileHeader == wave_value}">
+                                    <option value="${fileHeader}"
+                                        selected>${fileHeader}</option>
+                                </c:when>
+                                <c:otherwise>
+                                    <option value="${fileHeader}">${fileHeader}</option>
+                                </c:otherwise>
+                            </c:choose>
                         </c:forEach>
                     </select>
                 </td>
             </tr>
+        </table>
 
-            <c:forEach begin="1" end="${numPracticeRounds}"
-                varStatus="practiceLoopStatus">
-                <tr>
-                    <td bgcolor='yellow'>Practice
-                        ${practiceLoopStatus.index}</td>
-                    <td>
-                        <select id='practice${practiceLoopStatus.index}'
-                            name='practice${practiceLoopStatus.index}'>
-                            <c:forEach items="${spreadsheetHeaderNames}"
-                                var="fileHeader">
-                                <option value="${fileHeader}">${fileHeader}</option>
-                            </c:forEach>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor='yellow'>Practice
-                        ${practiceLoopStatus.index} table</td>
-                    <td>
-                        <select
-                            id='practiceTable${practiceLoopStatus.index}'
-                            name='practiceTable${practiceLoopStatus.index}'>
-                            <c:forEach items="${spreadsheetHeaderNames}"
-                                var="fileHeader">
-                                <option value="${fileHeader}">${fileHeader}</option>
-                            </c:forEach>
-                        </select>
-                    </td>
-                </tr>
+        <p>Performance rounds</p>
+        <table border='1'>
+            <tr>
+                <th>Round</th>
+                <th>Time</th>
+                <th>Table</th>
+                <th>Display Name</th>
+                <th>Is Regular Match Play</th>
+                <th>Display on Scoreboard</th>
+            </tr>
 
-            </c:forEach>
 
             <c:forEach begin="1"
                 end="${uploadScheduleData.numPerformanceRuns}"
                 varStatus="perfLoopStatus">
+
                 <tr>
-                    <td bgcolor='yellow'>Performance
-                        ${perfLoopStatus.index}</td>
+                    <td bgcolor='yellow'>${perfLoopStatus.index}</td>
                     <td>
-                        <select id='perf${perfLoopStatus.index}'
-                            name='perf${perfLoopStatus.index}'>
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                        <select id='perf${perfLoopStatus.index}_time'
+                            name='perf${perfLoopStatus.index}_time'>
+                            <c:forEach items="${timeColumns}"
+                                var="fileHeader">
+                                <c:set var="value"
+                                    value="${performanceRound_values[perfLoopStatus.index]}" />
+
+                                <c:choose>
+                                    <c:when
+                                        test="${fileHeader == value}">
+                                        <option value="${fileHeader}"
+                                            selected>${fileHeader}</option>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <option value="${fileHeader}">${fileHeader}</option>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </select>
+                    </td>
+
+                    <td>
+                        <select id='perf${perfLoopStatus.index}_table'
+                            name='perf${perfLoopStatus.index}_table'>
+                            <c:forEach items="${tableColumns}"
                                 var="fileHeader">
                                 <option value="${fileHeader}">${fileHeader}</option>
                             </c:forEach>
                         </select>
                     </td>
-                </tr>
-                <tr>
-                    <td bgcolor='yellow'>Performance
-                        ${perfLoopStatus.index} table</td>
+
                     <td>
-                        <select id='perfTable${perfLoopStatus.index}'
-                            name='perfTable${perfLoopStatus.index}'>
-                            <c:forEach items="${spreadsheetHeaderNames}"
-                                var="fileHeader">
-                                <option value="${fileHeader}">${fileHeader}</option>
+                        <input type='text'
+                            id='perf${perfLoopStatus.index}_name'
+                            name='perf${perfLoopStatus.index}_name' />
+                    </td>
+
+                    <td>
+                        <select id='perf${perfLoopStatus.index}_runType'
+                            name='perf${perfLoopStatus.index}_runType'>
+                            <c:forEach items='${runTypes}' var='runType'>
+                                <c:choose>
+                                    <c:when
+                                        test='${performanceRound_runType[perfLoopStatus.index] == runType}'>
+                                        <option value='${runType}'
+                                            selected>${runType}</option>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <option value='${runType}'>${runType}</option>
+                                    </c:otherwise>
+
+                                </c:choose>
                             </c:forEach>
                         </select>
+                    </td>
+
+                    <td>
+                        <c:choose>
+                            <c:when
+                                test="${performanceRound_scoreboard[perfLoopStatus.index] == true}">
+                                <input type='checkbox'
+                                    id='perf${perfLoopStatus.index}_scoreboard'
+                                    name='perf${perfLoopStatus.index}_scoreboard'
+                                    checked />
+                            </c:when>
+                            <c:otherwise>
+                                <input type='checkbox'
+                                    id='perf${perfLoopStatus.index}_scoreboard'
+                                    name='perf${perfLoopStatus.index}_scoreboard' />
+                            </c:otherwise>
+                        </c:choose>
                     </td>
                 </tr>
 
@@ -234,7 +300,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                     <td>
                         <select name='${subcat.name}:header'>
 
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                            <c:forEach items="${timeColumns}"
                                 var="subjHeader">
                                 <option value='${subjHeader}'>${subjHeader}</option>
                             </c:forEach>
@@ -247,7 +313,7 @@ fll.web.schedule.ChooseScheduleHeaders.populateContext(application, session, pag
                         <select name='${subcat.name}:header2'>
                             <option value="none">None</option>
 
-                            <c:forEach items="${spreadsheetHeaderNames}"
+                            <c:forEach items="${timeColumns}"
                                 var="subjHeader">
                                 <option value='${subjHeader}'>${subjHeader}</option>
                             </c:forEach>

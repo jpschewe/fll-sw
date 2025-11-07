@@ -14,6 +14,9 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -265,6 +268,29 @@ public final class WebUtils {
   }
 
   /**
+   * Format of the value from a time form field.
+   */
+  public static final DateTimeFormatter WEB_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @return the value
+   * @throws MissingRequiredParameterException if the parameter is missing
+   * @throws DateTimeParseException if the value isn't parsable as a time
+   */
+  public static LocalTime getTimeRequestParameter(final HttpServletRequest request,
+                                                  final String parameter)
+      throws MissingRequiredParameterException, DateTimeParseException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      throw new MissingRequiredParameterException(parameter);
+    }
+    final LocalTime value = LocalTime.parse(str, WEB_TIME_FORMAT);
+    return value;
+  }
+
+  /**
    * @param request where to get the parameter from
    * @param parameter the parameter to get
    * @return the value
@@ -316,6 +342,25 @@ public final class WebUtils {
       throw new MissingRequiredParameterException(parameter);
     }
     final double value = Double.parseDouble(str);
+    return value;
+  }
+
+  /**
+   * @param request where to get the parameter from
+   * @param parameter the parameter to get
+   * @param defaultValue the value to return if the parameter is not present
+   * @return the value
+   * @throws NumberFormatException if the value isn't parsable as an integer
+   */
+  public static boolean getBooleanRequestParameter(final HttpServletRequest request,
+                                                   final String parameter,
+                                                   final boolean defaultValue)
+      throws NumberFormatException {
+    final String str = request.getParameter(parameter);
+    if (null == str) {
+      return defaultValue;
+    }
+    final boolean value = Boolean.parseBoolean(str);
     return value;
   }
 
@@ -400,7 +445,8 @@ public final class WebUtils {
    *
    * @param application used to get the absolute path of the sponsor logos
    *          directory
-   * @return sorted sponsor logos list
+   * @return sorted sponsor logos filenames relative to the root of the web
+   *         application
    * @see Utilities#getGraphicFiles(File)
    */
   public static List<String> getSponsorLogos(final ServletContext application) {

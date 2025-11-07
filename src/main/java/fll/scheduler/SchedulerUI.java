@@ -31,7 +31,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalTime;
 import java.util.Collection;
@@ -90,13 +89,10 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
-import fll.db.CategoryColumnMapping;
-import fll.db.TournamentParameters;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
@@ -104,8 +100,6 @@ import fll.util.ProgressDialog;
 import fll.web.StoreColumnNames;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import fll.xml.ScoreCategory;
-import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
 
 /**
@@ -323,7 +317,6 @@ public class SchedulerUI extends JFrame {
     scheduleMenu.add(mOpenScheduleAction);
     scheduleMenu.add(mReloadFileAction);
     scheduleMenu.add(mRunOptimizerAction);
-    scheduleMenu.add(mWriteSchedulesAction);
     scheduleMenu.add(mDisplayGeneralScheduleAction);
     scheduleMenu.add(saveScheduleAction);
     menubar.add(scheduleMenu);
@@ -331,7 +324,6 @@ public class SchedulerUI extends JFrame {
     setJMenuBar(menubar);
 
     // initial state
-    mWriteSchedulesAction.setEnabled(false);
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
@@ -781,8 +773,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  @RequiresNonNull({ "mScheduleFilename", "mOpenScheduleAction", "mReloadFileAction", "mWriteSchedulesAction",
-                     "mDisplayGeneralScheduleAction" })
+  @RequiresNonNull({ "mScheduleFilename", "mOpenScheduleAction", "mReloadFileAction", "mDisplayGeneralScheduleAction" })
   private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
@@ -791,7 +782,6 @@ public class SchedulerUI extends JFrame {
     toolbar.addSeparator();
     toolbar.add(mOpenScheduleAction);
     toolbar.add(mReloadFileAction);
-    toolbar.add(mWriteSchedulesAction);
     toolbar.add(mDisplayGeneralScheduleAction);
 
     return toolbar;
@@ -899,8 +889,23 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      final String schedule = getScheduleData().computeGeneralSchedule();
-      JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule", JOptionPane.INFORMATION_MESSAGE);
+      final List<TournamentSchedule.GeneralSchedule> generalSchedule = getScheduleData().computeGeneralSchedule();
+
+      final StringBuilder schedule = new StringBuilder();
+      for (final var gs : generalSchedule) {
+        if (null != gs.wave()) {
+          schedule.append(String.format("Wave %s%n", gs.wave()));
+        }
+
+        schedule.append(String.format("Judging %s - %s%n", TournamentSchedule.humanFormatTime(gs.subjectiveStart()),
+                                      TournamentSchedule.humanFormatTime(gs.subjectiveEnd())));
+        schedule.append(String.format("Robot Game %s - %s%n", TournamentSchedule.humanFormatTime(gs.performanceStart()),
+                                      TournamentSchedule.humanFormatTime(gs.performanceEnd())));
+        schedule.append(String.format("%n"));
+      }
+
+      JOptionPane.showMessageDialog(SchedulerUI.this, schedule.toString(), "General Schedule",
+                                    JOptionPane.INFORMATION_MESSAGE);
     }
   }
 
@@ -949,206 +954,6 @@ public class SchedulerUI extends JFrame {
 
       } else {
         // user canceled
-        return;
-      }
-    }
-  }
-
-  private final Action mWriteSchedulesAction = new WriteSchedulesAction();
-
-  private final class WriteSchedulesAction extends AbstractAction {
-    WriteSchedulesAction() {
-      super("Write Detailed Schedules");
-      putValue(SMALL_ICON, Utilities.getIcon("toolbarButtonGraphics/general/Export16.gif"));
-      putValue(LARGE_ICON_KEY, Utilities.getIcon("toolbarButtonGraphics/general/Export24.gif"));
-      putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as a PDF");
-      // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent ae) {
-      try {
-        final File directory = getScheduleFile().getParentFile();
-        if (null == directory) {
-          final String message = "Cannot find a parent directory for "
-              + getScheduleFile()
-              + ", skipping writing of schedules";
-          LOGGER.warn("Cannot find a parent directory for {}, skipping writing of schedules", getScheduleFile());
-          JOptionPane.showMessageDialog(SchedulerUI.this, "Schedules not written", message,
-                                        JOptionPane.WARNING_MESSAGE);
-          return;
-        }
-
-        final String baseFilename = tournamentName;
-        LOGGER.info("Writing detailed schedules to "
-            + directory.getAbsolutePath());
-
-        final SwingWorker<Boolean, Void> detailedSchedulesTask = new SwingWorker<Boolean, Void>() {
-          @Override
-          protected Boolean doInBackground() {
-            try {
-              // output the schedule as a CSV file so that table optimization information can
-              // be saved
-              final File fullSchedule = new File(directory, String.format("%s-schedule.csv", baseFilename));
-              try (OutputStream os = new FileOutputStream(fullSchedule)) {
-                getScheduleData().outputScheduleAsCSV(os);
-              }
-
-              getScheduleData().outputDetailedSchedules(directory, baseFilename);
-              return true;
-            } catch (final IOException e) {
-              final Formatter errorFormatter = new Formatter();
-              errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
-              LOGGER.error(errorFormatter, e);
-              JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
-              return false;
-            }
-          }
-
-          @Override
-          protected void done() {
-            progressDialog.setVisible(false);
-          }
-        };
-        // make sure the task doesn't start until the window is up
-        progressDialog.addComponentListener(new ComponentAdapter() {
-          @Override
-          public void componentShown(final ComponentEvent e) {
-            progressDialog.removeComponentListener(this);
-            detailedSchedulesTask.execute();
-          }
-        });
-        progressDialog.setVisible(true);
-        if (!detailedSchedulesTask.get()) {
-          // an error occurred
-          return;
-        }
-
-        final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
-                                                         "Would you like to write out the score sheets as well?",
-                                                         "Write Out Scoresheets?", JOptionPane.YES_NO_OPTION);
-        if (JOptionPane.YES_OPTION != answer) {
-          return;
-        }
-
-        if (null == challengeDescription) {
-          promptForChallengeDescription();
-        }
-        final ChallengeDescription description = challengeDescription;
-        if (null == description) {
-          return;
-        }
-
-        final SwingWorker<Boolean, Void> performanceSheetsTask = new SwingWorker<Boolean, Void>() {
-          @Override
-          protected Boolean doInBackground() {
-            final File scoresheetFile = new File(directory, baseFilename
-                + "-scoresheets.pdf");
-            try (FileOutputStream scoresheetFos = new FileOutputStream(scoresheetFile)) {
-
-              getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
-              return true;
-            } catch (IOException | SQLException e) {
-              final Formatter errorFormatter = new Formatter();
-              errorFormatter.format("Error writing performance sheets: %s", e.getMessage());
-              LOGGER.error(errorFormatter, e);
-              JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
-              return false;
-            }
-          }
-
-          @Override
-          protected void done() {
-            progressDialog.setVisible(false);
-          }
-        };
-        // make sure the task doesn't start until the window is up
-        progressDialog.addComponentListener(new ComponentAdapter() {
-          @Override
-          public void componentShown(final ComponentEvent e) {
-            progressDialog.removeComponentListener(this);
-            performanceSheetsTask.execute();
-          }
-        });
-        progressDialog.setVisible(true);
-        if (!performanceSheetsTask.get()) {
-          // an error occurred
-          return;
-        }
-
-        if (null == columnInfo) {
-          throw new IllegalStateException("No column information");
-        }
-        final Collection<CategoryColumnMapping> categoryMappings = columnInfo.getSubjectiveColumnMappings();
-        final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description);
-        mapDialog.setLocationRelativeTo(SchedulerUI.this);
-        mapDialog.setVisible(true);
-        if (mapDialog.isCanceled()) {
-          return;
-        }
-
-        final Map<ScoreCategory, Collection<String>> categoryToScheduleColumns = new HashMap<>();
-        final Map<ScoreCategory, @Nullable String> filenameSuffixes = new HashMap<>();
-        for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
-          final Collection<CategoryColumnMapping> scheduleColumnMappings = categoryMappings.stream()
-                                                                                           .filter(mapping -> mapping.getCategoryName()
-                                                                                                                     .equals(scoreCategory.getName()))
-                                                                                           .toList();
-          if (scheduleColumnMappings.isEmpty()) {
-            throw new FLLInternalException("Did not find a schedule column for "
-                + scoreCategory.getTitle());
-          }
-          final Collection<String> scheduleColumns = scheduleColumnMappings.stream()
-                                                                           .map(CategoryColumnMapping::getScheduleColumn)
-                                                                           .toList();
-          categoryToScheduleColumns.put(scoreCategory, scheduleColumns);
-          filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
-        }
-
-        final SwingWorker<Boolean, Void> subjectiveSheetsTask = new SwingWorker<Boolean, Void>() {
-          @Override
-          protected Boolean doInBackground() {
-            try {
-              getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename,
-                                                       description, categoryToScheduleColumns, filenameSuffixes);
-              return true;
-            } catch (final IOException e) {
-              final Formatter errorFormatter = new Formatter();
-              errorFormatter.format("Error writing subjective sheets: %s", e.getMessage());
-              LOGGER.error(errorFormatter, e);
-              JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
-              return false;
-            }
-          }
-
-          @Override
-          protected void done() {
-            progressDialog.setVisible(false);
-          }
-        };
-        // make sure the task doesn't start until the window is up
-        progressDialog.addComponentListener(new ComponentAdapter() {
-          @Override
-          public void componentShown(final ComponentEvent e) {
-            progressDialog.removeComponentListener(this);
-            subjectiveSheetsTask.execute();
-          }
-        });
-        progressDialog.setVisible(true);
-        if (!subjectiveSheetsTask.get()) {
-          // an error occurred
-          return;
-        }
-
-        JOptionPane.showMessageDialog(SchedulerUI.this, "See '"
-            + directory.getAbsolutePath()
-            + "' for all outputs", "Information", JOptionPane.INFORMATION_MESSAGE);
-
-      } catch (InterruptedException | ExecutionException e) {
-        final Formatter errorFormatter = new Formatter();
-        errorFormatter.format("Unexpected error generating output: %s", e.getMessage());
-        LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
       }
     }
@@ -1264,14 +1069,10 @@ public class SchedulerUI extends JFrame {
       throw new FLLRuntimeException("No data in the file");
     }
 
-    final int numPracticeRounds = promptUserForInt(owner, "Enter the number of practice rounds",
-                                                   TournamentParameters.PRACTICE_ROUNDS_DEFAULT);
+    final int numPerformanceRounds = promptUserForInt(owner, "Enter the number of scheduled performance rounds", 1);
 
-    final int numRegularMatchRounds = promptUserForInt(owner, "Enter the number of performance rounds",
-                                                       TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-
-    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(owner, headerNames, numPracticeRounds,
-                                                                               numRegularMatchRounds, description);
+    final ChooseScheduleHeadersDialog dialog = new ChooseScheduleHeadersDialog(owner, headerNames, numPerformanceRounds,
+                                                                               description);
     dialog.setLocationRelativeTo(owner);
     dialog.setVisible(true);
 
@@ -1353,7 +1154,6 @@ public class SchedulerUI extends JFrame {
           + ":"
           + mScheduleSheetName);
 
-      mWriteSchedulesAction.setEnabled(true);
       mDisplayGeneralScheduleAction.setEnabled(true);
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
@@ -1606,24 +1406,14 @@ public class SchedulerUI extends JFrame {
           } else if (null != violation.getPerformance()) {
             final LocalTime violationPerformanceTime = violation.getPerformance();
 
-            final Pair<PerformanceTime, Long> practiceResult = schedInfo.enumeratePracticePerformances()
-                                                                        .filter(p -> p.getLeft().getTime()
-                                                                                      .equals(violationPerformanceTime))
-                                                                        .findFirst().orElse(null);
-
-            final Pair<PerformanceTime, Long> regularMatchPlayResult = schedInfo.enumerateRegularMatchPlayPerformances()
+            final Pair<PerformanceTime, Long> performanceRoundResult = schedInfo.enumeratePerformances()
                                                                                 .filter(p -> p.getLeft().getTime()
                                                                                               .equals(violationPerformanceTime))
                                                                                 .findFirst().orElse(null);
             final int firstIdx;
-            if (null != practiceResult) {
-              firstIdx = practiceResult.getRight().intValue()
+            if (null != performanceRoundResult) {
+              firstIdx = performanceRoundResult.getRight().intValue()
                   * SchedulerTableModel.NUM_COLUMNS_PER_ROUND;
-            } else if (null != regularMatchPlayResult) {
-              firstIdx = (getScheduleData().getNumberOfPracticeRounds()
-                  * SchedulerTableModel.NUM_COLUMNS_PER_ROUND)
-                  + (regularMatchPlayResult.getRight().intValue()
-                      * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             } else {
               throw new RuntimeException("Internal error, cannot find performance at time "
                   + violationPerformanceTime);

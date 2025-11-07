@@ -11,22 +11,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
+import fll.db.TableInformation;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -37,7 +29,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
-import fll.web.admin.Tables;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Commit the schedule in {@link UploadScheduleData#getSchedule()} to the
@@ -84,17 +81,22 @@ public class CommitSchedule extends BaseFLLServlet {
       CategoryColumnMapping.store(connection, tournament.getTournamentID(), categoryColumnMappings);
 
       // store table names
-      final List<ImmutablePair<String, String>> tables = new LinkedList<>();
+      final Collection<TableInformation> tables = new LinkedList<>();
+      int id = 1;
       for (final String color : schedule.getTableColors()) {
-        tables.add(ImmutablePair.of(color
-            + " 1", color
-                + " 2"));
+        // making the sort index the same for all tables causes the tables to be sorted
+        // by table color
+        final TableInformation table = new TableInformation(id++, String.format("%s 1", color),
+                                                            String.format("%s 2", color), 1);
+        tables.add(table);
       }
-      Tables.replaceTablesForTournament(connection, tournament.getTournamentID(), tables);
+      TableInformation.saveTournamentTableInformation(connection, tournament, tables);
 
       SessionAttributes.appendToMessage(session,
                                         "<p id='success' class='success'>Schedule successfully stored in the database</p>");
-      WebUtils.sendRedirect(application, response, "/admin/index.jsp");
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
+
+      WebUtils.sendRedirect(response, "/report/edit-award-group-order.jsp");
       return;
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);

@@ -66,17 +66,18 @@ public class CheckTeamInfo extends BaseFLLServlet {
 
     final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
+    final String redirectUrl;
     try (Connection sourceConnection = sourceDataSource.getConnection();
         Connection destConnection = destDataSource.getConnection()) {
 
       final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection,
                                                                                   tournament);
       if (teamDifferences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/awardsScript/CheckAwardsScriptInfo");
+        redirectUrl = "/developer/importdb/awardsScript/CheckAwardsScriptInfo";
       } else {
         sessionInfo.setTeamDifferences(teamDifferences);
         session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "/developer/importdb/resolveTeamInfoDifferences.jsp");
+        redirectUrl = "/developer/importdb/resolveTeamInfoDifferences.jsp";
       }
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
@@ -84,7 +85,7 @@ public class CheckTeamInfo extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, redirectUrl);
   }
 
 }

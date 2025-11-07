@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
 import fll.Utilities;
 import fll.util.CheckCanceled;
 import fll.util.FLLInternalException;
@@ -257,17 +255,14 @@ public class TableOptimizer {
         // if the values are not null they are guaranteed to be keys for originalValues
         if (null != team1
             && null != team2) {
-          assignments.put(new PerformanceTime(time, tableColor, side1,
-                                              castNonNull(originalValues.get(team1)).isPractice()),
+          assignments.put(new PerformanceTime(time, tableColor, side1),
                           team1);
-          assignments.put(new PerformanceTime(time, tableColor, side2,
-                                              castNonNull(originalValues.get(team2)).isPractice()),
+          assignments.put(new PerformanceTime(time, tableColor, side2),
                           team2);
         } else if (null != team1
             && null == team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side1,
-                                              castNonNull(originalValues.get(team1)).isPractice()),
+          assignments.put(new PerformanceTime(time, tableColor, side1),
                           team1);
 
           // can only have 1 uneven pairing at a time
@@ -275,8 +270,7 @@ public class TableOptimizer {
         } else if (null == team1
             && null != team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side2,
-                                              castNonNull(originalValues.get(team2)).isPractice()),
+          assignments.put(new PerformanceTime(time, tableColor, side2),
                           team2);
 
           // can only have 1 uneven pairing at a time

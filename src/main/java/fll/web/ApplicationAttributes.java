@@ -172,4 +172,35 @@ public final class ApplicationAttributes {
     }
   }
 
+  private static final String TOURNAMENT_DATA = "tournamentData";
+
+  /**
+   * @param application variable store
+   * @return the tournament data cache
+   */
+  public static TournamentData getTournamentData(final ServletContext application) {
+    @Nullable
+    TournamentData data = getAttribute(application, TOURNAMENT_DATA, TournamentData.class);
+    if (null == data) {
+      final DataSource datasource = getDataSource(application);
+      data = new TournamentData(datasource);
+      application.setAttribute(TOURNAMENT_DATA, data);
+    }
+    return data;
+  }
+
+  /**
+   * Clear any attributes that depends on that database.
+   * 
+   * @param application variable store
+   */
+  public static void clearDatabaseAttributes(final ServletContext application) {
+    // don't remove the datasource as that breaks things
+    application.removeAttribute(CHALLENGE_DESCRIPTION);
+    application.removeAttribute(DISPLAY_PAGE);
+    application.removeAttribute(PLAYOFF_DIVISION);
+    application.removeAttribute(PLAYOFF_RUN_NUMBER);
+    application.removeAttribute(SCORE_PAGE_TEXT);
+    application.removeAttribute(TOURNAMENT_DATA);
+  }
 }

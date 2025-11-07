@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.AwardDeterminationOrder;
@@ -53,6 +54,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
@@ -85,6 +87,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private record ScoreData(AwardCategory category,
                            int rank,
+                           double rankFraction,
                            String scoreText,
                            boolean missing) {
   }
@@ -125,9 +128,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                     .appendValue(ChronoField.YEAR,
                                                                                                                  4)
                                                                                                     .appendLiteral(' ')
-                                                                                                    .appendValue(ChronoField.HOUR_OF_DAY)
+                                                                                                    .appendValue(ChronoField.HOUR_OF_DAY,
+                                                                                                                 2)
                                                                                                     .appendLiteral(':')
-                                                                                                    .appendValue(ChronoField.MINUTE_OF_HOUR)
+                                                                                                    .appendValue(ChronoField.MINUTE_OF_HOUR,
+                                                                                                                 2)
                                                                                                     .toFormatter();
 
   /**
@@ -196,24 +201,22 @@ public final class FinalComputedScores extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/FinalComputedScores")) {
-      return;
-    }
-
     final ReportSelector selector = ReportSelector.valueOf(WebUtils.getNonNullRequestParameter(request, "selector"));
     final SortOrder sortOrder = SortOrder.valueOf(WebUtils.getNonNullRequestParameter(request, "sortOrder"));
     final String groupName = WebUtils.getNonNullRequestParameter(request, "groupName");
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
+                                                           tournamentData.getCurrentTournament());
 
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final int tournamentID = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
-      final int percentageHurdle = TournamentParameters.getPerformanceAdvancementPercentage(connection, tournamentID);
+      final int percentageHurdle = TournamentParameters.getPerformanceAdvancementPercentage(connection,
+                                                                                            tournament.getTournamentID());
       final double performanceHurdle;
       if (percentageHurdle > 0
           && percentageHurdle < 100) {
@@ -224,7 +227,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
         performanceHurdle = 0;
       }
 
-      final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection, tournamentID,
+      final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection,
+                                                                            tournament.getTournamentID(),
                                                                             challengeDescription.getWinner());
 
       response.reset();
@@ -966,7 +970,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * catRank;
+                      * scoreData.rank();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -993,7 +997,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
                 if (catRank > 0) {
                   weightedRankSum += catWeight
-                      * catRank;
+                      * scoreData.rank();
                 } else {
                   weightedRankSum = Double.NaN;
                 }
@@ -1014,7 +1018,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           if (perfRank > 0) {
 
             weightedRankSum += performanceCategory.getWeight()
-                * perfRank;
+                * perfScaledData.rank();
           } else {
             weightedRankSum = Double.NaN;
           }
@@ -1060,7 +1064,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (-1 == rank) {
       rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
     } else {
-      rankText = String.format("%1$s(%2$d)", Utilities.NON_BREAKING_SPACE, rank);
+      rankText = String.format("%1$s(%2$d", Utilities.NON_BREAKING_SPACE, rank);
     }
 
     final String overallScoreText;
@@ -1073,7 +1077,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final String scoreText = overallScoreText
         + rankText;
 
-    return new ScoreData(category, rank, scoreText, Double.isNaN(scaledScore));
+    final double rankFraction = (double) rank
+        / (double) rankInCategory.size();
+    return new ScoreData(category, rank, rankFraction, scoreText, Double.isNaN(scaledScore));
   }
 
   private ScoreData computeRawPerformanceScore(final Connection connection,
@@ -1111,7 +1117,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           text = Utilities.getFormatForScoreType(performanceScoreType).format(rawScore);
         }
 
-        return new ScoreData(category, -1, text, Double.isNaN(rawScore));
+        return new ScoreData(category, -1, Double.NaN, text, Double.isNaN(rawScore));
 
       } // ResultSet
     } // PreparedStatement
@@ -1275,7 +1281,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 scoreText = rawScoreText.toString();
               }
 
-              subjScoreData.add(new ScoreData(awardCategory, -1, scoreText, !scoreSeen));
+              subjScoreData.add(new ScoreData(awardCategory, -1, Double.NaN, scoreText, !scoreSeen));
             } // ResultSet
           } // category weight greater than 0
         }
@@ -1308,7 +1314,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 scoreText = rawScoreText.toString();
               }
 
-              subjScoreData.add(new ScoreData(awardCategory, -1, scoreText, !scoreSeen));
+              subjScoreData.add(new ScoreData(awardCategory, -1, Double.NaN, scoreText, !scoreSeen));
             } // ResultSet
           } // category weight greater than 0
         }

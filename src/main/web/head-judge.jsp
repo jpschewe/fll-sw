@@ -4,13 +4,13 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 %>
 
 <html>
 <head>
-<title>Head Judge links</title>
+<title>Head Judge</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -20,13 +20,9 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 </head>
 
 <body>
-    <h1>Head Judge links</h1>
+    <h1>Head Judge</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
-    <p>This page contains links to the pages used in the judges
-        room. Most links open new tabs so that you can continue to
-        follow the workflow on this page.</p>
-
     <p>
         The current tournament is
         <b>${tournament.description} on ${tournament.dateString}
@@ -34,96 +30,138 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
     </p>
 
 
-    <h2>Tournament steps</h2>
+    <h2>Deliberation Reports</h2>
     <a class="wide" target="_subjective"
         href="<c:url value='/subjective/Auth'/>"
-        onclick="return openMinimalBrowser(this)">Enter subjective
-        scores. This is done through the subjective web application</a>
+        onclick="return openMinimalBrowser(this)">Judge Scoring</a>
 
-    <a class="wide" target="_report"
-        href="<c:url value='/report/index.jsp' />">Generate reports
-        - this is done once all of the subjective scores are in.</a>
+    <!--  FIXME needs a page -->
+    <a class="wide" target="_TeamSchedules"
+        href='<c:url value="/report/team-schedules.jsp"/>'>Team
+        Schedules</a>
 
-    <a class="wide" target="_subjectiveSchedule"
-        href="<c:url value='/admin/SubjectiveScheduleByTime'/>">Subjective
-        schedule sorted by time</a>
+    <a class="wide" href="<c:url value='/report/judge-summary.jsp'/>"
+        target="_judge-summary">Judge summary. This shows which
+        judges have scores entered.</a>
+
+    <!--  FinalComputedScores -->
+    <div class="wide">
+        Final Computed Scores
+        <form action="<c:url value='/report/FinalComputedScores' />"
+            target="_finalComputedScores" method="POST">
+            <input type="hidden" name="selector"
+                value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
+            <select name="groupName">
+                <option
+                    value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                <c:forEach items="${awardGroups}" var="awardGroup">
+                    <option value="${awardGroup}">${awardGroup}</option>
+                </c:forEach>
+            </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
+                </c:forEach>
+            </select>
+            <input type="submit" value="Report by Award Group" />
+        </form>
+
+        <c:if test="${awardGroups != judgingStations}">
+            <form action="<c:url value='/report/FinalComputedScores'/>"
+                target="_finalComputedScores" method="POST">
+                <input type="hidden" name="selector"
+                    value="<%=fll.web.report.FinalComputedScores.ReportSelector.JUDGING_STATION.name()%>" />
+                <select name="groupName">
+                    <option
+                        value="<%=fll.web.report.FinalComputedScores.ALL_GROUP_NAME%>">All</option>
+                    <c:forEach items="${judgingStations}"
+                        var="judgingStation">
+                        <option value="${judgingStation}">${judgingStation}</option>
+                    </c:forEach>
+                </select>
+                <select name="sortOrder">
+                    <c:forEach items="${sortOrders}" var="sortOrder">
+                        <option value="${sortOrder}">Sort by
+                            ${sortOrder}</option>
+                    </c:forEach>
+                </select>
+                <input type="submit" value="Report by Judging Station" />
+            </form>
+        </c:if>
+    </div>
+    <!-- end FinalComputedScores -->
+
+    <div class="wide">
+        <form action="<c:url value='/report/AwardSummarySheet'/>"
+            method="POST" target="award-summary-sheet">
+            Award Summary Sheet
+            <select name="groupName">
+                <c:forEach items="${judgingStations}"
+                    var="judgingStation">
+                    <option value="${judgingStation}">${judgingStation}</option>
+                </c:forEach>
+            </select>
+            <select name="sortOrder">
+                <c:forEach items="${sortOrders}" var="sortOrder">
+                    <option value="${sortOrder}">Sort by
+                        ${sortOrder}</option>
+                </c:forEach>
+            </select>
+            <input type='submit' value='Create Sheet' />
+        </form>
+    </div>
 
     <a class="wide"
-        href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
-        Match Play performance scores</a>
+        href="<c:url value='/report/NonNumericNomineesReport'/>"
+        target="_blank">Optional Award Nominations</a>
 
-    <a class="wide" target="_performanceVsSchedule"
-        href="<c:url value='/report/regular-match-play-vs-schedule.jsp'/>">
-        Regular Match Play runs compared with the schedule</a>
+    <!-- VirtualSubjectiveCategoryReport -->
+    <c:if
+        test="${not empty challengeDescription.virtualSubjectiveCategories}">
+        <c:forEach
+            items="${challengeDescription.virtualSubjectiveCategories}"
+            var="category">
+            <a class="wide"
+                href="<c:url
+                    value='/report/VirtualSubjectiveCategoryReport' />?categoryName=${category.name}"
+                target="_blank"> ${category.title} Score Comparison
+            </a>
+        </c:forEach>
+    </c:if>
+    <!-- end VirtualSubjectiveCategoryReport -->
 
-    <a class="wide"
-        href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
-        the order that awards are determined.</a>
+    <a class='wide' href="<c:url value='/report/SubjectiveByJudge'/>"
+        target="_blank">Final Computed Scores Consolidated</a>
 
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
+        Match Scores</a>
+
+    <a class="wide" target="_additional_reports"
+        href="<c:url value='/report/additional-reports.jsp'/>">Additional
+        Reports</a>
+
+    <h2>Awards</h2>
     <a class="wide"
         href="<c:url value='/report/edit-award-winners.jsp' />"
-        target="_blank">Enter the winners of awards for use in the
-        awards report</a>
+        target="_blank">Award Winner Write-up</a>
 
     <a class="wide"
         href="<c:url value='/report/edit-advancing-teams.jsp' />"
-        target="_blank">Enter the advancing teams for use in the
-        awards report</a>
-
-    <a class="wide" href="<c:url value='/report/AwardsReport' />"
-        target="_blank">Report of winners for the tournament. This
-        can be published on the web or used for the awards ceremony.</a>
+        target="_blank">Advancing Teams</a>
 
     <a class="wide" target="_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
-        Script PDF </a>
+        Script </a>
 
+    <a class='wide'
+        href='<c:url value="/report/edit-award-group-order.jsp"/>'>Award
+        Group Order</a>
 
-    <h2>Finalist scheduling</h2>
-    <p>This is used at tournaments where there is more than 1
-        judging group in an award group. This is typically the case at a
-        state tournament where all teams are competing for first place
-        in each category, but there are too many teams for one judge to
-        see.</p>
-
-    <p>Before using these links the initial head to head brackets
-        need to be assigned in the performance area and the performance
-        dump needs to be imported into this server.</p>
-
-    <a class="wide"
-        href="<c:url value='/report/non-numeric-nominees.jsp' />"
-        target="_blank">Enter non-numeric nominees. This is used to
-        enter the teams that are up for consideration for the non-scored
-        subjective categories. This information transfers over to the
-        finalist scheduling web application. This is also used in the
-        awards scripts report.</a>
-
-    <a class="wide" href="<c:url value='/report/finalist/load.jsp' />"
-        target="_blank">Schedule Finalists. Before visiting this
-        page, all subjective scores need to be uploaded and any head to
-        head brackets that will occur during the finalist judging should
-        be created to avoid scheduling conflicts.</a>
-
-    <c:if test="{not empty finalistDivisions}">
-        <div class="wide">
-            <form
-                ACTION="<c:url value='/report/finalist/PdfFinalistSchedule' />"
-                METHOD='POST' target="_blank">
-                <select name='division'>
-                    <c:forEach var="division"
-                        items="${finalistDivisions }">
-                        <option value='${division }'>${division }</option>
-                    </c:forEach>
-                </select>
-                <input type='submit' value='Finalist Schedule (PDF)' />
-            </form>
-        </div>
-    </c:if>
-
-    <a class="wide"
-        href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
-        target="_blank">Finalist Schedule for each team</a>
-
+    <h2>
+        <a class='wide' href="<c:url value='/head-judge-state.jsp'/>">STATE</a>
+    </h2>
 
 </body>
 </html>

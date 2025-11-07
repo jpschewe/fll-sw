@@ -61,12 +61,17 @@ const awardsScriptModule = {};
             macrosList.appendChild(macrosLabel);
             macrosLabel.innerText = "Macros";
 
+            const macrosContainer = document.createElement("div");
+            macrosList.appendChild(macrosContainer);
+            macrosContainer.classList.add("macros-container");
+
             macros.forEach(function(macro) {
                 const div = document.createElement("div");
-                macrosList.appendChild(div);
+                macrosContainer.appendChild(div);
 
                 const button = document.createElement("button");
                 div.appendChild(button);
+                button.classList.add('macro-button');
                 button.setAttribute("type", "button");
                 button.setAttribute("id", sectionName + "_" + macro.text);
                 button.innerText = macro.title;

@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="ADMIN" allowSetup="false" />
 
 <%
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true);
 %>
 
 <html>
@@ -20,14 +20,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 }
 </style>
 
-<script type="text/javascript">
-  function display(id) {
-    document.getElementById(id).style.display = "block";
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = "none";
-  }
-</script>
+<script type="text/javascript" src="index.js"></script>
 </head>
 
 <body>
@@ -36,6 +29,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h2>Before tournament day</h2>
     <ol>
+        <li>
+            <a href="<c:url value='/report/awards/index.jsp'/>">Edit
+                awards report and awards script properties.</a>
+        </li>
+
         <li>
             <form id='uploadTeams'
                 ACTION="<c:url value='/UploadSpreadsheet'/>"
@@ -171,6 +169,12 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
         <li>
             <a
+                href="<c:url value='/report/edit-award-determination-order.jsp' />">Edit
+                the order that awards are determined.</a>
+        </li>
+
+        <li>
+            <a
                 href="<c:url value='/report/awards/edit-categories-awarded.jsp'/>">Specify
                 which categories are awarded by tournament level</a>
         </li>
@@ -187,39 +191,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 reports. Teams can be added directly to the current
                 tournament through a schedule as well. Column names are
                 not important, you will be given the opportunity to map
-                the column names to the fields that the sofware is
-                expecting. The columns needed are:
-                <ul>
-                    <li>Team number - this needs to be an integer
-                        and unique</li>
-                    <li>Practice - if the number of practice rounds
-                        in the tournament parameters is greater than
-                        zero there needs to be 2 columns for each
-                        practice round. One that contains a time
-                        (hour:minute) and one that contains the table in
-                        the format Blue 1 where "Blue" is the table and
-                        "1" is the side of the table. The side needs to
-                        be 1 or 2.</li>
-                    <li>Performance rounds - there must be 2
-                        columns for each regular match play (there may
-                        be additional rounds specified as well). See the
-                        description of practice for the format of the
-                        columns.</li>
-                    <li>Subjective categories - there needs to be a
-                        column for the subjective categories specifying
-                        the time (hour:minute) for the subjective
-                        judging. If all judging happens at the same
-                        time, a single column may be used for all
-                        subjective categories</li>
-                    <li>Team information - if the schedule is used
-                        to populate team information there may be
-                        columns for team name, organization</li>
-                    <li>judging group and award group - if the
-                        judging groups and award groups aren't assigned
-                        when the teams were uploaded, these columns may
-                        be specified in the schedule</li>
-                </ul>
-                <a href='javascript:hide("ScheduleHelp")'>[hide]</a>
+                the column names to the fields that the software is
+                expecting. A description of the <a
+                    href="schedule-format.jsp" target="_blank">schedule
+                    format</a> is available. <a
+                    href='javascript:hide("ScheduleHelp")'>[hide]</a>
             </div>
 
             <form id='uploadSchedule'
@@ -228,7 +204,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <input type="file" size="32" id='scheduleFile'
                     name="file" />
                 <input type='hidden' name='uploadRedirect'
-                    value="<c:url value='/schedule/CheckScheduleExists'/>" />
+                    value="<c:url value='/schedule/CheckPerformanceScoresExist'/>" />
                 <input id="upload-schedule" type="submit"
                     value="Upload Schedule" />
             </form>
@@ -237,87 +213,93 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <!--  downloads for the schedule -->
                 <ul>
                     <li>
-                        <a href="ScheduleByTeam" target="_new">Full
-                            schedule sorted by team</a>
+                        <a href="<c:url value='/admin/ScheduleByTeam'/>"
+                            target="_blank">Full schedule sorted by
+                            team</a>
+                    </li>
+                    <li>
+                        <a
+                            href="<c:url value='/admin/ScheduleByWaveAndTeam'/>"
+                            target="_blank">Full schedule sorted by
+                            wave and team</a>
                     </li>
                     <li>
                         <a href="SubjectiveScheduleByJudgingStation"
-                            target="_new">Subjective schedule split
-                            by category and sorted by judging group,
-                            then time</a>
+                            target="_blank">Subjective schedule
+                            split by category and sorted by judging
+                            group, then time</a>
                     </li>
                     <li>
-                        <a href="SubjectiveScheduleByCategory"
-                            target="_new">Subjective schedule split
-                            by category and sorted by time</a>
+                        <a
+                            href="<c:url value='/admin/SubjectiveScheduleByCategory'/>"
+                            target="_blank">Judging Schedule by
+                            Category</a>
                     </li>
                     <li>
-                        <a href="SubjectiveScheduleByTime" target="_new">Subjective
-                            schedule sorted by time</a>
+                        <a href="SubjectiveScheduleByTime"
+                            target="_blank">Judging Schedule</a>
                     </li>
                     <li>
-                        <a href="PerformanceSchedule" target="_new">Performance
+                        <a href="PerformanceSchedule" target="_blank">Performance
                             Schedule</a>
                     </li>
                     <li>
                         <a href="PerformanceSchedulePerTable"
-                            target="_new">Performance Schedule per
+                            target="_blank">Performance Schedule per
                             table</a>
                     </li>
                     <li>
-                        <a href="PerformanceNotes" target="_new">Performance
+                        <a href="PerformanceNotes" target="_blank">Performance
                             Schedule per table for notes</a>
                     </li>
                     <li>
                         <a href="<c:url value='/admin/ScheduleAsCsv' />"
-                            target="_new">Full Schedule as CSV</a> - for
-                        use with scheduling tools
+                            target="_blank">Full Schedule as CSV</a> -
+                        for use with scheduling tools
                     </li>
 
                     <li>
                         <a
                             href="<c:url value='/admin/PerformanceSheets' />"
-                            target="_new">Performance sheets for
+                            target="_blank">Performance sheets for
                             regular match play</a>
                     </li>
 
                     <!-- subjective sheets -->
-                    <c:forEach
-                        items="${challengeDescription.subjectiveCategories}"
-                        var="category">
+        <c:forEach items="${challengeDescription.subjectiveCategories}"
+            var="category">
 
-                        <c:set var="columns"
-                            value="${categoryNameToColumn[category.name]}" />
+            <c:set var="columns"
+                value="${categoryNameToColumn[category.name]}" />
 
-                        <c:forEach items="${columns}" var="columnName">
+            <c:forEach items="${columns}" var="columnName">
 
-                            <c:choose>
-                                <c:when test="${columns.size() gt 1}">
-                                    <li>
-                                        <a
-                                            target="_${category.name}-${columnName}"
-                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                            sheets for ${category.title}
-                                            schedule ${columnName}</a>
-                                    </li>
-                                </c:when>
-                                <c:otherwise>
-                                    <li>
-                                        <a target="_${category.name}"
-                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                            sheets for ${category.title}</a>
-                                    </li>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:forEach>
+                <c:choose>
+                    <c:when test="${columns.size() gt 1}">
+                        <li>
+                            <a target="_${category.name}-${columnName}"
+                                href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                sheets for ${category.title} schedule
+                                ${columnName}</a>
+                        </li>
+                    </c:when>
+                    <c:otherwise>
+                        <li>
+                            <a target="_${category.name}"
+                                href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                sheets for ${category.title}</a>
+                        </li>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
 
-                    </c:forEach>
-                    <!-- end subjective sheets -->
+        </c:forEach>
+        <!-- end subjective sheets -->
 
-                    <!-- Team schedules -->
-                    <li>
+        <!-- Team schedules -->
+        <li>
                         <a href="<c:url value='/admin/TeamSchedules' />"
-                            target="_new">Team Schedules</a>
+                            target="_blank">Team Schedules</a>
                     </li>
                     <li>
                         <form
@@ -340,18 +322,24 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                         </form>
                     </li>
                     <!-- end Team schedules -->
+
+                    <li>
+                        <button type='button' id='schedule_download'>Download
+                            Common Schedules</button>
+                    </li>
                 </ul>
             </c:if>
+        <!-- end schedule loaded -->
         </li>
 
         <li>
-            <a href="<c:url value='/report/PitSigns' />" target="_new">All
+            <a href="<c:url value='/report/PitSigns' />" target="_blank">All
                 Pit Signs</a>
         </li>
 
         <li>
             <form action="<c:url value='/report/PitSigns' />"
-                method='post' target="_new">
+                method='post' target="_blank">
                 Pit sign for
                 <select name='team_number'>
                     <c:forEach items="${tournamentTeams}" var="team">
@@ -397,6 +385,11 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
         </li>
 
         <li>
+            <a href="<c:url value='/admin/edit_run_metadata.jsp'/>">Edit
+                Performance Run Data</a>
+        </li>
+
+        <li>
             <a href="<c:url value='/admin/delayed_performance.jsp'/>">Setup
                 delay of displaying performance scores</a>
         </li>
@@ -439,7 +432,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 <span class='completed'>DONE </span>
             </c:if>
             <a href='<c:url value="tables.jsp"/>'>Assign Table
-                Labels</a> (for scoresheet printing during head to head)
+                Labels</a>
         </li>
 
 
@@ -460,7 +453,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             <ul>
                 <li>
                     <a href='<c:url value="/subjective/index.html"/>'
-                        target="_new">Subjective Web application</a>
+                        target="_blank">Judge Scoring</a>
                 </li>
 
                 <li>
@@ -518,7 +511,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 
         <li>
             Once regular match play has been completed you will need to
-            setup the <a href="../playoff" target="_new">head to
+            setup the <a href="../playoff" target="_blank">head to
                 head brackets</a>
         </li>
 

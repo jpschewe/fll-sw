@@ -4,8 +4,8 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 %>
 
 <html>
@@ -56,6 +56,14 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         <b>${tournament.description} on ${tournament.dateString}
             [${tournament.name}]</b>
     </p>
+
+    <h2>Before tournament day</h2>
+    <ol>
+        <li>
+            <a href="<c:url value='/report/awards/index.jsp'/>">Edit
+                awards report and awards script properties.</a>
+        </li>
+    </ol>
 
     <h2>Tournament steps</h2>
     <ol>
@@ -188,9 +196,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
         <li>
             <a href="CheckSubjectiveEmptyForPerformanceExport">Export
-                performance data for judges server</a>. Save this file to
-            the Red PERF Data flash drive and deliver to the judges
-            room.
+                performance data for judges server</a>.
+            <i>This is only done when 2 servers are used on site</i>
+            . Save this file to the Red PERF Data flash drive and
+            deliver to the judges room.
             <ul>
                 <li>
                     At
@@ -217,6 +226,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
         <li>
             Import performance data into the judges server.
+            <i>This is only done when 2 servers are used on site</i>
+            .
             <form name="import-performance"
                 action="<c:url value='/admin/ProcessImportPerformance' />"
                 target="_import_performance" method="POST"
@@ -233,7 +244,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
         <li>
             Load an offline datafile from the subjective application.
-            Use this when synchronize isn't working.
+            <i>Use this when synchronize isn't working</i>
+            .
             <form name="subjective-offline"
                 action="<c:url value='/admin/SubjectiveOffline'/>"
                 method="POST" ENCTYPE="multipart/form-data">
@@ -249,18 +261,22 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         <li>
             <a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
                 the final judges room database</a> and send it to the head
-            computer person
+            computer person.
+            <i>This is only done when 2 servers are used on site</i>
+            .
         </li>
 
         <li>
             <a href="<c:url value='/admin/ExportFinalistData' />">Export
-                finalist data</a> to bring to the performance computer
+                finalist data</a> to bring to the performance computer.
+            <i>This is only done when 2 servers are used on site</i>
+            .
         </li>
 
 
         <li>
             <a href='database.flldb'>Download the final database</a> -
-            send this to the lead Scoring Coordinator
+            send this to the lead Scoring Coordinator.
         </li>
 
     </ol>
@@ -279,6 +295,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 
         <li>
             <b>State Only</b>
+            <i>This is only done when 2 servers are used on site</i>
+            .
             <form name="import-finalist" action="ProcessImportFinalist"
                 method="POST" ENCTYPE="multipart/form-data">
                 Specify the file that was exported from the judges

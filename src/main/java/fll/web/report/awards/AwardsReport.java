@@ -35,6 +35,7 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -51,10 +52,10 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.PlayoffReport;
-import fll.web.report.PromptSummarizeScores;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
@@ -93,14 +94,14 @@ public class AwardsReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/AwardsReport")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                           tournamentData.getCurrentTournament());
+
       final Document doc = createReport(connection, description);
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
@@ -275,6 +276,8 @@ public class AwardsReport extends BaseFLLServlet {
     if (null != category) {
       return category.isRanked();
     } else if (null != description.getSubjectiveCategoryByTitle(categoryTitle)) {
+      return true;
+    } else if (null != description.getVirtualSubjectiveCategoryByTitle(categoryTitle)) {
       return true;
     } else if (ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryTitle)) {
       return true;
@@ -602,7 +605,8 @@ public class AwardsReport extends BaseFLLServlet {
 
     categoryTitleBlock.appendChild(document.createTextNode("Robot Performance Award - top score from regular match play"));
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     final Element table = FOPUtils.createBasicTable(document);
 
@@ -826,7 +830,7 @@ public class AwardsReport extends BaseFLLServlet {
     // add some spacing
     final Element emptyRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(emptyRow);
-    final Element emptyCell = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    final Element emptyCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_STRING);
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 

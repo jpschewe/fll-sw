@@ -16,12 +16,6 @@
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
     </Match>
 
-    <!-- spotbugs issue with JDK 11+ https://github.com/spotbugs/spotbugs/issues/868 -->
-    <Match>
-        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
-    </Match>
-
-
     <!-- spotbugs issue https://github.com/spotbugs/spotbugs/issues/811 -->
     <Match>
         <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
@@ -47,5 +41,18 @@
         <Bug pattern="CT_CONSTRUCTOR_THROW" />
     </Match>
 
+
+    <!-- it's OK to throw RuntimeException or Exception in test code --> 
+    <Match>
+      <or>
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+      </or>
+      <or>
+        <Source name="**/integrationTest/**" />
+        <Source name="**/test/**" />
+      </or>
+    </Match>
+    
 </FindBugsFilter>
 

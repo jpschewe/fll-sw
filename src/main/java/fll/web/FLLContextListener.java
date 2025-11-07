@@ -34,6 +34,10 @@ public class FLLContextListener implements ServletContextListener {
       return;
     }
 
+    // setup the character encoding
+    application.setRequestCharacterEncoding(Utilities.DEFAULT_CHARSET);
+    application.setResponseCharacterEncoding(Utilities.DEFAULT_CHARSET);
+
     initDataSource(application);
 
     // set some default text

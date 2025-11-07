@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,11 +25,8 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
-import fll.ScoreStandardization;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -35,61 +34,30 @@ import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Do first part of summarizing scores and gather information to show the user
- * about where we are.
+ * Compute the information for judges-summary.jsp.
  */
-public final class SummarizePhase1 {
+public final class ComputeJudgeSummary {
 
-  private SummarizePhase1() {
+  private ComputeJudgeSummary() {
   }
 
   /**
-   * Page key for judge information. Type is a {@link Map} of station to
-   * {@link java.util.Collection} of
-   * JudgeSummary.
-   */
-  public static final String JUDGE_SUMMARY = "judgeSummary";
-
-  /**
-   * Page key for missing categories. Type is a {@link Map} of station to
-   * {@link java.util.Collection} category titles.
-   */
-  public static final String MISSING_CATEGORIES = "missingCategories";
-
-  /**
-   * @param request http request to access parameters and headers
    * @param application application variables
-   * @param session session variables
    * @param pageContext page variables
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
-  public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
-                                     final HttpSession session,
+  public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
-    // clear the redirect if sent here directly from index.jsp
-    final String referrer = request.getHeader("Referer");
-    if (StringUtils.isEmpty(referrer)
-        || referrer.endsWith("index.jsp")) {
-      session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
-    }
-
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     try (Connection connection = datasource.getConnection()) {
       final int tournamentID = Queries.getCurrentTournament(connection);
 
-      ScoreStandardization.updateScoreTotals(challengeDescription, connection, tournamentID);
-
-      ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
-
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
+      // judging group -> judge information
       final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();
 
       final Collection<JudgeInformation> judges = JudgeInformation.getJudges(connection, tournamentID);
@@ -120,7 +88,9 @@ public final class SummarizePhase1 {
 
       addMissingCategories(connection, tournamentID, challengeDescription, seenCategoryNames, summary);
 
-      pageContext.setAttribute(JUDGE_SUMMARY, summary);
+      pageContext.setAttribute("judgeSummary", summary);
+
+      pageContext.setAttribute("timestamp", DateTimeFormatter.RFC_1123_DATE_TIME.format(OffsetDateTime.now()));
 
     } catch (
 
@@ -197,7 +167,7 @@ public final class SummarizePhase1 {
    * @return the number of scores entered
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static int getNumScoresEntered(final Connection connection,
                                         final String judge,
                                         final String categoryName,
@@ -206,21 +176,19 @@ public final class SummarizePhase1 {
       throws SQLException {
     int numActual = -1;
     try (PreparedStatement getActual = connection.prepareStatement("SELECT COUNT(*)" //
-        + " FROM subjective_computed_scores"
+        + " FROM "
+        + categoryName //
         + " WHERE tournament = ?" //
         + " AND judge = ?" //
-        + " AND category = ?" //
-        + " AND ( computed_total IS NOT NULL OR no_show = true )"//
-        + " AND team_number IN (" //
+        + " AND TeamNumber IN (" //
         + "  SELECT TeamNumber FROM TournamentTeams" //
         + "    WHERE Tournament = ?" //
         + "    AND judging_station = ?" //
         + ")")) {
       getActual.setInt(1, tournamentID);
       getActual.setString(2, judge);
-      getActual.setString(3, categoryName);
-      getActual.setInt(4, tournamentID);
-      getActual.setString(5, station);
+      getActual.setInt(3, tournamentID);
+      getActual.setString(4, station);
       try (ResultSet actual = getActual.executeQuery()) {
         if (actual.next()) {
           numActual = actual.getInt(1);

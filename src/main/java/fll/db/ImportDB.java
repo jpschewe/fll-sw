@@ -114,6 +114,7 @@ public final class ImportDB {
    * {@link #loadFromDumpIntoNewDB(ZipInputStream, Connection)}, this
    * will result in a database with all views and generated columns.
    * This also loads all images from the dump into the application directory.
+   * This also sets the current tournament
    *
    * @param zipfile the dump file to read
    * @param destConnection where to load the data
@@ -815,6 +816,26 @@ public final class ImportDB {
       upgrade46to47(connection);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 48) {
+      upgrade47to48(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 49) {
+      upgrade48to49(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 50) {
+      upgrade49to50(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 51) {
+      upgrade50to51(connection);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -987,13 +1008,7 @@ public final class ImportDB {
   private static void upgrade17To18(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 17 to 18");
 
-    try (Statement stmt = connection.createStatement()) {
-      // need to check if practice column exists as this can be added in the upgrade
-      // from 1 to 2
-      if (!checkForColumnInTable(connection, "sched_perf_rounds", "practice")) {
-        stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD COLUMN practice BOOLEAN DEFAULT FALSE NOT NULL");
-      }
-    }
+    // no longer anything to do
 
     setDBVersion(connection, 18);
   }
@@ -1413,45 +1428,7 @@ public final class ImportDB {
   private static void upgrade33To34(final Connection connection) throws SQLException {
     LOGGER.debug("Upgrading database from 33 to 34");
 
-    try (
-        PreparedStatement findTournaments = connection.prepareStatement("SELECT tournament_id FROM tournaments WHERE tournament_id != ?");
-        PreparedStatement getNumPracticeRounds = connection.prepareStatement("SELECT MAX(num_practice_rounds) FROM (" //
-            + "SELECT COUNT(team_number) AS num_practice_rounds FROM" //
-            + " sched_perf_rounds WHERE tournament = ?" //
-            + " AND practice = TRUE" //
-            + " GROUP BY team_number)")) {
-
-      findTournaments.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
-      try (ResultSet tournamentIds = findTournaments.executeQuery()) {
-        while (tournamentIds.next()) {
-          final int tournamentId = tournamentIds.getInt(1);
-          LOGGER.debug("Processing tournament {}", tournamentId);
-
-          getNumPracticeRounds.setInt(1, tournamentId);
-          try (ResultSet practiceRounds = getNumPracticeRounds.executeQuery()) {
-            final int numPracticeRounds;
-            if (practiceRounds.next()) {
-              final int num = practiceRounds.getInt(1);
-              if (practiceRounds.wasNull()) {
-                LOGGER.debug("practice rounds is null");
-                numPracticeRounds = 0;
-              } else {
-                LOGGER.debug("practice rounds is {}", num);
-                numPracticeRounds = num;
-              }
-            } else {
-              LOGGER.debug("no results from practice rounds");
-              numPracticeRounds = 0;
-            }
-
-            LOGGER.debug("Computed number of practice rounds: {}", numPracticeRounds);
-            TournamentParameters.setNumPracticeRounds(connection, tournamentId, numPracticeRounds);
-            LOGGER.debug("After setting practice rounds: {}",
-                         TournamentParameters.getNumPracticeRounds(connection, tournamentId));
-          } // practice rounds
-        } // foreach tournament
-      } // tournamentIds
-    } // prepared statement
+    // nothing to do now that practice rounds are handled by RunMetadata
 
     setDBVersion(connection, 34);
   }
@@ -1631,6 +1608,125 @@ public final class ImportDB {
       GenerateDB.createAwardDeterminationTable(connection, false);
     }
     setDBVersion(connection, 47);
+  }
+
+  /**
+   * Add sort order to tablenames.
+   */
+  private static void upgrade47to48(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 47 to 48");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (!checkForColumnInTable(connection, "tablenames", "sort_order")) {
+        stmt.executeUpdate("ALTER TABLE tablenames ADD COLUMN sort_order INTEGER DEFAULT NULL");
+        try (ResultSet rs = stmt.executeQuery("SELECT Tournament,PairID FROM tablenames ORDER BY Tournament, SideA");
+            PreparedStatement update = connection.prepareStatement("UPDATE tablenames SET sort_order = ? WHERE Tournament = ? AND PairID = ?")) {
+          // this code increments the sort order across all tournaments, which is fine as
+          // all we need is a unique order within a tournament, the actual values don't
+          // matter.
+          int sortOrder = 0;
+          while (rs.next()) {
+            final int tournamentId = rs.getInt(1);
+            final int pairId = rs.getInt(2);
+            update.setInt(1, sortOrder++);
+            update.setInt(2, tournamentId);
+            update.setInt(3, pairId);
+            update.executeUpdate();
+          }
+        }
+      }
+    }
+    setDBVersion(connection, 48);
+  }
+
+  /**
+   * Add wave checkin times.
+   * Ensure all waves are non-null.
+   */
+  private static void upgrade48to49(final Connection connection) throws SQLException {
+    GenerateDB.createScheduleWaveCheckin(connection, false);
+
+    // ensure waves are set to the empty string instead of null
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("UPDATE TournamentTeams SET wave = '' WHERE wave IS NULL");
+    }
+
+    setDBVersion(connection, 49);
+  }
+
+  /**
+   * Add tables for finalist groups
+   */
+  private static void upgrade49to50(final Connection connection) throws SQLException {
+    GenerateDB.createFinalistGroupTables(connection, false);
+
+    setDBVersion(connection, 50);
+  }
+
+  /**
+   * Add run metadata.
+   */
+  private static void upgrade50to51(final Connection connection) throws SQLException {
+    GenerateDB.createRunMetadataTable(connection, false);
+
+    // migrate data
+    try (PreparedStatement prep = connection.prepareStatement("SELECT TP3.param_value FROM tournament_parameters AS TP3" //
+        + "   WHERE TP3.param = 'SeedingRounds'" //
+        + "      AND TP3.tournament = ( " //
+        + "      SELECT MAX(TP2.tournament) FROM tournament_parameters AS TP2 " //
+        + "           WHERE TP2.param = 'SeedingRounds'" //
+        + "           AND TP2.tournament IN (-1, ?) )");
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO run_metadata" //
+            + " (tournament_id, run_number, display_name, scoreboard_display, run_type)" //
+            + " VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement maxRunPrep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE tournament = ?")) {
+
+      for (final Tournament tournament : Tournament.getTournaments(connection)) {
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                    tournament.getTournamentID());
+
+        prep.setInt(1, tournament.getTournamentID());
+        insert.setInt(1, tournament.getTournamentID());
+        maxRunPrep.setInt(1, tournament.getTournamentID());
+
+        try (ResultSet rs = prep.executeQuery()) {
+          if (rs.next()) {
+            final int seedingRounds = rs.getInt(1);
+            try (ResultSet maxRunRs = maxRunPrep.executeQuery()) {
+              if (maxRunRs.next()) {
+                final int maxRun = maxRunRs.getInt(1);
+                for (int run = 1; run <= maxRun; ++run) {
+                  final boolean regularMatchPlay = run <= seedingRounds;
+                  final boolean scoreboardDisplay = true;
+
+                  final RunMetadata.RunType runType;
+                  if (regularMatchPlay) {
+                    runType = RunMetadata.RunType.REGULAR_MATCH_PLAY;
+                  } else if (runningHeadToHead) {
+                    // if the tournament is running head to head and the run isn't a regular match
+                    // play, then it must be head to head
+                    runType = RunMetadata.RunType.HEAD_TO_HEAD;
+                  } else {
+                    runType = RunMetadata.RunType.OTHER;
+                  }
+
+                  insert.setInt(2, run);
+                  // ideally this would have something about the playoff round in the name, but
+                  // that's a lot of work for historical data
+                  insert.setString(3, String.format("Run %d", run));
+                  insert.setBoolean(4, scoreboardDisplay);
+                  insert.setString(5, runType.name());
+
+                  insert.executeUpdate();
+                } // for each run
+              }
+            }
+          }
+        }
+      } // foreach tournament
+    } // allocate prepared statements
+
+    setDBVersion(connection, 51);
   }
 
   /**
@@ -1846,20 +1942,39 @@ public final class ImportDB {
       try (
           PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound WHERE tournament = ?")) {
 
-        try (ResultSet rs = stmt.executeQuery("SELECT tournament_id from tournaments")) {
-          while (rs.next()) {
-            final int tournamentId = rs.getInt(1);
-            final int seedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentId);
+        // can't use Tournament.getTournaments because the table may not be complete
+        try (ResultSet tournamentIds = stmt.executeQuery("SELECT tournament_id FROM tournaments")) {
+          while (tournamentIds.next()) {
+            final int tournamentId = tournamentIds.getInt(1);
+            final int maxRunNumber = getMaxRunNumber(connection, tournamentId);
 
-            prep.setInt(1, seedingRounds);
+            prep.setInt(1, maxRunNumber);
             prep.setInt(2, tournamentId);
             prep.executeUpdate();
           }
-        } // result set
+        }
       } // prepared statement
-
-      setDBVersion(connection, 8);
     } // statement
+
+    setDBVersion(connection, 8);
+  }
+
+  private static int getMaxRunNumber(final Connection connection,
+                                     final int tournamentId)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
+      prep.setInt(1, tournamentId);
+      try (ResultSet rs = prep.executeQuery()) {
+        final int runNumber;
+        if (rs.next()) {
+          runNumber = rs.getInt(1);
+        } else {
+          runNumber = 0;
+        }
+        return runNumber;
+      }
+    }
   }
 
   /**
@@ -2237,6 +2352,12 @@ public final class ImportDB {
     LOGGER.debug("Importing Schedule");
 
     try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM schedule_wave_checkin WHERE tournament = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM sched_perf_rounds WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
@@ -2273,11 +2394,11 @@ public final class ImportDB {
     }
 
     try (
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, practice, perf_time, table_color, table_side" //
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, perf_time, table_color, table_side" //
             + " FROM sched_perf_rounds WHERE tournament=?");
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO sched_perf_rounds" //
-            + " (tournament, team_number, practice, perf_time, table_color, table_side)" //
-            + " VALUES (?, ?, ?, ?, ?, ?)")) {
+            + " (tournament, team_number, perf_time, table_color, table_side)" //
+            + " VALUES (?, ?, ?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
@@ -2300,6 +2421,16 @@ public final class ImportDB {
             + " (tournament_id, key, duration_minutes)" //
             + " VALUES (?, ?, ?)")) {
 
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT wave, checkin_time" //
+        + " FROM schedule_wave_checkin WHERE tournament = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO schedule_wave_checkin" //
+            + " (tournament, wave, checkin_time)" //
+            + " VALUES (?, ?, ?)")) {
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
       copyData(sourcePrep, destPrep);
@@ -2513,10 +2644,10 @@ public final class ImportDB {
       destPrep.executeUpdate();
     }
 
-    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT PairID, SideA, SideB "
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT PairID, SideA, SideB, sort_order "
         + "FROM tablenames WHERE Tournament=?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) "
-            + "VALUES (?, ?, ?, ?)")) {
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB, sort_order) "
+            + "VALUES (?, ?, ?, ?, ?)")) {
 
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep.setInt(1, destTournamentID);
@@ -2649,6 +2780,22 @@ public final class ImportDB {
                                         final int destTournamentID,
                                         final ChallengeDescription description)
       throws SQLException {
+    LOGGER.debug("Importing performance run metadata");
+    try (
+        PreparedStatement delete = destinationConnection.prepareStatement("DELETE FROM run_metadata WHERE tournament_id = ?")) {
+      delete.setInt(1, destTournamentID);
+      delete.executeUpdate();
+    }
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT run_number, display_name, scoreboard_display, run_type"
+            + " FROM run_metadata WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO run_metadata (tournament_id, run_number, display_name, scoreboard_display, run_type)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
     LOGGER.debug("Importing performance scores");
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final String tableName = "Performance";
@@ -2735,9 +2882,6 @@ public final class ImportDB {
 
     // use the "get" methods rather than generic SQL query to ensure that the
     // default value is picked up in case the default value has been changed
-
-    final int seedingRounds = TournamentParameters.getNumSeedingRounds(sourceConnection, sourceTournamentID);
-    TournamentParameters.setNumSeedingRounds(destinationConnection, destTournamentID, seedingRounds);
 
     final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(sourceConnection, sourceTournamentID);
     TournamentParameters.setRunningHeadToHead(destinationConnection, destTournamentID, runningHeadToHead);
@@ -2841,6 +2985,12 @@ public final class ImportDB {
       destPrep.executeUpdate();
     }
 
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_groups WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
     // insert categories next
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?)");
@@ -2895,8 +3045,41 @@ public final class ImportDB {
           destPrep.executeUpdate();
         }
       }
-
     }
+
+    // finalist groups
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_groups (tournament_id, name, start_time, end_time) VALUES(?, ?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, start_time, end_time FROM finalist_groups WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setTime(3, sourceRS.getTime(2));
+          destPrep.setTime(4, sourceRS.getTime(3));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_groups_judging_groups (tournament_id, name, judging_group) VALUES(?, ?, ?)");
+
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, judging_group FROM finalist_groups_judging_groups WHERE tournament_id = ?")) {
+
+      destPrep.setInt(1, destTournamentID);
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+
   }
 
   private static void importDeliberation(final Connection sourceConnection,
@@ -3091,109 +3274,115 @@ public final class ImportDB {
    * Check the awards script information between the two databases.
    * 
    * @param description challenge description for the tournament
-   * @param sourceConnection source database
-   * @param destConnection destination database
+   * @param sourceDataSource source database
+   * @param destDataSource destination database
    * @param tournament tournament to compare
    * @return list of differences, empty if no differences
    * @throws SQLException on a database error
    */
   public static List<AwardsScriptDifference> checkAwardsScriptInfo(final ChallengeDescription description,
-                                                                   final Connection sourceConnection,
-                                                                   final Connection destConnection,
+                                                                   final DataSource sourceDataSource,
+                                                                   final DataSource destDataSource,
                                                                    final String tournament)
       throws SQLException {
     final List<AwardsScriptDifference> differences = new LinkedList<>();
 
-    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
-    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
+    try (Connection sourceConnection = sourceDataSource.getConnection();
+        Connection destConnection = destDataSource.getConnection()) {
 
-    // macro values
-    for (final Macro macro : Macro.values()) {
-      if (!AwardsScript.isMacroSpecifiedForTournament(sourceConnection, sourceTournament, macro)) {
-        final String sourceValue = AwardsScript.getMacroValue(sourceConnection, sourceTournament, macro);
-        final String destValue = AwardsScript.getMacroValue(destConnection, destTournament, macro);
-        if (!sourceValue.equals(destValue)) {
-          differences.add(new MacroValueDifference(macro, sourceValue, destValue));
-        }
-      }
-    }
+      final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
+      final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
 
-    // award order
-    if (!AwardsScript.isAwardOrderSpecifiedForTournament(sourceConnection, sourceTournament)) {
-      final List<AwardCategory> sourceValue = AwardsScript.getAwardOrder(description, sourceConnection,
-                                                                         sourceTournament);
-      final List<AwardCategory> destValue = AwardsScript.getAwardOrder(description, destConnection, destTournament);
-      if (!sourceValue.equals(destValue)) {
-        differences.add(new AwardOrderDifference(sourceValue, destValue));
-      }
-    }
-
-    for (final NonNumericCategory category : description.getNonNumericCategories()) {
-      // presenter - non-numeric category
-      if (!AwardsScript.isPresenterSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
-        final String sourceValue = AwardsScript.getPresenter(sourceConnection, sourceTournament, category);
-        final String destValue = AwardsScript.getPresenter(destConnection, destTournament, category);
-        if (!sourceValue.equals(destValue)) {
-          differences.add(new NonNumericCategoryPresenterDifference(category, sourceValue, destValue));
+      // macro values
+      final RunMetadataFactory sourceRunMetadataFactory = new RunMetadataFactory(sourceDataSource, sourceTournament);
+      final RunMetadataFactory destRunMetadataFactory = new RunMetadataFactory(destDataSource, destTournament);
+      for (final Macro macro : Macro.values()) {
+        if (!AwardsScript.isMacroSpecifiedForTournament(sourceConnection, sourceTournament, macro)) {
+          final String sourceValue = AwardsScript.getMacroValue(sourceConnection, sourceRunMetadataFactory, macro);
+          final String destValue = AwardsScript.getMacroValue(destConnection, destRunMetadataFactory, macro);
+          if (!sourceValue.equals(destValue)) {
+            differences.add(new MacroValueDifference(macro, sourceValue, destValue));
+          }
         }
       }
 
-      // category text - non-numeric category
-      if (!AwardsScript.isCategoryTextSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
-        final String sourceValue = AwardsScript.getCategoryText(sourceConnection, sourceTournament, category);
-        final String destValue = AwardsScript.getCategoryText(destConnection, destTournament, category);
+      // award order
+      if (!AwardsScript.isAwardOrderSpecifiedForTournament(sourceConnection, sourceTournament)) {
+        final List<AwardCategory> sourceValue = AwardsScript.getAwardOrder(description, sourceConnection,
+                                                                           sourceTournament);
+        final List<AwardCategory> destValue = AwardsScript.getAwardOrder(description, destConnection, destTournament);
         if (!sourceValue.equals(destValue)) {
-          differences.add(new NonNumericCategoryTextDifference(category, sourceValue, destValue));
-        }
-      }
-    }
-
-    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      // presenter - subjective category
-      if (!AwardsScript.isPresenterSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
-        final String sourceValue = AwardsScript.getPresenter(sourceConnection, sourceTournament, category);
-        final String destValue = AwardsScript.getPresenter(destConnection, destTournament, category);
-        if (!sourceValue.equals(destValue)) {
-          differences.add(new SubjectiveCategoryPresenterDifference(category, sourceValue, destValue));
+          differences.add(new AwardOrderDifference(sourceValue, destValue));
         }
       }
 
-      // category text - subjective category
-      if (!AwardsScript.isCategoryTextSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
-        final String sourceValue = AwardsScript.getCategoryText(sourceConnection, sourceTournament, category);
-        final String destValue = AwardsScript.getCategoryText(destConnection, destTournament, category);
-        if (!sourceValue.equals(destValue)) {
-          differences.add(new SubjectiveCategoryTextDifference(category, sourceValue, destValue));
+      for (final NonNumericCategory category : description.getNonNumericCategories()) {
+        // presenter - non-numeric category
+        if (!AwardsScript.isPresenterSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+          final String sourceValue = AwardsScript.getPresenter(sourceConnection, sourceTournament, category);
+          final String destValue = AwardsScript.getPresenter(destConnection, destTournament, category);
+          if (!sourceValue.equals(destValue)) {
+            differences.add(new NonNumericCategoryPresenterDifference(category, sourceValue, destValue));
+          }
+        }
+
+        // category text - non-numeric category
+        if (!AwardsScript.isCategoryTextSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+          final String sourceValue = AwardsScript.getCategoryText(sourceConnection, sourceTournament, category);
+          final String destValue = AwardsScript.getCategoryText(destConnection, destTournament, category);
+          if (!sourceValue.equals(destValue)) {
+            differences.add(new NonNumericCategoryTextDifference(category, sourceValue, destValue));
+          }
         }
       }
-    }
 
-    // num performance awards
-    if (!AwardsScript.isNumPerformanceAwardsSpecifiedForTournament(sourceConnection, sourceTournament)) {
-      final int sourceValue = AwardsScript.getNumPerformanceAwards(sourceConnection, sourceTournament);
-      final int destValue = AwardsScript.getNumPerformanceAwards(destConnection, destTournament);
-      if (sourceValue != destValue) {
-        differences.add(new NumPerformanceAwardsDifference(sourceValue, destValue));
-      }
-    }
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        // presenter - subjective category
+        if (!AwardsScript.isPresenterSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+          final String sourceValue = AwardsScript.getPresenter(sourceConnection, sourceTournament, category);
+          final String destValue = AwardsScript.getPresenter(destConnection, destTournament, category);
+          if (!sourceValue.equals(destValue)) {
+            differences.add(new SubjectiveCategoryPresenterDifference(category, sourceValue, destValue));
+          }
+        }
 
-    // section text
-    for (final Section section : Section.values()) {
-      if (!AwardsScript.isSectionSpecifiedForTournament(sourceConnection, sourceTournament, section)) {
-        final String sourceValue = AwardsScript.getSectionText(sourceConnection, sourceTournament, section);
-        final String destValue = AwardsScript.getSectionText(destConnection, destTournament, section);
-        if (!sourceValue.equals(destValue)) {
-          differences.add(new SectionTextDifference(section, sourceValue, destValue));
+        // category text - subjective category
+        if (!AwardsScript.isCategoryTextSpecifiedForTournament(sourceConnection, sourceTournament, category)) {
+          final String sourceValue = AwardsScript.getCategoryText(sourceConnection, sourceTournament, category);
+          final String destValue = AwardsScript.getCategoryText(destConnection, destTournament, category);
+          if (!sourceValue.equals(destValue)) {
+            differences.add(new SubjectiveCategoryTextDifference(category, sourceValue, destValue));
+          }
         }
       }
-    }
 
-    // sponsors
-    if (!AwardsScript.isSponsorsSpecifiedForTournament(sourceConnection, sourceTournament)) {
-      final List<String> sourceValue = AwardsScript.getSponsors(sourceConnection, sourceTournament);
-      final List<String> destValue = AwardsScript.getSponsors(destConnection, destTournament);
-      if (!sourceValue.equals(destValue)) {
-        differences.add(new SponsorsDifference(sourceValue, destValue));
+      // num performance awards
+      if (!AwardsScript.isNumPerformanceAwardsSpecifiedForTournament(sourceConnection, sourceTournament)) {
+        final int sourceValue = AwardsScript.getNumPerformanceAwards(sourceConnection, sourceTournament);
+        final int destValue = AwardsScript.getNumPerformanceAwards(destConnection, destTournament);
+        if (sourceValue != destValue) {
+          differences.add(new NumPerformanceAwardsDifference(sourceValue, destValue));
+        }
+      }
+
+      // section text
+      for (final Section section : Section.values()) {
+        if (!AwardsScript.isSectionSpecifiedForTournament(sourceConnection, sourceTournament, section)) {
+          final String sourceValue = AwardsScript.getSectionText(sourceConnection, sourceTournament, section);
+          final String destValue = AwardsScript.getSectionText(destConnection, destTournament, section);
+          if (!sourceValue.equals(destValue)) {
+            differences.add(new SectionTextDifference(section, sourceValue, destValue));
+          }
+        }
+      }
+
+      // sponsors
+      if (!AwardsScript.isSponsorsSpecifiedForTournament(sourceConnection, sourceTournament)) {
+        final List<String> sourceValue = AwardsScript.getSponsors(sourceConnection, sourceTournament);
+        final List<String> destValue = AwardsScript.getSponsors(destConnection, destTournament);
+        if (!sourceValue.equals(destValue)) {
+          differences.add(new SponsorsDifference(sourceValue, destValue));
+        }
       }
     }
 

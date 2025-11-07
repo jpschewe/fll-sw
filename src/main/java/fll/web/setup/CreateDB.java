@@ -8,8 +8,6 @@ package fll.web.setup;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.sql.Connection;
@@ -28,12 +26,12 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Authentication;
 import fll.db.DumpDB;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
-import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
@@ -42,6 +40,7 @@ import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.DescriptionInfo;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -96,26 +95,22 @@ public class CreateDB extends BaseFLLServlet {
         }
       }
 
+      // make sure that we clear any cache in the Application
+      ApplicationAttributes.clearDatabaseAttributes(application);
+
       boolean success = false;
       if (null != request.getParameter("chooseDescription")) {
         final String description = WebUtils.getNonNullRequestParameter(request, "description");
 
-        try {
-          final URL descriptionURL = new URI(description).toURL();
-          final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
-                                                                                                        Utilities.DEFAULT_CHARSET));
+        final URL descriptionURL = DescriptionInfo.getKnownChallengeUrl(description);
+        final ChallengeDescription challengeDescription = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
+                                                                                                      Utilities.DEFAULT_CHARSET));
 
-          DumpDB.automaticBackup(connection, "before-create-from-description");
+        DumpDB.automaticBackup(connection, "before-create-from-description");
 
-          GenerateDB.generateDB(challengeDescription, connection);
+        GenerateDB.generateDB(challengeDescription, connection);
 
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
-
-          success = true;
-        } catch (final URISyntaxException e) {
-          throw new FLLInternalException("Could not parse URL from choosen description: "
-              + description, e);
-        }
+        success = true;
       } else if (null != request.getPart("reinitializeDatabase")) {
         // create a new empty database from an XML descriptor
         final Part xmlFileItem = request.getPart("xmldocument");
@@ -130,8 +125,6 @@ public class CreateDB extends BaseFLLServlet {
           DumpDB.automaticBackup(connection, "before-create-from-xml");
 
           GenerateDB.generateDB(challengeDescription, connection);
-
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
 
           success = true;
         }
@@ -155,8 +148,8 @@ public class CreateDB extends BaseFLLServlet {
                                          importResult.getImportDirectory()));
           }
 
-          // remove application variables that depend on the database
-          application.removeAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION);
+          ApplicationAttributes.getTournamentData(application)
+                               .setCurrentTournament(Tournament.getCurrentTournament(connection));
 
           final Collection<String> newDbUsers = Authentication.getUsers(connection);
           final Iterator<UserAccount> accountIter = accounts.iterator();

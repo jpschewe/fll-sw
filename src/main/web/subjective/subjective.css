@@ -89,7 +89,7 @@ span.sliderTickMark {
 }
 
 #side-panel_server-status.online {
-    background: lightgreen;
+    background-color: lightgreen;
 }
 
 #side-panel_open {
@@ -171,5 +171,15 @@ footer button {
 
 #enter-score-note-button {
     background-color: purple;
-    color: white;    
+    color: white;
+}
+
+/* make sure the other judge columns line up */
+.other-judge {
+    font-family: monospace;
+    font-size: larger;
+}
+
+.virtual-category-gear {
+    height: 20px;
 }

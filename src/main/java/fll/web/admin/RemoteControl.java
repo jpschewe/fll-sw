@@ -8,11 +8,8 @@ package fll.web.admin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import fll.Tournament;
@@ -21,7 +18,8 @@ import fll.web.ApplicationAttributes;
 import fll.web.display.DisplayHandler;
 import fll.web.playoff.Playoff;
 import fll.web.report.awards.AwardsScriptReport;
-import fll.web.report.finalist.FinalistSchedule;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Context information for remoteControl.jsp.
@@ -63,12 +61,7 @@ public final class RemoteControl {
       pageContext.setAttribute("numPlayoffRounds",
                                Queries.getNumPlayoffRounds(connection, currentTournament.getTournamentID()));
 
-      final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection,
-                                                                                    currentTournament.getTournamentID());
-      pageContext.setAttribute("finalistDivisions", finalistDivisions);
-
-      pageContext.setAttribute("allAwardGroups",
-                               AwardsScriptReport.getAwardGroupOrder(connection, currentTournament));
+      pageContext.setAttribute("allAwardGroups", AwardsScriptReport.getAwardGroupOrder(connection, currentTournament));
 
       pageContext.setAttribute("displayInformation", DisplayHandler.getAllRemoteControlDisplays());
 

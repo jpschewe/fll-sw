@@ -7,17 +7,22 @@
 package fll.web.report;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Utilities;
 import fll.db.AwardDeterminationOrder;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -48,9 +53,17 @@ public class EditAwardDeterminationOrder extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
       final List<AwardCategory> awards = AwardDeterminationOrder.get(connection, description);
-      page.setAttribute("awards", awards);
+
+      final Map<AwardCategory, String> awardToParam = awards.stream()
+                                                            .collect(Collectors.toMap(Function.identity(),
+                                                                                      EditAwardDeterminationOrder::sanitizeAwardTitle,
+                                                                                      (a,
+                                                                                       b) -> {
+                                                                                        throw new IllegalStateException("Merging of values is not allowed");
+                                                                                      }, LinkedHashMap::new));
+
+      page.setAttribute("awardToParam", awardToParam);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
@@ -74,7 +87,7 @@ public class EditAwardDeterminationOrder extends BaseFLLServlet {
 
       final List<AwardCategory> awards = AwardDeterminationOrder.get(connection, description);
       for (AwardCategory award : awards) {
-        final int index = WebUtils.getIntRequestParameter(request, award.getTitle(), -1);
+        final int index = WebUtils.getIntRequestParameter(request, sanitizeAwardTitle(award), -1);
         if (index >= 0) {
           awardOrderMap.put(award, index);
         }
@@ -107,6 +120,11 @@ public class EditAwardDeterminationOrder extends BaseFLLServlet {
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
+  }
+
+  private static String sanitizeAwardTitle(final AwardCategory award) {
+    final String paramName = URLEncoder.encode(award.getTitle(), Utilities.DEFAULT_CHARSET);
+    return paramName;
   }
 
 }

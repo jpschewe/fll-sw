@@ -1,28 +1,32 @@
 "use strict";
 
-document.addEventListener("DOMContentLoaded", () => {
-    setSelectValue(document.getElementById("teamNumber"), TEAM_NUMBER_HEADER);
-    setSelectValue(document.getElementById("teamName"), TEAM_NAME_HEADER);
-    setSelectValue(document.getElementById("organization"), ORGANIZATION_HEADER);
-    setSelectValue(document.getElementById("awardGroup"), AWARD_GROUP_HEADER);
-    setSelectValue(document.getElementById("judgingGroup"), JUDGE_GROUP_HEADER);
-    setSelectValue(document.getElementById("wave"), WAVE_HEADER);
-
-    for (let i = 0; i < numPracticeRounds; ++i) {
-        const roundNumber = i + 1;
-        if (roundNumber == 1) {
-            // try short versions
-            setSelectValue(document.getElementById("practice" + roundNumber), BASE_PRACTICE_HEADER_SHORT);
-            setSelectValue(document.getElementById("practiceTable" + roundNumber), PRACTICE_TABLE_HEADER_FORMAT_SHORT);
+function setTableValue(timeSelect, tableSelect, nameInput) {
+    let found = false;
+    for (const option of timeSelect.options) {
+        if (option.selected) {
+            found = true;
+            nameInput.value = option.value;
+        } else if (found) {
+            // assume the table is the next value
+            setSelectValue(tableSelect, option.value);
+            break;
         }
-        setSelectValue(document.getElementById("practice" + roundNumber), practiceHeaders[i]);
-        setSelectValue(document.getElementById("practiceTable" + roundNumber), practiceTableHeaders[i]);
     }
+}
 
+document.addEventListener("DOMContentLoaded", () => {
     for (let i = 0; i < numPerformanceRuns; ++i) {
         const roundNumber = i + 1;
-        setSelectValue(document.getElementById("perf" + roundNumber), perfHeaders[i]);
-        setSelectValue(document.getElementById("perfTable" + roundNumber), perfTableHeaders[i]);
+        const timeSelect = document.getElementById(`perf${roundNumber}_time`);
+        const tableSelect = document.getElementById(`perf${roundNumber}_table`);
+        const nameInput = document.getElementById(`perf${roundNumber}_name`);
+        // sync table with initial value
+        setTableValue(timeSelect, tableSelect, nameInput);
+
+        // update table when time is selected
+        timeSelect.addEventListener('change', () => {
+            setTableValue(timeSelect, tableSelect, nameInput);
+        })
     }
 
 });

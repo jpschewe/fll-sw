@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="HEAD_JUDGE,REPORT_GENERATOR" allowSetup="false" />
+<fll-sw:required-roles roles="HEAD_JUDGE,REPORT_GENERATOR"
+    allowSetup="false" />
 
 <!DOCTYPE HTML>
 <html>
@@ -31,8 +32,13 @@
     <h1>Edit Advancing Teams</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
+
     <p>Specify the teams advancing to the next tournament. The group
         names will be used in the awards report.</p>
+
+    <p>Note that if two people are using this form at the same time,
+        the last one to save overwrites any previous data.</p>
+
     <button id="advancing-teams_add-group">Add Group</button>
     <ul id="advancing-teams"></ul>
 

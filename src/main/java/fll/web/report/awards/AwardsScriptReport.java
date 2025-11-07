@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
 import com.diffplug.common.base.Errors;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -54,6 +55,7 @@ import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
+import fll.db.RunMetadataFactory;
 import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -62,11 +64,11 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.report.FinalComputedScores;
 import fll.web.report.PlayoffReport;
-import fll.web.report.PromptSummarizeScores;
 import fll.web.report.finalist.FinalistDBRow;
 import fll.web.report.finalist.FinalistSchedule;
 import fll.web.scoreboard.Top10;
@@ -104,21 +106,19 @@ public class AwardsScriptReport extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/awards/AwardsScriptReport")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                          tournamentData.getCurrentTournament());
 
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=awardsScript.pdf");
 
       try {
-        final Document document = generateDocument(description, connection);
+        final Document document = generateDocument(tournamentData, description, connection);
 
         if (LOGGER.isTraceEnabled()) {
           try (StringWriter writer = new StringWriter()) {
@@ -141,22 +141,23 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   private void addMacrosToTemplateContext(final Connection connection,
-                                          final Tournament tournament,
+                                          final RunMetadataFactory runMetadataFactory,
                                           final VelocityContext templateContext)
       throws SQLException {
     for (final AwardsScript.Macro macro : AwardsScript.Macro.values()) {
-      final String value = AwardsScript.getMacroValue(connection, tournament, macro);
+      final String value = AwardsScript.getMacroValue(connection, runMetadataFactory, macro);
       templateContext.put(macro.getText(), value);
     }
   }
 
-  private Document generateDocument(final ChallengeDescription description,
+  private Document generateDocument(final TournamentData tournamentData,
+                                    final ChallengeDescription description,
                                     final Connection connection)
       throws SQLException {
-    final Tournament tournament = Tournament.getCurrentTournament(connection);
+    final Tournament tournament = tournamentData.getCurrentTournament();
 
     final VelocityContext templateContext = new VelocityContext();
-    addMacrosToTemplateContext(connection, tournament, templateContext);
+    addMacrosToTemplateContext(connection, tournamentData.getRunMetadataFactory(), templateContext);
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -604,7 +605,8 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final Element categoryPresenter = createPresenter(document, connection, tournament, category);
     container.appendChild(categoryPresenter);
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     final int numAwards = AwardsScript.getNumPerformanceAwards(connection, tournament);
 
@@ -985,7 +987,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
 
     final Element blank = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     teamContainer.appendChild(blank);
-    blank.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE)));
+    blank.appendChild(document.createTextNode(Utilities.NON_BREAKING_SPACE_STRING));
   }
 
   private static String suffixForPlace(final int place) {

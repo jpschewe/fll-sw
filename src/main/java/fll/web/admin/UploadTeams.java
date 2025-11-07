@@ -27,6 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -564,11 +566,11 @@ public final class UploadTeams extends BaseFLLServlet {
             continue;
           }
 
-          final @Nullable String wave;
+          final String wave;
           if (!StringUtils.isBlank(waveColumn)) {
-            wave = rs.getString(5);
+            wave = castNonNull(rs.getString(5));
           } else {
-            wave = null;
+            wave = "";
           }
 
           final Tournament tournament;

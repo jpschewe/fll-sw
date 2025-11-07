@@ -79,7 +79,11 @@ const finalistScheduleModule = {};
         const h2hHeader = document.createElement("div");
         headerRow.appendChild(h2hHeader);
         h2hHeader.classList.add("rTableHead");
-        h2hHeader.innerText = "Head to Head";
+        if (finalist_module.getRunningHead2Head()) {
+            h2hHeader.innerText = "Head to Head";
+        } else {
+            h2hHeader.innerText = "Finalist Group";
+        }
 
         for (const category of finalist_module.getAllScheduledCategories()) {
             const room = finalist_module.getRoom(category, finalist_module.getCurrentDivision());
@@ -247,6 +251,22 @@ const finalistScheduleModule = {};
         waitList.push(finalist_module.uploadPlayoffSchedules(
             playoffSchedulesSuccess, playoffSchedulesFail));
 
+        const finalistGroupsSuccess = function(_) {
+            _log("Finalist groups upload success")
+        };
+        const finalistGroupsFail = function(result) {
+            let message;
+            if (null == result) {
+                message = "Unknown server error";
+            } else {
+                message = result.message;
+            }
+
+            alert("Finalist groups upload failure: " + message);
+        }
+        waitList.push(finalist_module.uploadFinalistGroups(
+            finalistGroupsSuccess, finalistGroupsFail));
+
         const scheduleParamsSuccess = function(_) {
             _log("Schedule parameters upload success")
         };
@@ -373,6 +393,9 @@ const finalistScheduleModule = {};
             if (finalist_module.hasPlayoffConflict(oldTeam, srcSlot)) {
                 srcCell.classList.add("overlap-playoff");
             }
+            if (finalist_module.outsideFinalistGroup(oldTeam, srcSlot)) {
+                srcCell.classList.add("overlap-playoff");
+            }
         }
 
         // add team to new slot, reference actual slot in case
@@ -411,6 +434,7 @@ const finalistScheduleModule = {};
         }
 
         const hasPlayoffConflict = finalist_module.hasPlayoffConflict(team, slot);
+        const outsideFinalistGroup = finalist_module.outsideFinalistGroup(team, slot);
 
         for (const [name, checkTeamNumber] of Object.entries(slot.categories)) {
             if (checkTeamNumber == teamNumber) {
@@ -427,6 +451,12 @@ const finalistScheduleModule = {};
                     }
 
                     if (hasPlayoffConflict) {
+                        cell.classList.add('overlap-playoff');
+                    } else {
+                        cell.classList.remove('overlap-playoff');
+                    }
+
+                    if (outsideFinalistGroup) {
                         cell.classList.add('overlap-playoff');
                     } else {
                         cell.classList.remove('overlap-playoff');
@@ -459,19 +489,35 @@ const finalistScheduleModule = {};
         const playoffCell = document.createElement("div");
         row.appendChild(playoffCell);
         playoffCell.classList.add("rTableCell");
-        let text = "";
-        let first = true;
-        for (const [bracketName, playoffSchedule] of Object.entries(finalist_module.getPlayoffSchedules())) {
-            if (finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
-                if (first) {
-                    first = false;
-                } else {
-                    text = text + ",";
+        let playoffCellText = "";
+        if (finalist_module.getRunningHead2Head()) {
+            let first = true;
+            for (const [bracketName, playoffSchedule] of Object.entries(finalist_module.getPlayoffSchedules())) {
+                if (finalist_module.slotHasPlayoffConflict(playoffSchedule, slot)) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        playoffCellText = playoffCellText + ",";
+                    }
+                    playoffCellText = playoffCellText + bracketName;
                 }
-                text = text + bracketName;
+            }
+        } else {
+            let first = true;
+            for (const [name, finalistGroup] of Object.entries(finalist_module.getFinalistGroups())) {
+                if (finalistGroup.startTime && finalistGroup.endTime) {
+                    if (slot.time.isBefore(finalistGroup.endTime) && finalistGroup.startTime.isBefore(slot.endTime)) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            playoffCellText = playoffCellText + ",";
+                        }
+                        playoffCellText = playoffCellText + name;
+                    }
+                }
             }
         }
-        playoffCell.innerText = text;
+        playoffCell.innerText = playoffCellText;
 
         const categoriesToCells = {};
         const teamsInSlot = {};

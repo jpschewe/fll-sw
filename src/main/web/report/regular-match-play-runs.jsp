@@ -40,9 +40,9 @@ table#perf-data th, table#perf-data td {
             <th>Team Name</th>
             <th>Organization</th>
 
-            <c:forEach begin="1" end="${maxScoresPerTeam}"
-                varStatus="loopStatus">
-                <th>${loopStatus.current}</th>
+            <c:forEach items="${regularMatchPlayRounds}"
+                var="runMetadata">
+                <th>${runMetadata.displayName}</th>
             </c:forEach>
         </tr>
 

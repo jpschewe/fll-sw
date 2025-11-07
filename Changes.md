@@ -1,3 +1,57 @@
+Release 20.0.0
+==============
+
+* #1281 - Remove "out of" from final computed scores
+* #1273 - Allow users to see the password they have typed in
+* #1280 - Add tooltip to sync button in subjective scores app
+* #1274 - Show Award Group and Judging Group report selection only when they are different
+* #1279 - Highlight background of 1st place teams in subjective by judge report
+* #1276 - Ensure that the awards summary order is properly saved
+* #1258 - Handle UTF-8 content in all web pages. This allows special characters in the subjective judging application comments.
+* #1271 - Ensure that the judges summary sees the number of teams scored as soon as a score comes in
+* #1272 - Use run display name in performance vs. scheduled report
+* #1270 - Add page displaying all known challenge descriptions
+* Allow the user to access database backups from the setup page
+* Correct links to download database backups
+* #1267 - On schedule upload filter columns that have data of the incorrect type
+* #1266 - Add documentation of the schedule file format
+* #1265 - Add more details to the exception message when a time in a schedule cannot be parsed
+* #1244 - Make the crossed off teams more visible on the deliberations page
+* #1243 - Display places for virtual subjective categories in the awards script
+* #1268 - Add a judges summary page
+* #1263 - Add report displaying raw scores from virtual subjective categories
+* #1251 - automatically compute summarized scores when needed for a report
+* #1264 - Put gear next to goals that double count in the subjective judging app
+* #1262 - 2 column layout for macro buttons on edit awards script
+* #1261 - prompt the user for award group sort after uploading a schedule
+* Scale weighted rank by number of teams in group per category
+* Display practice scores on the scoreboard by default
+* #1245 - Sort the finalist schedule report in the same order as the deliberation category order
+* #1220 - Add metadata to runs so that they can be named and the user can control what runs are displayed on the scoreboard
+* #1259 - Fix bug switching between full scoreboard and all teams / most recent scores
+* #1242 - Don't stomp awards script when saving presenters
+* #1253 - fix error uploading delibration winners a second time
+* Fix finalist schedule link missing
+* #1232 - Allow the user to delete all advancing teams
+
+Release 19.2.0
+==============
+* #1228 - Add synchronize button to the footer of the subjective judging app
+* #1223 - Add button to allow downloading all common schedules at once
+* #1227 - Add score to performance winners in the awards CSV file
+* #1230 - Add option to display scoreboard with most recent and all teams scores
+* #1229 - Support generating finalist schedule when not running head to head
+* #1222 - Display all performance runs in the performance runs vs. schedule report
+* Fix bug in subjective application where the score summary sometimes would not display
+* #1211 - Add PDF version of the schedule
+* #1224 - Allow judge names to be longer than 64 characters
+
+Release 19.1.0
+==============
+* #1129 - Display scores for other judges in the subjective score summary
+* shrink font size for judging group on pit signs
+* #1215 - Allow the user to specify the order of the tables in performance schedules
+* #1123 - Upload subjective scores in the background
 * #1212 - Export and import images with database dumps
 * #1218 - Make sure judges can see the goal they are commenting on
 * Properly import virtual subjective category winners

@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.report.awards;
+package fll.web.report.awards;
 
 import java.io.IOException;
 import java.sql.Connection;

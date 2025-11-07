@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -146,12 +147,17 @@ public final class Utilities {
   /**
    * Character set to use throughout the software. Currently set to UTF-8.
    */
-  public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
   /**
    * Unicode character for a non-breaking space.
    */
   public static final char NON_BREAKING_SPACE = '\u00a0';
+
+  /**
+   * {@link #NON_BREAKING_SPACE} as a string.
+   */
+  public static final String NON_BREAKING_SPACE_STRING = String.valueOf(NON_BREAKING_SPACE);
 
   private Utilities() {
   }
@@ -169,7 +175,7 @@ public final class Utilities {
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
-   * existence of the TournamentParameters tables.
+   * existence of the TournamentParameters table.
    *
    * @param connection the connection to check
    * @return true if the database is initialized

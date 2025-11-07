@@ -4,8 +4,8 @@
 
 <%
 fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext);
+fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
+fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 %>
 
 <html>
@@ -37,8 +37,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         Match Play performance scores</a>
 
     <a class="wide"
-        href="<c:url value='/report/regular-match-play-vs-schedule.jsp' />">Regular
-        Match Play runs compared with the schedule</a>
+        href="<c:url value='/report/performance-runs-vs-schedule.jsp' />">Performance
+        runs compared with the schedule</a>
 
     <a class="wide"
         href="<c:url value='/report/topScoreReportPerAwardGroup.jsp' />">Top
@@ -86,8 +86,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext);
         href="<c:url value='/admin/PerformanceSchedulePerTable' />"
         target="_new">Performance Schedule per table</a>
 
-    <a class="wide"
-        href="<c:url value='/admin/PerformanceNotes' />"
+    <a class="wide" href="<c:url value='/admin/PerformanceNotes' />"
         target="_new">Performance Schedule per table for notes</a>
 
     <a class="wide" href="<c:url value='/admin/PerformanceSheets' />"

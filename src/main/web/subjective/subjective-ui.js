@@ -353,6 +353,15 @@ function addGoalHeaderToScoreEntry(table, totalColumns, goal, rowClass) {
     const goalDescTable = document.createElement("table");
     const goalDescRow = document.createElement("tr");
 
+    if (subjective_module.isReferencedInVirtualCategory(goal)) {
+        const gear = document.createElement("td");
+        goalDescRow.appendChild(gear);
+        const gearImage = document.createElement("img");
+        gear.appendChild(gearImage);
+        gearImage.setAttribute("src", "/images/gear-empty.png");
+        gearImage.classList.add("virtual-category-gear");
+    }
+
     const goalTitle = document.createElement("td");
     goalDescRow.appendChild(goalTitle);
     goalTitle.innerText = goal.title;
@@ -459,7 +468,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
                     popupContent.style.marginTop = offset + "px";
                     popupContent.style.height = height + "px";
                 }
-                
+
                 popup.classList.remove("fll-sw-ui-inactive");
                 textarea.focus();
             });
@@ -728,6 +737,8 @@ function saveScore() {
         }
     });
 
+    backgroundScoreUpload();
+
     window.location = subjective_module.getScoreEntryBackPage();
 }
 
@@ -789,23 +800,139 @@ function populateScoreSummary() {
 
     const teamScores = {};
     const teamsWithScores = [];
+    const otherJudges = [];
+    const otherJudgesScores = new Map(); // team number -> judge id -> score data
+    //const otherJudge
 
     const teams = subjective_module.getCurrentTeams();
     for (const team of teams) {
+        let teamOtherJudgeScores;
+        if (otherJudgesScores.has(team.teamNumber)) {
+            teamOtherJudgeScores = otherJudgesScores.get(team.teamNumber);
+        } else {
+            teamOtherJudgeScores = new Map();
+        }
+
         const score = subjective_module.getScore(team.teamNumber);
         if (subjective_module.isScoreCompleted(score)) {
             teamsWithScores.push(team);
 
             const computedScore = subjective_module.computeScore(score);
             teamScores[team.teamNumber] = computedScore;
+
+            const otherJudgeScores = subjective_module.getOtherJudgeScores(team.teamNumber);
+            for (const [otherJudgeId, otherScore] of otherJudgeScores) {
+                if (!otherJudges.includes(otherJudgeId)) {
+                    otherJudges.push(otherJudgeId);
+                }
+
+                let scoreData;
+                if (teamOtherJudgeScores.has(otherJudgeId)) {
+                    scoreData = teamOtherJudgeScores.get(otherJudgeId);
+                } else {
+                    scoreData = {};
+                }
+                scoreData["score"] = otherScore;
+                if (subjective_module.isScoreCompleted(otherScore)) {
+                    const otherComputedScore = subjective_module.computeScore(otherScore);
+                    scoreData["computedScore"] = otherComputedScore;
+                }
+                teamOtherJudgeScores.set(otherJudgeId, scoreData);
+            }
+        }
+        otherJudgesScores.set(team.teamNumber, teamOtherJudgeScores);
+    }
+
+    // collect score data by judge so that it can be sorted to compute ranks
+    const otherJudgeRank = new Map(); // judge id -> [ scoreData ]
+    for (const [_, judgeData] of otherJudgesScores) {
+        for (const [judgeId, scoreData] of judgeData) {
+            if (otherJudgeRank.has(judgeId)) {
+                otherJudgeRank.get(judgeId).push(scoreData);
+            } else {
+                otherJudgeRank.set(judgeId, [scoreData]);
+            }
         }
     }
 
+    // compute ranks for other judge scores
+    for (const [_, scoreDataList] of otherJudgeRank) {
+        scoreDataList.sort(function(a, b) {
+            const scoreA = a["computedScore"];
+            const scoreB = b["computedScore"];
+            if (!scoreA && !scoreB) {
+                return 0;
+            } else if (!scoreA && scoreB) {
+                return 1;
+            } else if (scoreA && !scoreB) {
+                return -1;
+            } else if (scoreA > scoreB) {
+                return -1;
+            } else if (scoreA < scoreB) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        // assign ranks
+        let rank = 0;
+        let rankOffset = 1;
+        for (let i = 0; i < scoreDataList.length; ++i) {
+            const scoreData = scoreDataList[i];
+
+            if (i > 0) {
+                const prevScoreData = scoreDataList[i - 1];
+                if (scoreData["computedScore"] == prevScoreData["computedScore"]) {
+                    scoreData["tie"] = true;
+                    rankOffset = rankOffset + 1;
+                } else {
+                    rank = rank + rankOffset;
+                    rankOffset = 1;
+                }
+            } else {
+                rank = rank + rankOffset;
+                rankOffset = 1;
+            }
+
+            if (i + 1 < teamsWithScores.length) {
+                const nextScoreData = scoreDataList[i + 1];
+                if (scoreData && nextScoreData && scoreData["computedScore"] == nextScoreData["computedScore"]) {
+                    scoreData["tie"] = true;
+                }
+            }
+
+            scoreData["rank"] = rank;
+        }
+    }
+
+    otherJudges.sort();
+
     teamsWithScores.sort(function(a, b) {
-        var scoreA = teamScores[a.teamNumber];
-        var scoreB = teamScores[b.teamNumber];
+        const scoreA = teamScores[a.teamNumber];
+        const scoreB = teamScores[b.teamNumber];
         return scoreA < scoreB ? 1 : scoreA > scoreB ? -1 : 0;
     });
+
+    const headerRow = document.createElement("div");
+    scoreSummaryContent.appendChild(headerRow);
+
+    const headerRowSpacer = document.createElement("span");
+    headerRowSpacer.innerHTML = "&nbsp;";
+    headerRow.appendChild(headerRowSpacer);
+
+    const headerRowRightBlock = document.createElement("span");
+    headerRow.appendChild(headerRowRightBlock);
+    headerRowRightBlock.classList.add("right-align");
+    headerRowRightBlock.classList.add("other-judge");
+    headerRowRightBlock.classList.add("fll-sw-ui-inactive");
+
+    for (const judgeId of otherJudges) {
+        const judgeIdBlock = document.createElement("span");
+        headerRowRightBlock.appendChild(judgeIdBlock);
+        judgeIdBlock.classList.add("score-summary-right-elements");
+        judgeIdBlock.innerText = judgeId;
+    }
 
     let rank = 0;
     let rankOffset = 1;
@@ -884,6 +1011,41 @@ function populateScoreSummary() {
             subjective_module.setScoreEntryBackPage("#score-summary");
             window.location = "#enter-score";
         });
+
+        const teamOtherJudgeScores = otherJudgesScores.get(team.teamNumber);
+        for (const otherJudgeId of otherJudges) {
+            const otherScoreBlock = document.createElement("span");
+            rightBlock.appendChild(otherScoreBlock);
+            otherScoreBlock.classList.add("other-judge");
+
+            const otherJudgeIdLength = otherJudgeId.length;
+            const otherScoreData = teamOtherJudgeScores.get(otherJudgeId);
+            if (!otherScoreData) {
+                otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeIdLength);
+            } else {
+                const otherScore = otherScoreData["score"];
+                if (otherScore.noShow) {
+                    otherScoreBlock.innerHTML = centerText("No Show", otherJudgeIdLength);
+                    otherScoreBlock.classList.add("no-show");
+                } else {
+                    if (otherScoreData["tie"]) {
+                        otherScoreBlock.classList.add("tie");
+                    }
+
+                    const otherComputed = otherScoreData["computedScore"];
+                    if (otherComputed) {
+                        const otherRank = otherScoreData["rank"];
+                        otherScoreBlock.innerHTML = centerText(`${otherComputed} ${otherRank}`, otherJudgeIdLength);
+                    } else {
+                        otherScoreBlock.innerHTML = "&nbsp;".repeat(otherJudgeIdLength);
+                    }
+
+                }
+            }
+            otherScoreBlock.classList.add("score-summary-right-elements");
+            otherScoreBlock.classList.add("other-judge");
+            otherScoreBlock.classList.add("fll-sw-ui-inactive");
+        }
 
 
         if (score && score.note) {
@@ -1305,59 +1467,100 @@ function displayPageEnterScore() {
     installWarnOnReload();
 }
 
+/**
+ * Upload scores without alerting the user.
+ */
+function backgroundScoreUpload() {
+    if (!server_online) {
+        return;
+    }
+
+    fetch("CheckAuth").
+        then(checkJsonResponse).
+        then(function(data) {
+            if (data.authenticated) {
+                // only upload if the judge is still logged in, we don't want to redirect them to the login page until they explicitly sync
+                subjective_module.uploadData(
+                    () => {
+                        // successCallback
+                        subjective_module.log("Background upload successful");
+                    }, //
+                    (result) => {
+                        subjective_module.log(`Background upload failed: ${JSON.stringify(result)}`);
+                    });
+            }
+        }).
+        catch((err) => {
+            // Error: response error, request timeout or runtime error
+            subjective_module.log(`Background upload auth check failed: ${JSON.stringify(err)}`);
+        });
+}
+
 function synchronizeData() {
+    // block the user while uploading
     const waitDialog = document.getElementById("wait-dialog");
+    waitDialog.classList.remove("fll-sw-ui-inactive");
 
-    subjective_module.uploadData(function(result) {
-        // scoresSuccess
-        document.getElementById('alert-dialog_text').innerText = "Uploaded " + result.numModified + " scores."
-            + result.message;
-        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-    }, //
-        function(result) {
-            // scoresFail
+    fetch("CheckAuth").then(checkJsonResponse).then(function(data) {
+        if (data.authenticated) {
+            subjective_module.uploadData(
+                () => {
+                    // successCallback
 
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
+                    // load most recent data from server
+                    subjective_module.loadFromServer(function() {
+                        // loadSuccess
+                        populateChooseJudgingGroup();
+                        waitDialog.classList.add("fll-sw-ui-inactive");
+
+
+                        document.getElementById('alert-dialog_text').innerText = "Successfully synchronized data";
+                        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                    }, function(error) {
+                        // loadFail
+                        populateChooseJudgingGroup();
+                        waitDialog.classList.add("fll-sw-ui-inactive");
+
+                        document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + error
+                        document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                    }, false);
+
+                }, //
+                (result) => {
+                    // failCallback
+                    let message;
+                    if (null == result) {
+                        message = "Unknown server error";
+                    } else {
+                        message = result.message;
+                    }
+
+                    document.getElementById('alert-dialog_text').innerText = "Failed to upload data: " + message
+                    document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
+                });
+        } else {
+            alertCallback = function() {
+                waitDialog.classList.add("fll-sw-ui-inactive");
+                window.open('../login.jsp', '_login');
             }
-
-            document.getElementById('alert-dialog_text').innerText = "Failed to upload scores: " + message;
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-        }, //
-        function(result) {
-            // judgesSuccess
-            subjective_module.log("Judges modified: " + result.numModifiedJudges
-                + " new: " + result.numNewJudges);
+            document.getElementById("alert-dialog_text").innerText = "Your device has been logged out. A new window will be opened to the login page. Once you have logged in, close that window and synchronize again.";
+            document.getElementById("alert-dialog").classList.remove("fll-sw-ui-inactive");
         }
+    });
 
-        ,//
-        function(result) {
-            // judgesFail
-            let message;
-            if (null == result) {
-                message = "Unknown server error";
-            } else {
-                message = result.message;
-            }
+}
 
-            document.getElementById('alert-dialog_text').innerText = "Failed to upload judges: " + message
-            document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-        }, //
+function synchronizeButtonAction() {
+    subjective_module.checkServerStatus(true, function() {
+        server_online = true;
+        postServerStatusCallback();
+        synchronizeData();
+    },
         function() {
-            // loadSuccess
-            populateChooseJudgingGroup();
-            waitDialog.classList.add("fll-sw-ui-inactive");
-        }, //
-        function(message) {
-            // loadFail
-            populateChooseJudgingGroup();
+            server_online = false;
+            postServerStatusCallback();
 
-            waitDialog.classList.add("fll-sw-ui-inactive");
-
-            document.getElementById('alert-dialog_text').innerText = "Failed to load scores from server: " + message
+            document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
             document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
         });
 }
@@ -1416,26 +1619,16 @@ function setupAfterContentLoaded() {
     });
 
 
-    document.getElementById("side-panel_synchronize").addEventListener('click', () => {
-        sidePanel.classList.remove('open');
+    const synchronizeButtons = document.getElementsByClassName("synchronize-button");
+    for (let i = 0; i < synchronizeButtons.length; i++) {
+        synchronizeButtons.item(i).addEventListener("click", () => {
+            // one button is in the panel, doing the remove for the footer buttons is a no-op
+            sidePanel.classList.remove('open');
 
-        subjective_module.checkServerStatus(true, function() {
-            server_online = true;
-            postServerStatusCallback();
+            synchronizeButtonAction();
+        });
+    }
 
-            // block the user while uploading
-            const waitDialog = document.getElementById("wait-dialog");
-            waitDialog.classList.remove("fll-sw-ui-inactive");
-            synchronizeData();
-        },
-            function() {
-                server_online = false;
-                postServerStatusCallback();
-
-                document.getElementById('alert-dialog_text').innerText = "Server is offline, cannot synchronize.";
-                document.getElementById('alert-dialog').classList.remove("fll-sw-ui-inactive");
-            });
-    });
 
     document.getElementById("side-panel_offline-download").addEventListener('click', () => {
         sidePanel.classList.remove('open');
@@ -1574,6 +1767,10 @@ function setupAfterContentLoaded() {
     });
 
 
+    document.getElementById("score-summary_show-other-judges").addEventListener('click', function() {
+        toggleScoreSummaryOtherJudges();
+    });
+
     // navigate to pages when the anchor changes
     window.addEventListener('hashchange', navigateToPage);
 }
@@ -1680,6 +1877,12 @@ function toggleScoreSummaryNotes() {
     displayOrHideCommentsOrNotes(hide, button, '.score-summary_note');
 }
 
+function toggleScoreSummaryOtherJudges() {
+    const button = document.getElementById("score-summary_show-other-judges");
+    const hide = button.classList.contains("fll-sw-button-pressed");
+    displayOrHideCommentsOrNotes(hide, button, '.other-judge');
+}
+
 /**
  * @param hide if true, hide the comments or notes
  * @param button the button that is toggled
@@ -1713,11 +1916,11 @@ function postServerStatusCallback() {
         sidePanelServerStatus.classList.remove("online");
     }
 
-    // schedule another update check in 30 seconds
-    setTimeout(updateServerStatus, 30 * 1000);
 }
 
 function updateServerStatus() {
+    const SERVER_CHECK_FREQUENCY_SECONDS = 60;
+
     subjective_module.checkServerStatus(false,
         () => {
             if (!server_online) {
@@ -1725,6 +1928,7 @@ function updateServerStatus() {
             }
             server_online = true;
             postServerStatusCallback();
+            setTimeout(updateServerStatus, SERVER_CHECK_FREQUENCY_SECONDS * 1000);
         },
         () => {
             if (server_online) {
@@ -1732,6 +1936,7 @@ function updateServerStatus() {
             }
             server_online = false;
             postServerStatusCallback();
+            setTimeout(updateServerStatus, SERVER_CHECK_FREQUENCY_SECONDS * 1000);
         }
     );
 }

@@ -29,6 +29,7 @@ import fll.TournamentTeam;
 import fll.UserImages;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.RunMetadataFactory;
 import fll.db.TournamentParameters;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TeamScheduleInfo;
@@ -41,6 +42,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.Welcome;
 import jakarta.servlet.ServletContext;
@@ -70,13 +72,14 @@ public class PitSigns extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     response.reset();
     response.setContentType("application/pdf");
 
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final @Nullable TournamentSchedule schedule;
       if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
@@ -108,7 +111,6 @@ public class PitSigns extends BaseFLLServlet {
       documentBody.setAttribute("font-family", "Helvetica");
 
       final @Nullable String challengeImageBase64 = getImageAsBase64(UserImages.CHALLENGE_LOGO_FILENAME);
-      LOGGER.warn("Image logo found? {}", null != challengeImageBase64);
 
       final @Nullable String partnerImageBase64 = getImageAsBase64(Welcome.PARTNER_LOGO_FILENAME);
       final @Nullable String firstImageBase64 = getImageAsBase64(Welcome.FLL_LOGO_FILENAME);
@@ -120,23 +122,27 @@ public class PitSigns extends BaseFLLServlet {
       // then render all pit signs
       final @Nullable String teamNumberStr = request.getParameter("team_number");
       if (null == teamNumberStr) {
-        response.setHeader("Content-Disposition", "filename=pit_signs.pdf");
+        response.setHeader("Content-Disposition",
+                           String.format("attachment; filename=\"%s_pit_signs.pdf\"", tournament.getName()));
 
         for (final TournamentTeam team : Queries.getTournamentTeams(connection, tournament.getTournamentID())
                                                 .values()) {
-          final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64,
-                                          firstImageBase64, team, topText, bottomText);
+          final Element page = renderTeam(document, tournamentData.getRunMetadataFactory(), schedule,
+                                          challengeImageBase64, partnerImageBase64, firstImageBase64, team, topText,
+                                          bottomText);
           documentBody.appendChild(page);
           page.setAttribute("page-break-after", "always");
         }
       } else {
         final int teamNumber = Integer.parseInt(teamNumberStr);
-        response.setHeader("Content-Disposition", String.format("filename=pit_sign_%d.pdf", teamNumber));
+        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s_pit_sign_%d.pdf\"",
+                                                                tournament.getName(), teamNumber));
 
         final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament, teamNumber);
 
-        final Element page = renderTeam(document, schedule, challengeImageBase64, partnerImageBase64, firstImageBase64,
-                                        team, topText, bottomText);
+        final Element page = renderTeam(document, tournamentData.getRunMetadataFactory(), schedule,
+                                        challengeImageBase64, partnerImageBase64, firstImageBase64, team, topText,
+                                        bottomText);
         documentBody.appendChild(page);
       }
 
@@ -154,6 +160,7 @@ public class PitSigns extends BaseFLLServlet {
   }
 
   private Element renderTeam(final Document document,
+                             final RunMetadataFactory runMetadataFactory,
                              final @Nullable TournamentSchedule schedule,
                              final @Nullable String challengeImageBase64,
                              final @Nullable String partnerImageBase64,
@@ -203,19 +210,20 @@ public class PitSigns extends BaseFLLServlet {
     final Element judgingGroupBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     page.appendChild(judgingGroupBlock);
     judgingGroupBlock.appendChild(document.createTextNode(String.format("Judging Group: %s", team.getJudgingGroup())));
+    judgingGroupBlock.setAttribute("font-size", "22pt");
     final @Nullable String wave = team.getWave();
     if (null != wave) {
       final Element waveText = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
       judgingGroupBlock.appendChild(waveText);
       waveText.setAttribute("font-size", "14pt");
       waveText.appendChild(document.createTextNode(String.format("%swave %s",
-                                                                 String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4),
+                                                                 Utilities.NON_BREAKING_SPACE_STRING.repeat(4),
                                                                  wave)));
     }
 
     // top text
     // read from tournament parameters and create a block for each carriage
-    // return separated pice
+    // return separated piece
     final Element topTextContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     page.appendChild(topTextContainer);
     topTextContainer.setAttribute("font-size", "14pt");
@@ -233,7 +241,7 @@ public class PitSigns extends BaseFLLServlet {
       if (null == si) {
         scheduleContainer.appendChild(document.createTextNode("No schedule"));
       } else {
-        ScheduleWriter.appendTeamSchedule(document, schedule, si, scheduleContainer);
+        ScheduleWriter.appendTeamSchedule(document, runMetadataFactory, schedule, si, scheduleContainer);
       }
     }
 

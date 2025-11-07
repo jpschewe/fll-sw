@@ -8,9 +8,9 @@
 }
 
 .skipped-place {
-    background: red;
+    background-color: red;
 }
 
 .tie {
-    background: yellow;
+    background-color: yellow;
 }

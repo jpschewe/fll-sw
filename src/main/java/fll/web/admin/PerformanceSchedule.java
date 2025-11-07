@@ -13,13 +13,14 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
@@ -30,8 +31,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * @see ScheduleWriter#outputPerformanceScheduleByTime(TournamentSchedule,
- *      java.io.OutputStream)
+ * @see ScheduleWriter#outputPerformanceScheduleByTime(Connection,
+ *      TournamentData, TournamentSchedule, java.io.OutputStream)
  */
 @WebServlet("/admin/PerformanceSchedule")
 public class PerformanceSchedule extends BaseFLLServlet {
@@ -50,10 +51,12 @@ public class PerformanceSchedule extends BaseFLLServlet {
       return;
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
         SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
@@ -65,8 +68,9 @@ public class PerformanceSchedule extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=performanceSchedule.pdf");
-      ScheduleWriter.outputPerformanceScheduleByTime(schedule, response.getOutputStream());
+      response.setHeader("Content-Disposition",
+                         String.format("attachment; filename=\"%s_performanceSchedule.pdf\"", tournament.getName()));
+      ScheduleWriter.outputPerformanceScheduleByTime(connection, tournamentData, schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);

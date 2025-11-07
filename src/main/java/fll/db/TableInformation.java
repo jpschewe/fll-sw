@@ -28,7 +28,7 @@ import fll.Tournament;
 /**
  * Information about a tournament table.
  */
-public final class TableInformation implements Serializable {
+public final class TableInformation implements Serializable, Comparable<TableInformation> {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -36,16 +36,25 @@ public final class TableInformation implements Serializable {
    * @param id the id of the table information
    * @param sideA name of side A
    * @param sideB name of side B
-   * @param use true if this table should be used
+   * @param sortOrder {@link #getSortOrder()}
    */
   public TableInformation(final int id,
                           final String sideA,
                           final String sideB,
-                          final boolean use) {
+                          final int sortOrder) {
     mId = id;
     mSideA = sideA;
     mSideB = sideB;
-    mUse = use;
+    this.sortOrder = sortOrder;
+  }
+
+  private final int sortOrder;
+
+  /**
+   * @return used to sort this table pair compared to other table pairs
+   */
+  public int getSortOrder() {
+    return sortOrder;
   }
 
   private final String mSideA;
@@ -66,15 +75,6 @@ public final class TableInformation implements Serializable {
     return mSideB;
   }
 
-  private final boolean mUse;
-
-  /**
-   * @return if this table pair is to be used
-   */
-  public boolean getUse() {
-    return mUse;
-  }
-
   private final int mId;
 
   /**
@@ -92,8 +92,8 @@ public final class TableInformation implements Serializable {
         + getSideB()
         + " id: "
         + getId()
-        + " use: "
-        + getUse()
+        + " sortOrder: "
+        + getSortOrder()
         + "]";
   }
 
@@ -119,85 +119,50 @@ public final class TableInformation implements Serializable {
   }
 
   /**
-   * Get the list of tables to use for the specified playoff bracket.
+   * Filter {@code tables} to those that are specified for us in the playoff
+   * bracket {@code bracket}.
    * 
-   * @param connection database connection
-   * @param tournament tournament identifier
-   * @param division playoff bracket name
-   * @return non-empty list of tables to use sorted by least used first
-   * @throws SQLException on a database error
+   * @param tables the tables to filter, will not be modified
+   * @param connection database
+   * @param tournament the tournament
+   * @param bracket the bracket
+   * @return a new list of the tables to use
+   * @throws SQLException
    */
-  public static List<TableInformation> getTablesToUseForBracket(final Connection connection,
-                                                                final int tournament,
-                                                                final String division)
+  public static List<TableInformation> filterToTablesForBracket(final List<TableInformation> tables,
+                                                                final Connection connection,
+                                                                final Tournament tournament,
+                                                                final String bracket)
       throws SQLException {
-    final List<TableInformation> tournamentTables = getTournamentTableInformation(connection, tournament, division);
+    final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament.getTournamentID(), bracket);
 
-    final List<TableInformation> tablesToUse = tournamentTables.stream().filter(t -> t.getUse())
-                                                               .collect(Collectors.toList());
-    if (tablesToUse.isEmpty()
-        && !tournamentTables.isEmpty()) {
-      LOGGER.warn("Tables are defined, but none are set to be used by bracket "
-          + division
-          + ". This is unexpected, using all tables");
-      tablesToUse.addAll(tournamentTables);
+    final List<TableInformation> useTables = tables.stream().filter(table -> tableIdsForDivision.isEmpty()
+        || tableIdsForDivision.contains(table.getId())).collect(Collectors.toList());
+
+    if (useTables.isEmpty()
+        && !tables.isEmpty()) {
+      LOGGER.warn("Tables are defined, but none are set to be used by bracket {}. This is unexpected, using all tables");
+      return new LinkedList<>(tables);
+    } else {
+      return useTables;
     }
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Division: "
-          + division
-          + " all Tables: "
-          + tournamentTables
-          + " use tables: "
-          + tablesToUse);
-    }
-
-    // Ensure that the list isn't empty
-    if (tablesToUse.isEmpty()) {
-      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", true));
-    }
-
-    return tablesToUse;
   }
 
   /**
-   * Get table information for a tournament.
-   *
-   * @param connection where to get the table information from
-   * @param tournament the tournament to get the information from
-   * @param division the award group to get the table information for
-   * @return Tables listed by least used first
-   * @throws SQLException if there is a database error
+   * Sort {@code tables} by usage from least used to most used.
+   * 
+   * @param tables the tables to sort, this list will be modified by sort
+   * @param connection the database
+   * @param tournament the tournament
+   * @throws SQLException on a database error
    */
-  public static List<TableInformation> getTournamentTableInformation(final Connection connection,
-                                                                     final int tournament,
-                                                                     final String division)
+  public static void sortByTableUsage(final List<TableInformation> tables,
+                                      final Connection connection,
+                                      final Tournament tournament)
       throws SQLException {
-    final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
-
-    final List<TableInformation> tableInfo = new LinkedList<>();
-    final Map<Integer, Integer> tableUsage = new HashMap<>();
-    try (
-        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB" //
-            + " FROM tablenames" //
-            + " WHERE tablenames.Tournament = ?")) {
-      getAllTables.setInt(1, tournament);
-      try (ResultSet allTables = getAllTables.executeQuery()) {
-        while (allTables.next()) {
-          final int pairId = allTables.getInt(1);
-          final String sideA = castNonNull(allTables.getString(2));
-          final String sideB = castNonNull(allTables.getString(3));
-
-          final boolean use = tableIdsForDivision.isEmpty()
-              || tableIdsForDivision.contains(pairId);
-
-          final TableInformation info = new TableInformation(pairId, sideA, sideB, use);
-          tableInfo.add(info);
-        } // foreach result
-      } // allTables
-    } // getAllTables
 
     // sort by the usage
+    final Map<Integer, Integer> tableUsage = new HashMap<>();
     try (PreparedStatement prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
         + " FROM PlayoffTableData, tablenames" //
         + " WHERE PlayoffTableData.Tournament = ?" //
@@ -205,7 +170,7 @@ public final class TableInformation implements Serializable {
         + " AND AssignedTable IS NOT NULL" //
         + " AND (PlayoffTableData.AssignedTable = tablenames.SideA OR PlayoffTableData.AssignedTable = tablenames.SideB)"//
         + " GROUP BY tablenames.PairID")) {
-      prep.setInt(1, tournament);
+      prep.setInt(1, tournament.getTournamentID());
 
       // get table usage
       try (ResultSet rs = prep.executeQuery()) {
@@ -218,8 +183,8 @@ public final class TableInformation implements Serializable {
     } // prepared statement
 
     // sort by table usage
-    Collections.sort(tableInfo, (one,
-                                 two) -> {
+    Collections.sort(tables, (one,
+                              two) -> {
       final Integer oneUse = tableUsage.get(one.getId());
       final Integer twoUse = tableUsage.get(two.getId());
       if (null == oneUse
@@ -234,7 +199,97 @@ public final class TableInformation implements Serializable {
       }
     });
 
+  }
+
+  /**
+   * Replace the table information for the specified tournament.
+   * 
+   * @param connection the database
+   * @param tournament the tournament to replace information for
+   * @param tables the new table information
+   * @throws SQLException on a database error
+   */
+  public static void saveTournamentTableInformation(final Connection connection,
+                                                    final Tournament tournament,
+                                                    final Collection<TableInformation> tables)
+      throws SQLException {
+    final boolean autoCommit = connection.getAutoCommit();
+    try {
+      connection.setAutoCommit(false);
+
+      try (PreparedStatement delete = connection.prepareStatement("DELETE FROM tablenames WHERE tournament = ?")) {
+        delete.setInt(1, tournament.getTournamentID());
+        delete.executeUpdate();
+      }
+
+      try (
+          PreparedStatement prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB, sort_order) VALUES(?, ?, ?, ?, ?)")) {
+        prep.setInt(1, tournament.getTournamentID());
+
+        for (final TableInformation table : tables) {
+          prep.setInt(2, table.getId());
+          prep.setString(3, table.getSideA());
+          prep.setString(4, table.getSideB());
+          prep.setInt(5, table.getSortOrder());
+          prep.executeUpdate();
+        }
+      }
+
+      connection.commit();
+    } finally {
+      connection.setAutoCommit(autoCommit);
+    }
+  }
+
+  /**
+   * Get table information for a tournament.
+   *
+   * @param connection where to get the table information from
+   * @param tournament the tournament to get the information from
+   * @return tables sorted by {@link #compareTo(TableInformation)}
+   * @throws SQLException if there is a database error
+   */
+  public static List<TableInformation> getTournamentTableInformation(final Connection connection,
+                                                                     final Tournament tournament)
+      throws SQLException {
+    final List<TableInformation> tableInfo = new LinkedList<>();
+    try (
+        PreparedStatement getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, sort_order" //
+            + " FROM tablenames" //
+            + " WHERE tablenames.Tournament = ?")) {
+      getAllTables.setInt(1, tournament.getTournamentID());
+      try (ResultSet allTables = getAllTables.executeQuery()) {
+        while (allTables.next()) {
+          final int pairId = allTables.getInt(1);
+          final String sideA = castNonNull(allTables.getString(2));
+          final String sideB = castNonNull(allTables.getString(3));
+          final int sortOrder = allTables.getInt(4);
+
+          final TableInformation info = new TableInformation(pairId, sideA, sideB, sortOrder);
+          tableInfo.add(info);
+        } // foreach result
+      } // allTables
+    } // getAllTables
+
+    Collections.sort(tableInfo);
+
+    if (tableInfo.isEmpty()) {
+      return setupDefaultTables(connection, tournament);
+    }
+
     return tableInfo;
+  }
+
+  /**
+   * Create default table information and save to the database so that things
+   * work.
+   */
+  private static List<TableInformation> setupDefaultTables(final Connection connection,
+                                                           final Tournament tournament)
+      throws SQLException {
+    final List<TableInformation> tables = Collections.singletonList(new TableInformation(0, "Table 1", "Table 2", 0));
+    saveTournamentTableInformation(connection, tournament, tables);
+    return tables;
   }
 
   /**
@@ -267,7 +322,7 @@ public final class TableInformation implements Serializable {
     final Collection<String> tables = new LinkedList<>();
 
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ?")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT sidea, sideb FROM tablenames WHERE tournament = ? ORDER BY sort_order, SideA")) {
       prep.setInt(1, tournament.getTournamentID());
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -281,6 +336,41 @@ public final class TableInformation implements Serializable {
     } // prepared statement
 
     return tables;
+  }
+
+  /**
+   * Order first on {@link #getSortOrder()} and then on {@link #getSideA()}.
+   */
+  @Override
+  public int compareTo(final TableInformation o) {
+    if (getSortOrder() < o.getSortOrder()) {
+      return -1;
+    } else if (getSortOrder() > o.getSortOrder()) {
+      return 1;
+    } else {
+      return getSideA().compareTo(o.getSideA());
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return getId();
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object o) {
+    if (o instanceof TableInformation) {
+      return this.equals((TableInformation) o);
+    } else {
+      return false;
+    }
+  }
+
+  public boolean equals(final TableInformation other) {
+    return getId() == other.getId() //
+        && getSortOrder() == other.getSortOrder() //
+        && getSideA().equals(other.getSideA()) //
+        && getSideB().equals(other.getSideB());
   }
 
 }

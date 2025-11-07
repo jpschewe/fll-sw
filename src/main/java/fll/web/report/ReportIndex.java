@@ -26,6 +26,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.finalist.FinalistSchedule;
@@ -47,13 +48,12 @@ public final class ReportIndex {
    * @param session session variables
    * @param application application context
    * @param pageContext page context, information is put in here
+   * @param setRedirect if true, set the redirect URL
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
-                                     final PageContext pageContext) {
-
-    // clear out some variables
-    session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
+                                     final PageContext pageContext,
+                                     final boolean setRedirect) {
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -100,6 +100,10 @@ public final class ReportIndex {
       pageContext.setAttribute("awardGroups", AwardsScriptReport.getAwardGroupOrder(connection, tournament));
       pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournamentId));
       pageContext.setAttribute("sortOrders", FinalComputedScores.SortOrder.values());
+
+      if (setRedirect) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "/report/index.jsp");
+      }
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     } catch (final JsonProcessingException e) {

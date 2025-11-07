@@ -9,15 +9,10 @@
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
-<style type='text/css'>
-body {
-    font-size: x-large;
-}
+<link rel="stylesheet" type="text/css" href="login.css" />
 
-input {
-    font-size: x-large;
-}
-</style>
+<script type='text/javascript' src='login.js'></script>
+
 </head>
 <body>
     <h1>Login to FLL-SW</h1>
@@ -36,6 +31,9 @@ input {
         <div>
             <label for="pass">Password:</label>
             <input type="password" size="15" name="pass" id="pass" />
+
+            <input type="checkbox" id="show_password" />
+            <label for="show_password">Show password</label>
         </div>
 
         <div>

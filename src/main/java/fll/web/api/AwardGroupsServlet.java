@@ -31,6 +31,7 @@ import fll.web.SessionAttributes;
 
 /**
  * Collection of names of the award groups in the current tournament.
+ * @see Queries#getAwardGroups(Connection)
  */
 @WebServlet("/api/AwardGroups")
 public class AwardGroupsServlet extends HttpServlet {

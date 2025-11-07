@@ -14,9 +14,11 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
@@ -27,7 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * PDF of top performance scores organized by award group.
+ * PDF of top regular match play performance scores organized by award group.
  */
 @WebServlet("/report/TopScoreReportPerAwardGroupPdf")
 public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
@@ -38,23 +40,22 @@ public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/TopScoreReportPerAwardGroupPdf")) {
-      return;
-    }
-
     response.reset();
     response.setContentType("application/pdf");
     response.setHeader("Content-Disposition", "filename=TopScoreReportPerAwardGroup.pdf");
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                          tournamentData.getCurrentTournament());
 
-      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
-      outputReport(response.getOutputStream(), challengeDescription, tournament, "Award Group", scores);
+      final Tournament tournament = tournamentData.getCurrentTournament();
+
+      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                         false);
+      outputReport(response.getOutputStream(), description, tournament, "Award Group", scores);
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }

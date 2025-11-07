@@ -39,7 +39,8 @@ public final class TopScoreReport {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
-      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                         false);
       pageContext.setAttribute("scoreMap", scores);
     }
   }
@@ -58,7 +59,7 @@ public final class TopScoreReport {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
       final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByJudgingStation(connection, description,
-                                                                                             tournament);
+                                                                                             tournament, true, false);
       pageContext.setAttribute("scoreMap", scores);
     }
   }

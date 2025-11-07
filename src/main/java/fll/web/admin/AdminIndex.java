@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
@@ -46,10 +45,12 @@ public final class AdminIndex {
    * @param application the application context
    * @param session the session context
    * @param pageContext populated with variables
+   * @param setRedirect if true, set the redirect url
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
-                                     final PageContext pageContext) {
+                                     final PageContext pageContext,
+                                     final boolean setRedirect) {
     final StringBuilder message = new StringBuilder();
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
@@ -59,9 +60,6 @@ public final class AdminIndex {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       pageContext.setAttribute("currentTournament", Tournament.findTournamentByID(connection, currentTournamentID));
-
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentID);
-      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       pageContext.setAttribute("tournaments", tournaments);
@@ -93,6 +91,9 @@ public final class AdminIndex {
 
       pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
 
+      if (setRedirect) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
+      }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage()

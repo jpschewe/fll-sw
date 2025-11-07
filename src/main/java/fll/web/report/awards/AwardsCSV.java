@@ -31,6 +31,7 @@ import com.opencsv.CSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
@@ -40,14 +41,15 @@ import fll.db.AwardWinners;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.TournamentParameters;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.playoff.Playoff;
-import fll.web.report.PromptSummarizeScores;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
@@ -77,14 +79,15 @@ public class AwardsCSV extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session, "/report/Awards.csv")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
 
     try (Connection connection = datasource.getConnection()) {
+
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
+                                                          tournamentData.getCurrentTournament());
+
       response.reset();
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=awards.csv");
@@ -95,7 +98,7 @@ public class AwardsCSV extends BaseFLLServlet {
         writeData(connection, description, csv);
       }
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      throw new FLLRuntimeException(e);
     }
   }
 
@@ -391,7 +394,8 @@ public class AwardsCSV extends BaseFLLServlet {
 
     final String awardName = "Robot Performance Award";
 
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description);
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMapByAwardGroup(connection, description, true,
+                                                                                       false);
 
     // make sure all groups are in the sort
     final List<String> localSortedAwardGroups = new LinkedList<>(sortedAwardGroups);
@@ -414,7 +418,8 @@ public class AwardsCSV extends BaseFLLServlet {
             final String awardText = String.format("%s - %s %s", awardName, (allWinners.size() > 1 ? "Tie" : "Winner"),
                                                    group);
 
-            csv.writeNext(new String[] { String.valueOf(winner.getTeamNumber()), winner.getTeamName(), awardText });
+            csv.writeNext(new String[] { String.valueOf(winner.getTeamNumber()), winner.getTeamName(), awardText,
+                                         winner.getFormattedScore() });
           }
         } // have a winner
       } // group has scores

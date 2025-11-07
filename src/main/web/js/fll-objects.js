@@ -18,6 +18,17 @@ function PlayoffSchedule() {
 }
 
 /**
+ * Start and end times are initialized to null and judgingGroups is empty.
+ *
+ * Matches fll.db.FinalistGroup.
+ */
+function FinalistGroup() {
+    this.startTime = null;
+    this.endTime = null;
+    this.judgingGroups = [];
+}
+
+/**
  * Start time initialized to 2:00pm.
  * Duration initialized to 20 minutes.
  *

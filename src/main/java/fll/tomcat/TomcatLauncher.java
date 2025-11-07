@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Launcher;
 import fll.UserImages;
+import fll.Utilities;
 import fll.db.DumpDB;
 import fll.util.FLLRuntimeException;
 
@@ -60,6 +61,8 @@ public class TomcatLauncher {
     // trigger the creation of the default connector
     tomcat.getConnector();
 
+    // set character encoding
+    tomcat.getConnector().setURIEncoding(Utilities.DEFAULT_CHARSET.displayName());
   }
 
   /**
@@ -156,13 +159,16 @@ public class TomcatLauncher {
 
     Launcher.setupDataDirectories();
 
+    // serve servlets
     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", classesPath.toAbsolutePath().toString(),
                                                  "/"));
 
+    // serve backup databases
     resources.addPreResources(new DirResourceSet(resources, "/"
         + DumpDB.getDatabaseBackupPath().getFileName(), DumpDB.getDatabaseBackupPath().toAbsolutePath().toString(),
                                                  "/"));
 
+    // serve user images
     resources.addPreResources(new DirResourceSet(resources, "/"
         + UserImages.getImagesPath().getFileName(), UserImages.getImagesPath().toAbsolutePath().toString(), "/"));
 

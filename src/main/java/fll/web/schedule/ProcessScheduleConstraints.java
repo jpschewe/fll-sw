@@ -7,16 +7,8 @@
 package fll.web.schedule;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
-import fll.Tournament;
-import fll.db.TournamentParameters;
-import fll.util.FLLInternalException;
-import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -28,25 +20,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.PageContext;
 
 /**
  * Process the results of scheduleConstraints.jsp.
  */
 @WebServlet("/schedule/ProcessScheduleConstraints")
 public class ProcessScheduleConstraints extends BaseFLLServlet {
-
-  public static void populateContext(final ServletContext application,
-                                     final PageContext page) {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
-      page.setAttribute("numSeedingRounds", numSeedingRounds);
-    } catch (final SQLException e) {
-      throw new FLLInternalException("Error reading from the database", e);
-    }
-  }
 
   @Override
   protected void processRequest(final HttpServletRequest request,

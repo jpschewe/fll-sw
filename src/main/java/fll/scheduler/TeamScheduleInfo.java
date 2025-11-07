@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,14 +31,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @return number of regular match play rounds
    */
   public int getNumRegularMatchPlayRounds() {
-    return (int) performances.stream().filter(Predicate.not(PerformanceTime::isPractice)).count();
-  }
-
-  /**
-   * @return number of practice rounds
-   */
-  public int getNumPracticeRounds() {
-    return (int) performances.stream().filter(PerformanceTime::isPractice).count();
+    return performances.size();
   }
 
   /**
@@ -57,23 +49,12 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return stream of all practice performance rounds and their index within
-   *         practice rounds
-   */
-  public Stream<Pair<PerformanceTime, Long>> enumeratePracticePerformances() {
-    return Streams.mapWithIndex(allPerformances().filter(PerformanceTime::isPractice), (performance,
-                                                                                        index) -> Pair.of(performance,
-                                                                                                          index));
-  }
-
-  /**
    * @return stream of all regular match play performance rounds and their index
    *         within in the rounds, so round #1 shows up as index 0.
    */
-  public Stream<Pair<PerformanceTime, Long>> enumerateRegularMatchPlayPerformances() {
-    return Streams.mapWithIndex(allPerformances().filter(Predicate.not(PerformanceTime::isPractice)), (performance,
-                                                                                                       index) -> Pair.of(performance,
-                                                                                                                         index));
+  public Stream<Pair<PerformanceTime, Long>> enumeratePerformances() {
+    return Streams.mapWithIndex(allPerformances(), (performance,
+                                                    index) -> Pair.of(performance, index));
   }
 
   /**
@@ -179,7 +160,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @return {@link TournamentTeam#getWave()}
    */
-  public @Nullable String getWave() {
+  public String getWave() {
     return team.getWave();
   }
 
@@ -231,39 +212,9 @@ public final class TeamScheduleInfo implements Serializable {
    * @return the round number or -1 if the performance cannot be found
    */
   public int computeRound(final PerformanceTime performance) {
-    final Stream<Pair<PerformanceTime, Long>> stream;
-    if (performance.isPractice()) {
-      stream = enumeratePracticePerformances();
-    } else {
-      stream = enumerateRegularMatchPlayPerformances();
-    }
+    final Stream<Pair<PerformanceTime, Long>> stream = enumeratePerformances();
     return stream.filter(p -> p.getLeft().equals(performance)).map(Pair::getRight).findFirst().orElse(Long.valueOf(-1))
                  .intValue();
   }
 
-  /**
-   * Compute a display name for the specified performance round.
-   *
-   * @param performance the performance information
-   * @return the name to display
-   * @throws IndexOutOfBoundsException if the computed round index is less than
-   *           zero
-   */
-  public String getRoundName(final PerformanceTime performance) {
-    final int roundIndex = computeRound(performance);
-    if (roundIndex < 0) {
-      throw new IndexOutOfBoundsException("Computed round index for "
-          + performance
-          + " is "
-          + roundIndex);
-    } else {
-      if (performance.isPractice()) {
-        return String.format("Practice %d", roundIndex
-            + 1);
-      } else {
-        return String.valueOf(roundIndex
-            + 1);
-      }
-    }
-  }
 }

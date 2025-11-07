@@ -35,7 +35,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
-import fll.web.setup.SetupIndex.DescriptionInfo;
+import fll.xml.DescriptionInfo;
 import net.mtu.eggplant.util.BasicFileFilter;
 
 /**

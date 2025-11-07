@@ -26,12 +26,14 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
@@ -39,11 +41,11 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Support for regular-match-play-vs-schedule.jsp.
+ * Support for performance-runs-vs-schedule.jsp.
  */
-public final class RegularMatchPlayVsSchedule {
+public final class PerformanceRunsVsSchedule {
 
-  private RegularMatchPlayVsSchedule() {
+  private PerformanceRunsVsSchedule() {
   }
 
   /**
@@ -57,12 +59,11 @@ public final class RegularMatchPlayVsSchedule {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final RunMetadataFactory runMetadataFactory = tournamentData.getRunMetadataFactory();
 
     try (Connection connection = datasource.getConnection()) {
       final Tournament currentTournament = Tournament.getCurrentTournament(connection);
-
-      final int numRegularMatchPlayRounds = TournamentParameters.getNumSeedingRounds(connection,
-                                                                                     currentTournament.getTournamentID());
 
       final List<Data> data = new LinkedList<>();
 
@@ -73,25 +74,24 @@ public final class RegularMatchPlayVsSchedule {
           final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                    tsi.getTeamNumber());
 
-          int nextRunNumber = 1;
-          for (final PerformanceTime pt : tsi.getAllPerformances()) {
-            if (!pt.isPractice()) {
-              final Data d = new Data(team, nextRunNumber, pt);
-              data.add(d);
-
-              ++nextRunNumber;
-            }
-          }
+          final List<Data> teamData = tsi.enumeratePerformances() //
+                                         .map(p -> {
+                                           final int runNumber = (int) (p.getRight()
+                                               + 1);
+                                           final String runName = runMetadataFactory.getRunMetadata(runNumber)
+                                                                                    .getDisplayName();
+                                           return new Data(team, runNumber, runName, p.getLeft());
+                                         }) //
+                                         .toList();
+          data.addAll(teamData);
         }
       }
 
       // update with tournament data
       try (
           PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, runnumber, computedtotal, noshow, bye, timestamp, tablename FROM performance" //
-              + " WHERE tournament = ?" //
-              + "   AND runnumber <= ?")) {
+              + " WHERE tournament = ?")) {
         prep.setInt(1, currentTournament.getTournamentID());
-        prep.setInt(2, numRegularMatchPlayRounds);
 
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
@@ -127,7 +127,9 @@ public final class RegularMatchPlayVsSchedule {
             } else {
               final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                        teamNumber);
-              final Data entry = new Data(team, runNumber, lastEdited, value, tablename);
+              final String runName = runMetadataFactory.getRunMetadata(runNumber).getDisplayName();
+
+              final Data entry = new Data(team, runNumber, runName, lastEdited, value, tablename);
               data.add(entry);
             }
           }
@@ -151,13 +153,16 @@ public final class RegularMatchPlayVsSchedule {
      *
      * @param team {@link #getTeam()}
      * @param roundNumber {@link #getRoundNumber()}
+     * @param runName {@link #getRunName()}
      * @param perfTime {@link #getPerformanceTime()}
      */
     Data(final TournamentTeam team,
          final int roundNumber,
+         final String runName,
          final PerformanceTime perfTime) {
       this.team = team;
       this.roundNumber = roundNumber;
+      this.runName = runName;
       this.perfTime = perfTime;
       this.lastEdited = null;
       this.formattedScore = "";
@@ -169,20 +174,31 @@ public final class RegularMatchPlayVsSchedule {
      * 
      * @param team {@link #getTeam()}
      * @param roundNumber {@link #getRoundNumber()}
+     * @param runName {@link #getRunName()}
      * @param lastEdited {@link #getLastEdited()}
      * @param table {@link #getTable()}
      */
     Data(final TournamentTeam team,
          final int roundNumber,
+         final String runName,
          final LocalTime lastEdited,
          final String formattedScore,
          final String table) {
       this.team = team;
       this.roundNumber = roundNumber;
+      this.runName = runName;
       this.perfTime = null;
       this.lastEdited = lastEdited;
       this.formattedScore = formattedScore;
-      this.table = table;
+      this.table = determineEditedTableDisplay(table);
+    }
+
+    private static String determineEditedTableDisplay(final String origTable) {
+      if ("ALL".equals(origTable)) {
+        return "UNKNOWN";
+      } else {
+        return origTable;
+      }
     }
 
     private final TournamentTeam team;
@@ -201,6 +217,16 @@ public final class RegularMatchPlayVsSchedule {
      */
     public int getRoundNumber() {
       return roundNumber;
+    }
+
+    private final String runName;
+
+    /**
+     * @return display name for the run
+     * @see RunMetadata#getDisplayName()
+     */
+    public String getRunName() {
+      return runName;
     }
 
     private final @Nullable PerformanceTime perfTime;

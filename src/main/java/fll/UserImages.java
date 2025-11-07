@@ -12,6 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
+
+import org.apache.commons.io.IOUtils;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -56,6 +59,23 @@ public final class UserImages {
       Files.copy(partnerDefaultLogo, partnerLogo, StandardCopyOption.REPLACE_EXISTING);
     } catch (final IOException e) {
       throw new FLLInternalException("Error copying default partner logo", e);
+    }
+  }
+
+  /**
+   * Get the partner logo as a base64 encoded string to be used in PDF documents.
+   * 
+   * @return base64 encoded version of the image
+   */
+  public static String getPartnerLogoAsBase64() {
+    final Base64.Encoder encoder = Base64.getEncoder();
+
+    final Path partnerLogo = UserImages.getImagesPath().resolve(Welcome.PARTNER_LOGO_FILENAME);
+    try (InputStream input = Files.newInputStream(partnerLogo)) {
+      final String encoded = encoder.encodeToString(IOUtils.toByteArray(input));
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read partner logo", e);
     }
   }
 

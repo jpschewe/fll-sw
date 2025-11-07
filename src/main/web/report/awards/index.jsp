@@ -60,6 +60,6 @@ fll.web.report.awards.AwardsIndex.populateContext(application, pageContext);
     <h3>Awards Script</h3>
     <a class="wide" target="_awards_script_report"
         href="<c:url value='/report/awards/AwardsScriptReport'/>">Awards
-        Script PDF </a>
+        Script</a>
 </body>
 </html>

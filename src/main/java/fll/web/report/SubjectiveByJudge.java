@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -38,10 +39,12 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FP;
+import fll.util.FOPUtils.Margins;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
@@ -61,6 +64,8 @@ import net.mtu.eggplant.xml.XMLUtils;
 public class SubjectiveByJudge extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private static final String HIGHLIGHT_BACKGROUND_COLOR = "yellow";
+
   @Override
   protected void processRequest(HttpServletRequest request,
                                 HttpServletResponse response,
@@ -74,18 +79,15 @@ public class SubjectiveByJudge extends BaseFLLServlet {
       return;
     }
 
-    if (PromptSummarizeScores.checkIfSummaryUpdated(request, response, application, session,
-                                                    "/report/SubjectiveByJudge")) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final DataSource datasource = tournamentData.getDataSource();
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
+                                                           tournamentData.getCurrentTournament());
 
-      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final int tournamentID = Queries.getCurrentTournament(connection);
-      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       response.reset();
       response.setContentType("application/pdf");
@@ -122,9 +124,11 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
+                                                               FOPUtils.PAGE_LANDSCAPE_LETTER_SIZE,
+                                                               new Margins(0.2, 0.2, 0.2, 0.2), 0,
+                                                               FOPUtils.STANDARD_FOOTER_HEIGHT);
     layoutMasterSet.appendChild(pageMaster);
-    pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -141,8 +145,8 @@ public class SubjectiveByJudge extends BaseFLLServlet {
     for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
       final Element ele = generateAwardGroupReport(connection, document, challengeDescription, tournament, teams,
                                                    judgingGroup);
+      ele.setAttribute("keep-together.within-page", "always");
       documentBody.appendChild(ele);
-      ele.setAttribute("page-break-after", "always");
     }
 
     return document;
@@ -173,8 +177,8 @@ public class SubjectiveByJudge extends BaseFLLServlet {
             final String judge = castNonNull(rs.getString("judge"));
             final String station = castNonNull(rs.getString("station"));
 
-            final int numScores = SummarizePhase1.getNumScoresEntered(connection, judge, category.getName(), station,
-                                                                      tournament.getTournamentID());
+            final int numScores = ComputeJudgeSummary.getNumScoresEntered(connection, judge, category.getName(),
+                                                                          station, tournament.getTournamentID());
             if (numScores > 0) {
               judges.add(judge);
             }
@@ -345,14 +349,22 @@ public class SubjectiveByJudge extends BaseFLLServlet {
                                                .getOrDefault(category, Collections.emptyMap())//
                                                .get(judge);
 
+          final boolean highlight;
           final String text;
           if (null != rankData) {
+            highlight = rankData.rank == 1;
             text = String.format("%d - %s", rankData.rank, rankData.rawScore);
           } else {
-            text = String.valueOf(Utilities.NON_BREAKING_SPACE);
+            highlight = false;
+            text = Utilities.NON_BREAKING_SPACE_STRING;
           }
-          teamRow.appendChild(FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text),
-                                                  FOPUtils.STANDARD_BORDER_WIDTH));
+          final Element dataCell = FOPUtils.addBorders(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                                                text),
+                                                       FOPUtils.STANDARD_BORDER_WIDTH);
+          if (highlight) {
+            dataCell.setAttribute("background-color", HIGHLIGHT_BACKGROUND_COLOR);
+          }
+          teamRow.appendChild(dataCell);
         } // foreach judge
       } // foreach category
     } // foreach team

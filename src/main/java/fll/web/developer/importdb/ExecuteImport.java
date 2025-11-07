@@ -69,13 +69,14 @@ public class ExecuteImport extends BaseFLLServlet {
       throw new FLLInternalException("Missing tournament to import");
     }
 
+    final String redirectUrl;
     try (Connection sourceConnection = sourceDataSource.getConnection();
         Connection destConnection = destDataSource.getConnection()) {
 
       final boolean differences = ImportDB.checkForDifferences(sourceConnection, destConnection, tournament);
       if (differences) {
         message.append("<p class='error'>Error, there are still differences that need to be resolved before the import can be completed.</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
+        redirectUrl = "CheckTournamentExists";
       } else {
         DumpDB.automaticBackup(destConnection, "before-import");
 
@@ -90,9 +91,7 @@ public class ExecuteImport extends BaseFLLServlet {
         ScoreStandardization.updateScoreTotals(description, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful.</p>", tournament));
-        session.setAttribute(SessionAttributes.REDIRECT_URL,
-                             SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
-                                                            String.class));
+        redirectUrl = SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY, String.class);
 
         session.removeAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY);
         session.removeAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY);
@@ -104,7 +103,7 @@ public class ExecuteImport extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    WebUtils.sendRedirect(response, session);
+    WebUtils.sendRedirect(response, redirectUrl);
   }
 
 }

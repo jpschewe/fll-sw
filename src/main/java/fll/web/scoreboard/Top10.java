@@ -20,7 +20,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.DelayedPerformance;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
+import fll.db.RunMetadata;
 import fll.util.FP;
 import fll.web.report.FinalComputedScores;
 import fll.web.report.awards.AwardsScriptReport;
@@ -66,10 +66,14 @@ public final class Top10 {
    * @param connection database connection
    * @param description challenge description
    * @return awardGroup to sorted scores
+   * @param regularMatchPlay if true, limit to regular match play rounds
+   * @param scoreboardDisplay if true, limit to rounds displayed on the scoreboard
    * @throws SQLException if there is a problem talking to the database
    */
   public static Map<String, List<ScoreEntry>> getTableAsMapByAwardGroup(final Connection connection,
-                                                                        final ChallengeDescription description)
+                                                                        final ChallengeDescription description,
+                                                                        final boolean regularMatchPlay,
+                                                                        final boolean scoreboardDisplay)
       throws SQLException {
     final Tournament tournament = Tournament.getCurrentTournament(connection);
 
@@ -79,11 +83,11 @@ public final class Top10 {
     final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
     for (final String ag : awardGroups) {
       final List<ScoreEntry> scores = new LinkedList<>();
-      processScoresForAwardGroup(connection, description, ag, (teamName,
-                                                               teamNumber,
-                                                               organization,
-                                                               formattedScore,
-                                                               rank) -> {
+      processScoresForAwardGroup(connection, description, ag, regularMatchPlay, scoreboardDisplay, (teamName,
+                                                                                                    teamNumber,
+                                                                                                    organization,
+                                                                                                    formattedScore,
+                                                                                                    rank) -> {
         final ScoreEntry row = new ScoreEntry(teamName, teamNumber, organization, formattedScore, rank);
         scores.add(row);
       });
@@ -97,21 +101,25 @@ public final class Top10 {
    * @param description challenge description
    * @param tournament the tournament to get scores for
    * @return judging station to sorted scores
+   * @param regularMatchPlay if true, limit to regular match play rounds
+   * @param scoreboardDisplay if true, limit to rounds displayed on the scoreboard
    * @throws SQLException if there is a problem talking to the database
    */
   public static Map<String, List<ScoreEntry>> getTableAsMapByJudgingStation(final Connection connection,
                                                                             final ChallengeDescription description,
-                                                                            final Tournament tournament)
+                                                                            final Tournament tournament,
+                                                                            final boolean regularMatchPlay,
+                                                                            final boolean scoreboardDisplay)
       throws SQLException {
     final Map<String, List<ScoreEntry>> data = new HashMap<>();
     final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
     for (final String ag : judgingStations) {
       final List<ScoreEntry> scores = new LinkedList<>();
-      processScoresForJudgingStation(connection, description, ag, (teamName,
-                                                                   teamNumber,
-                                                                   organization,
-                                                                   formattedScore,
-                                                                   rank) -> {
+      processScoresForJudgingStation(connection, description, ag, regularMatchPlay, scoreboardDisplay, (teamName,
+                                                                                                        teamNumber,
+                                                                                                        organization,
+                                                                                                        formattedScore,
+                                                                                                        rank) -> {
         final ScoreEntry row = new ScoreEntry(teamName, teamNumber, organization, formattedScore, rank);
         scores.add(row);
       });
@@ -190,27 +198,47 @@ public final class Top10 {
 
   }
 
+  /**
+   * @param regularMatchPlay if true, limit to regular match play rounds
+   * @param scoreboardDisplay if true, limit to rounds displayed on the scoreboard
+   */
   private static void processScoresForAwardGroup(final Connection connection,
                                                  final ChallengeDescription challengeDescription,
                                                  final String awardGroupName,
+                                                 final boolean regularMatchPlay,
+                                                 final boolean scoreboardDisplay,
                                                  final ProcessScoreEntry processor)
       throws SQLException {
-    processScores(connection, challengeDescription, "event_division", awardGroupName, processor);
+    processScores(connection, challengeDescription, "event_division", awardGroupName, regularMatchPlay,
+                  scoreboardDisplay, processor);
   }
 
+  /**
+   * @param regularMatchPlay if true, limit to regular match play rounds
+   * @param scoreboardDisplay if true, limit to rounds displayed on the scoreboard
+   */
   private static void processScoresForJudgingStation(final Connection connection,
                                                      final ChallengeDescription challengeDescription,
                                                      final String judgingStation,
+                                                     final boolean regularMatchPlay,
+                                                     final boolean scoreboardDisplay,
                                                      final ProcessScoreEntry processor)
       throws SQLException {
-    processScores(connection, challengeDescription, "judging_station", judgingStation, processor);
+    processScores(connection, challengeDescription, "judging_station", judgingStation, regularMatchPlay,
+                  scoreboardDisplay, processor);
   }
 
+  /**
+   * @param regularMatchPlay if true, limit to regular match play rounds
+   * @param scoreboardDisplay if true, limit to rounds displayed on the scoreboard
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   private static void processScores(final Connection connection,
                                     final ChallengeDescription challengeDescription,
                                     final String divisionColumn, // event_division or judging_station
                                     final String awardGroupName,
+                                    final boolean regularMatchPlay,
+                                    final boolean scoreboardDisplay,
                                     final ProcessScoreEntry processor)
       throws SQLException {
     final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
@@ -218,35 +246,43 @@ public final class Top10 {
 
     final Tournament currentTournament = Tournament.getCurrentTournament(connection);
     final int currentTournamentId = currentTournament.getTournamentID();
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentId);
-    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournamentId);
     final int maxRunNumberToDisplay = DelayedPerformance.getMaxRunNumberToDisplay(connection, currentTournament);
 
-    try (
-        PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
-            + " FROM (SELECT TeamNumber, " //
-            + winnerCriteria.getMinMaxString()
-            + "(ComputedTotal) AS MaxOfComputedScore" //
-            + "  FROM verified_performance WHERE Tournament = ? "
-            + "   AND NoShow = False" //
-            + "   AND Bye = False" //
-            + "   AND (? OR RunNumber <= ?)" //
-            + "   AND RunNumber <= ?" //
-            + "  GROUP BY TeamNumber) AS T2"
-            + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, TournamentTeams"
-            + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
-            + " AND TournamentTeams."
-            + divisionColumn
-            + " = ?" //
-            + " AND TournamentTeams.tournament = ?" //
-            + " ORDER BY T2.MaxOfComputedScore "
-            + winnerCriteria.getSortString())) {
-      prep.setInt(1, currentTournamentId);
-      prep.setBoolean(2, !runningHeadToHead);
-      prep.setInt(3, numSeedingRounds);
-      prep.setInt(4, maxRunNumberToDisplay);
-      prep.setString(5, awardGroupName);
-      prep.setInt(6, currentTournamentId);
+    final StringBuilder sql = new StringBuilder();
+    sql.append("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore"); //
+    sql.append(String.format("    FROM (SELECT TeamNumber, %s(ComputedTotal) AS MaxOfComputedScore",
+                             winnerCriteria.getMinMaxString()));
+    sql.append("      FROM verified_performance WHERE Tournament = ?"); // tournament
+    sql.append("       AND NoShow = False");
+    sql.append("       AND Bye = False");
+    if (regularMatchPlay) {
+      sql.append("       AND RunNumber IN (SELECT run_number FROM run_metadata WHERE tournament_id = ? AND run_type = ?)"); // tournament,
+                                                                                                                            // REGULAR_MATCH_PLAY
+    }
+    if (scoreboardDisplay) {
+      sql.append("       AND RunNumber IN (SELECT run_number FROM run_metadata WHERE tournament_id = 15 AND scoreboard_display = TRUE)"); // tournament
+    }
+    sql.append("   AND RunNumber <= ?"); // maxRunNumberToDisplay
+    sql.append("      GROUP BY TeamNumber) AS T2");
+    sql.append("     JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, TournamentTeams");
+    sql.append("     WHERE Teams.TeamNumber = TournamentTeams.TeamNumber");
+    sql.append(String.format("     AND TournamentTeams.%s = ?", divisionColumn)); // awardGroupName
+    sql.append("     AND TournamentTeams.tournament = ?"); // tournament
+    sql.append(String.format("     ORDER BY T2.MaxOfComputedScore %s", winnerCriteria.getSortString()));
+
+    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
+      int paramIndex = 1;
+      prep.setInt(paramIndex++, currentTournamentId);
+      if (regularMatchPlay) {
+        prep.setInt(paramIndex++, currentTournamentId);
+        prep.setString(paramIndex++, RunMetadata.RunType.REGULAR_MATCH_PLAY.name());
+      }
+      if (scoreboardDisplay) {
+        prep.setInt(paramIndex++, currentTournamentId);
+      }
+      prep.setInt(paramIndex++, maxRunNumberToDisplay);
+      prep.setString(paramIndex++, awardGroupName);
+      prep.setInt(paramIndex++, currentTournamentId);
       try (ResultSet rs = prep.executeQuery()) {
 
         double prevScore = -1;

@@ -2,14 +2,20 @@ digraph UploadSchedule {
 
 "admin_index.jsp" -> UploadSpreadsheet [label="uploadSpreadsheet"];
 
-UploadSpreadsheet -> CheckScheduleExists [label="uploadRedirect"];
+UploadSpreadsheet -> CheckPerformanceScoresExist  [label="uploadRedirect"];
+
+CheckPerformanceScoresExist -> "promptPerformanceScoresExist.jsp" [label="if performance scores exist"];
+
+"promptPerformanceScoresExist.jsp" -> CheckScheduleExists [label="yes"];
+"promptPerformanceScoresExist.jsp" -> "admin_index.jsp" [label="no"];
+CheckPerformanceScoresExist -> CheckScheduleExists;
 
 CheckScheduleExists -> "promptForOverwrite.jsp" [label="if schedule exists"];
 
 "promptForOverwrite.jsp" -> "scheduleConstraints.jsp" [label="yes"];
 "promptForOverwrite.jsp" -> "admin_index.jsp" [label="no"];
 
-CheckScheduleExists -> "scheduleConstraints.jsp";
+CheckScheduleExists -> "scheduleConstraints.jsp" [label="if no schedule exists"];
 
 "scheduleConstraints.jsp" -> ProcessScheduleConstraints;
 ProcessScheduleConstraints -> "chooseScheduleHeaders.jsp";
@@ -20,7 +26,10 @@ ChooseScheduleHeaders -> "specifySubjectiveStationDurations.jsp";
 "specifySubjectiveStationDurations.jsp" -> SpecifySubjectiveStationDurations;
 SpecifySubjectiveStationDurations -> LoadSchedule;
 
-LoadSchedule -> CheckMissingTeams;
+LoadSchedule -> "specifyTimes.jsp";
+
+"specifyTimes.jsp" -> SpecifyTimes;
+SpecifyTimes -> CheckMissingTeams;
 
 CheckMissingTeams -> CheckViolations;
 CheckMissingTeams -> "promptAddScheduleTeams.jsp" [label="if teams in schedule not in database"];
@@ -47,6 +56,6 @@ CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
 
 "CommitTeamInformationChanges" -> "CommitSchedule";
 
-
+"CommitSchedule" -> "edit-award-group-order.jsp";
 
 }

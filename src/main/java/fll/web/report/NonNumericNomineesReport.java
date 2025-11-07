@@ -271,7 +271,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
       titleBuilder.append(tournament.getLevel().getName());
     }
 
-    titleBuilder.append(" Non-numeric Nominees");
+    titleBuilder.append(" Optional Award Nominations");
     return titleBuilder.toString();
   }
 
