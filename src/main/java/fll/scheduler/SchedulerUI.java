@@ -287,12 +287,31 @@ public class SchedulerUI extends JFrame {
     subjectiveChangeDuration.addPropertyChangeListener("value", durationChangeListener);
     performanceDuration.addPropertyChangeListener("value", durationChangeListener);
 
-    // Work around https://github.com/typetools/checker-framework/issues/4667 by
-    // putting all initialization inside the constructor
-    // Working with checker more I suspect this issue is because of
-    // https://github.com/typetools/checker-framework/issues/4667 and how
-    // @NotOnlyInitialized works
-    // final JMenuBar menubar = createMenubar();
+    final JMenuBar menubar = createMenubar();
+
+    setJMenuBar(menubar);
+
+    // initial state
+    mDisplayGeneralScheduleAction.setEnabled(false);
+    mRunOptimizerAction.setEnabled(false);
+    mReloadFileAction.setEnabled(false);
+    saveScheduleAction.setEnabled(false);
+
+    // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
+    // can try and figure out what is wrong here
+    // until then I have copied the body of setSchedParams here
+    // setSchedParams(mSchedParams);
+    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
+    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    subjectiveChangeDuration.setValue(mSchedParams.getSubjectiveChangetimeMinutes());
+    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
+
+    setChallengeDescriptionTitle();
+
+    pack();
+  }
+
+  private JMenuBar createMenubar(@UnderInitialization(javax.swing.JFrame.class) SchedulerUI this) {
     final JMenuBar menubar = new JMenuBar();
 
     final JMenu fileMenu = new JMenu("File");
@@ -321,26 +340,7 @@ public class SchedulerUI extends JFrame {
     scheduleMenu.add(saveScheduleAction);
     menubar.add(scheduleMenu);
 
-    setJMenuBar(menubar);
-
-    // initial state
-    mDisplayGeneralScheduleAction.setEnabled(false);
-    mRunOptimizerAction.setEnabled(false);
-    mReloadFileAction.setEnabled(false);
-    saveScheduleAction.setEnabled(false);
-
-    // Once https://github.com/typetools/checker-framework/issues/4613 is resolved I
-    // can try and figure out what is wrong here
-    // until then I have copied the body of setSchedParams here
-    // setSchedParams(mSchedParams);
-    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
-    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
-    subjectiveChangeDuration.setValue(mSchedParams.getSubjectiveChangetimeMinutes());
-    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
-
-    setChallengeDescriptionTitle();
-
-    pack();
+    return menubar;
   }
 
   private final class CheckSchedule implements PropertyChangeListener {
