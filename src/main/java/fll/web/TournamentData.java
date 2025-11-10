@@ -92,6 +92,8 @@ public class TournamentData {
         currentTournament = tournament;
 
         runMetadata.clear();
+
+        runMetadataFactory = new RunMetadataFactory(getDataSource(), currentTournament);
       } catch (final SQLException e) {
         throw new FLLInternalException("Unable to get current tournament", e);
       }

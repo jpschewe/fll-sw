@@ -1,3 +1,5 @@
+* #1284 - Fix caching of run metadata in the web application
+
 Release 20.0.0
 ==============
 
