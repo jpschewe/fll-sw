@@ -77,8 +77,8 @@ public class DatabasePerformanceTeamScore extends BasePerformanceTeamScore {
    * Create a database team score object for a performance score.
    * 
    * @param tournament the tournament ID
-   * @param teamNumber see {@link TeamScore#getTeamNumber()}
-   * @param runNumber see {@link TeamScore#getRunNumber()}
+   * @param teamNumber see {@link #getTeamNumber()}
+   * @param runNumber see {@link #getRunNumber()}
    * @param connection the connection to get the data from
    * @return the {@link TeamScore} or {@code null} if no score exists matching the
    *         supplied criteria
