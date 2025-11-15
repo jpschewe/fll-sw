@@ -20,7 +20,7 @@ import fll.db.GenerateDB;
 /**
  * TeamScore implementation for a performance score in the database.
  */
-public class DatabaseTeamScore extends TeamScore {
+public class DatabaseTeamScore extends BaseTeamScore {
 
   private final Map<String, @Nullable Object> data;
 
@@ -61,12 +61,12 @@ public class DatabaseTeamScore extends TeamScore {
     try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
         + GenerateDB.PERFORMANCE_TABLE_NAME
         + " WHERE TeamNumber = ? AND Tournament = ?"
-        + (NON_PERFORMANCE_RUN_NUMBER == getRunNumber() ? "" : " AND RunNumber = ?"))) {
-      if (NON_PERFORMANCE_RUN_NUMBER != getRunNumber()) {
-        prep.setInt(3, getRunNumber());
+        + (NON_PERFORMANCE_RUN_NUMBER == runNumber ? "" : " AND RunNumber = ?"))) {
+      if (NON_PERFORMANCE_RUN_NUMBER != runNumber) {
+        prep.setInt(3, runNumber);
       }
 
-      prep.setInt(1, getTeamNumber());
+      prep.setInt(1, teamNumber);
       prep.setInt(2, tournament);
       try (ResultSet result = prep.executeQuery()) {
         if (result.next()) {
