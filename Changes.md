@@ -1,3 +1,5 @@
+* #1288 - Internal rework of TeamScore to separate subjective and performance objects
+
 Release 20.0.1
 ==============
 
