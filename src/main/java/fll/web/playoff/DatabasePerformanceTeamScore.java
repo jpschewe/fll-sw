@@ -64,12 +64,12 @@ public class DatabasePerformanceTeamScore extends BasePerformanceTeamScore {
   }
 
   @Override
-  public double getRawScore(String goalName) {
+  protected double internalGetRawScore(String goalName) {
     return delegate.getRawScore(goalName);
   }
 
   @Override
-  public @Nullable String getEnumRawScore(String goalName) {
+  protected @Nullable String internalGetEnumRawScore(String goalName) {
     return delegate.getEnumRawScore(goalName);
   }
 

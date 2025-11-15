@@ -81,12 +81,12 @@ public class DatabaseTeamScore extends BaseTeamScore {
   }
 
   @Override
-  public @Nullable String getEnumRawScore(final String goalName) {
+  protected @Nullable String internalGetEnumRawScore(final String goalName) {
     return getString(goalName);
   }
 
   @Override
-  public double getRawScore(final String goalName) {
+  protected double internalGetRawScore(final String goalName) {
     return getDouble(goalName);
   }
 

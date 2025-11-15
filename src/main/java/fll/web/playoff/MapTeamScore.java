@@ -29,12 +29,12 @@ public final class MapTeamScore extends BasePerformanceTeamScore {
   }
 
   @Override
-  public @Nullable String getEnumRawScore(final String goalName) {
+  protected @Nullable String internalGetEnumRawScore(final String goalName) {
     return map.get(goalName);
   }
 
   @Override
-  public double getRawScore(final String goalName) {
+  protected double internalGetRawScore(final String goalName) {
     final String value = map.get(goalName);
     if (null == value) {
       return Double.NaN;

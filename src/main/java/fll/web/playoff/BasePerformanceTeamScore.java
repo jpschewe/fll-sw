@@ -4,6 +4,7 @@
 
 package fll.web.playoff;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
@@ -40,5 +41,37 @@ public abstract class BasePerformanceTeamScore extends BaseTeamScore implements 
   }
 
   private final int runNumber;
+
+  /**
+   * Implemented to return {@link Double#NaN} if {@link #isNoShow()} or
+   * {@link #isBye()} returns
+   * {@code true}, otherwise return {@link #internalGetRawScore(String)}.
+   */
+  @Override
+  @SideEffectFree
+  public double getRawScore(final String goalName) {
+    if (isNoShow()
+        || isBye()) {
+      return Double.NaN;
+    } else {
+      return internalGetRawScore(goalName);
+    }
+  }
+
+  /**
+   * Implemented to return {@code null} if {@link #isNoShow()} or {@link #isBye()}
+   * returns
+   * {@code true}, otherwise return {@link #internalGetEnumRawScore(String)}.
+   */
+  @Override
+  @SideEffectFree
+  public @Nullable String getEnumRawScore(final String goalName) {
+    if (isNoShow()
+        || isBye()) {
+      return null;
+    } else {
+      return internalGetEnumRawScore(goalName);
+    }
+  }
 
 }

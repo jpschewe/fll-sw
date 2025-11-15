@@ -23,6 +23,8 @@ import fll.web.playoff.Playoff;
 public class DummyTeamScore extends BasePerformanceTeamScore {
 
   /**
+   * Sets {@link #isNoShow()} and {@link #isBye()} to {@code false}.
+   * 
    * @param teamNumber the team number the score is for
    * @param runNumber the run number the score is for
    * @param simpleGoals the simple goal values
@@ -57,7 +59,7 @@ public class DummyTeamScore extends BasePerformanceTeamScore {
   }
 
   @Override
-  public @Nullable String getEnumRawScore(final String goalName) {
+  protected @Nullable String internalGetEnumRawScore(final String goalName) {
     if (enumGoals.containsKey(goalName)) {
       return enumGoals.get(goalName);
     } else {
@@ -66,7 +68,7 @@ public class DummyTeamScore extends BasePerformanceTeamScore {
   }
 
   @Override
-  public double getRawScore(final String goalName) {
+  protected double internalGetRawScore(final String goalName) {
     if (simpleGoals.containsKey(goalName)) {
       return simpleGoals.get(goalName);
     } else {
