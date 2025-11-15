@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.web.playoff.BaseTeamScore;
 import fll.web.playoff.Playoff;
-import fll.web.playoff.TeamScore;
 
 /**
  * Team score that is populated from a map of values. This is most often used
@@ -20,7 +20,7 @@ import fll.web.playoff.TeamScore;
  *
  * @author jpschewe
  */
-public class DummyTeamScore extends TeamScore {
+public class DummyTeamScore extends BaseTeamScore {
 
   /**
    * @param teamNumber the team number the score is for

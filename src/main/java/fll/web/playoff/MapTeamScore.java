@@ -12,7 +12,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * A team score in a Map containing strings from form data.
  */
-public final class MapTeamScore extends TeamScore {
+public final class MapTeamScore extends BaseTeamScore {
 
   /**
    * @param teamNumber {@link #getTeamNumber()}
