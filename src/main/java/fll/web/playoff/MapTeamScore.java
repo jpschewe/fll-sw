@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.FLLInternalException;
+
 /**
  * A team score in a Map containing strings from form data from the web.
  */
@@ -43,19 +45,26 @@ public final class MapTeamScore extends BaseTeamScore {
 
   @Override
   public boolean isNoShow() {
-    final String noShow = map.get("NoShow");
-    if (null == noShow) {
-      throw new RuntimeException("Missing parameter: NoShow");
-    }
-    return noShow.equalsIgnoreCase("true")
-        || noShow.equalsIgnoreCase("t")
-        || noShow.equals("1");
+    return getBoolean("NoShow");
   }
 
   @Override
   public boolean isBye() {
-    // one cannot enter a BYE through the web interface
-    return false;
+    // can't get a bye from the web, however this might be used later for the
+    // database implementation
+    return getBoolean("Bye");
+  }
+
+  private boolean getBoolean(final String key) {
+    final String value = map.get(key);
+    if (null == value) {
+      throw new FLLInternalException("Missing parameter: "
+          + key);
+    }
+    return value.equalsIgnoreCase("true")
+        || value.equalsIgnoreCase("t")
+        || value.equals("1");
+
   }
 
   @Override
@@ -63,13 +72,7 @@ public final class MapTeamScore extends BaseTeamScore {
     if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
       return false;
     } else {
-      final String verified = map.get("Verified");
-      if (null == verified) {
-        throw new RuntimeException("Missing parameter: Verified");
-      }
-      return verified.equalsIgnoreCase("true")
-          || verified.equalsIgnoreCase("t")
-          || verified.equals("1");
+      return getBoolean("Verified");
     }
   }
 
