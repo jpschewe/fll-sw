@@ -10,7 +10,7 @@ import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A team score in a Map containing strings from form data.
+ * A team score in a Map containing strings from form data from the web.
  */
 public final class MapTeamScore extends BaseTeamScore {
 
@@ -27,12 +27,12 @@ public final class MapTeamScore extends BaseTeamScore {
   }
 
   @Override
-  protected @Nullable String internalGetEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     return map.get(goalName);
   }
 
   @Override
-  protected double internalGetRawScore(final String goalName) {
+  public double getRawScore(final String goalName) {
     final String value = map.get(goalName);
     if (null == value) {
       return Double.NaN;
@@ -41,22 +41,15 @@ public final class MapTeamScore extends BaseTeamScore {
     }
   }
 
-  /**
-   * @see fll.web.playoff.TeamScore#isNoShow()
-   */
   @Override
   public boolean isNoShow() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      final String noShow = map.get("NoShow");
-      if (null == noShow) {
-        throw new RuntimeException("Missing parameter: NoShow");
-      }
-      return noShow.equalsIgnoreCase("true")
-          || noShow.equalsIgnoreCase("t")
-          || noShow.equals("1");
+    final String noShow = map.get("NoShow");
+    if (null == noShow) {
+      throw new RuntimeException("Missing parameter: NoShow");
     }
+    return noShow.equalsIgnoreCase("true")
+        || noShow.equalsIgnoreCase("t")
+        || noShow.equals("1");
   }
 
   @Override
@@ -69,8 +62,6 @@ public final class MapTeamScore extends BaseTeamScore {
   public boolean isVerified() {
     if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
       return false;
-    } else if (!scoreExists()) {
-      return false;
     } else {
       final String verified = map.get("Verified");
       if (null == verified) {
@@ -80,11 +71,6 @@ public final class MapTeamScore extends BaseTeamScore {
           || verified.equalsIgnoreCase("t")
           || verified.equals("1");
     }
-  }
-
-  @Override
-  public boolean scoreExists() {
-    return true;
   }
 
   private final Map<String, String> map;

@@ -178,8 +178,12 @@ public final class Playoff {
                                           final TeamScore teamBScore,
                                           final int runNumber)
       throws SQLException {
-    final DatabaseTeamScore teamAScore = new DatabaseTeamScore(tournament, teamA.getTeamNumber(), runNumber,
-                                                               connection);
+    final @Nullable TeamScore teamAScore = DatabaseTeamScore.fetchTeamScore(tournament, teamA.getTeamNumber(),
+                                                                            runNumber, connection);
+    if (null == teamAScore) {
+      return null;
+    }
+
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     return retval;
@@ -206,29 +210,24 @@ public final class Playoff {
         || Team.TIE.equals(teamB)) {
       return null;
     } else {
-      if (teamAScore.scoreExists()
-          && teamBScore.scoreExists()) {
-        final boolean noshowA = teamAScore.isNoShow();
-        final boolean noshowB = teamBScore.isNoShow();
-        if (noshowA
-            && !noshowB) {
-          return teamB;
-        } else if (!noshowA
-            && noshowB) {
-          return teamA;
-        } else {
-          final double scoreA = perf.evaluate(teamAScore);
-          final double scoreB = perf.evaluate(teamBScore);
-          if (FP.lessThan(scoreA, scoreB, TIEBREAKER_TOLERANCE)) {
-            return WinnerType.HIGH == winnerCriteria ? teamB : teamA;
-          } else if (FP.lessThan(scoreB, scoreA, TIEBREAKER_TOLERANCE)) {
-            return WinnerType.HIGH == winnerCriteria ? teamA : teamB;
-          } else {
-            return evaluateTiebreaker(tiebreakerElement, teamA, teamAScore, teamB, teamBScore);
-          }
-        }
+      final boolean noshowA = teamAScore.isNoShow();
+      final boolean noshowB = teamBScore.isNoShow();
+      if (noshowA
+          && !noshowB) {
+        return teamB;
+      } else if (!noshowA
+          && noshowB) {
+        return teamA;
       } else {
-        return null;
+        final double scoreA = perf.evaluate(teamAScore);
+        final double scoreB = perf.evaluate(teamBScore);
+        if (FP.lessThan(scoreA, scoreB, TIEBREAKER_TOLERANCE)) {
+          return WinnerType.HIGH == winnerCriteria ? teamB : teamA;
+        } else if (FP.lessThan(scoreB, scoreA, TIEBREAKER_TOLERANCE)) {
+          return WinnerType.HIGH == winnerCriteria ? teamA : teamB;
+        } else {
+          return evaluateTiebreaker(tiebreakerElement, teamA, teamAScore, teamB, teamBScore);
+        }
       }
     }
   }

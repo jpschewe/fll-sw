@@ -178,9 +178,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    if (!teamScore.scoreExists()) {
-      return Double.NaN;
-    } else if (teamScore.isNoShow()
+    if (teamScore.isNoShow()
         || teamScore.isBye()) {
       return 0D;
     }
@@ -198,9 +196,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   public Map<String, Double> getGoalGroupScores(final TeamScore teamScore) {
     final Map<String, Double> goalGroupScores = new HashMap<>();
 
-    if (!teamScore.scoreExists()) {
-      return goalGroupScores;
-    } else if (teamScore.isNoShow()
+    if (teamScore.isNoShow()
         || teamScore.isBye()) {
       return goalGroupScores;
     }
