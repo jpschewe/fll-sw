@@ -65,9 +65,7 @@ public interface TeamScore {
 
   /**
    * What run do these scores apply to?
-   * This is a 1-based number. It will be {@link #NON_PERFORMANCE_RUN_NUMBER} if
-   * this is not a performance score.
-   *
+   * 
    * @return the run for the scores
    */
   @SideEffectFree
