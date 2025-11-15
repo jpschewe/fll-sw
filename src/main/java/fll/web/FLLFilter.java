@@ -436,6 +436,29 @@ public class FLLFilter implements Filter {
       throws IOException, RuntimeException {
     LOGGER.trace("Top of initialize");
 
+    if (ApplicationAttributes.getNonNullAttribute(application, FLLContextListener.DATABASE_UPGRADE_FAILED,
+                                                  Boolean.class)) {
+      final String message = "In-place database upgrade failed. See the automatic backups for the previous database to send to the developers. Please create a new database.";
+      LOGGER.warn(message);
+
+      SessionAttributes.appendToMessage(session, "<p class='error'>"
+          + message
+          + "</p>");
+
+      response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+          + "/setup/index.jsp"));
+
+      // setup special authentication for setup
+      LOGGER.info("Setting in-setup authentication after failed database upgrade");
+      AuthenticationContext auth = AuthenticationContext.inSetup();
+      session.setAttribute(SessionAttributes.AUTHENTICATION, auth);
+
+      // clear the failed state
+      application.setAttribute(FLLContextListener.DATABASE_UPGRADE_FAILED, Boolean.FALSE);
+
+      return false;
+    }
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 

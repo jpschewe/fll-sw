@@ -63,7 +63,6 @@ public class ProcessImportPerformance extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
-    Utilities.loadDBDriver();
     try {
       if (null != request.getPart("performanceFile")) {
 

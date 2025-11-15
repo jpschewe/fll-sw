@@ -55,12 +55,6 @@ fll.web.developer.DeveloperIndex.populateContext(pageContext);
         </li>
 
         <li>
-            inside.test:
-            <%=System.getProperty("inside.test")%>
-            --
-            <%=Boolean.getBoolean("inside.test")%></li>
-
-        <li>
             Java Version:
             <%=System.getProperty("java.version")%></li>
         <li>
