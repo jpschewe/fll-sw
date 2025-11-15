@@ -50,9 +50,8 @@ public final class MapTeamScore extends BasePerformanceTeamScore {
 
   @Override
   public boolean isBye() {
-    // can't get a bye from the web, however this might be used later for the
-    // database implementation
-    return getBoolean("Bye");
+    // can't get a bye from the web
+    return false;
   }
 
   private boolean getBoolean(final String key) {
