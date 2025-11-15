@@ -271,9 +271,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     final double bestTotalScore = bestTotalScore(performance, scores);
     for (final TeamScore score : scores) {
       final Element scoreCell;
-      if (!score.scoreExists()) {
-        scoreCell = createCell(document, "");
-      } else if (score.isBye()) {
+      if (score.isBye()) {
         scoreCell = createCell(document, "Bye");
       } else if (score.isNoShow()) {
         scoreCell = createCell(document, "No Show");
@@ -349,8 +347,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     titleCell.setAttribute("font-weight", TITLE_FONT_WEIGHT);
 
     for (final TeamScore score : scores) {
-      if (!score.scoreExists()
-          || score.isBye()
+      if (score.isBye()
           || score.isNoShow()) {
         row.appendChild(createCell(document, ""));
       } else {
@@ -408,8 +405,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      if (score.scoreExists()
-          && !score.isBye()
+      if (!score.isBye()
           && !score.isNoShow()) {
         final double computedValue = performance.evaluate(score);
         bestScore = Math.max(bestScore, computedValue);
@@ -428,8 +424,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     double bestScore = Double.MAX_VALUE
         * -1;
     for (final TeamScore score : scores) {
-      if (score.scoreExists()
-          && !score.isBye()
+      if (!score.isBye()
           && !score.isNoShow()) {
         final double computedValue = goal.evaluate(score);
         bestScore = Math.max(bestScore, computedValue);
@@ -447,8 +442,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       throws SQLException {
     final List<TeamScore> scores = new LinkedList<>();
     for (final RunMetadata metadata : regularMatchPlayRuns) {
-      scores.add(new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(), metadata.getRunNumber(),
-                                       connection));
+      final @Nullable TeamScore score = DatabaseTeamScore.fetchTeamScore(tournament.getTournamentID(),
+                                                                         team.getTeamNumber(), metadata.getRunNumber(),
+                                                                         connection);
+      if (null != score) {
+        scores.add(score);
+      }
     }
     return scores;
   }

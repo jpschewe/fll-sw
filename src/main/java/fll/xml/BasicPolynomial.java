@@ -161,10 +161,6 @@ public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serial
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    if (!teamScore.scoreExists()) {
-      return Double.NaN;
-    }
-
     double score = 0;
     for (final Term t : getTerms()) {
       final double val = t.evaluate(teamScore);

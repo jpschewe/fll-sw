@@ -50,60 +50,22 @@ public abstract class BaseTeamScore implements TeamScore {
 
   private final int teamNumber;
 
-  /**
-   * Check if the score exists. If it doesn't exist, the other score methods
-   * will throw a RuntimeException
-   *
-   * @return true if the score exists
-   */
-  @Override
-  @SideEffectFree
-  public abstract boolean scoreExists();
-
-  /**
-   * Is this score a no show?
-   *
-   * @return true if this score is a no show
-   */
   @Override
   @SideEffectFree
   public abstract boolean isNoShow();
 
-  /**
-   * Is this score a bye?
-   *
-   * @return true if this score is a no show
-   */
   @Override
+  @SideEffectFree
   public abstract boolean isBye();
 
-  /**
-   * Is the score verified.
-   * 
-   * @return true if this score has been verified
-   */
   @Override
   @SideEffectFree
   public abstract boolean isVerified();
 
-  /**
-   * When the score is entered from a tablet where the table is known, this has
-   * the table name, otherwise the value is "ALL" meaning that the person entering
-   * the score has "all tables" selected.
-   * 
-   * @return the table that the score was entered from.
-   */
   @Override
   @SideEffectFree
   public abstract String getTable();
 
-  /**
-   * What run do these scores apply to?
-   * This is a 1-based number. It will be {@link #NON_PERFORMANCE_RUN_NUMBER} if
-   * this is not a performance score.
-   *
-   * @return the run for the scores
-   */
   @Override
   @SideEffectFree
   public final int getRunNumber() {
@@ -112,58 +74,12 @@ public abstract class BaseTeamScore implements TeamScore {
 
   private final int runNumber;
 
-  /**
-   * The raw score for a particular simple goal, as a double.
-   *
-   * @param goalName the goal to get the score for
-   * @return the score, NaN if there is no score for the specified goal name or
-   *         {@link #scoreExists()} returns {@code false}.
-   */
   @Override
   @SideEffectFree
-  public final double getRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return Double.NaN;
-    } else {
-      return internalGetRawScore(goalName);
-    }
-  }
+  public abstract double getRawScore(String goalName);
 
-  /**
-   * Implementation of {@link #getRawScore(String)}. The calling method has
-   * already checked {@link #scoreExists()}.
-   * 
-   * @param goalName the goal to get the score for
-   * @return the value or {@link Double#NaN} if there is no value for the goal
-   */
-  @SideEffectFree
-  protected abstract double internalGetRawScore(String goalName);
-
-  /**
-   * The raw score for a particular enumerated goal, as a String.
-   *
-   * @param goalName the goal to get the score for
-   * @return the score, null if there is no score for the specified goal name or
-   *         {@link #scoreExists()} returns {@code false}.
-   */
   @Override
   @SideEffectFree
-  public final @Nullable String getEnumRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return null;
-    } else {
-      return internalGetEnumRawScore(goalName);
-    }
-  }
-
-  /**
-   * Implementation of {@link #getEnumRawScore(String)}. The calling method has
-   * already checked {@link #scoreExists()}.
-   * 
-   * @param goalName the goal to get the score for
-   * @return the value or {@code null} if there is no value for the goal
-   */
-  @SideEffectFree
-  protected abstract @Nullable String internalGetEnumRawScore(String goalName);
+  public abstract @Nullable String getEnumRawScore(String goalName);
 
 }

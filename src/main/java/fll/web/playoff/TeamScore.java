@@ -22,15 +22,6 @@ public interface TeamScore {
   int getTeamNumber();
 
   /**
-   * Check if the score exists. If it doesn't exist, the other score methods
-   * will throw a RuntimeException
-   *
-   * @return true if the score exists
-   */
-  @SideEffectFree
-  boolean scoreExists();
-
-  /**
    * Is this score a no show?
    *
    * @return true if this score is a no show
@@ -75,8 +66,7 @@ public interface TeamScore {
    * The raw score for a particular simple goal, as a double.
    *
    * @param goalName the goal to get the score for
-   * @return the score, NaN if there is no score for the specified goal name or
-   *         {@link #scoreExists()} returns {@code false}.
+   * @return the score, NaN if there is no score for the specified goal name
    */
   @SideEffectFree
   double getRawScore(String goalName);
@@ -85,8 +75,7 @@ public interface TeamScore {
    * The raw score for a particular enumerated goal, as a String.
    *
    * @param goalName the goal to get the score for
-   * @return the score, null if there is no score for the specified goal name or
-   *         {@link #scoreExists()} returns {@code false}.
+   * @return the score, null if there is no score for the specified goal name
    */
   @SideEffectFree
   @Nullable

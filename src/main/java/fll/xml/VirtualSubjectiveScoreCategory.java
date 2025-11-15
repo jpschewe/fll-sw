@@ -63,9 +63,7 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    if (!teamScore.scoreExists()) {
-      return Double.NaN;
-    } else if (teamScore.isNoShow()
+    if (teamScore.isNoShow()
         || teamScore.isBye()) {
       return 0D;
     }

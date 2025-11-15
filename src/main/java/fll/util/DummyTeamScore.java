@@ -57,7 +57,7 @@ public class DummyTeamScore extends BaseTeamScore {
   }
 
   @Override
-  protected @Nullable String internalGetEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     if (enumGoals.containsKey(goalName)) {
       return enumGoals.get(goalName);
     } else {
@@ -66,7 +66,7 @@ public class DummyTeamScore extends BaseTeamScore {
   }
 
   @Override
-  protected double internalGetRawScore(final String goalName) {
+  public double getRawScore(final String goalName) {
     if (simpleGoals.containsKey(goalName)) {
       return simpleGoals.get(goalName);
     } else {
@@ -90,11 +90,6 @@ public class DummyTeamScore extends BaseTeamScore {
 
   @Override
   public boolean isVerified() {
-    return true;
-  }
-
-  @Override
-  public boolean scoreExists() {
     return true;
   }
 

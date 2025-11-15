@@ -36,6 +36,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.TournamentData;
 import fll.web.playoff.BracketUpdate;
@@ -496,8 +497,14 @@ public final class Queries {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
-    final TeamScore prevTeamScore = new DatabaseTeamScore(currentTournament, teamScore.getTeamNumber(),
-                                                          teamScore.getRunNumber(), connection);
+    final @Nullable TeamScore prevTeamScore = DatabaseTeamScore.fetchTeamScore(currentTournament,
+                                                                               teamScore.getTeamNumber(),
+                                                                               teamScore.getRunNumber(), connection);
+    if (null == prevTeamScore) {
+      throw new FLLInternalException(String.format("Unable to find performance score. Team %d Tournament %s",
+                                                   teamScore.getTeamNumber(), tournament.getName()));
+    }
+
     final boolean prevNoShow = prevTeamScore.isNoShow();
     final double prevScore = performanceElement.evaluate(prevTeamScore);
     final boolean prevVerified = prevTeamScore.isVerified();

@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,42 +38,37 @@ public class DatabaseTeamScore extends BaseTeamScore {
     super(teamNumber);
 
     data = Utilities.resultSetRowToMap(rs);
-    scoreExists = true;
   }
 
   /**
    * Create a database team score object for a performance score.
    * 
-   * @param tournament the tournament
-   * @param teamNumber passed to superclass
-   * @param runNumber passed to superclass
+   * @param tournament the tournament ID
+   * @param teamNumber see {@link TeamScore#getTeamNumber()}
+   * @param runNumber see {@link TeamScore#getRunNumber()}
    * @param connection the connection to get the data from
+   * @return the {@link TeamScore} or {@code null} if no score exists matching the
+   *         supplied criteria
    * @throws SQLException if there is an error getting the data
    */
-  public DatabaseTeamScore(final int tournament,
-                           final int teamNumber,
-                           final int runNumber,
-                           final Connection connection)
+  public static @Nullable DatabaseTeamScore fetchTeamScore(final int tournament,
+                                                           final int teamNumber,
+                                                           final int runNumber,
+                                                           final Connection connection)
       throws SQLException {
-    super(teamNumber, runNumber);
-
     try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
         + GenerateDB.PERFORMANCE_TABLE_NAME
         + " WHERE TeamNumber = ? AND Tournament = ?"
-        + (NON_PERFORMANCE_RUN_NUMBER == runNumber ? "" : " AND RunNumber = ?"))) {
-      if (NON_PERFORMANCE_RUN_NUMBER != runNumber) {
-        prep.setInt(3, runNumber);
-      }
+        + " AND RunNumber = ?")) {
+      prep.setInt(3, runNumber);
 
       prep.setInt(1, teamNumber);
       prep.setInt(2, tournament);
       try (ResultSet result = prep.executeQuery()) {
         if (result.next()) {
-          scoreExists = true;
-          data = Utilities.resultSetRowToMap(result);
+          return new DatabaseTeamScore(teamNumber, result);
         } else {
-          scoreExists = false;
-          data = Collections.emptyMap();
+          return null;
         }
       }
     }
@@ -97,7 +91,6 @@ public class DatabaseTeamScore extends BaseTeamScore {
     super(teamNumber, runNumber);
 
     data = Utilities.resultSetRowToMap(rs);
-    scoreExists = true;
   }
 
   private @Nullable String getString(final String goalName) {
@@ -132,48 +125,29 @@ public class DatabaseTeamScore extends BaseTeamScore {
   }
 
   @Override
-  protected @Nullable String internalGetEnumRawScore(final String goalName) {
+  public @Nullable String getEnumRawScore(final String goalName) {
     return getString(goalName);
   }
 
   @Override
-  protected double internalGetRawScore(final String goalName) {
+  public double getRawScore(final String goalName) {
     return getDouble(goalName);
   }
 
   @Override
   public boolean isNoShow() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      return getBoolean("NoShow");
-    }
+    return getBoolean("NoShow");
   }
 
   @Override
   public boolean isBye() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      return getBoolean("Bye");
-    }
+    return getBoolean("Bye");
   }
 
   @Override
   public boolean isVerified() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      return getBoolean("Verified");
-    }
+    return getBoolean("Verified");
   }
-
-  @Override
-  public boolean scoreExists() {
-    return scoreExists;
-  }
-
-  private final boolean scoreExists;
 
   @Override
   public String getTable() {
