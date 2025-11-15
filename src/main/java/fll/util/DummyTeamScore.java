@@ -57,28 +57,20 @@ public class DummyTeamScore extends TeamScore {
   }
 
   @Override
-  public @Nullable String getEnumRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return null;
+  protected @Nullable String internalGetEnumRawScore(final String goalName) {
+    if (enumGoals.containsKey(goalName)) {
+      return enumGoals.get(goalName);
     } else {
-      if (enumGoals.containsKey(goalName)) {
-        return enumGoals.get(goalName);
-      } else {
-        return null;
-      }
+      return null;
     }
   }
 
   @Override
-  public double getRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return Double.NaN;
+  protected double internalGetRawScore(final String goalName) {
+    if (simpleGoals.containsKey(goalName)) {
+      return simpleGoals.get(goalName);
     } else {
-      if (simpleGoals.containsKey(goalName)) {
-        return simpleGoals.get(goalName);
-      } else {
-        return Double.NaN;
-      }
+      return Double.NaN;
     }
   }
 
