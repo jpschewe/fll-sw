@@ -116,7 +116,7 @@ public abstract class TeamScore {
    *         {@link #scoreExists()} returns {@code false}.
    */
   @SideEffectFree
-  public final double getRawScore(String goalName) {
+  public final double getRawScore(final String goalName) {
     if (!scoreExists()) {
       return Double.NaN;
     } else {
@@ -132,7 +132,7 @@ public abstract class TeamScore {
    * @return the value or {@link Double#NaN} if there is no value for the goal
    */
   @SideEffectFree
-  protected abstract double internalGetRawScore(final String goalName);
+  protected abstract double internalGetRawScore(String goalName);
 
   /**
    * The raw score for a particular enumerated goal, as a String.
@@ -142,7 +142,7 @@ public abstract class TeamScore {
    *         {@link #scoreExists()} returns {@code false}.
    */
   @SideEffectFree
-  public final @Nullable String getEnumRawScore(String goalName) {
+  public final @Nullable String getEnumRawScore(final String goalName) {
     if (!scoreExists()) {
       return null;
     } else {
@@ -158,6 +158,6 @@ public abstract class TeamScore {
    * @return the value or {@code null} if there is no value for the goal
    */
   @SideEffectFree
-  protected abstract @Nullable String internalGetEnumRawScore(final String goalName);
+  protected abstract @Nullable String internalGetEnumRawScore(String goalName);
 
 }
