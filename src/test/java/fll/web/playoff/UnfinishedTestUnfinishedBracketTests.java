@@ -82,7 +82,8 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
 
     Playoff.populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
 
-    final TeamScore teamScore = new DummyTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1, simpleGoals, enumGoals);
+    final PerformanceTeamScore teamScore = new DummyTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1, simpleGoals,
+                                                              enumGoals);
 
     challenge.getPerformance().evaluate(teamScore);
   }
