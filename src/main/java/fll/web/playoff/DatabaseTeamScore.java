@@ -132,21 +132,13 @@ public class DatabaseTeamScore extends TeamScore {
   }
 
   @Override
-  public @Nullable String getEnumRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return null;
-    } else {
-      return getString(goalName);
-    }
+  protected @Nullable String internalGetEnumRawScore(final String goalName) {
+    return getString(goalName);
   }
 
   @Override
-  public double getRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return Double.NaN;
-    } else {
-      return getDouble(goalName);
-    }
+  protected double internalGetRawScore(final String goalName) {
+    return getDouble(goalName);
   }
 
   @Override

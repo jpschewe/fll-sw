@@ -10,8 +10,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
- * Represents a score for a team. Only the values of simple goals are available
- * through this object.
+ * Represents a score for a team.
  */
 public abstract class TeamScore {
 
@@ -59,6 +58,7 @@ public abstract class TeamScore {
    *
    * @return true if the score exists
    */
+  @SideEffectFree
   public abstract boolean scoreExists();
 
   /**
@@ -66,6 +66,7 @@ public abstract class TeamScore {
    *
    * @return true if this score is a no show
    */
+  @SideEffectFree
   public abstract boolean isNoShow();
 
   /**
@@ -80,6 +81,7 @@ public abstract class TeamScore {
    * 
    * @return true if this score has been verified
    */
+  @SideEffectFree
   public abstract boolean isVerified();
 
   /**
@@ -89,6 +91,7 @@ public abstract class TeamScore {
    * 
    * @return the table that the score was entered from.
    */
+  @SideEffectFree
   public abstract String getTable();
 
   /**
@@ -109,16 +112,52 @@ public abstract class TeamScore {
    * The raw score for a particular simple goal, as a double.
    *
    * @param goalName the goal to get the score for
-   * @return the score, NaN if there is no score for the specified name
+   * @return the score, NaN if there is no score for the specified goal name or
+   *         {@link #scoreExists()} returns {@code false}.
    */
-  public abstract double getRawScore(String goalName);
+  @SideEffectFree
+  public final double getRawScore(String goalName) {
+    if (!scoreExists()) {
+      return Double.NaN;
+    } else {
+      return internalGetRawScore(goalName);
+    }
+  }
+
+  /**
+   * Implementation of {@link #getRawScore(String)}. The calling method has
+   * already checked {@link #scoreExists()}.
+   * 
+   * @param goalName the goal to get the score for
+   * @return the value or {@link Double#NaN} if there is no value for the goal
+   */
+  @SideEffectFree
+  protected abstract double internalGetRawScore(final String goalName);
 
   /**
    * The raw score for a particular enumerated goal, as a String.
    *
    * @param goalName the goal to get the score for
-   * @return the score, null if there is no score for the specified name
+   * @return the score, null if there is no score for the specified goal name or
+   *         {@link #scoreExists()} returns {@code false}.
    */
-  public abstract @Nullable String getEnumRawScore(String goalName);
+  @SideEffectFree
+  public final @Nullable String getEnumRawScore(String goalName) {
+    if (!scoreExists()) {
+      return null;
+    } else {
+      return internalGetEnumRawScore(goalName);
+    }
+  }
+
+  /**
+   * Implementation of {@link #getEnumRawScore(String)}. The calling method has
+   * already checked {@link #scoreExists()}.
+   * 
+   * @param goalName the goal to get the score for
+   * @return the value or {@code null} if there is no value for the goal
+   */
+  @SideEffectFree
+  protected abstract @Nullable String internalGetEnumRawScore(final String goalName);
 
 }
