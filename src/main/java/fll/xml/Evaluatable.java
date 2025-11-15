@@ -10,8 +10,10 @@ import fll.web.playoff.TeamScore;
 
 /**
  * Something that can have a score computed for.
+ * 
+ * @param <T> type of score object supported
  */
-public interface Evaluatable {
+public interface Evaluatable<T extends TeamScore> {
 
   /**
    * Compute the numeric score given the individual score elements for a team.
@@ -19,6 +21,6 @@ public interface Evaluatable {
    * @param teamScore the individual score elements for a team
    * @return the score
    */
-  double evaluate(TeamScore teamScore);
+  double evaluate(T teamScore);
 
 }

@@ -20,7 +20,7 @@ import fll.web.playoff.TeamScore;
 /**
  * A reference to a goal.
  */
-public class GoalRef implements Evaluatable, Serializable, StringValue {
+public class GoalRef implements Evaluatable<TeamScore>, Serializable, StringValue {
 
   /**
    * XML tag name used for this class.
@@ -173,9 +173,7 @@ public class GoalRef implements Evaluatable, Serializable, StringValue {
       throw new FLLRuntimeException("The enumerated goal "
           + getGoalName()
           + " has no score for team "
-          + score.getTeamNumber()
-          + " run: "
-          + score.getRunNumber());
+          + score.getTeamNumber());
     } else {
       return rawScore;
     }

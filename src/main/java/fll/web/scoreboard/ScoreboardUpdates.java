@@ -42,8 +42,8 @@ import fll.web.WebUtils;
 import fll.web.display.DisplayHandler;
 import fll.web.display.DisplayInfo;
 import fll.web.display.UnknownDisplayException;
-import fll.web.playoff.DatabaseTeamScore;
-import fll.web.playoff.TeamScore;
+import fll.web.playoff.DatabasePerformanceTeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
@@ -141,7 +141,7 @@ public final class ScoreboardUpdates {
               continue;
             }
 
-            final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
+            final PerformanceTeamScore teamScore = new DatabasePerformanceTeamScore(teamNumber, runNumber, rs);
             final double score = performanceElement.evaluate(teamScore);
             final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
             final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
@@ -260,7 +260,7 @@ public final class ScoreboardUpdates {
                               final TournamentTeam team,
                               final double score,
                               final String formattedScore,
-                              final TeamScore teamScore) {
+                              final PerformanceTeamScore teamScore) {
     final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(teamScore.getRunNumber());
     if (runMetadata.isScoreboardDisplay()) {
       final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore, runMetadata);

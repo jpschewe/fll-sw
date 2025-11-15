@@ -23,7 +23,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * A category made up of goals from other categories.
  */
-public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable, AwardCategory {
+public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable<TeamScore>, AwardCategory {
 
   /**
    * Name of the XML tag used for this class.
@@ -63,10 +63,7 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    if (!teamScore.scoreExists()) {
-      return Double.NaN;
-    } else if (teamScore.isNoShow()
-        || teamScore.isBye()) {
+    if (teamScore.isNoShow()) {
       return 0D;
     }
 

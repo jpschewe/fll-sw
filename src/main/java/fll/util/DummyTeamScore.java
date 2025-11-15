@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.web.playoff.BasePerformanceTeamScore;
 import fll.web.playoff.Playoff;
-import fll.web.playoff.TeamScore;
 
 /**
  * Team score that is populated from a map of values. This is most often used
@@ -20,7 +20,7 @@ import fll.web.playoff.TeamScore;
  *
  * @author jpschewe
  */
-public class DummyTeamScore extends TeamScore {
+public class DummyTeamScore extends BasePerformanceTeamScore {
 
   /**
    * @param teamNumber the team number the score is for
@@ -58,27 +58,19 @@ public class DummyTeamScore extends TeamScore {
 
   @Override
   public @Nullable String getEnumRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return null;
+    if (enumGoals.containsKey(goalName)) {
+      return enumGoals.get(goalName);
     } else {
-      if (enumGoals.containsKey(goalName)) {
-        return enumGoals.get(goalName);
-      } else {
-        return null;
-      }
+      return null;
     }
   }
 
   @Override
   public double getRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return Double.NaN;
+    if (simpleGoals.containsKey(goalName)) {
+      return simpleGoals.get(goalName);
     } else {
-      if (simpleGoals.containsKey(goalName)) {
-        return simpleGoals.get(goalName);
-      } else {
-        return Double.NaN;
-      }
+      return Double.NaN;
     }
   }
 
@@ -98,11 +90,6 @@ public class DummyTeamScore extends TeamScore {
 
   @Override
   public boolean isVerified() {
-    return true;
-  }
-
-  @Override
-  public boolean scoreExists() {
     return true;
   }
 

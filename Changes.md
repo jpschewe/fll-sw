@@ -1,3 +1,4 @@
+* #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
 
 Release 20.0.1

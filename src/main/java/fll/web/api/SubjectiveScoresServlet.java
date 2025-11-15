@@ -40,7 +40,6 @@ import fll.web.AuthenticationContext;
 import fll.web.SessionAttributes;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -383,7 +382,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
                                      final String categoryName,
-                                     final ScoreCategory categoryElement)
+                                     final SubjectiveScoreCategory categoryElement)
       throws SQLException {
     final List<AbstractGoal> goalDescriptions = categoryElement.getAllGoals();
 
