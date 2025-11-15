@@ -24,7 +24,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * A switch statement in the challenge description.
  */
-public class SwitchStatement implements Evaluatable, CaseStatementResult, Serializable {
+public class SwitchStatement implements Evaluatable<TeamScore>, CaseStatementResult, Serializable {
 
   /**
    * XML tag for the switch statement.

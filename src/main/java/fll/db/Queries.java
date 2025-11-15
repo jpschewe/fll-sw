@@ -40,10 +40,10 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.TournamentData;
 import fll.web.playoff.BracketUpdate;
-import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.DatabasePerformanceTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.web.playoff.Playoff;
-import fll.web.playoff.TeamScore;
 import fll.web.scoreEntry.PerformanceRunsEndpoint;
 import fll.web.scoreboard.ScoreboardUpdates;
 import fll.xml.AbstractGoal;
@@ -354,7 +354,7 @@ public final class Queries {
                                             final ChallengeDescription description,
                                             final Tournament tournament,
                                             final boolean verified,
-                                            final TeamScore teamScore)
+                                            final PerformanceTeamScore teamScore)
       throws SQLException, ParseException {
     final WinnerType winnerCriteria = description.getWinner();
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -488,7 +488,7 @@ public final class Queries {
                                            final ChallengeDescription description,
                                            final Connection connection,
                                            final DataSource datasource,
-                                           final TeamScore teamScore)
+                                           final PerformanceTeamScore teamScore)
       throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
@@ -497,9 +497,10 @@ public final class Queries {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
-    final @Nullable TeamScore prevTeamScore = DatabaseTeamScore.fetchTeamScore(currentTournament,
-                                                                               teamScore.getTeamNumber(),
-                                                                               teamScore.getRunNumber(), connection);
+    final @Nullable PerformanceTeamScore prevTeamScore = DatabasePerformanceTeamScore.fetchTeamScore(currentTournament,
+                                                                                                     teamScore.getTeamNumber(),
+                                                                                                     teamScore.getRunNumber(),
+                                                                                                     connection);
     if (null == prevTeamScore) {
       throw new FLLInternalException(String.format("Unable to find performance score. Team %d Tournament %s",
                                                    teamScore.getTeamNumber(), tournament.getName()));

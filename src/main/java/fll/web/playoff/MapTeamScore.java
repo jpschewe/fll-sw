@@ -14,7 +14,7 @@ import fll.util.FLLInternalException;
 /**
  * A team score in a Map containing strings from form data from the web.
  */
-public final class MapTeamScore extends BaseTeamScore {
+public final class MapTeamScore extends BasePerformanceTeamScore {
 
   /**
    * @param teamNumber {@link #getTeamNumber()}
@@ -69,11 +69,7 @@ public final class MapTeamScore extends BaseTeamScore {
 
   @Override
   public boolean isVerified() {
-    if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
-      return false;
-    } else {
-      return getBoolean("Verified");
-    }
+    return getBoolean("Verified");
   }
 
   private final Map<String, String> map;

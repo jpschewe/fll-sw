@@ -64,7 +64,6 @@ import fll.util.FLLRuntimeException;
 import fll.web.TournamentData;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -603,8 +602,8 @@ public class TournamentSchedule implements Serializable {
                                      final String dir,
                                      final String baseFileName,
                                      final ChallengeDescription description,
-                                     final Map<ScoreCategory, Collection<String>> categoryToSchedule,
-                                     final Map<ScoreCategory, @Nullable String> filenameSuffixes)
+                                     final Map<SubjectiveScoreCategory, Collection<String>> categoryToSchedule,
+                                     final Map<SubjectiveScoreCategory, @Nullable String> filenameSuffixes)
       throws IOException {
 
     // setup the sheets from the sucked in xml

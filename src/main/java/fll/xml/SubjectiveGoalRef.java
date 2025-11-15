@@ -20,7 +20,7 @@ import fll.web.playoff.TeamScore;
 /**
  * Reference to a goal in another score category.
  */
-public class SubjectiveGoalRef implements Evaluatable, Serializable {
+public class SubjectiveGoalRef implements Evaluatable<TeamScore>, Serializable {
 
   /**
    * XML tag name used for this class.

@@ -24,7 +24,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Term in a polynomial.
  */
-public class Term extends Object implements Evaluatable, Serializable {
+public class Term extends Object implements Evaluatable<TeamScore>, Serializable {
 
   /**
    * XML tag for the term element.

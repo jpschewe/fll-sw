@@ -26,7 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
-import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.DatabasePerformanceTeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 
@@ -73,7 +74,7 @@ public class TestComputedScores {
             assertNotNull(rs, "Error getting performance scores");
             assertTrue(rs.next(), "No scores found");
 
-            final DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, runNumber, rs);
+            final PerformanceTeamScore score = new DatabasePerformanceTeamScore(teamNumber, runNumber, rs);
             final double computedTotal = performanceElement.evaluate(score);
             assertEquals(expectedTotal, computedTotal, 0D);
           } // result set

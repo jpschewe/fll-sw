@@ -58,6 +58,7 @@ import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.TeamScore;
 import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
@@ -1341,7 +1342,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static boolean checkZeroInRequiredGoal(final Connection connection,
                                                 final Tournament tournament,
-                                                final ScoreCategory category,
+                                                final ScoreCategory<? extends TeamScore> category,
                                                 final int teamNumber)
       throws SQLException {
     final Set<Goal> requiredGoals = category.getAllGoals().stream().filter(g -> g instanceof Goal).map(g -> (Goal) g)

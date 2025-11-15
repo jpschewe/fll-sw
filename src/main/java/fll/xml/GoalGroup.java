@@ -73,8 +73,7 @@ public class GoalGroup extends GoalElement {
    */
   @Override
   public double evaluate(final TeamScore teamScore) {
-    if (teamScore.isNoShow()
-        || teamScore.isBye()) {
+    if (teamScore.isNoShow()) {
       return 0D;
     }
 

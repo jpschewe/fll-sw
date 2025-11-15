@@ -30,39 +30,6 @@ public interface TeamScore {
   boolean isNoShow();
 
   /**
-   * Is this score a bye?
-   *
-   * @return true if this score is a no show
-   */
-  boolean isBye();
-
-  /**
-   * Is the score verified.
-   * 
-   * @return true if this score has been verified
-   */
-  @SideEffectFree
-  boolean isVerified();
-
-  /**
-   * When the score is entered from a tablet where the table is known, this has
-   * the table name, otherwise the value is "ALL" meaning that the person entering
-   * the score has "all tables" selected.
-   * 
-   * @return the table that the score was entered from.
-   */
-  @SideEffectFree
-  String getTable();
-
-  /**
-   * What run do these scores apply to?
-   * 
-   * @return the run for the scores
-   */
-  @SideEffectFree
-  int getRunNumber();
-
-  /**
    * The raw score for a particular simple goal, as a double.
    *
    * @param goalName the goal to get the score for
