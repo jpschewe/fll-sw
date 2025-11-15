@@ -23,7 +23,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Polynomial that references goals.
  */
-public class BasicPolynomial implements Evaluatable, CaseStatementResult, Serializable {
+public class BasicPolynomial implements Evaluatable<TeamScore>, CaseStatementResult, Serializable {
 
   /**
    * XML attribute for storing the {@link #getFloatingPoint()} data.

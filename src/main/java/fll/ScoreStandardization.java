@@ -22,10 +22,11 @@ import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.TournamentData;
+import fll.web.playoff.DatabasePerformanceTeamScore;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
@@ -226,7 +227,7 @@ public final class ScoreStandardization {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
     final Map<String, Double> categoryWeights = new HashMap<>();
-    final ScoreCategory performanceCategory = description.getPerformance();
+    final PerformanceScoreCategory performanceCategory = description.getPerformance();
     categoryWeights.put(performanceCategory.getName(), performanceCategory.getWeight());
 
     description.getSubjectiveCategories().forEach(cat -> categoryWeights.put(cat.getName(), cat.getWeight()));
@@ -390,7 +391,7 @@ public final class ScoreStandardization {
             final int runNumber = rs.getInt("RunNumber");
             final double computedTotal;
 
-            final DatabaseTeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
+            final PerformanceTeamScore teamScore = new DatabasePerformanceTeamScore(teamNumber, runNumber, rs);
             if (teamScore.isNoShow()) {
               computedTotal = Double.NaN;
             } else {

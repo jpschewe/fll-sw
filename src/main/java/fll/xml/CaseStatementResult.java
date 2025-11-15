@@ -6,10 +6,12 @@
 
 package fll.xml;
 
+import fll.web.playoff.TeamScore;
+
 /**
  * Common interface for {@link CaseStatement#getResult()}.
  */
-public interface CaseStatementResult extends Evaluatable {
+public interface CaseStatementResult extends Evaluatable<TeamScore> {
 
   /**
    * @return score type for the result

@@ -43,6 +43,7 @@ import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.FLLInternalException;
 import fll.util.FP;
+import fll.web.playoff.TeamScore;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.web.report.awards.HeadToHeadCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -645,7 +646,7 @@ public final class ChallengeParser {
   /**
    * Get the column definitions for all goals in the specified element
    */
-  private static Map<String, String> gatherColumnDefinitions(final ScoreCategory element) {
+  private static Map<String, String> gatherColumnDefinitions(final ScoreCategory<? extends TeamScore> element) {
     final Map<String, String> goalDefs = new HashMap<>();
 
     for (final AbstractGoal goal : element.getAllGoals()) {

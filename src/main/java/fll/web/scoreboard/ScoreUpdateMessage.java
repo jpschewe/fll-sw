@@ -8,7 +8,7 @@ package fll.web.scoreboard;
 
 import fll.TournamentTeam;
 import fll.db.RunMetadata;
-import fll.web.playoff.TeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 
 /**
  * Message sent to the client for a new score.
@@ -26,7 +26,7 @@ import fll.web.playoff.TeamScore;
   ScoreUpdateMessage(final TournamentTeam team,
                      final double score,
                      final String formattedScore,
-                     final TeamScore teamScore,
+                     final PerformanceTeamScore teamScore,
                      final RunMetadata runMetadata) {
     super(Message.MessageType.UPDATE);
     this.team = team;

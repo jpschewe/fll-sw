@@ -19,14 +19,14 @@ import org.w3c.dom.NodeList;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Utilities;
-import fll.web.playoff.TeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Description of the performance.
  */
-public class PerformanceScoreCategory extends ScoreCategory implements AwardCategory {
+public class PerformanceScoreCategory extends ScoreCategory<PerformanceTeamScore> implements AwardCategory {
 
   /**
    * Category name for {@link #getName()}.
@@ -235,7 +235,11 @@ public class PerformanceScoreCategory extends ScoreCategory implements AwardCate
   }
 
   @Override
-  public double evaluate(final TeamScore teamScore) {
+  public double evaluate(final PerformanceTeamScore teamScore) {
+    if (teamScore.isBye()) {
+      return 0D;
+    }
+
     final double score = super.evaluate(teamScore);
     if (score < mMinimumScore
         && !teamScore.isNoShow()

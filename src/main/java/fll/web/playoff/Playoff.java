@@ -175,11 +175,13 @@ public final class Playoff {
                                           final WinnerType winnerCriteria,
                                           final Team teamA,
                                           final Team teamB,
-                                          final TeamScore teamBScore,
+                                          final PerformanceTeamScore teamBScore,
                                           final int runNumber)
       throws SQLException {
-    final @Nullable TeamScore teamAScore = DatabaseTeamScore.fetchTeamScore(tournament, teamA.getTeamNumber(),
-                                                                            runNumber, connection);
+    final @Nullable PerformanceTeamScore teamAScore = DatabasePerformanceTeamScore.fetchTeamScore(tournament,
+                                                                                                  teamA.getTeamNumber(),
+                                                                                                  runNumber,
+                                                                                                  connection);
     if (null == teamAScore) {
       return null;
     }
@@ -198,9 +200,9 @@ public final class Playoff {
                                            final List<TiebreakerTest> tiebreakerElement,
                                            final WinnerType winnerCriteria,
                                            final Team teamA,
-                                           final TeamScore teamAScore,
+                                           final PerformanceTeamScore teamAScore,
                                            final Team teamB,
-                                           final TeamScore teamBScore) {
+                                           final PerformanceTeamScore teamBScore) {
 
     // teamA can actually be a bye here in the degenerate case of a 3-team
     // tournament with 3rd/4th place brackets enabled...
@@ -1506,26 +1508,26 @@ public final class Playoff {
           + " found that it's already finished, skipping");
       return;
     } else if (teamAscoreExists) {
-      final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
-                                                      enumGoals, true, false);
+      final PerformanceTeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter,
+                                                                 simpleGoals, enumGoals, true, false);
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamBscore);
 
     } else if (teamBscoreExists) {
-      final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
-                                                      enumGoals, true, false);
+      final PerformanceTeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter,
+                                                                 simpleGoals, enumGoals, true, false);
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamAscore);
     } else {
       // initial value score
-      final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
-                                                      enumGoals, false, false);
+      final PerformanceTeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter,
+                                                                 simpleGoals, enumGoals, false, false);
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamAscore);
 
       // no show
-      final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
-                                                      enumGoals, true, false);
+      final PerformanceTeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter,
+                                                                 simpleGoals, enumGoals, true, false);
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamBscore);
     }
@@ -1726,7 +1728,7 @@ public final class Playoff {
                                         final List<TiebreakerTest> tiebreakerElement,
                                         final int teamNumber,
                                         final int runNumber,
-                                        final TeamScore teamScore)
+                                        final PerformanceTeamScore teamScore)
       throws SQLException, ParseException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Updating playoff score for team: "

@@ -33,6 +33,7 @@ import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FormatterUtils;
 import fll.util.GuiUtils;
+import fll.web.playoff.TeamScore;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
@@ -42,6 +43,7 @@ import fll.xml.ComplexPolynomial;
 import fll.xml.ComputedGoal;
 import fll.xml.ConditionStatement;
 import fll.xml.EnumConditionStatement;
+import fll.xml.Evaluatable;
 import fll.xml.Goal;
 import fll.xml.GoalElement;
 import fll.xml.GoalGroup;
@@ -60,8 +62,10 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
 /**
  * Editor for {@link ScoreCategory} objects.
+ * 
+ * @param <TS> side effect of {@link Evaluatable} being a generic class.
  */
-public abstract class ScoreCategoryEditor extends Box implements Validatable {
+public abstract class ScoreCategoryEditor<TS extends TeamScore> extends Box implements Validatable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -71,7 +75,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
 
   private final Box mGoalEditorContainer;
 
-  private final ScoreCategory mCategory;
+  private final ScoreCategory<TS> mCategory;
 
   private final GoalEventListener goalEventListener;
 
@@ -80,7 +84,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
   /**
    * @param scoreCategory the object to edit
    */
-  public ScoreCategoryEditor(final ScoreCategory scoreCategory) {
+  public ScoreCategoryEditor(final ScoreCategory<TS> scoreCategory) {
     super(BoxLayout.PAGE_AXIS);
 
     mCategory = scoreCategory;
@@ -139,11 +143,11 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
   /**
    * @return the category being edited
    */
-  public ScoreCategory getCategory() {
+  public ScoreCategory<TS> getCategory() {
     return mCategory;
   }
 
-  private void addNewGoal(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this) {
+  private void addNewGoal(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor<TS> this) {
     final String name = String.format("goal_%d", mCategory.getGoalElements().size());
     final String title = String.format("Goal %d", mCategory.getGoalElements().size());
     final Goal newGoal = new Goal(name);
@@ -152,7 +156,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     addGoalElement(newGoal);
   }
 
-  private void addNewComputedGoal(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this) {
+  private void addNewComputedGoal(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor<TS> this) {
     final String name = String.format("goal_%d", mCategory.getGoalElements().size());
     final String title = String.format("Goal %d", mCategory.getGoalElements().size());
     final ComputedGoal newGoal = new ComputedGoal(name, mCategory);
@@ -161,7 +165,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     addGoalElement(newGoal);
   }
 
-  private void addNewGoalGroup(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this) {
+  private void addNewGoalGroup(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor<TS> this) {
     final GoalGroup group = new GoalGroup();
     final String title = String.format("Group %d", mCategory.getGoalElements().size());
     group.setTitle(title);
@@ -169,7 +173,7 @@ public abstract class ScoreCategoryEditor extends Box implements Validatable {
     addGoalElement(group);
   }
 
-  private void addGoalElement(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor this,
+  private void addGoalElement(@UnknownInitialization(ScoreCategoryEditor.class) ScoreCategoryEditor<TS> this,
                               final GoalElement ge) {
 
     final GoalElementEditor editor;
