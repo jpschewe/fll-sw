@@ -273,7 +273,7 @@ public final class PerformanceRunsVsSchedule {
     private String table;
 
     /**
-     * @return {@link TeamScore#getTable()}
+     * @return {@link PerformanceTeamScore#getTable()}
      */
     public String getTable() {
       return table;
