@@ -19,7 +19,7 @@ public class DefaultPerformanceTeamScore extends BasePerformanceTeamScore {
   /**
    * Sets {@link #isNoShow()} and {@link #isBye()} to {@code false} and
    * {@link #getTable()} to {@link PerformanceTeamScore#ALL_TABLE} and
-   * {@link #isVerified()} to {@code true}
+   * {@link #isVerified()} to {@code true}.
    * 
    * @param teamNumber the team number the score is for
    * @param runNumber the run number the score is for
