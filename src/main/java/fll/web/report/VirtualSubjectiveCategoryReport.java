@@ -34,6 +34,8 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -44,7 +46,6 @@ import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
-import fll.web.api.SubjectiveScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;
@@ -144,10 +145,10 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
 
     teams.values().stream().sorted(Comparator.comparing(TournamentTeam::getJudgingGroup)).forEach(team -> {
       try {
-        final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores = getReferencedScores(connection,
-                                                                                                               tournament,
-                                                                                                               referencedCategories,
-                                                                                                               team);
+        final Map<SubjectiveScoreCategory, Collection<SubjectiveTeamScore>> referencedScores = getReferencedScores(connection,
+                                                                                                                   tournament,
+                                                                                                                   referencedCategories,
+                                                                                                                   team);
         final Element ele = generateTeamTable(document, team, category, referencedScores);
 
         documentBody.appendChild(ele);
@@ -167,11 +168,11 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
   private static Element generateTeamTable(final Document document,
                                            final TournamentTeam team,
                                            final VirtualSubjectiveScoreCategory category,
-                                           final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores)
+                                           final Map<SubjectiveScoreCategory, Collection<SubjectiveTeamScore>> referencedScores)
       throws SQLException {
 
     final List<String> judges = referencedScores.values().stream().flatMap(Collection::stream)
-                                                .map(SubjectiveScore::getJudge).distinct().sorted().toList();
+                                                .map(SubjectiveTeamScore::getJudge).distinct().sorted().toList();
 
     final Element teamTable = FOPUtils.createBasicTable(document);
 
@@ -227,18 +228,18 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
       goalCell.setAttribute("padding-right", SIDE_PADDING);
 
       final SubjectiveScoreCategory referencedCategory = goalRef.getCategory();
-      final Collection<SubjectiveScore> scores = referencedScores.getOrDefault(referencedCategory,
-                                                                               Collections.emptyList());
+      final Collection<SubjectiveTeamScore> scores = referencedScores.getOrDefault(referencedCategory,
+                                                                                   Collections.emptyList());
       final NumberFormat referencedCategoryScoreFormatter = Utilities.getFormatForScoreType(referencedCategory.getScoreType());
       int scoresCount = 0;
       double scoresSum = 0;
       for (final String judge : judges) {
-        final Optional<SubjectiveScore> score = scores.stream().filter(s -> s.getJudge().equals(judge)).findAny();
+        final Optional<SubjectiveTeamScore> score = scores.stream().filter(s -> s.getJudge().equals(judge)).findAny();
 
         final String formattedScore;
         if (score.isPresent()) {
-          if (!score.get().getNoShow()) {
-            final double rawScore = score.get().getStandardSubScores().getOrDefault(goalRef.getGoal().getName(), 0D);
+          if (!score.get().isNoShow()) {
+            final double rawScore = score.get().getRawScore(goalRef.getGoal().getName());
             ++scoresCount;
             scoresSum += rawScore;
 
@@ -300,15 +301,16 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
     return category.getGoalReferences().stream().map(SubjectiveGoalRef::getCategory).collect(Collectors.toSet());
   }
 
-  private static Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> getReferencedScores(final Connection connection,
-                                                                                               final Tournament tournament,
-                                                                                               final Set<SubjectiveScoreCategory> referencedCategories,
-                                                                                               final Team team)
+  private static Map<SubjectiveScoreCategory, Collection<SubjectiveTeamScore>> getReferencedScores(final Connection connection,
+                                                                                                   final Tournament tournament,
+                                                                                                   final Set<SubjectiveScoreCategory> referencedCategories,
+                                                                                                   final Team team)
       throws SQLException {
-    final Map<SubjectiveScoreCategory, Collection<SubjectiveScore>> referencedScores = new HashMap<>();
+    final Map<SubjectiveScoreCategory, Collection<SubjectiveTeamScore>> referencedScores = new HashMap<>();
     for (final SubjectiveScoreCategory referencedCategory : referencedCategories) {
-      final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, referencedCategory,
-                                                                                  tournament, team);
+      final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForTeam(connection,
+                                                                                                 referencedCategory,
+                                                                                                 tournament, team);
       referencedScores.put(referencedCategory, scores);
     }
     return referencedScores;

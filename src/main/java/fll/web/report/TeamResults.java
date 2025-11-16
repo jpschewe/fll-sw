@@ -29,6 +29,8 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
+import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
@@ -37,7 +39,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
-import fll.web.api.SubjectiveScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
@@ -85,7 +86,8 @@ public class TeamResults extends BaseFLLServlet {
         // go for speed and not compression
         zipOut.setLevel(Deflater.NO_COMPRESSION);
 
-        // if a team number is specified, only write that team, otherwise write all teams (NULL_TEAM_NUMBER)
+        // if a team number is specified, only write that team, otherwise write all
+        // teams (NULL_TEAM_NUMBER)
         for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
           final TournamentTeam team = entry.getValue();
           if (Team.NULL_TEAM_NUMBER == selectedTeamNumber
@@ -110,8 +112,8 @@ public class TeamResults extends BaseFLLServlet {
     final String directory = String.valueOf(team.getTeamNumber());
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, category, tournament,
-                                                                                  team);
+      final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForTeam(connection, category, tournament,
+                                                                                      team);
       final String filename = String.format("%s/%s_%s.pdf", directory, directory, category.getTitle());
 
       zipOut.putNextEntry(new ZipEntry(filename));

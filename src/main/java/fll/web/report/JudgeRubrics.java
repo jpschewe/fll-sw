@@ -21,6 +21,8 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
+import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -29,7 +31,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
-import fll.web.api.SubjectiveScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
@@ -83,10 +84,11 @@ public class JudgeRubrics extends BaseFLLServlet {
                                                 .values()) {
           final String directory = String.valueOf(team.getTeamNumber());
 
-          final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, category, tournament,
-                                                                                      team)
-                                                                    .stream().filter(s -> s.getJudge().equals(judge))
-                                                                    .toList();
+          final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForTeamAndJudge(connection,
+                                                                                                             category,
+                                                                                                             tournament,
+                                                                                                             team,
+                                                                                                             judge);
           if (!scores.isEmpty()) {
             final String filename = String.format("%s/%s.pdf", directory, category.getTitle());
             zipOut.putNextEntry(new ZipEntry(filename));
