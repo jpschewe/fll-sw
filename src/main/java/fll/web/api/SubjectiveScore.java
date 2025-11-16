@@ -287,43 +287,6 @@ public class SubjectiveScore {
   }
 
   /**
-   * Load the scores for a team from the database.
-   * 
-   * @param connection the database connection
-   * @param category the subjective score category to load the scores for
-   * @param tournament the tournament
-   * @param team the team
-   * @return the scores found on the server, possibly an empty list
-   * @throws SQLException if there is a problem talking to the database
-   */
-  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Table name is determined by the category")
-  public static Collection<SubjectiveScore> getScoresForTeam(final Connection connection,
-                                                             final SubjectiveScoreCategory category,
-                                                             final Tournament tournament,
-                                                             final Team team)
-      throws SQLException {
-    final Collection<SubjectiveScore> scores = new LinkedList<>();
-
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + category.getName()
-        + " WHERE Tournament = ? AND teamnumber = ?")) {
-      prep.setInt(1, tournament.getTournamentID());
-      prep.setInt(2, team.getTeamNumber());
-
-      try (ResultSet rs = prep.executeQuery()) {
-        while (rs.next()) {
-          final SubjectiveScore score = fromResultSet(connection, category, tournament, rs);
-
-          scores.add(score);
-        } // foreach result
-
-      } // allocate result set
-    } // allocate prep
-
-    return scores;
-  }
-
-  /**
    * Populate a {@link SubjectiveScore} object from the specified database result.
    * One needs to select all columns from the category table for this method to
    * work properly.
@@ -384,52 +347,6 @@ public class SubjectiveScore {
                                                                                          score.getTeamNumber());
     score.setNonNumericNominations(nominatedCategories);
     return score;
-  }
-
-  /**
-   * Get subjective scores for all teams in the specified award group and
-   * category.
-   * 
-   * @param connection database connection
-   * @param tournament tournament to get the scores for
-   * @param category the category to get the scores for
-   * @param awardGroup the award group to get the scores for
-   * @return the subjective scores
-   * @throws SQLException on a database error
-   */
-  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Table name is determined by the category")
-  public static Collection<SubjectiveScore> getScoresForCategoryAndAwardGroup(final Connection connection,
-                                                                              final Tournament tournament,
-                                                                              final SubjectiveScoreCategory category,
-                                                                              final String awardGroup)
-      throws SQLException {
-    final Collection<SubjectiveScore> scores = new LinkedList<>();
-
-    final String teamNumbersStr = Queries.getTournamentTeams(connection, tournament.getTournamentID())//
-                                         .entrySet().stream() //
-                                         .map(Map.Entry::getValue) //
-                                         .filter(t -> t.getAwardGroup().equals(awardGroup)) //
-                                         .map(t -> String.valueOf(t.getTeamNumber())) //
-                                         .collect(Collectors.joining(", "));
-
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + category.getName()
-        + " WHERE Tournament = ? AND teamnumber IN ( "
-        + teamNumbersStr
-        + " )")) {
-      prep.setInt(1, tournament.getTournamentID());
-
-      try (ResultSet rs = prep.executeQuery()) {
-        while (rs.next()) {
-          final SubjectiveScore score = fromResultSet(connection, category, tournament, rs);
-
-          scores.add(score);
-        } // foreach result
-
-      } // allocate result set
-    } // allocate prep
-
-    return scores;
   }
 
 }
