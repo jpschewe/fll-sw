@@ -2,7 +2,7 @@
  * This code is released under GPL; see LICENSE for details.
  */
 
-package fll.web.playoff;
+package fll.scores;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -10,7 +10,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 /**
  * Base implementation of {@link PerformanceTeamScore}.
  */
-public abstract class BasePerformanceTeamScore extends BaseTeamScore implements PerformanceTeamScore {
+/* package */ abstract class BasePerformanceTeamScore extends BaseTeamScore implements PerformanceTeamScore {
 
   /**
    * @param teamNumber see {@link #getTeamNumber()}

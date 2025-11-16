@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.playoff;
+package fll.scores;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

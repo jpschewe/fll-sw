@@ -2,7 +2,7 @@
  * This code is released under GPL; see LICENSE for details.
  */
 
-package fll.web.playoff;
+package fll.scores;
 
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
@@ -10,6 +10,11 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
  * Represents a performance score.
  */
 public interface PerformanceTeamScore extends TeamScore {
+
+  /**
+   * Value used for ALL tables, no particular table set.
+   */
+  public static final String ALL_TABLE = "ALL";
 
   /**
    * Is this score a bye?
@@ -29,7 +34,8 @@ public interface PerformanceTeamScore extends TeamScore {
 
   /**
    * When the score is entered from a tablet where the table is known, this has
-   * the table name, otherwise the value is "ALL" meaning that the person entering
+   * the table name, otherwise the value is {@link #ALL_TABLE} meaning that the
+   * person entering
    * the score has "all tables" selected.
    * 
    * @return the table that the score was entered from.

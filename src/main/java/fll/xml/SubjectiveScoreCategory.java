@@ -17,7 +17,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 

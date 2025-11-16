@@ -22,7 +22,8 @@ import org.junit.jupiter.api.Test;
 
 import fll.Team;
 import fll.db.GlobalParameters;
-import fll.util.DummyTeamScore;
+import fll.scores.DefaultPerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 
 /**
@@ -82,7 +83,7 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
 
     Playoff.populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
 
-    final PerformanceTeamScore teamScore = new DummyTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1, simpleGoals,
+    final PerformanceTeamScore teamScore = new DefaultPerformanceTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1, simpleGoals,
                                                               enumGoals);
 
     challenge.getPerformance().evaluate(teamScore);

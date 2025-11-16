@@ -2,7 +2,7 @@
  * This code is released under GPL; see LICENSE for details.
  */
 
-package fll.web.playoff;
+package fll.scores;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

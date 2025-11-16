@@ -1,7 +1,7 @@
 /*
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.playoff;
+package fll.scores;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -9,7 +9,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 /**
  * Represents a score for a team.
  */
-public abstract class BaseTeamScore implements TeamScore {
+/* package */ abstract class BaseTeamScore implements TeamScore {
 
   /**
    * Create a non-performance TeamScore for the specified team.

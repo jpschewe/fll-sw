@@ -26,8 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
-import fll.web.playoff.DatabasePerformanceTeamScore;
-import fll.web.playoff.PerformanceTeamScore;
+import fll.scores.DatabasePerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 

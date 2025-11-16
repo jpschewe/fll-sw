@@ -19,7 +19,7 @@ import org.w3c.dom.NodeList;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.Utilities;
-import fll.web.playoff.PerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
