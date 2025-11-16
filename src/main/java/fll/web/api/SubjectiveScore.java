@@ -272,7 +272,7 @@ public class SubjectiveScore {
   private final Set<String> nonNumericNominations = new HashSet<>();
 
   /**
-   * @return unmodifiable list of {@link NonNumericCategory#getTitle()}
+   * @return unmodifiable set of {@link NonNumericCategory#getTitle()}
    */
   public Set<String> getNonNumericNominations() {
     return Collections.unmodifiableSet(nonNumericNominations);
