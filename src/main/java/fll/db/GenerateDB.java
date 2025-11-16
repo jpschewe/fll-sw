@@ -386,6 +386,7 @@ public final class GenerateDB {
       if (createConstraints) {
         countSql.append(", CONSTRAINT performance_goals_fk1 FOREIGN KEY(tournament_id, team_number, run_number) REFERENCES Performance(Tournament, TeamNumber, RunNumber) ON DELETE CASCADE");
       }
+      countSql.append(")");
       stmt.executeUpdate(countSql.toString());
 
       final StringBuilder enumSql = new StringBuilder();
@@ -399,6 +400,7 @@ public final class GenerateDB {
       if (createConstraints) {
         enumSql.append(", CONSTRAINT performance_enum_goals_fk1 FOREIGN KEY(tournament_id, team_number, run_number) REFERENCES Performance(Tournament, TeamNumber, RunNumber) ON DELETE CASCADE");
       }
+      enumSql.append(")");
       stmt.executeUpdate(enumSql.toString());
     }
   }
