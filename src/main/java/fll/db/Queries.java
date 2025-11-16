@@ -386,6 +386,7 @@ public final class Queries {
       insert.setBoolean(6, teamScore.isBye());
       insert.setBoolean(7, teamScore.isVerified());
       insert.setDouble(8, score);
+      insert.executeUpdate();
 
       if (!teamScore.isNoShow()
           && !teamScore.isBye()) {
