@@ -23,7 +23,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
    * @param enumGoals the enum goal values
    * @param noShow true if this is a no show
    */
-  public DefaultTeamScore(final int teamNumber,
+  DefaultTeamScore(final int teamNumber,
                           final Map<String, Double> simpleGoals,
                           final Map<String, String> enumGoals,
                           final boolean noShow) {
