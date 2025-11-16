@@ -417,6 +417,8 @@ public final class Queries {
           } // !computed
         } // foreach goal
       }
+
+      connection.commit();
     } catch (final SQLException e) {
       connection.rollback();
       throw e;
@@ -593,6 +595,8 @@ public final class Queries {
         deleteEnumGoals.setInt(3, runNumber);
         deleteEnumGoals.executeUpdate();
       }
+
+      connection.commit();
     } catch (final SQLException e) {
       connection.rollback();
       throw e;
