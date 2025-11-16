@@ -22,14 +22,15 @@ import fll.db.GenerateDB;
  */
 public final class DatabasePerformanceTeamScore {
 
-  private DatabasePerformanceTeamScore() {}
-  
+  private DatabasePerformanceTeamScore() {
+  }
+
   /**
    * Create a database team score object for a performance score.
    * 
    * @param tournament the tournament ID
-   * @param teamNumber see {@link #getTeamNumber()}
-   * @param runNumber see {@link #getRunNumber()}
+   * @param teamNumber see {@link TeamScore#getTeamNumber()}
+   * @param runNumber see {@link PerformanceTeamScore#getRunNumber()}
    * @param connection the connection to get the data from
    * @return the {@link PerformanceTeamScore} or {@code null} if no score exists
    *         matching the
