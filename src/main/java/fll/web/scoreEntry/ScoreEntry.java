@@ -8,8 +8,6 @@ package fll.web.scoreEntry;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collection;
@@ -21,12 +19,15 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.RunMetadata;
+import fll.scores.DatabasePerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
@@ -1093,69 +1094,64 @@ public final class ScoreEntry {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    try (Connection connection = datasource.getConnection();
-        PreparedStatement prep = connection.prepareStatement("SELECT * from Performance"
-            + " WHERE TeamNumber = ?" //
-            + " AND RunNumber = ?"//
-            + " AND Tournament = ?")) {
+    try (Connection connection = datasource.getConnection()) {
       final int tournament = Queries.getCurrentTournament(connection);
 
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, runNumber);
-      prep.setInt(3, tournament);
+      final @Nullable PerformanceTeamScore teamScore = DatabasePerformanceTeamScore.fetchTeamScore(tournament,
+                                                                                                   teamNumber,
+                                                                                                   runNumber,
+                                                                                                   connection);
+      if (null == teamScore) {
+        throw new FLLInternalException("Cannot find score for TeamNumber and RunNumber."
+            + " TeamNumber: "
+            + teamNumber
+            + " RunNumber: "
+            + runNumber);
+      }
 
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          final PerformanceScoreCategory performanceElement = description.getPerformance();
-          for (final AbstractGoal element : performanceElement.getAllGoals()) {
-            if (!element.isComputed()) {
-              final Goal goal = (Goal) element;
-              final String name = goal.getName();
-              final String rawVarName = getVarNameForRawScore(name);
+      final PerformanceScoreCategory performanceElement = description.getPerformance();
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final Goal goal = (Goal) element;
+          final String name = goal.getName();
+          final String rawVarName = getVarNameForRawScore(name);
 
-              if (goal.isEnumerated()) {
-                // enumerated
-                final String storedValue = rs.getString(name);
-                boolean found = false;
-                for (final EnumeratedValue valueElement : goal.getSortedValues()) {
-                  final String value = valueElement.getValue();
-                  if (value.equals(storedValue)) {
-                    writer.println("  "
-                        + rawVarName
-                        + " = \""
-                        + value
-                        + "\";");
-                    found = true;
-                  }
-                }
-                if (!found) {
-                  throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
-                      + name
-                      + " value: "
-                      + storedValue);
-                }
-              } else {
-                // just use the value that is stored in the database
+          if (goal.isEnumerated()) {
+            // enumerated
+            final String storedValue = teamScore.getEnumRawScore(name);
+            boolean found = false;
+            for (final EnumeratedValue valueElement : goal.getSortedValues()) {
+              final String value = valueElement.getValue();
+              if (value.equals(storedValue)) {
                 writer.println("  "
                     + rawVarName
-                    + " = "
-                    + rs.getString(name)
-                    + ";");
+                    + " = \""
+                    + value
+                    + "\";");
+                found = true;
               }
-            } // !computed
-          } // foreach goal
-          // Always init the special double-check column
-          writer.println("  Verified = "
-              + rs.getBoolean("Verified")
-              + ";");
-        } else {
-          throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
-              + " TeamNumber: "
-              + teamNumber
-              + " RunNumber: "
-              + runNumber);
-        }
-      }
+            }
+            if (!found) {
+              throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
+                  + name
+                  + " value: "
+                  + storedValue);
+            }
+          } else {
+            // just use the value that is stored in the database
+            writer.println("  "
+                + rawVarName
+                + " = "
+                + teamScore.getRawScore(name)
+                + ";");
+          }
+        } // !computed
+      } // foreach goal
+      // Always init the special double-check column
+
+      writer.println("  Verified = "
+          + teamScore.isVerified()
+          + ";");
     }
   }
 
