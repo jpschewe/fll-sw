@@ -834,6 +834,11 @@ public final class ImportDB {
       upgrade50to51(connection, createConstraints);
     }
 
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 52) {
+      upgrade51to52(connection, createConstraints, challengeDescription);
+    }
+
     // NOTE: when adding new tournament parameters they need to be explicitly set in
     // importTournamentParameters
 
@@ -1776,6 +1781,74 @@ public final class ImportDB {
   }
 
   /**
+   * Rework performance goal values into their own normalized tables.
+   */
+  private static void upgrade51to52(final Connection connection,
+                                    final boolean createConstraints,
+                                    final ChallengeDescription description)
+      throws SQLException {
+
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+
+    GenerateDB.createPerformanceGoalsTables(connection, createConstraints);
+
+    // reorganize the performance goal data
+    try (Statement stmt = connection.createStatement();
+        PreparedStatement goalInsert = connection.prepareStatement("INSERT INTO performance_goals (tournament_id, team_number, run_number, goal_name, goal_value) VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, team_number, run_number, goal_name, goal_value) VALUES(?, ?, ?, ?, ?)")) {
+
+      try (ResultSet rs = stmt.executeQuery("SELECT * FROM Performance")) {
+        while (rs.next()) {
+
+          final int tournamentId = rs.getInt("Tournament");
+          final int teamNumber = rs.getInt("TeamNumber");
+          final int runNumber = rs.getInt("RunNumber");
+          final boolean isNoShow = rs.getBoolean("NoShow");
+          final boolean isBye = rs.getBoolean("Bye");
+          if (!isNoShow
+              && !isBye) {
+            for (final AbstractGoal element : performanceElement.getAllGoals()) {
+              if (!element.isComputed()) {
+                final String name = element.getName();
+
+                if (element.isEnumerated()) {
+                  final String value = rs.getString(name);
+                  enumGoalInsert.setInt(1, tournamentId);
+                  enumGoalInsert.setInt(2, teamNumber);
+                  enumGoalInsert.setInt(3, runNumber);
+                  enumGoalInsert.setString(4, name);
+                  enumGoalInsert.setString(5, value);
+                  enumGoalInsert.executeUpdate();
+                } else {
+                  final double value = rs.getDouble(name);
+                  goalInsert.setInt(1, tournamentId);
+                  goalInsert.setInt(2, teamNumber);
+                  goalInsert.setInt(3, runNumber);
+                  goalInsert.setString(4, name);
+                  goalInsert.setDouble(5, value);
+                  goalInsert.executeUpdate();
+                }
+              } // !computed
+            } // foreach goal
+          } // has score
+
+        } // foreach score
+      } // result set
+
+      // delete the additional columns from Performance - needed for in-place database
+      // upgrades
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final String name = element.getName();
+          stmt.executeUpdate(String.format("ALTER TABLE Performance DROP COLUMN %s", name));
+        }
+      }
+    } // statements
+
+    setDBVersion(connection, 52);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -2217,7 +2290,7 @@ public final class ImportDB {
     }
 
     if (importPerformance) {
-      importPerformanceData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
+      importPerformanceData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     }
 
     if (importSubjective) {
@@ -2262,11 +2335,10 @@ public final class ImportDB {
 
   private static void importPerformanceData(final Connection sourceConnection,
                                             final Connection destinationConnection,
-                                            final ChallengeDescription description,
                                             final int sourceTournamentID,
                                             final int destTournamentID)
       throws SQLException {
-    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
+    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
@@ -2823,8 +2895,7 @@ public final class ImportDB {
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
-                                        final int destTournamentID,
-                                        final ChallengeDescription description)
+                                        final int destTournamentID)
       throws SQLException {
     LOGGER.debug("Importing performance run metadata");
     try (
@@ -2843,8 +2914,7 @@ public final class ImportDB {
     }
 
     LOGGER.debug("Importing performance scores");
-    final PerformanceScoreCategory performanceElement = description.getPerformance();
-    final String tableName = "Performance";
+    final String tableName = GenerateDB.PERFORMANCE_TABLE_NAME;
     try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
         + tableName
         + " WHERE Tournament = ?")) {
@@ -2856,25 +2926,67 @@ public final class ImportDB {
     columns.append(" Tournament,");
     columns.append(" TeamNumber,");
     columns.append(" RunNumber,");
-    // Note: If TimeStamp is no longer the 3rd element, then the hack below
-    // needs to be modified
     columns.append(" TimeStamp,");
-    final List<AbstractGoal> goals = performanceElement.getAllGoals();
-    int numColumns = 7;
-    for (final AbstractGoal element : goals) {
-      if (!element.isComputed()) {
-        columns.append(" "
-            + element.getName()
-            + ",");
-        ++numColumns;
-      }
-    }
     columns.append(" NoShow,");
     columns.append(" Bye,");
     columns.append(" Verified");
+    final int numColumns = 7;
 
     importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
                  sourceTournamentID);
+
+    importPerformanceGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importPerformanceEnumGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  private static void importPerformanceGoals(final Connection sourceConnection,
+                                             final Connection destinationConnection,
+                                             final int sourceTournamentID,
+                                             final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing performance_goals");
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance_goals WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, run_number, goal_name, goal_value "
+            + "FROM performance_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO performance_goals (tournament_id, team_number, run_number, goal_name, goal_value)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
+    } // prepared statements
+  }
+
+  private static void importPerformanceEnumGoals(final Connection sourceConnection,
+                                                 final Connection destinationConnection,
+                                                 final int sourceTournamentID,
+                                                 final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing performance_goals");
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance_enum_goals WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, run_number, goal_name, goal_value "
+            + "FROM performance_enum_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, team_number, run_number, goal_name, goal_value)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
+    } // prepared statements
   }
 
   /**

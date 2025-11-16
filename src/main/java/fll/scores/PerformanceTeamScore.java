@@ -14,7 +14,7 @@ public interface PerformanceTeamScore extends TeamScore {
   /**
    * Value used for ALL tables, no particular table set.
    */
-  public static final String ALL_TABLE = "ALL";
+  String ALL_TABLE = "ALL";
 
   /**
    * Is this score a bye?

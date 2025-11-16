@@ -22,6 +22,7 @@ import fll.db.Queries;
 import fll.scores.DatabasePerformanceTeamScore;
 import fll.scores.DatabaseTeamScore;
 import fll.scores.PerformanceTeamScore;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.TournamentData;
@@ -377,7 +378,7 @@ public final class ScoreStandardization {
       throws SQLException {
     try (
         PreparedStatement updatePrep = connection.prepareStatement("UPDATE Performance SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
-        PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ?")) {
+        PreparedStatement selectPrep = connection.prepareStatement("SELECT TeamNumber, RunNumber FROM Performance WHERE Tournament = ?")) {
 
       updatePrep.setInt(3, tournament);
       selectPrep.setInt(1, tournament);
@@ -386,12 +387,17 @@ public final class ScoreStandardization {
       final double minimumPerformanceScore = performanceElement.getMinimumScore();
       try (ResultSet rs = selectPrep.executeQuery()) {
         while (rs.next()) {
-          if (!rs.getBoolean("Bye")) {
-            final int teamNumber = rs.getInt("TeamNumber");
-            final int runNumber = rs.getInt("RunNumber");
-            final double computedTotal;
+          final int teamNumber = rs.getInt(1);
+          final int runNumber = rs.getInt(2);
+          final double computedTotal;
 
-            final PerformanceTeamScore teamScore = new DatabasePerformanceTeamScore(teamNumber, runNumber, rs);
+          final PerformanceTeamScore teamScore = DatabasePerformanceTeamScore.fetchTeamScore(tournament, teamNumber,
+                                                                                             runNumber, connection);
+          if (null == teamScore) {
+            throw new FLLInternalException(String.format("Unable to find score for tournament %d team %d run %d",
+                                                         tournament, teamNumber, runNumber));
+          }
+          if (!teamScore.isBye()) {
             if (teamScore.isNoShow()) {
               computedTotal = Double.NaN;
             } else {
@@ -415,7 +421,7 @@ public final class ScoreStandardization {
             updatePrep.setInt(2, teamNumber);
             updatePrep.setInt(4, runNumber);
             updatePrep.executeUpdate();
-          }
+          } // not bye
         }
       }
     }

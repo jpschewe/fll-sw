@@ -16,8 +16,8 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
    * @param teamNumber see {@link #getTeamNumber()}
    * @param runNumber see {@link #getRunNumber()}
    */
-  public BasePerformanceTeamScore(int teamNumber,
-                                  int runNumber) {
+  BasePerformanceTeamScore(final int teamNumber,
+                           final int runNumber) {
     super(teamNumber);
     this.runNumber = runNumber;
   }
@@ -45,7 +45,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
   /**
    * Implemented to return {@link Double#NaN} if {@link #isNoShow()} or
    * {@link #isBye()} returns
-   * {@code true}, otherwise return {@link #internalGetRawScore(String)}.
+   * {@code true}, otherwise return the value.
    */
   @Override
   @SideEffectFree
@@ -61,7 +61,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
   /**
    * Implemented to return {@code null} if {@link #isNoShow()} or {@link #isBye()}
    * returns
-   * {@code true}, otherwise return {@link #internalGetEnumRawScore(String)}.
+   * {@code true}, otherwise return the value.
    */
   @Override
   @SideEffectFree

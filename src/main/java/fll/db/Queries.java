@@ -360,75 +360,68 @@ public final class Queries {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
-    final StringBuffer columns = new StringBuffer();
-    final StringBuffer values = new StringBuffer();
     final double score = performanceElement.evaluate(teamScore);
+    final boolean autoCommit = connection.getAutoCommit();
 
-    columns.append("TeamNumber");
-    values.append(teamScore.getTeamNumber());
-    columns.append(", Tournament");
-    values.append(", "
-        + tournament.getTournamentID());
+    try (PreparedStatement insert = connection.prepareStatement("INSERT INTO Performance" //
+        + " (Tournament, TeamNumber, RunNumber, tablename, NoShow, Bye, Verified, ComputedTotal)" //
+        + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
-    columns.append(", ComputedTotal");
-    if (teamScore.isNoShow()
-        || teamScore.isBye()) {
-      values.append(", NULL");
-    } else {
-      values.append(", "
-          + score);
-    }
+        PreparedStatement insertGoal = connection.prepareStatement("INSERT INTO performance_goals" //
+            + " (tournament_id, team_number, run_number, goal_name, goal_value)" //
+            + " VALUES(?, ?, ?, ?, ?)");
 
-    columns.append(", RunNumber");
-    values.append(", "
-        + teamScore.getRunNumber());
+        PreparedStatement insertEnumGoal = connection.prepareStatement("INSERT INTO performance_enum_goals" //
+            + " (tournament_id, team_number, run_number, goal_name, goal_value)" //
+            + " VALUES(?, ?, ?, ?, ?)");
 
-    columns.append(", tablename");
-    values.append(", '"
-        + teamScore.getTable()
-        + "'");
+    ) {
+      connection.setAutoCommit(false);
 
-    // TODO: this should be reworked to use ? in the prepared statement
+      insert.setInt(1, tournament.getTournamentID());
+      insert.setInt(2, teamScore.getTeamNumber());
+      insert.setInt(3, teamScore.getRunNumber());
+      insert.setString(4, teamScore.getTable());
+      insert.setBoolean(5, teamScore.isNoShow());
+      insert.setBoolean(6, teamScore.isBye());
+      insert.setBoolean(7, teamScore.isVerified());
+      insert.setDouble(8, score);
 
-    columns.append(", NoShow");
-    values.append(", "
-        + (teamScore.isNoShow() ? "1" : "0"));
+      if (!teamScore.isNoShow()
+          && !teamScore.isBye()) {
 
-    columns.append(", Verified");
-    values.append(", "
-        + (verified ? "1" : "0"));
+        insertGoal.setInt(1, tournament.getTournamentID());
+        insertGoal.setInt(2, teamScore.getTeamNumber());
+        insertGoal.setInt(3, teamScore.getRunNumber());
 
-    if (!teamScore.isNoShow()
-        && !teamScore.isBye()) {
-      // now do each goal
-      for (final AbstractGoal element : performanceElement.getAllGoals()) {
-        if (!element.isComputed()) {
-          final String name = element.getName();
+        insertEnumGoal.setInt(1, tournament.getTournamentID());
+        insertEnumGoal.setInt(2, teamScore.getTeamNumber());
+        insertEnumGoal.setInt(3, teamScore.getRunNumber());
 
-          columns.append(", "
-              + name);
-          if (element.isEnumerated()) {
-            // enumerated
-            values.append(", '"
-                + teamScore.getEnumRawScore(name)
-                + "'");
-          } else {
-            values.append(", "
-                + teamScore.getRawScore(name));
-          }
-        } // !computed
-      } // foreach goal
-    }
+        // now do each goal
+        for (final AbstractGoal element : performanceElement.getAllGoals()) {
+          if (!element.isComputed()) {
+            final String name = element.getName();
 
-    final String sql = "INSERT INTO Performance"
-        + " ( "
-        + columns.toString()
-        + ") "
-        + "VALUES ( "
-        + values.toString()
-        + ")";
-    try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate(sql);
+            if (element.isEnumerated()) {
+              final String value = teamScore.getEnumRawScore(name);
+              insertEnumGoal.setString(4, name);
+              insertEnumGoal.setString(5, value);
+              insertEnumGoal.executeUpdate();
+            } else {
+              final double value = teamScore.getRawScore(name);
+              insertGoal.setString(4, name);
+              insertGoal.setDouble(5, value);
+              insertGoal.executeUpdate();
+            }
+          } // !computed
+        } // foreach goal
+      }
+    } catch (final SQLException e) {
+      connection.rollback();
+      throw e;
+    } finally {
+      connection.setAutoCommit(autoCommit);
     }
 
     if (teamScore.isVerified()) {
@@ -518,63 +511,93 @@ public final class Queries {
 
     final double score = performanceElement.evaluate(teamScore);
 
-    final StringBuffer sql = new StringBuffer();
-
-    sql.append("UPDATE Performance SET ");
-
-    sql.append("NoShow = "
-        + teamScore.isNoShow());
-
-    sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
-
-    if (teamScore.isNoShow()
-        || teamScore.isBye()) {
-      sql.append(", ComputedTotal = NULL");
-    } else {
-      sql.append(", ComputedTotal = "
-          + score);
-    }
-
-    if (!teamScore.isNoShow()
-        && !teamScore.isBye()) {
-      // now do each goal
-      for (final AbstractGoal element : performanceElement.getAllGoals()) {
-        if (!element.isComputed()) {
-          final String name = element.getName();
-
-          if (element.isEnumerated()) {
-            final String value = teamScore.getEnumRawScore(name);
-            // enumerated
-            sql.append(", "
-                + name
-                + " = '"
-                + value
-                + "'");
-          } else {
-            final double value = teamScore.getRawScore(name);
-            sql.append(", "
-                + name
-                + " = "
-                + value);
-          }
-        } // !computed
-      } // foreach goal
-    }
-
-    sql.append(", Verified = "
-        + teamScore.isVerified());
-
-    sql.append(" WHERE TeamNumber = "
-        + teamNumber);
-
-    sql.append(" AND RunNumber = "
-        + teamScore.getRunNumber());
-    sql.append(" AND Tournament = "
-        + currentTournament);
-
+    final boolean autoCommit = connection.getAutoCommit();
     int numRowsUpdated = 0;
-    try (Statement stmt = connection.createStatement()) {
-      numRowsUpdated = stmt.executeUpdate(sql.toString());
+    try (PreparedStatement update = connection.prepareStatement("UPDATE Performance" //
+        + " SET NoShow = ?" //
+        + ", SET Bye = ?" //
+        + ", TIMESTAMP = CURRENT_TIMESTAMP" //
+        + ", ComputedTotal = ?" //
+        + ", Verified = ?" //
+        + " WHERE TeamNumber = ? AND RunNumber = ? AND Tournament = ?");
+        PreparedStatement updateGoal = connection.prepareStatement("UPDATE performance_goals SET goal_value = ?"//
+            + " WHERE tournament_id = ?" //
+            + " AND team_number = ?" //
+            + " AND run_number = ?" //
+            + " AND goal_name = ?"//
+        );
+        PreparedStatement deleteGoals = connection.prepareStatement("DELETE FROM performance_goals" //
+            + " WHERE tournament_id = ?" //
+            + " AND team_number = ?" //
+            + " AND run_number = ?");
+        PreparedStatement updateEnumGoal = connection.prepareStatement("UPDATE performance_enum_goals SET goal_value = ?"//
+            + " WHERE tournament_id = ?" //
+            + " AND team_number = ?" //
+            + " AND run_number = ?" //
+            + " AND goal_name = ?"//
+        );
+        PreparedStatement deleteEnumGoals = connection.prepareStatement("DELETE FROM performance_enum_goals" //
+            + " WHERE tournament_id = ?" //
+            + " AND team_number = ?" //
+            + " AND run_number = ?")) {
+      connection.setAutoCommit(false);
+
+      update.setBoolean(1, teamScore.isNoShow());
+      update.setBoolean(2, teamScore.isBye());
+      update.setDouble(3, score);
+      update.setBoolean(4, teamScore.isVerified());
+
+      update.setInt(5, teamNumber);
+      update.setInt(6, runNumber);
+      update.setInt(7, currentTournament);
+
+      numRowsUpdated = update.executeUpdate();
+
+      if (!teamScore.isNoShow()
+          && !teamScore.isBye()) {
+        updateGoal.setInt(2, currentTournament);
+        updateGoal.setInt(3, teamNumber);
+        updateGoal.setInt(4, runNumber);
+
+        updateEnumGoal.setInt(2, currentTournament);
+        updateEnumGoal.setInt(3, teamNumber);
+        updateEnumGoal.setInt(4, runNumber);
+
+        // now do each goal
+        for (final AbstractGoal element : performanceElement.getAllGoals()) {
+          if (!element.isComputed()) {
+            final String name = element.getName();
+
+            if (element.isEnumerated()) {
+              final String value = teamScore.getEnumRawScore(name);
+              updateEnumGoal.setString(5, value);
+              updateEnumGoal.setString(1, name);
+              updateEnumGoal.executeUpdate();
+            } else {
+              final double value = teamScore.getRawScore(name);
+              updateGoal.setDouble(5, value);
+              updateGoal.setString(1, name);
+              updateGoal.executeUpdate();
+            }
+          } // !computed
+        } // foreach goal
+      } else {
+        // delete goal values
+        deleteGoals.setInt(1, currentTournament);
+        deleteGoals.setInt(2, teamNumber);
+        deleteGoals.setInt(3, runNumber);
+        deleteGoals.executeUpdate();
+
+        deleteEnumGoals.setInt(1, currentTournament);
+        deleteEnumGoals.setInt(2, teamNumber);
+        deleteEnumGoals.setInt(3, runNumber);
+        deleteEnumGoals.executeUpdate();
+      }
+    } catch (final SQLException e) {
+      connection.rollback();
+      throw e;
+    } finally {
+      connection.setAutoCommit(autoCommit);
     }
 
     if (numRowsUpdated > 0) {

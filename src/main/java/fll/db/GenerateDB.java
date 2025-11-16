@@ -41,7 +41,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 51;
+  public static final int DATABASE_VERSION = 52;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -242,7 +242,6 @@ public final class GenerateDB {
       // used for view below
       final StringBuilder performanceColumns = new StringBuilder();
       {
-        final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = PERFORMANCE_TABLE_NAME;
         createStatement.append("CREATE TABLE "
             + tableName
@@ -261,16 +260,6 @@ public final class GenerateDB {
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
-        for (final AbstractGoal element : performanceElement.getAllGoals()) {
-          if (!element.isComputed()) {
-            final String columnDefinition = generateGoalColumnDefinition(element);
-            createStatement.append(" "
-                + columnDefinition
-                + ",");
-            performanceColumns.append(element.getName()
-                + ",");
-          }
-        }
         performanceColumns.append("ComputedTotal,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         performanceColumns.append("StandardizedScore"); // last column, no comma
@@ -280,14 +269,15 @@ public final class GenerateDB {
             + "_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
         createStatement.append(",CONSTRAINT "
             + tableName
-            + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
+            + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
         createStatement.append(",CONSTRAINT "
             + tableName
-            + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
+            + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
       }
+      createPerformanceGoalsTables(connection, true);
 
       // loop over each subjective category and create a table for it
       for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
@@ -379,6 +369,38 @@ public final class GenerateDB {
 
     }
 
+  }
+
+  /* package */ static void createPerformanceGoalsTables(final Connection connection,
+                                                         final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder countSql = new StringBuilder();
+      countSql.append("CREATE TABLE performance_goals (");
+      countSql.append("  tournament_id INTEGER NOT NULL");
+      countSql.append(", team_number INTEGER NOT NULL");
+      countSql.append(", run_number INTEGER NOT NULL");
+      countSql.append(", goal_name varchar NOT NULL");
+      countSql.append(", goal_value double NOT NULL");
+      countSql.append(", CONSTRAINT performance_goals_pk PRIMARY KEY (tournament_id, team_number, run_number, goal_name)");
+      if (createConstraints) {
+        countSql.append(", CONSTRAINT performance_goals_fk1 FOREIGN KEY(tournament_id, team_number, run_number) REFERENCES Performance(Tournament, TeamNumber, RunNumber) ON DELETE CASCADE");
+      }
+      stmt.executeUpdate(countSql.toString());
+
+      final StringBuilder enumSql = new StringBuilder();
+      enumSql.append("CREATE TABLE performance_enum_goals (");
+      enumSql.append("  tournament_id INTEGER NOT NULL");
+      enumSql.append(", team_number INTEGER NOT NULL");
+      enumSql.append(", run_number INTEGER NOT NULL");
+      enumSql.append(", goal_name varchar NOT NULL");
+      enumSql.append(", goal_value varchar NOT NULL");
+      enumSql.append(", CONSTRAINT performance_enum_goals_pk PRIMARY KEY (tournament_id, team_number, run_number, goal_name)");
+      if (createConstraints) {
+        enumSql.append(", CONSTRAINT performance_enum_goals_fk1 FOREIGN KEY(tournament_id, team_number, run_number) REFERENCES Performance(Tournament, TeamNumber, RunNumber) ON DELETE CASCADE");
+      }
+      stmt.executeUpdate(enumSql.toString());
+    }
   }
 
   /* package */ static void createPlayoffTableData(final Connection connection,

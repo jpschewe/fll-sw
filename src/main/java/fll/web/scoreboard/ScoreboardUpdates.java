@@ -120,15 +120,15 @@ public final class ScoreboardUpdates {
 
       // get all scores in ascending order by time. This ensures that the most recent
       // scores display sees the newest scores last
-      try (PreparedStatement prep = connection.prepareStatement("SELECT * from Performance" //
+      try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber, RunNumber from Performance" //
           + " WHERE tournament = ?" //
           + " ORDER BY TimeStamp ASC, TeamNumber ASC" //
       )) {
         prep.setInt(1, currentTournament.getTournamentID());
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
-            final int teamNumber = rs.getInt("teamNumber");
-            final int runNumber = rs.getInt("runNumber");
+            final int teamNumber = rs.getInt(1);
+            final int runNumber = rs.getInt(2);
             final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
             if (!runMetadata.isScoreboardDisplay()) {
               continue;
@@ -141,7 +141,14 @@ public final class ScoreboardUpdates {
               continue;
             }
 
-            final PerformanceTeamScore teamScore = new DatabasePerformanceTeamScore(teamNumber, runNumber, rs);
+            final PerformanceTeamScore teamScore = DatabasePerformanceTeamScore.fetchTeamScore(currentTournament.getTournamentID(),
+                                                                                               teamNumber, runNumber,
+                                                                                               connection);
+            if (null == teamScore) {
+              throw new FLLInternalException(String.format("Unable to find score for tournament %d team %d run %d",
+                                                           currentTournament.getTournamentID(), teamNumber, runNumber));
+            }
+
             final double score = performanceElement.evaluate(teamScore);
             final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
             final ScoreUpdateMessage update = new ScoreUpdateMessage(team, score, formattedScore, teamScore,
