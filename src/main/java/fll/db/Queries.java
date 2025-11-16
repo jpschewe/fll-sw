@@ -398,24 +398,27 @@ public final class Queries {
     values.append(", "
         + (verified ? "1" : "0"));
 
-    // now do each goal
-    for (final AbstractGoal element : performanceElement.getAllGoals()) {
-      if (!element.isComputed()) {
-        final String name = element.getName();
+    if (!teamScore.isNoShow()
+        && !teamScore.isBye()) {
+      // now do each goal
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final String name = element.getName();
 
-        columns.append(", "
-            + name);
-        if (element.isEnumerated()) {
-          // enumerated
-          values.append(", '"
-              + teamScore.getEnumRawScore(name)
-              + "'");
-        } else {
-          values.append(", "
-              + teamScore.getRawScore(name));
-        }
-      } // !computed
-    } // foreach goal
+          columns.append(", "
+              + name);
+          if (element.isEnumerated()) {
+            // enumerated
+            values.append(", '"
+                + teamScore.getEnumRawScore(name)
+                + "'");
+          } else {
+            values.append(", "
+                + teamScore.getRawScore(name));
+          }
+        } // !computed
+      } // foreach goal
+    }
 
     final String sql = "INSERT INTO Performance"
         + " ( "
@@ -532,28 +535,31 @@ public final class Queries {
           + score);
     }
 
-    // now do each goal
-    for (final AbstractGoal element : performanceElement.getAllGoals()) {
-      if (!element.isComputed()) {
-        final String name = element.getName();
+    if (!teamScore.isNoShow()
+        && !teamScore.isBye()) {
+      // now do each goal
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final String name = element.getName();
 
-        if (element.isEnumerated()) {
-          final String value = teamScore.getEnumRawScore(name);
-          // enumerated
-          sql.append(", "
-              + name
-              + " = '"
-              + value
-              + "'");
-        } else {
-          final double value = teamScore.getRawScore(name);
-          sql.append(", "
-              + name
-              + " = "
-              + value);
-        }
-      } // !computed
-    } // foreach goal
+          if (element.isEnumerated()) {
+            final String value = teamScore.getEnumRawScore(name);
+            // enumerated
+            sql.append(", "
+                + name
+                + " = '"
+                + value
+                + "'");
+          } else {
+            final double value = teamScore.getRawScore(name);
+            sql.append(", "
+                + name
+                + " = "
+                + value);
+          }
+        } // !computed
+      } // foreach goal
+    }
 
     sql.append(", Verified = "
         + teamScore.isVerified());
