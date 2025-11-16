@@ -573,13 +573,13 @@ public final class Queries {
 
             if (element.isEnumerated()) {
               final String value = teamScore.getEnumRawScore(name);
-              updateEnumGoal.setString(5, value);
-              updateEnumGoal.setString(1, name);
+              updateEnumGoal.setString(1, value);
+              updateEnumGoal.setString(5, name);
               updateEnumGoal.executeUpdate();
             } else {
               final double value = teamScore.getRawScore(name);
-              updateGoal.setDouble(5, value);
-              updateGoal.setString(1, name);
+              updateGoal.setDouble(1, value);
+              updateGoal.setString(5, name);
               updateGoal.executeUpdate();
             }
           } // !computed
