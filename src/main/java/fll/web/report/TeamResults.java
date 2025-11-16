@@ -24,7 +24,6 @@ import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 
-import fll.SubjectiveScore;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -38,6 +37,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
+import fll.web.api.SubjectiveScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;

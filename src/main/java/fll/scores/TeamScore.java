@@ -9,7 +9,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
- * Represents a score for a team.
+ * Represents a score for a team. All implementations are intended to be
+ * read-only.
  */
 public interface TeamScore {
 

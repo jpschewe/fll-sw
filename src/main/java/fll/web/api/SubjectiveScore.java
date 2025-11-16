@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll;
+package fll.web.api;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,9 +25,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Team;
+import fll.Tournament;
 import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
+import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
@@ -37,6 +40,8 @@ import fll.xml.SubjectiveScoreCategory;
 /**
  * A subjective score from the database.
  * Primarily used to exchange data with the subjective web application.
+ * This object allows both read and write, unlike the implementations of
+ * {@link TeamScore}.
  */
 public class SubjectiveScore {
 

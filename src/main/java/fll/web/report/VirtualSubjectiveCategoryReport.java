@@ -29,7 +29,6 @@ import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fll.SubjectiveScore;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -45,6 +44,7 @@ import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import fll.web.api.SubjectiveScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveGoalRef;
 import fll.xml.SubjectiveScoreCategory;

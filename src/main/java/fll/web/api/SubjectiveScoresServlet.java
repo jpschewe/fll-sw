@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;

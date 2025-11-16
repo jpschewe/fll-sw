@@ -71,7 +71,6 @@ import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
-import fll.SubjectiveScore;
 import fll.Team;
 import fll.TestUtils;
 import fll.Tournament;
@@ -86,6 +85,7 @@ import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.scores.DatabasePerformanceTeamScore;
 import fll.scores.PerformanceTeamScore;
+import fll.web.api.SubjectiveScore;
 import fll.web.developer.QueryHandler;
 import fll.web.playoff.Playoff;
 import fll.web.scoreEntry.ScoreEntry;

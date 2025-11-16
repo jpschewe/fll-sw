@@ -13,13 +13,13 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.WebUtils;
+import fll.web.api.SubjectiveScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;

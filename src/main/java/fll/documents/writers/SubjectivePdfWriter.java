@@ -40,7 +40,6 @@ import org.w3c.dom.Element;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.SubjectiveScore;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -54,6 +53,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FOPUtils.Margins;
+import fll.web.api.SubjectiveScore;
 import fll.util.HSLColor;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
