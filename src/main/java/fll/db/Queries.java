@@ -518,7 +518,7 @@ public final class Queries {
     int numRowsUpdated = 0;
     try (PreparedStatement update = connection.prepareStatement("UPDATE Performance" //
         + " SET NoShow = ?" //
-        + ", SET Bye = ?" //
+        + ", Bye = ?" //
         + ", TIMESTAMP = CURRENT_TIMESTAMP" //
         + ", ComputedTotal = ?" //
         + ", Verified = ?" //
