@@ -35,7 +35,7 @@ import fll.xml.SubjectiveScoreCategory;
 /**
  * Subjective score populated from values.
  */
-public class DefaultSubjectiveTeamScore extends DefaultTeamScore implements SubjectiveTeamScore {
+public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implements SubjectiveTeamScore {
 
   /**
    * @param teamNumber see {@link #getTeamNumber()}
