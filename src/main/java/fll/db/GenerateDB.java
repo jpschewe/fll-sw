@@ -369,14 +369,7 @@ public final class GenerateDB {
           + " WHERE Performance.RunNumber IN ( SELECT run_number FROM run_metadata WHERE run_type = 'REGULAR_MATCH_PLAY' AND tournament_id = Performance.tournament )" //
           + " GROUP BY Performance.tournament, Performance.TeamNumber");
 
-      // verified performance scores
-      stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
-      stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT "
-          + performanceColumns.toString()
-          + " FROM Performance WHERE Verified = TRUE");
-
       setDefaultParameters(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
-
     }
 
   }
