@@ -8,19 +8,29 @@
 
 <table>
     <colgroup>
+        <%-- buttons --%>
         <col width="5%" />
+        <c:if test="${ranked}">
+            <%-- place --%>
+            <col width="5%" />
+        </c:if>
+        <%-- Team Number --%>
         <col width="5%" />
-        <col width="5%" />
+        <%-- Team Name --%>
         <col width="10%" />
         <c:choose>
             <c:when test="${perAwardGroup}">
+                <%-- Organization --%>
                 <col width="20%" />
             </c:when>
             <c:otherwise>
+                <%-- Organization --%>
                 <col width="15%" />
+                <%-- award group --%>
                 <col width="5%" />
             </c:otherwise>
         </c:choose>
+        <%-- description --%>
         <col width="45%" />
     </colgroup>
     <tr>

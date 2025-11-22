@@ -1,3 +1,4 @@
+* #1295 - Fix formatting of award winner write-up for non-ranked categories
 * #1289 - remove verified_performance SQL view
 * #1292 - Update confirmation dialog after entering a performance score to show the correct run name
 
