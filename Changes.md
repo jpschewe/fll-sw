@@ -1,3 +1,5 @@
+* #1292 - Update confirmation dialog after entering a performance score to show the correct run name
+
 Release 20.0.1
 ==============
 
