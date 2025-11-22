@@ -252,9 +252,11 @@ public final class Top10 {
     sql.append("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore"); //
     sql.append(String.format("    FROM (SELECT TeamNumber, %s(ComputedTotal) AS MaxOfComputedScore",
                              winnerCriteria.getMinMaxString()));
-    sql.append("      FROM verified_performance WHERE Tournament = ?"); // tournament
+    sql.append("      FROM Performance"); //
+    sql.append("       WHERE Tournament = ?"); // tournament
     sql.append("       AND NoShow = False");
     sql.append("       AND Bye = False");
+    sql.append("       AND Verified = TRUE");
     if (regularMatchPlay) {
       sql.append("       AND RunNumber IN (SELECT run_number FROM run_metadata WHERE tournament_id = ? AND run_type = ?)"); // tournament,
                                                                                                                             // REGULAR_MATCH_PLAY
