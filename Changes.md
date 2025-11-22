@@ -1,3 +1,5 @@
+* #1289 - remove verified_performance SQL view
+
 Release 20.0.1
 ==============
 
