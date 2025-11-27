@@ -111,7 +111,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       response.reset();
       response.setContentType("application/pdf");
@@ -329,9 +329,20 @@ public class AwardsScriptReport extends BaseFLLServlet {
                             .collect(Collectors.toList());
   }
 
-  private List<AwardCategory> filterAwardOrder(final Connection connection,
-                                               final Tournament tournament,
-                                               final List<AwardCategory> fullAwardOrder)
+  /**
+   * Filter out non-numeric categories that are ignored for this tournament.
+   * Filter out head to head if head to head
+   * isn't being run in this tournament.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param fullAwardOrder all awards
+   * @return a new list that is a subset of {@code fullAwardOrder}
+   * @throws SQLException on a database error
+   */
+  public static List<AwardCategory> filterAwardOrder(final Connection connection,
+                                                     final Tournament tournament,
+                                                     final List<AwardCategory> fullAwardOrder)
       throws SQLException {
 
     final List<AwardCategory> filteredAwardOrder = new LinkedList<>();
