@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,9 +39,11 @@ import fll.TournamentLevel;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
+import fll.db.AwardsScript;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.TournamentParameters;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -53,7 +56,9 @@ import fll.web.playoff.Playoff;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -66,6 +71,8 @@ import jakarta.servlet.http.HttpSession;
  */
 @WebServlet("/report/Awards.csv")
 public class AwardsCSV extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -83,19 +90,26 @@ public class AwardsCSV extends BaseFLLServlet {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = tournamentData.getDataSource();
 
-    try (Connection connection = datasource.getConnection()) {
+    final Tournament tournament = tournamentData.getCurrentTournament();
 
-      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
-                                                          tournamentData.getCurrentTournament());
+    try (Connection connection = datasource.getConnection()) {
+      ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description, tournament);
+
+      final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                                  tournament.getTournamentID());
 
       response.reset();
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=awards.csv");
 
       try (CSVWriter csv = new CSVWriter(response.getWriter())) {
-
         writeHeader(csv);
-        writeData(connection, description, csv);
+        writeAwards(description, connection, csv, tournamentData.getCurrentTournament(), sortedAwardGroups);
+        final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection,
+                                                                               tournament.getTournamentID());
+        if (!advancing.isEmpty()) {
+          addAdvancingTeams(advancing, connection, csv, tournament, sortedAwardGroups);
+        }
       }
     } catch (final SQLException e) {
       throw new FLLRuntimeException(e);
@@ -106,31 +120,100 @@ public class AwardsCSV extends BaseFLLServlet {
     csv.writeNext(new String[] { "team #", "team name", "award" });
   }
 
-  private void writeData(final Connection connection,
-                         final ChallengeDescription description,
-                         final CSVWriter csv)
+  private void writeAwards(final ChallengeDescription description,
+                           final Connection connection,
+                           final CSVWriter csv,
+                           final Tournament tournament,
+                           final List<String> sortedAwardGroups)
       throws SQLException, IOException {
-    final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-    final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
-                                                                                                tournament.getTournamentID());
+    final List<String> awardGroupOrder = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
+    final List<AwardCategory> fullAwardOrder = AwardsScript.getAwardOrder(description, connection, tournament);
+    final List<AwardCategory> awardOrder = AwardsScriptReport.filterAwardOrder(connection, tournament, fullAwardOrder);
 
-    addSubjectiveExtraWinners(connection, description, csv, tournament, sortedAwardGroups, true);
+    final List<AwardWinner> nonNumericPerAwardGroupWinners = AwardWinners.getNonNumericAwardWinners(connection,
+                                                                                                    tournament.getTournamentID())
+                                                                         .stream() //
+                                                                         .filter(Errors.rethrow()
+                                                                                       .wrapPredicate(w -> AwardsReport.isNonNumericAwarded(connection,
+                                                                                                                                            description,
+                                                                                                                                            tournament.getLevel(),
+                                                                                                                                            w))) //
+                                                                         .collect(Collectors.toList());
+    final Map<String, Map<String, List<AwardWinner>>> organizedNonNumericPerAwardGroupWinners = AwardsReport.organizeAwardWinners(nonNumericPerAwardGroupWinners);
 
-    addPerformance(connection, csv, description, sortedAwardGroups);
+    final Map<String, List<OverallAwardWinner>> nonNumericOverallWinners = AwardsReport.getNonNumericOverallWinners(description,
+                                                                                                                    connection,
+                                                                                                                    tournament);
 
-    if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
-      addHeadToHead(connection, tournament, csv, sortedAwardGroups);
-    }
+    final List<AwardWinner> subjectiveWinners = AwardWinners.getSubjectiveAwardWinners(connection,
+                                                                                       tournament.getTournamentID());
+    final Map<String, Map<String, List<AwardWinner>>> organizedSubjectiveWinners = AwardsReport.organizeAwardWinners(subjectiveWinners);
 
-    addSubjectiveChallengeWinners(connection, description, csv, tournament, sortedAwardGroups);
-    addVirtualSubjectiveChallengeWinners(connection, description, csv, tournament, sortedAwardGroups);
-    addSubjectiveExtraWinners(connection, description, csv, tournament, sortedAwardGroups, false);
-    addSubjectiveOverallWinners(connection, description, csv, tournament);
+    final List<AwardWinner> virtualSubjectiveWinners = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
+                                                                                                     tournament.getTournamentID());
+    final Map<String, Map<String, List<AwardWinner>>> organizedVirtualSubjectiveWinners = AwardsReport.organizeAwardWinners(virtualSubjectiveWinners);
 
-    final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
-    if (!advancing.isEmpty()) {
-      addAdvancingTeams(advancing, connection, csv, tournament, sortedAwardGroups);
+    final ListIterator<AwardCategory> iter = awardOrder.listIterator();
+    while (iter.hasNext()) {
+      final AwardCategory category = iter.next();
+
+      LOGGER.trace("addAwards: Processing category {}", category.getTitle());
+
+      if (category instanceof NonNumericCategory
+          && CategoriesIgnored.isNonNumericCategoryIgnored(connection, tournament.getLevel(),
+                                                           (NonNumericCategory) category)) {
+        throw new FLLInternalException("Should have filtered this ignored non-numberic category out: "
+            + category.getTitle());
+      }
+
+      final String categoryName = category.getTitle();
+
+      switch (category) {
+      case PerformanceScoreCategory awardCategory -> {
+        addPerformance(connection, csv, description, sortedAwardGroups);
+      }
+      case NonNumericCategory awardCategory -> {
+        if (category.getPerAwardGroup()) {
+          final Map<String, List<AwardWinner>> categoryWinners = organizedNonNumericPerAwardGroupWinners.getOrDefault(categoryName,
+                                                                                                                      Collections.emptyMap());
+          addSubjectiveAwardGroupWinners(connection, description, csv, categoryName, categoryWinners, awardGroupOrder);
+        } else {
+          final List<OverallAwardWinner> categoryWinners = nonNumericOverallWinners.getOrDefault(categoryName,
+                                                                                                 Collections.emptyList());
+          if (!categoryWinners.isEmpty()) {
+            addSubjectiveOverallWinners(connection, description, csv, categoryName, categoryWinners);
+          }
+        }
+      }
+      case SubjectiveScoreCategory awardCategory -> {
+        final Map<String, List<AwardWinner>> categoryWinners = organizedSubjectiveWinners.getOrDefault(categoryName,
+                                                                                                       Collections.emptyMap());
+        addSubjectiveAwardGroupWinners(connection, description, csv, categoryName, categoryWinners, awardGroupOrder);
+      }
+      case VirtualSubjectiveScoreCategory awardCategory -> {
+        final Map<String, List<AwardWinner>> categoryWinners = organizedVirtualSubjectiveWinners.getOrDefault(categoryName,
+                                                                                                              Collections.emptyMap());
+        addSubjectiveAwardGroupWinners(connection, description, csv, categoryName, categoryWinners, awardGroupOrder);
+      }
+      case ChampionshipCategory awardCategory -> {
+        // Championship winners are "non-numeric" and [er award group
+        final Map<String, List<AwardWinner>> categoryWinners = organizedNonNumericPerAwardGroupWinners.getOrDefault(categoryName,
+                                                                                                                    Collections.emptyMap());
+        addSubjectiveAwardGroupWinners(connection, description, csv, categoryName, categoryWinners, awardGroupOrder);
+      }
+      case HeadToHeadCategory awardCategory -> {
+        if (TournamentParameters.getRunningHeadToHead(connection, tournament.getTournamentID())) {
+          addHeadToHead(connection, tournament, csv, sortedAwardGroups);
+        } else {
+          throw new FLLInternalException("Should have filtered out head to head category when not enabled in this tournament");
+        }
+      }
+      default -> {
+        throw new FLLInternalException(String.format("Category %s is of an unknown type: %s", category.getTitle(),
+                                                     category.getClass().getName()));
+      }
+      }
     }
   }
 
@@ -193,125 +276,6 @@ public class AwardsCSV extends BaseFLLServlet {
     } // finished playoff
   }
 
-  private void addSubjectiveChallengeWinners(final Connection connection,
-                                             final ChallengeDescription description,
-                                             final CSVWriter csv,
-                                             final Tournament tournament,
-                                             final List<String> sortedAwardGroups)
-      throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getSubjectiveAwardWinners(connection, tournament.getTournamentID());
-
-    final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
-                                                  .map(SubjectiveScoreCategory::getTitle) //
-                                                  .collect(Collectors.toList());
-    addSubjectiveWinners(connection, description, csv, winners, sortedAwardGroups, categoryOrder, false);
-  }
-
-  private void addVirtualSubjectiveChallengeWinners(final Connection connection,
-                                                    final ChallengeDescription description,
-                                                    final CSVWriter csv,
-                                                    final Tournament tournament,
-                                                    final List<String> sortedAwardGroups)
-      throws SQLException {
-    final List<AwardWinner> winners = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
-                                                                                    tournament.getTournamentID());
-
-    final List<String> categoryOrder = description.getSubjectiveCategories().stream() //
-                                                  .map(SubjectiveScoreCategory::getTitle) //
-                                                  .collect(Collectors.toList());
-    addSubjectiveWinners(connection, description, csv, winners, sortedAwardGroups, categoryOrder, false);
-  }
-
-  private void addSubjectiveExtraWinners(final Connection connection,
-                                         final ChallengeDescription description,
-                                         final CSVWriter csv,
-                                         final Tournament tournament,
-                                         final List<String> sortedAwardGroups,
-                                         final boolean displayChampionship)
-      throws SQLException, IOException {
-    final TournamentLevel level = tournament.getLevel();
-
-    final List<AwardWinner> winners = AwardWinners.getNonNumericAwardWinners(connection, tournament.getTournamentID())
-                                                  .stream() //
-                                                  .filter(Errors.rethrow()
-                                                                .wrapPredicate(w -> AwardsReport.isNonNumericAwarded(connection,
-                                                                                                                     description,
-                                                                                                                     level,
-                                                                                                                     w))) //
-                                                  .collect(Collectors.toList());
-
-    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection, tournament)
-                                                        .stream() //
-                                                        .map(NonNumericCategory::getTitle) //
-                                                        .collect(Collectors.toList());
-
-    // show places when showing championship
-    addSubjectiveWinners(connection, description, csv, winners, sortedAwardGroups, categoryOrder, displayChampionship);
-  }
-
-  /**
-   * @param displayChampionship if true, then display only the championship award,
-   *          otherwise skip the championship award
-   */
-  private void addSubjectiveWinners(final Connection connection,
-                                    final ChallengeDescription description,
-                                    final CSVWriter csv,
-                                    final List<AwardWinner> winners,
-                                    final List<String> sortedAwardGroups,
-                                    final List<String> categoryOrder,
-                                    final boolean displayChampionship)
-      throws SQLException {
-    final Map<String, Map<String, List<AwardWinner>>> organizedWinners = AwardsReport.organizeAwardWinners(winners);
-
-    final List<String> fullOrder = new LinkedList<String>(categoryOrder);
-    organizedWinners.keySet().forEach(c -> {
-      if (!fullOrder.contains(c)) {
-        fullOrder.add(c);
-      }
-    });
-    for (final String categoryName : fullOrder) {
-      if ((displayChampionship
-          && ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))
-          || (!displayChampionship
-              && !ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE.equals(categoryName))) {
-        if (organizedWinners.containsKey(categoryName)) {
-          final Map<String, List<AwardWinner>> categoryWinners = organizedWinners.get(categoryName);
-          addSubjectiveAwardGroupWinners(connection, description, csv, categoryName, categoryWinners,
-                                         sortedAwardGroups);
-        }
-      }
-    }
-  }
-
-  private void addSubjectiveOverallWinners(final Connection connection,
-                                           final ChallengeDescription description,
-                                           final CSVWriter csv,
-                                           final Tournament tournament)
-      throws SQLException {
-
-    final Map<String, List<OverallAwardWinner>> organizedWinners = AwardsReport.getNonNumericOverallWinners(description,
-                                                                                                            connection,
-                                                                                                            tournament);
-
-    final List<String> categoryOrder = CategoriesIgnored.getNonNumericCategories(description, connection, tournament)
-                                                        .stream() //
-                                                        .map(NonNumericCategory::getTitle) //
-                                                        .collect(Collectors.toList());
-    final List<String> fullOrder = new LinkedList<String>(categoryOrder);
-    organizedWinners.keySet().forEach(c -> {
-      if (!fullOrder.contains(c)) {
-        fullOrder.add(c);
-      }
-    });
-    for (final String categoryName : fullOrder) {
-      final List<OverallAwardWinner> categoryWinners = organizedWinners.getOrDefault(categoryName,
-                                                                                     Collections.emptyList());
-      if (!categoryWinners.isEmpty()) {
-        addSubjectiveOverallWinners(connection, description, csv, categoryName, categoryWinners);
-      }
-    }
-  }
-
   private void addSubjectiveOverallWinners(final Connection connection,
                                            final ChallengeDescription description,
                                            final CSVWriter csv,
@@ -342,14 +306,14 @@ public class AwardsCSV extends BaseFLLServlet {
                                               final CSVWriter csv,
                                               final String categoryName,
                                               final Map<String, List<AwardWinner>> categoryWinners,
-                                              final List<String> sortedGroups)
+                                              final List<String> awardGroupOrder)
       throws SQLException {
 
     final boolean displayPlace = AwardsReport.displayPlace(description, categoryName);
 
     final String awardName = String.format("%s Award", categoryName);
 
-    final List<String> localSortedGroups = new LinkedList<>(sortedGroups);
+    final List<String> localSortedGroups = new LinkedList<>(awardGroupOrder);
     categoryWinners.entrySet().stream().map(Map.Entry::getKey).filter(e -> !localSortedGroups.contains(e))
                    .forEach(localSortedGroups::add);
 
