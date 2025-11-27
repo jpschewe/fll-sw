@@ -11,16 +11,6 @@
     </Match>
 
 
-    <!-- spotbugs issue with JDK 11+ https://github.com/spotbugs/spotbugs/issues/756 -->
-    <Match>
-        <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
-    </Match>
-
-    <!-- spotbugs issue https://github.com/spotbugs/spotbugs/issues/811 -->
-    <Match>
-        <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
-    </Match>
-
     <!-- TODO: ignore exposing of internal state for now, but may want to 
         change this later -->
     <Match>
