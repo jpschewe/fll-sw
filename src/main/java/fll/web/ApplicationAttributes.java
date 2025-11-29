@@ -30,7 +30,7 @@ public final class ApplicationAttributes {
    * All attributes should be prefixed by this to avoid collisions with
    * other software.
    */
-  public static final String PREFIX = "fll-sw.";
+  public static final String PREFIX = "fll-sw_";
 
   /**
    * {@link javax.sql.DataSource} that is connected to the tournament database.
