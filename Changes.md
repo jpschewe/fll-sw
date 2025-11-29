@@ -1,3 +1,4 @@
+* #1296 - Add top performance scores (PDF) to tournament reporter page
 * #1297 - Sort awards CSV file the same as the awards script
 * #1295 - Fix formatting of award winner write-up for non-ranked categories
 * #1289 - remove verified_performance SQL view
