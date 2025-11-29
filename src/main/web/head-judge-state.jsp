@@ -26,12 +26,12 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 
     <h2>Preliminary Reports</h2>
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Robot
-        Match Scores (HTML)</a>
+        href="<c:url value='/report/topScoreReportPerAwardGroup.jsp'/>">Top
+        Robot Match Scores (HTML)</a>
 
     <a class="wide" target="_topScoreReportPerAwardGroup"
-        href="<c:url value='/report/TopScoreReportPerAwardGroupPdf'/>">Robot
-        Match Scores (PDF)</a>
+        href="<c:url value='/report/TopScoreReportPerAwardGroupPdf'/>">Top
+        Robot Match Scores (PDF)</a>
 
     <c:if test="${awardGroups != judgingStations}">
         <a class="wide" target="_topScoreReportPerJudgingStation"

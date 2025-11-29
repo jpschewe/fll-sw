@@ -1,5 +1,6 @@
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
+* #1296 - Add top performance scores (PDF) to tournament reporter page
 * #1297 - Sort awards CSV file the same as the awards script
 * #1295 - Fix formatting of award winner write-up for non-ranked categories
 * #1289 - remove verified_performance SQL view
