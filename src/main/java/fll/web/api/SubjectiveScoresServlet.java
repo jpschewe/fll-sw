@@ -57,7 +57,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response)
@@ -173,6 +172,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
    * @return the number of modified scores
    * @throws SQLException on a database error
    */
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   public static int processScores(final Connection connection,
                                   final ChallengeDescription challengeDescription,
@@ -365,6 +365,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
    * @param categoryElement
    * @throws SQLException
    */
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
@@ -395,6 +396,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
   /**
    * Create the statement for inserting a score into category.
    */
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   private static PreparedStatement createInsertStatement(final Connection connection,
                                                          final SubjectiveScoreCategory categoryDescription)

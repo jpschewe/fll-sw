@@ -77,6 +77,7 @@ public class CommitJudges extends BaseFLLServlet {
    *
    * @param tournament the current tournament
    */
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static void commitData(final HttpSession session,
                                  final Connection connection,

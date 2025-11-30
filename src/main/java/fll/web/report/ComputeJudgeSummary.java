@@ -167,6 +167,7 @@ public final class ComputeJudgeSummary {
    * @return the number of scores entered
    * @throws SQLException on a database error
    */
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static int getNumScoresEntered(final Connection connection,
                                         final String judge,

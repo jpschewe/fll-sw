@@ -306,6 +306,7 @@ public final class ScoreStandardization {
    * @param connection
    * @throws SQLException
    */
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   private static void updateSubjectiveScoreTotals(final ChallengeDescription description,
                                                   final Connection connection,
@@ -427,6 +428,7 @@ public final class ScoreStandardization {
     }
   }
 
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and goal name need to be inserted as strings")
   private static void populateVirtualSubjectiveCategories(final Connection connection,
                                                           final ChallengeDescription description,

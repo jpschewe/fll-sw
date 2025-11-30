@@ -118,6 +118,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     }
   }
 
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
                                                          final List<SubjectiveScoreCategory> subjectiveCategories,

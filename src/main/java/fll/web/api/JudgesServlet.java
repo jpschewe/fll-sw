@@ -81,6 +81,7 @@ public class JudgesServlet extends HttpServlet {
 
   }
 
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   @Override
   protected final void doPost(final HttpServletRequest request,

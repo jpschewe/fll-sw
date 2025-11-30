@@ -72,6 +72,7 @@ public class CheckSubjectiveEmptyForJudgeImport extends BaseFLLServlet {
     }
   }
 
+  //FIXME
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "table name is dependent on category name")
   private boolean categoryHasScores(final Connection connection,
                                     final SubjectiveScoreCategory category,

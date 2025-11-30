@@ -2784,6 +2784,7 @@ public final class ImportDB {
 
   }
 
+  //FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
@@ -2913,6 +2914,7 @@ public final class ImportDB {
       copyData(sourcePrep, destPrep);
     }
 
+    //FIXME
     LOGGER.debug("Importing performance scores");
     final String tableName = GenerateDB.PERFORMANCE_TABLE_NAME;
     try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "

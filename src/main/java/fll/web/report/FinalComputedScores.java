@@ -41,13 +41,14 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
+import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.AwardDeterminationOrder;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.scores.DatabaseTeamScore;
-import fll.scores.TeamScore;
+import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
@@ -64,7 +65,6 @@ import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
@@ -634,7 +634,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
    *         {@link VirtualSubjectiveScoreCategory}
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
   public static Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> gatherRankedSubjectiveTeams(final Connection connection,
                                                                                                                           final ChallengeDescription description,
                                                                                                                           final Tournament tournament)
@@ -1340,10 +1339,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return true if there is a zero in a required goal
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static boolean checkZeroInRequiredGoal(final Connection connection,
                                                 final Tournament tournament,
-                                                final ScoreCategory<? extends TeamScore> category,
+                                                final SubjectiveScoreCategory category,
                                                 final int teamNumber)
       throws SQLException {
     final Set<Goal> requiredGoals = category.getAllGoals().stream().filter(g -> g instanceof Goal).map(g -> (Goal) g)
@@ -1352,29 +1350,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (!requiredGoals.isEmpty()) {
       boolean zeroInRequiredGoal = false;
 
-      try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-          + category.getName()
-          + " WHERE TeamNumber = ? AND Tournament = ?")) {
-        prep.setInt(1, teamNumber);
-        prep.setInt(2, tournament.getTournamentID());
-        try (ResultSet rs = prep.executeQuery()) {
-          while (!zeroInRequiredGoal
-              && rs.next()) {
-            final DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, rs);
-
-            final Iterator<Goal> iter = requiredGoals.iterator();
-            while (!zeroInRequiredGoal
-                && iter.hasNext()) {
-              final Goal goal = iter.next();
-              final double goalScore = score.getRawScore(goal.getName());
-              if (FP.equals(0, goalScore, TIE_TOLERANCE)) {
-                zeroInRequiredGoal = true;
-              }
-            }
+      final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+      for (final SubjectiveTeamScore score : DefaultSubjectiveTeamScore.getScoresForTeam(connection, category,
+                                                                                         tournament, team)) {
+        final Iterator<Goal> iter = requiredGoals.iterator();
+        while (!zeroInRequiredGoal
+            && iter.hasNext()) {
+          final Goal goal = iter.next();
+          final double goalScore = score.getRawScore(goal.getName());
+          if (FP.equals(0, goalScore, TIE_TOLERANCE)) {
+            zeroInRequiredGoal = true;
           }
-
-        } // result set
-      } // prepared statement
+        }
+      }
 
       return zeroInRequiredGoal;
     } else {
