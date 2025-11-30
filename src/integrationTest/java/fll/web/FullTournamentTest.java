@@ -841,28 +841,17 @@ public class FullTournamentTest {
       // judge -> teamNumber -> score
       final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<>();
 
-      try (PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
-          + category
-          + " WHERE Tournament = ?")) {
-        prep.setInt(1, sourceTournament.getTournamentID());
+      for (final SubjectiveScore score : SubjectiveScore.getCategoryScores(testDataConn, subjectiveElement,
+                                                                           sourceTournament)) {
+        // only modified scores are stored to the database
+        score.setModified(true);
 
-        try (ResultSet rs = prep.executeQuery()) {
-          while (rs.next()) {
+        final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
+                                                                                         k -> new HashMap<>());
+        judgeScores.put(score.getTeamNumber(), score);
+      } // foreach result
 
-            final SubjectiveScore score = SubjectiveScore.fromResultSet(testDataConn, subjectiveElement,
-                                                                        sourceTournament, rs);
-            // only modified scores are stored to the database
-            score.setModified(true);
-
-            final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
-                                                                                             k -> new HashMap<>());
-            judgeScores.put(score.getTeamNumber(), score);
-
-          } // foreach result
-
-          allScores.put(category, categoryScores);
-        } // allocate result set
-      } // allocate prep
+      allScores.put(category, categoryScores);
     } // foreach category
 
     // send data as HTTP post

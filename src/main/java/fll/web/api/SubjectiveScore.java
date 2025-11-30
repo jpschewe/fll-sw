@@ -17,19 +17,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
-import fll.db.Queries;
 import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
 import fll.xml.AbstractGoal;
@@ -41,14 +38,14 @@ import fll.xml.SubjectiveScoreCategory;
  * A subjective score from the database.
  * Primarily used to exchange data with the subjective web application.
  * This object allows both read and write, unlike the implementations of
- * {@link TeamScore}.
+ * {@link TeamScore}. Used by {@code subjective.js}.
  */
-public class SubjectiveScore {
+public final class SubjectiveScore {
 
   /**
    * Constructor that sets all default values.
    */
-  public SubjectiveScore() {
+  private SubjectiveScore() {
     noShow = false;
     modified = false;
     deleted = false;
@@ -287,66 +284,75 @@ public class SubjectiveScore {
   }
 
   /**
-   * Populate a {@link SubjectiveScore} object from the specified database result.
-   * One needs to select all columns from the category table for this method to
-   * work properly.
-   * 
-   * @param connection database connection
-   * @param category category
-   * @param tournament the tournament
-   * @param rs the database result to read from
-   * @return a newly created object
+   * @param connection database
+   * @param category the category to get scores for
+   * @param tournament the tournament to get scores for
+   * @return the scores
    * @throws SQLException on a database error
    */
-  public static SubjectiveScore fromResultSet(final Connection connection,
-                                              final SubjectiveScoreCategory category,
-                                              final Tournament tournament,
-                                              final ResultSet rs)
+  public static Collection<SubjectiveScore> getCategoryScores(final Connection connection,
+                                                              final SubjectiveScoreCategory category,
+                                                              final Tournament tournament)
       throws SQLException {
-    final SubjectiveScore score = new SubjectiveScore();
-    score.setScoreOnServer(true);
+    final Collection<SubjectiveScore> scores = new LinkedList<>();
 
-    final String judge = castNonNull(rs.getString("Judge"));
+    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+        + category.getName() //
+        + " WHERE Tournament = ?" //
+    )) {
+      prep.setInt(1, tournament.getTournamentID());
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final SubjectiveScore score = new SubjectiveScore();
+          score.setScoreOnServer(true);
 
-    score.setTeamNumber(rs.getInt("TeamNumber"));
-    score.setJudge(judge);
-    score.setNoShow(rs.getBoolean("NoShow"));
-    score.setNote(rs.getString("note"));
-    score.setCommentGreatJob(rs.getString("comment_great_job"));
-    score.setCommentThinkAbout(rs.getString("comment_think_about"));
+          final int teamNumber = rs.getInt("TeamNumber");
+          final String judge = castNonNull(rs.getString("Judge"));
 
-    final Map<String, Double> standardSubScores = new HashMap<>();
-    final Map<String, String> enumSubScores = new HashMap<>();
-    final Map<String, String> goalComments = new HashMap<>();
-    for (final AbstractGoal goal : category.getAllGoals()) {
-      if (goal.isEnumerated()) {
-        final String value = rs.getString(goal.getName());
-        if (null == value) {
-          throw new FLLInternalException("Found enumerated goal '"
-              + goal.getName()
-              + "' with null value in the database");
+          score.setTeamNumber(teamNumber);
+          score.setJudge(judge);
+          score.setNoShow(rs.getBoolean("NoShow"));
+          score.setNote(rs.getString("note"));
+          score.setCommentGreatJob(rs.getString("comment_great_job"));
+          score.setCommentThinkAbout(rs.getString("comment_think_about"));
+
+          final Map<String, Double> standardSubScores = new HashMap<>();
+          final Map<String, String> enumSubScores = new HashMap<>();
+          final Map<String, String> goalComments = new HashMap<>();
+          for (final AbstractGoal goal : category.getAllGoals()) {
+            if (goal.isEnumerated()) {
+              final String value = rs.getString(goal.getName());
+              if (null == value) {
+                throw new FLLInternalException("Found enumerated goal '"
+                    + goal.getName()
+                    + "' with null value in the database");
+              }
+              enumSubScores.put(goal.getName(), value);
+            } else {
+              final double value = rs.getDouble(goal.getName());
+              standardSubScores.put(goal.getName(), value);
+            }
+
+            final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
+            final String comment = rs.getString(commentColumn);
+            if (!StringUtils.isBlank(comment)) {
+              goalComments.put(goal.getName(), comment);
+            }
+          } // foreach goal
+          score.setStandardSubScores(standardSubScores);
+          score.setEnumSubScores(enumSubScores);
+          score.setGoalComments(goalComments);
+
+          final Set<String> nominatedCategories = NonNumericNominees.getNomineesByJudgeForTeam(connection, tournament,
+                                                                                               score.getJudge(),
+                                                                                               score.getTeamNumber());
+          score.setNonNumericNominations(nominatedCategories);
+
+          scores.add(score);
         }
-        enumSubScores.put(goal.getName(), value);
-      } else {
-        final double value = rs.getDouble(goal.getName());
-        standardSubScores.put(goal.getName(), value);
       }
-
-      final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
-      final String comment = rs.getString(commentColumn);
-      if (!StringUtils.isBlank(comment)) {
-        goalComments.put(goal.getName(), comment);
-      }
-    } // foreach goal
-    score.setStandardSubScores(standardSubScores);
-    score.setEnumSubScores(enumSubScores);
-    score.setGoalComments(goalComments);
-
-    final Set<String> nominatedCategories = NonNumericNominees.getNomineesByJudgeForTeam(connection, tournament,
-                                                                                         score.getJudge(),
-                                                                                         score.getTeamNumber());
-    score.setNonNumericNominations(nominatedCategories);
-    return score;
+    }
+    return scores;
   }
 
 }

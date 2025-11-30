@@ -13,7 +13,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
@@ -86,25 +85,14 @@ public class SubjectiveScoresServlet extends HttpServlet {
         // judge->teamNumber->score
         final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<String, Map<Integer, SubjectiveScore>>();
 
-        try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-            + sc.getName()
-            + " WHERE Tournament = ?")) {
-          prep.setInt(1, currentTournament.getTournamentID());
+        for (final SubjectiveScore score : SubjectiveScore.getCategoryScores(connection, sc, currentTournament)) {
+          final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
+                                                                                           k -> new HashMap<>());
+          judgeScores.put(score.getTeamNumber(), score);
 
-          try (ResultSet rs = prep.executeQuery()) {
-            while (rs.next()) {
-              final SubjectiveScore score = SubjectiveScore.fromResultSet(connection, sc, currentTournament, rs);
+        } // foreach result
 
-              final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
-                                                                                               k -> new HashMap<>());
-              judgeScores.put(score.getTeamNumber(), score);
-
-            } // foreach result
-
-            allScores.put(sc.getName(), categoryScores);
-
-          } // allocate result set
-        } // allocate prep
+        allScores.put(sc.getName(), categoryScores);
       } // foreach category
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
