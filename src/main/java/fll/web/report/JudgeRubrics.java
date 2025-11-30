@@ -21,7 +21,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
-import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -84,7 +84,7 @@ public class JudgeRubrics extends BaseFLLServlet {
                                                 .values()) {
           final String directory = String.valueOf(team.getTeamNumber());
 
-          final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForTeamAndJudge(connection,
+          final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForTeamAndJudge(connection,
                                                                                                              category,
                                                                                                              tournament,
                                                                                                              team,

@@ -22,7 +22,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import fll.Team;
 import fll.Tournament;
 import fll.db.NonNumericNominees;
-import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.SubjectiveTeamScore;
 import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
@@ -293,7 +293,7 @@ public final class SubjectiveScore {
       throws SQLException {
     final Collection<SubjectiveScore> scores = new LinkedList<>();
 
-    for (final SubjectiveTeamScore dbScore : DefaultSubjectiveTeamScore.getScoresForCategory(connection, tournament,
+    for (final SubjectiveTeamScore dbScore : DatabaseSubjectiveTeamScore.getScoresForCategory(connection, tournament,
                                                                                              category)) {
       final SubjectiveScore score = new SubjectiveScore();
       score.setScoreOnServer(true);

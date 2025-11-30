@@ -29,7 +29,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
-import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -112,7 +112,7 @@ public class TeamResults extends BaseFLLServlet {
     final String directory = String.valueOf(team.getTeamNumber());
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForTeam(connection, category, tournament,
+      final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForTeam(connection, category, tournament,
                                                                                       team);
       final String filename = String.format("%s/%s_%s.pdf", directory, directory, category.getTitle());
 

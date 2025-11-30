@@ -34,7 +34,7 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -308,7 +308,7 @@ public class VirtualSubjectiveCategoryReport extends BaseFLLServlet {
       throws SQLException {
     final Map<SubjectiveScoreCategory, Collection<SubjectiveTeamScore>> referencedScores = new HashMap<>();
     for (final SubjectiveScoreCategory referencedCategory : referencedCategories) {
-      final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForTeam(connection,
+      final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForTeam(connection,
                                                                                                  referencedCategory,
                                                                                                  tournament, team);
       referencedScores.put(referencedCategory, scores);

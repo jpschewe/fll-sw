@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.documents.writers.SubjectivePdfWriter;
-import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -61,7 +61,7 @@ public class SubjectiveScoreRubrics extends BaseFLLServlet {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final Collection<SubjectiveTeamScore> scores = DefaultSubjectiveTeamScore.getScoresForCategoryAndAwardGroup(connection,
+      final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForCategoryAndAwardGroup(connection,
                                                                                                                   tournament,
                                                                                                                   category,
                                                                                                                   awardGroup);

@@ -47,7 +47,7 @@ import fll.Utilities;
 import fll.db.AwardDeterminationOrder;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.scores.DefaultSubjectiveTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -1351,7 +1351,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       boolean zeroInRequiredGoal = false;
 
       final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-      for (final SubjectiveTeamScore score : DefaultSubjectiveTeamScore.getScoresForTeam(connection, category,
+      for (final SubjectiveTeamScore score : DatabaseSubjectiveTeamScore.getScoresForTeam(connection, category,
                                                                                          tournament, team)) {
         final Iterator<Goal> iter = requiredGoals.iterator();
         while (!zeroInRequiredGoal
