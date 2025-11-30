@@ -57,7 +57,7 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
                                      final @Nullable String commentGreatJob,
                                      final @Nullable String commentThinkAbout,
                                      final Map<String, @Nullable String> goalComments,
-                                     final String note,
+                                     final @Nullable String note,
                                      final Set<String> nonNumericNominations) {
     super(teamNumber, simpleGoals, enumGoals, noShow);
     this.judge = judge;
