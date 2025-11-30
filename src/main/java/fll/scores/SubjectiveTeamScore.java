@@ -50,4 +50,11 @@ public interface SubjectiveTeamScore extends TeamScore {
   @SideEffectFree
   Set<String> getNonNumericNominations();
 
+  /**
+   * @return the judge note for the score.
+   */
+  @SideEffectFree
+  @Nullable
+  String getNote();
+
 }

@@ -46,6 +46,7 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
    * @param commentGreatJob see {@link #getCommentGreatJob()}
    * @param commentThinkAbout see {@link #getCommentThinkAbout()}
    * @param goalComments see {@link #getGoalComment(String)}
+   * @param note {@link #getNote()}
    * @param nonNumericNominations see {@link #getNonNumericNominations()}
    */
   private DefaultSubjectiveTeamScore(final int teamNumber,
@@ -56,12 +57,14 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
                                      final @Nullable String commentGreatJob,
                                      final @Nullable String commentThinkAbout,
                                      final Map<String, @Nullable String> goalComments,
+                                     final String note,
                                      final Set<String> nonNumericNominations) {
     super(teamNumber, simpleGoals, enumGoals, noShow);
     this.judge = judge;
     this.commentGreatJob = commentGreatJob;
     this.commentThinkAbout = commentThinkAbout;
     this.goalComments = new HashMap<>(goalComments);
+    this.note = note;
     this.nonNumericNominations = Collections.unmodifiableSet(new HashSet<>(nonNumericNominations));
   }
 
@@ -98,6 +101,13 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
   @Override
   public Set<String> getNonNumericNominations() {
     return nonNumericNominations;
+  }
+
+  private final @Nullable String note;
+
+  @Override
+  public @Nullable String getNote() {
+    return note;
   }
 
   /**
@@ -180,6 +190,37 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
    * @param connection database connection
    * @param tournament the tournament
    * @param category the category to get scores for
+   * @return scores
+   * @throws SQLException on a database error
+   */
+  public static Collection<SubjectiveTeamScore> getScoresForCategory(final Connection connection,
+                                                                     final Tournament tournament,
+                                                                     final SubjectiveScoreCategory category)
+      throws SQLException {
+    final Collection<SubjectiveTeamScore> scores = new LinkedList<>();
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+        + category.getName()
+        + " WHERE Tournament = ?")) {
+      prep.setInt(1, tournament.getTournamentID());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final SubjectiveTeamScore score = fromResultSet(connection, category, tournament, rs);
+
+          scores.add(score);
+        } // foreach result
+
+      } // allocate result set
+    } // allocate prep
+
+    return scores;
+  }
+
+  /**
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param category the category to get scores for
    * @param awardGroup the award group to get scores for
    * @return scores
    * @throws SQLException on a database error
@@ -231,6 +272,7 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
 
     final @Nullable String commentGreatJob = rs.getString("comment_great_job");
     final @Nullable String commentThinkAbout = rs.getString("comment_think_about");
+    final @Nullable String note = rs.getString("note");
 
     final Map<String, Double> simpleGoals = new HashMap<>();
     final Map<String, String> enumGoals = new HashMap<>();
@@ -261,7 +303,7 @@ public final class DefaultSubjectiveTeamScore extends DefaultTeamScore implement
 
     final SubjectiveTeamScore score = new DefaultSubjectiveTeamScore(teamNumber, simpleGoals, enumGoals, noShow, judge,
                                                                      commentGreatJob, commentThinkAbout, goalComments,
-                                                                     nominatedCategories);
+                                                                     note, nominatedCategories);
     return score;
   }
 
