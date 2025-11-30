@@ -4,26 +4,13 @@
 
 package fll.scores;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
-
-import fll.Tournament;
-import fll.db.GenerateDB;
-import fll.db.NonNumericNominees;
-import fll.util.FLLInternalException;
-import fll.xml.AbstractGoal;
-import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Subjective score populated from values.

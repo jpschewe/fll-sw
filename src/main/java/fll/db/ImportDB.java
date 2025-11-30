@@ -1489,13 +1489,9 @@ public final class ImportDB {
     LOGGER.debug("Upgrading database from 35 to 36");
 
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("ALTER TABLE "
-          + GenerateDB.PERFORMANCE_TABLE_NAME
-          + " ADD COLUMN tablename varchar(64)");
+      stmt.executeUpdate("ALTER TABLE performance ADD COLUMN tablename varchar(64)");
 
-      stmt.executeUpdate("UPDATE "
-          + GenerateDB.PERFORMANCE_TABLE_NAME
-          + " SET tablename = 'UNKNOWN'");
+      stmt.executeUpdate("UPDATE performance SET tablename = 'UNKNOWN'");
     }
 
     setDBVersion(connection, 36);
@@ -2784,7 +2780,7 @@ public final class ImportDB {
 
   }
 
-  //FIXME
+  // FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
@@ -2914,12 +2910,10 @@ public final class ImportDB {
       copyData(sourcePrep, destPrep);
     }
 
-    //FIXME
+    // FIXME
     LOGGER.debug("Importing performance scores");
-    final String tableName = GenerateDB.PERFORMANCE_TABLE_NAME;
-    try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
-        + tableName
-        + " WHERE Tournament = ?")) {
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
     }
@@ -2934,7 +2928,7 @@ public final class ImportDB {
     columns.append(" Verified");
     final int numColumns = 7;
 
-    importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
+    importCommon(columns, "performance", numColumns, destinationConnection, destTournamentID, sourceConnection,
                  sourceTournamentID);
 
     importPerformanceGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);

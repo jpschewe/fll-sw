@@ -242,10 +242,7 @@ public final class GenerateDB {
       // used for view below
       final StringBuilder performanceColumns = new StringBuilder();
       {
-        final String tableName = PERFORMANCE_TABLE_NAME;
-        createStatement.append("CREATE TABLE "
-            + tableName
-            + " (");
+        createStatement.append("CREATE TABLE Performance (");
         performanceColumns.append("TeamNumber,");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         performanceColumns.append("Tournament,");
@@ -264,15 +261,9 @@ public final class GenerateDB {
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         performanceColumns.append("StandardizedScore"); // last column, no comma
         createStatement.append(" StandardizedScore float default NULL,");
-        createStatement.append(" CONSTRAINT "
-            + tableName
-            + "_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
-        createStatement.append(",CONSTRAINT "
-            + tableName
-            + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
-        createStatement.append(",CONSTRAINT "
-            + tableName
-            + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        createStatement.append(" CONSTRAINT performance_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
+        createStatement.append(",CONSTRAINT performance_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        createStatement.append(",CONSTRAINT performance_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 

@@ -15,8 +15,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import fll.db.GenerateDB;
-
 /**
  * Performance score from the database.
  */
@@ -43,9 +41,8 @@ public final class DatabasePerformanceTeamScore {
                                                               final Connection connection)
       throws SQLException {
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename FROM "
-        + GenerateDB.PERFORMANCE_TABLE_NAME
-        + " WHERE TeamNumber = ? AND Tournament = ?"
+    try (PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename" //
+        + " FROM performance WHERE TeamNumber = ? AND Tournament = ?"
         + " AND RunNumber = ?")) {
 
       prep.setInt(1, teamNumber);
