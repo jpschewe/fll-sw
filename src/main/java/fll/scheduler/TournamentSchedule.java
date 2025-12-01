@@ -988,7 +988,7 @@ public class TournamentSchedule implements Serializable {
                                                              + 1)));
         }
 
-        final String table = ci.getPerfTable(line, perfIndex);
+        final @Nullable String table = ci.getPerfTable(line, perfIndex);
         if (StringUtils.isBlank(table)) {
           throw new ScheduleParseException(String.format("Line %d is missing a table for performance %d",
                                                          reader.getLineNumber(), (perfIndex
