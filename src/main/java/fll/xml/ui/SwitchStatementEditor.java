@@ -37,8 +37,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link SwitchStatement}.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 /* package */ final class SwitchStatementEditor extends JPanel implements Validatable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();

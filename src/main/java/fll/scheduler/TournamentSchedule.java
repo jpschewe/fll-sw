@@ -36,9 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,7 +51,6 @@ import com.opencsv.CSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -62,7 +59,6 @@ import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.CellFileReader;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.TournamentData;
 import fll.web.playoff.ScoresheetGenerator;
@@ -537,101 +533,6 @@ public class TournamentSchedule implements Serializable {
             + si.getTeamNumber());
       }
     }
-  }
-
-  /**
-   * Check if this line is a header line. This checks for key headers and
-   * returns true if they are found.
-   */
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
-  private static boolean isHeaderLine(final @Nullable String[] line) {
-    boolean retval = false;
-    for (final String element : line) {
-      if (TEAM_NUMBER_HEADER.equals(element)) {
-        retval = true;
-      }
-    }
-
-    return retval;
-  }
-
-  /**
-   * Figure out how many regular match play rounds exist in this header line. This
-   * method also checks that the corresponding table header exists for each
-   * round and that the round numbers are contiguous starting at 1.
-   *
-   * @throws FLLRuntimeException if there are problems with the performance
-   *           round headers found
-   */
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
-  private static int countNumRegularMatchPlayRounds(final @Nullable String[] line) {
-    final SortedSet<Integer> perfRounds = new TreeSet<>();
-    for (final String element : line) {
-      if (null != element
-          && element.startsWith(BASE_PERF_HEADER)
-          && element.length() > BASE_PERF_HEADER.length()) {
-        final String perfNumberStr = element.substring(BASE_PERF_HEADER.length());
-        final Integer perfNumber = Integer.valueOf(perfNumberStr);
-        if (!perfRounds.add(perfNumber)) {
-          throw new FLLRuntimeException("Found performance rounds num "
-              + perfNumber
-              + " twice in the header: "
-              + Arrays.asList(line));
-        }
-      }
-    }
-
-    /*
-     * check that the values start at 1, are contiguous, and that the
-     * corresponding table header exists
-     */
-    int expectedValue = 1;
-    for (final Integer value : perfRounds) {
-      if (null == value) {
-        throw new FLLInternalException("Found null performance round in header!");
-      }
-      if (expectedValue != value.intValue()) {
-        throw new FLLRuntimeException("Performance rounds not contiguous after "
-            + (expectedValue
-                - 1)
-            + " found "
-            + value);
-      }
-
-      final String tableHeader = String.format(TABLE_HEADER_FORMAT, expectedValue);
-      if (!checkHeaderExists(line, tableHeader)) {
-        throw new FLLRuntimeException("Couldn't find header for round "
-            + expectedValue
-            + ". Looking for header '"
-            + tableHeader
-            + "'");
-      }
-
-      ++expectedValue;
-    }
-
-    return perfRounds.size();
-  }
-
-  private static boolean checkHeaderExists(final @Nullable String[] line,
-                                           final String header) {
-    return null != columnForHeader(line, header);
-  }
-
-  /**
-   * Find the column that contains the specified header.
-   *
-   * @return the column, null if not found
-   */
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
-  private static @Nullable Integer columnForHeader(final @Nullable String[] line,
-                                                   final String header) {
-    for (int i = 0; i < line.length; ++i) {
-      if (header.equals(line[i])) {
-        return i;
-      }
-    }
-    return null;
   }
 
   /**
@@ -1549,7 +1450,6 @@ public class TournamentSchedule implements Serializable {
      * @throws IllegalArgumentException if {@code perfColumn} and
      *           {@code perfTableColumn} are not the same length
      */
-    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
     public ColumnInformation(final int headerRowIndex,
                              final @Nullable String[] headerLine,
                              final String teamNumColumn,

@@ -2773,7 +2773,6 @@ public final class ImportDB {
 
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon category")
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,

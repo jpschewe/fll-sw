@@ -37,8 +37,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
  * Edit the list of {@link TiebreakerTest} objects on the
  * {@link PerformanceScoreCategory}.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 /* package */ class TiebreakerEditor extends JPanel implements Validatable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
