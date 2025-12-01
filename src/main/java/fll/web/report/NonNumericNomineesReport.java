@@ -136,7 +136,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     pageSequence.appendChild(documentBody);
 
     for (final NonNumericCategory category : CategoriesIgnored.getNonNumericCategories(description, connection,
-                                                                                                tournament)) {
+                                                                                       tournament)) {
       final Element element = addCategory(connection, tournament, document, category);
       documentBody.appendChild(element);
     }
@@ -160,8 +160,7 @@ public class NonNumericNomineesReport extends BaseFLLServlet {
     categoryTitleBlock.appendChild(document.createTextNode(category.getTitle()));
 
     final String categoryDescription = category.getDescription();
-    if (null != categoryDescription
-        && !categoryDescription.isBlank()) {
+    if (!categoryDescription.isBlank()) {
       final Element categoryDescriptionBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       container.appendChild(categoryDescriptionBlock);
       categoryDescriptionBlock.appendChild(document.createTextNode(categoryDescription));

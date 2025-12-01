@@ -516,8 +516,7 @@ public final class UploadTeams extends BaseFLLServlet {
    *          judging station
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+  @SuppressFBWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   private static void updateTournamentTeams(final Connection connection,
                                             final String teamNumberColumn,
                                             final String tournamentColumn,

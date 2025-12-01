@@ -19,7 +19,6 @@ import javax.sql.DataSource;
 
 import org.checkerframework.checker.nullness.qual.PolyNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -46,7 +45,6 @@ public class VerifyJudges extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
-  @SuppressFBWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Checking category name retrieved from request against valid category names")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

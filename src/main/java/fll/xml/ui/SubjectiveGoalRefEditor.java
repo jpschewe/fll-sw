@@ -16,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -26,8 +25,6 @@ import fll.xml.SubjectiveScoreCategory;
 /**
  * Editor for {@link SubjectiveGoalRef} objects.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 /* package */ class SubjectiveGoalRefEditor extends JPanel implements Validatable {
 
   private final ValidityPanel validPanel;

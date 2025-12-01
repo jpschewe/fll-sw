@@ -24,8 +24,7 @@ import fll.xml.VariableRef;
 /**
  * Editor for {@link VariableRef} objects.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 class VariableRefEditor extends Box {
 
   private final VariableRef variableRef;
