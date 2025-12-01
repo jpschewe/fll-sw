@@ -1779,6 +1779,7 @@ public final class ImportDB {
   /**
    * Rework performance goal values into their own normalized tables.
    */
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Column names to drop depends on the goal names")
   private static void upgrade51to52(final Connection connection,
                                     final boolean createConstraints,
                                     final ChallengeDescription description)
