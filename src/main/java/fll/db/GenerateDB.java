@@ -240,24 +240,17 @@ public final class GenerateDB {
       // performance
 
       // used for view below
-      final StringBuilder performanceColumns = new StringBuilder();
       {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = PERFORMANCE_TABLE_NAME;
         createStatement.append("CREATE TABLE "
             + tableName
             + " (");
-        performanceColumns.append("TeamNumber,");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
-        performanceColumns.append("Tournament,");
         createStatement.append(" Tournament INTEGER NOT NULL,");
-        performanceColumns.append("RunNumber,");
         createStatement.append(" RunNumber INTEGER NOT NULL,");
-        performanceColumns.append("TimeStamp,");
         createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
-        performanceColumns.append("NoShow,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
@@ -267,13 +260,9 @@ public final class GenerateDB {
             createStatement.append(" "
                 + columnDefinition
                 + ",");
-            performanceColumns.append(element.getName()
-                + ",");
           }
         }
-        performanceColumns.append("ComputedTotal,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
-        performanceColumns.append("StandardizedScore"); // last column, no comma
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
             + tableName
