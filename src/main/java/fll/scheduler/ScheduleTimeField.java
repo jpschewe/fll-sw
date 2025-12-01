@@ -24,6 +24,7 @@ import javax.swing.text.MaskFormatter;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.FLLInternalException;
 
 /**
@@ -80,6 +81,7 @@ import fll.util.FLLInternalException;
    * is the same as the time format used by TournamentSchedule as it's
    * output format, except that we're making sure there is a leading 0.
    */
+  @SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
   private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
 
   /**

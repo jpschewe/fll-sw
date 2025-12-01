@@ -51,6 +51,7 @@ import com.opencsv.CSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -174,6 +175,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Always output without 24-hour time and without AM/PM.
    */
+  @SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
   private static final DateTimeFormatter OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm");
 
   /**
