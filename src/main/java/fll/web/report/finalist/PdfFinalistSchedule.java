@@ -53,6 +53,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 /**
  * Outputs the PDF showing times of finalist categories.
  */
+@SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
 @WebServlet("/report/finalist/PdfFinalistSchedule")
 public class PdfFinalistSchedule extends BaseFLLServlet {
 
@@ -223,7 +224,6 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
   /**
    * Simple hour and minute time format.
    */
-  @SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
   public static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
 
   private Element createMainTable(final Connection connection,

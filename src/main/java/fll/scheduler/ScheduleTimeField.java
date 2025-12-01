@@ -35,6 +35,7 @@ import fll.util.FLLInternalException;
  * @see TournamentSchedule#parseTime(String)
  * @see TournamentSchedule#formatTime(java.time.LocalTime)
  */
+@SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
 /* package */ class ScheduleTimeField extends JFormattedTextField {
 
   public static final String MASKFORMAT = "##:##";
@@ -81,7 +82,6 @@ import fll.util.FLLInternalException;
    * is the same as the time format used by TournamentSchedule as it's
    * output format, except that we're making sure there is a leading 0.
    */
-  @SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
   private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
 
   /**
