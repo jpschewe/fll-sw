@@ -77,6 +77,7 @@ import fll.xml.SubjectiveScoreCategory;
  * the scheduling document.
  * </p>
  */
+@SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
 public class TournamentSchedule implements Serializable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -175,7 +176,6 @@ public class TournamentSchedule implements Serializable {
   /**
    * Always output without 24-hour time and without AM/PM.
    */
-  @SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
   private static final DateTimeFormatter OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm");
 
   /**
