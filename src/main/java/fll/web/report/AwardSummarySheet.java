@@ -22,7 +22,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
@@ -95,7 +94,7 @@ public class AwardSummarySheet extends BaseFLLServlet {
     final DataSource datasource = tournamentData.getDataSource();
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, challengeDescription,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       response.reset();
       response.setContentType("application/pdf");
@@ -115,7 +114,6 @@ public class AwardSummarySheet extends BaseFLLServlet {
     }
   }
 
-  @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private Document generateReport(final Connection connection,
                                   final ChallengeDescription challengeDescription,
                                   final TournamentData tournamentData,

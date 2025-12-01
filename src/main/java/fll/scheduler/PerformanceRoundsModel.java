@@ -15,8 +15,6 @@ import javax.swing.table.AbstractTableModel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Model for displaying and editing a list of performance rounds.
  */
@@ -109,7 +107,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
    * 
    * @param data the index specifies the round, null means no limit
    */
-  @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification = "https://github.com/spotbugs/spotbugs/issues/927")
   public void setData(final List<@Nullable LocalTime> data) {
     this.times.clear();
     this.times.addAll(data);

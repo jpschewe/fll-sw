@@ -49,8 +49,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link ChallengeDescription} objects.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 public final class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();

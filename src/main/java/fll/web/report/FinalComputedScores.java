@@ -634,7 +634,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
    *         {@link VirtualSubjectiveScoreCategory}
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
   public static Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> gatherRankedSubjectiveTeams(final Connection connection,
                                                                                                                           final ChallengeDescription description,
                                                                                                                           final Tournament tournament)

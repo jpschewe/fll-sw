@@ -775,7 +775,6 @@ public class Launcher extends JFrame {
   /**
    * Prompt the user if the webserver is running.
    */
-  @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "This method is ment to close the application")
   private void maybeExit(@UnknownInitialization(Launcher.class) Launcher this) {
     if (mServerOnline) {
       final int result = JOptionPane.showConfirmDialog(this,

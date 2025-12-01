@@ -38,8 +38,7 @@ import fll.xml.StringValue;
 /**
  * Editor for {@link StringValue}.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 class StringValueEditor extends JPanel implements Validatable {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();

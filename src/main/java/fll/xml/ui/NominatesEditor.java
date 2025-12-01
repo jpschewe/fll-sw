@@ -26,8 +26,7 @@ import fll.xml.SubjectiveScoreCategory;
 /**
  * Editor for {@link SubjectiveScoreCategory.Nominates} objects.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 /* package */ class NominatesEditor extends Box {
 
   private final SubjectiveScoreCategory.Nominates nominates;
