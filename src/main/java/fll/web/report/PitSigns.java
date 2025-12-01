@@ -211,15 +211,12 @@ public class PitSigns extends BaseFLLServlet {
     page.appendChild(judgingGroupBlock);
     judgingGroupBlock.appendChild(document.createTextNode(String.format("Judging Group: %s", team.getJudgingGroup())));
     judgingGroupBlock.setAttribute("font-size", "22pt");
-    final @Nullable String wave = team.getWave();
-    if (null != wave) {
-      final Element waveText = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
-      judgingGroupBlock.appendChild(waveText);
-      waveText.setAttribute("font-size", "14pt");
-      waveText.appendChild(document.createTextNode(String.format("%swave %s",
-                                                                 Utilities.NON_BREAKING_SPACE_STRING.repeat(4),
-                                                                 wave)));
-    }
+    final String wave = team.getWave();
+    final Element waveText = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    judgingGroupBlock.appendChild(waveText);
+    waveText.setAttribute("font-size", "14pt");
+    waveText.appendChild(document.createTextNode(String.format("%swave %s",
+                                                               Utilities.NON_BREAKING_SPACE_STRING.repeat(4), wave)));
 
     // top text
     // read from tournament parameters and create a block for each carriage

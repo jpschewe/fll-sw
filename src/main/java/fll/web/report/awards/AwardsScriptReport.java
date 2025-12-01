@@ -471,38 +471,36 @@ public class AwardsScriptReport extends BaseFLLServlet {
       }
       }
 
-      if (null != categoryPage) {
-        final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-        rootElement.appendChild(pageSequence);
+      final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+      rootElement.appendChild(pageSequence);
 
-        final String presenter = getCategoryPresenter(connection, tournament, category);
+      final String presenter = getCategoryPresenter(connection, tournament, category);
 
-        final Element header = createHeader(document, description, tournament,
-                                            null == prevCategory ? null : prevCategory.getTitle(), presenter);
-        pageSequence.appendChild(header);
+      final Element header = createHeader(document, description, tournament,
+                                          null == prevCategory ? null : prevCategory.getTitle(), presenter);
+      pageSequence.appendChild(header);
 
-        final @Nullable String beforeText;
-        if (iter.hasNext()) {
-          final AwardCategory nextCategory = iter.next();
-          beforeText = nextCategory.getTitle();
+      final @Nullable String beforeText;
+      if (iter.hasNext()) {
+        final AwardCategory nextCategory = iter.next();
+        beforeText = nextCategory.getTitle();
 
-          // move back
-          iter.previous();
-        } else {
-          beforeText = null;
-        }
-
-        final Element footer = createFooter(document, beforeText);
-        pageSequence.appendChild(footer);
-
-        final Element documentBody = FOPUtils.createBody(document);
-        pageSequence.appendChild(documentBody);
-
-        documentBody.appendChild(categoryPage);
-        categoryPage.setAttribute("page-break-after", "always");
-
-        prevCategory = category;
+        // move back
+        iter.previous();
+      } else {
+        beforeText = null;
       }
+
+      final Element footer = createFooter(document, beforeText);
+      pageSequence.appendChild(footer);
+
+      final Element documentBody = FOPUtils.createBody(document);
+      pageSequence.appendChild(documentBody);
+
+      documentBody.appendChild(categoryPage);
+      categoryPage.setAttribute("page-break-after", "always");
+
+      prevCategory = category;
     }
   }
 

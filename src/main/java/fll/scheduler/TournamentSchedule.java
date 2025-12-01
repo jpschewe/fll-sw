@@ -823,22 +823,9 @@ public class TournamentSchedule implements Serializable {
     @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
-      final @Nullable String oneWave = one.getWave();
-      final @Nullable String twoWave = two.getWave();
-      final int waveCompare;
-      if (null == oneWave
-          && null == twoWave) {
-        waveCompare = 0;
-      } else if (null == oneWave
-          && null != twoWave) {
-        waveCompare = 1;
-      } else if (null != oneWave
-          && null == twoWave) {
-        waveCompare = -1;
-      } else {
-        // checker bug
-        waveCompare = castNonNull(oneWave).compareTo(castNonNull(twoWave));
-      }
+      final String oneWave = one.getWave();
+      final String twoWave = two.getWave();
+      final int waveCompare = oneWave.compareTo(twoWave);
 
       if (waveCompare == 0) {
         return Integer.compare(one.getTeamNumber(), two.getTeamNumber());

@@ -50,16 +50,14 @@ public class FLLContextListener implements ServletContextListener {
 
     // shutdown the database
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    if (null != datasource) {
-      try (Connection connection = datasource.getConnection()) {
-        try (Statement stmt = connection.createStatement()) {
-          stmt.executeUpdate("SHUTDOWN COMPACT");
-        } catch (final SQLException e) {
-          LOGGER.error("Error shutting down the database", e);
-        }
+    try (Connection connection = datasource.getConnection()) {
+      try (Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate("SHUTDOWN COMPACT");
       } catch (final SQLException e) {
-        LOGGER.error("Error getting connection to shutdown the database", e);
+        LOGGER.error("Error shutting down the database", e);
       }
+    } catch (final SQLException e) {
+      LOGGER.error("Error getting connection to shutdown the database", e);
     }
 
     Utilities.unloadDBDriver();
