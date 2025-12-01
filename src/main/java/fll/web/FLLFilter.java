@@ -22,7 +22,6 @@ import org.apache.logging.log4j.CloseableThreadContext;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.Version;
 import fll.db.Authentication;
@@ -428,7 +427,6 @@ public class FLLFilter implements Filter {
   /**
    * @return true if everything is OK, false if a redirect happened
    */
-  @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE", justification = "Spotbugs false positive checking of null for connection")
   private static boolean initialize(final HttpServletRequest request,
                                     final HttpServletResponse response,
                                     final HttpSession session,

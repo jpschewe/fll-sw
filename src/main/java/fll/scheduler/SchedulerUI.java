@@ -124,7 +124,6 @@ public class SchedulerUI extends JFrame {
 
   private final JTable mScheduleTable = new JTable();
 
-  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
   private TournamentSchedule mScheduleData = new TournamentSchedule();
 
   private @MonotonicNonNull ColumnInformation columnInfo = null;
@@ -160,13 +159,11 @@ public class SchedulerUI extends JFrame {
 
       frame.addWindowListener(new WindowAdapter() {
         @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosing(final WindowEvent e) {
           System.exit(0);
         }
 
         @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosed(final WindowEvent e) {
           System.exit(0);
         }
@@ -1218,7 +1215,6 @@ public class SchedulerUI extends JFrame {
       putValue(MNEMONIC_KEY, KeyEvent.VK_O);
     }
 
-    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "False positive in SpotBugs thinking that the second parameter to loaodScheduleFile cannot be null")
     @Override
     public void actionPerformed(final ActionEvent ae) {
       final String startingDirectory = PREFS.get(SCHEDULE_STARTING_DIRECTORY_PREF, null);

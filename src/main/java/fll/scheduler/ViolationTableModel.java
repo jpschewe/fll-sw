@@ -13,14 +13,11 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Table model for constraint violations.
  */
 /* package */class ViolationTableModel extends AbstractTableModel {
 
-  @SuppressFBWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
   private final List<ConstraintViolation> violations;
 
   private static final Comparator<ConstraintViolation> TEAM_NUMBER_COMPARATOR = new Comparator<ConstraintViolation>() {

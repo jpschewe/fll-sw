@@ -20,7 +20,6 @@ import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.util.FLLRuntimeException;
 
@@ -146,7 +145,6 @@ public class ScheduleChecker {
     }
   }
 
-  @SuppressFBWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations,
                           final TeamScheduleInfo ti) {
     final Duration subjectiveChangetime = getSubjectiveChangetime();

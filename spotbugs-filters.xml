@@ -32,17 +32,23 @@
     </Match>
 
 
-    <!-- it's OK to throw RuntimeException or Exception in test code --> 
+    <!-- it's OK to throw RuntimeException or Exception in test code -->
+    <!-- should be able to use an "or" here for the bug pattern, but that 
+        hides a bunch of bugs. Filed as https://github.com/spotbugs/spotbugs/issues/3837 -->
     <Match>
-      <or>
         <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
-        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
-      </or>
-      <or>
-        <Source name="**/integrationTest/**" />
-        <Source name="**/test/**" />
-      </or>
+        <or>
+            <Source name="**/integrationTest/**" />
+            <Source name="**/test/**" />
+        </or>
     </Match>
-    
+    <Match>
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+        <or>
+            <Source name="**/integrationTest/**" />
+            <Source name="**/test/**" />
+        </or>
+    </Match>
+
 </FindBugsFilter>
 

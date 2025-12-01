@@ -727,7 +727,7 @@ public final class Utilities {
       return contextClassLoader;
     }
 
-    final ClassLoader classClassLoader = Utilities.getClassLoader();
+    final ClassLoader classClassLoader = Utilities.class.getClassLoader();
     if (null != classClassLoader) {
       return classClassLoader;
     }

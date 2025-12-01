@@ -56,14 +56,11 @@ public class RegexFormatter extends DefaultFormatter {
   public Object stringToValue(String text) throws ParseException {
     final Pattern pattern = getPattern();
 
-    if (pattern != null) {
-      final Matcher matcher = pattern.matcher(text);
+    final Matcher matcher = pattern.matcher(text);
 
-      if (matcher.matches()) {
-        return super.stringToValue(text);
-      }
-      throw new ParseException("Pattern did not match", 0);
+    if (matcher.matches()) {
+      return super.stringToValue(text);
     }
-    return text;
+    throw new ParseException("Pattern did not match", 0);
   }
 }

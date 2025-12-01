@@ -161,12 +161,10 @@ public class RubricRange implements Serializable {
     }
 
     final String description = getDescription();
-    if (null != description) {
-      if (sb.length() > 0) {
-        sb.append(" ");
-      }
-      sb.append(description.trim());
+    if (sb.length() > 0) {
+      sb.append(" ");
     }
+    sb.append(description.trim());
 
     return sb.toString();
   }

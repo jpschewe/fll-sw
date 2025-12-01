@@ -406,7 +406,7 @@ public class H2HUpdateWebSocket {
   }
 
   @OnError
-  public void onError(final Throwable t) throws Throwable {
+  public void onError(final Throwable t) {
     if (t instanceof EOFException) {
       LOGGER.debug("{}: Socket closed.", h2hUuid, t);
     } else {

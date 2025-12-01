@@ -1328,8 +1328,7 @@ public final class ScoreEntry {
       if (caseResult instanceof ComplexPolynomial) {
         final ComplexPolynomial resultPoly = (ComplexPolynomial) caseResult;
         formatter.format("%s%s = %s;%n", generateIndentSpace(indent
-            + INDENT_LEVEL), getVarNameForComputedScore(goalName),
-                         null == resultPoly ? "NULL" : polyToString(resultPoly));
+            + INDENT_LEVEL), getVarNameForComputedScore(goalName), polyToString(resultPoly));
       } else if (caseResult instanceof SwitchStatement) {
         final SwitchStatement resultSwitch = (SwitchStatement) caseResult;
         generateSwitch(formatter, resultSwitch, goalName, indent

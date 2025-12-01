@@ -26,8 +26,7 @@ import fll.xml.GoalScoreType;
 /**
  * Editor for {@link GoalRef} objects.
  */
-@SuppressFBWarnings(value = { "SE_BAD_FIELD",
-                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
 /* package */ class GoalRefEditor extends Box {
 
   private final GoalRef goalRef;
@@ -39,7 +38,7 @@ import fll.xml.GoalScoreType;
    */
   /* package */ GoalRefEditor(final GoalRef ref) {
     super(BoxLayout.LINE_AXIS);
-    
+
     this.goalRef = ref;
 
     editor = new JButton(ref.getGoal().getTitle());

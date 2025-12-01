@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
@@ -65,7 +64,6 @@ public class ImportDBDump extends BaseFLLServlet {
   /**
    * @return an integer to differentiate in-memory databases.
    */
-  @SuppressFBWarnings(value = "SSD_DO_NOT_USE_INSTANCE_LOCK_ON_SHARED_STATIC_DATA", justification = "https://github.com/spotbugs/spotbugs/issues/1978")
   public static int getNextDBCount() {
     synchronized (ImportDBDump.class) {
       return importdbCount++;
