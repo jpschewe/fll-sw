@@ -347,7 +347,6 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws ParseException on an error parsing the score data
    */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static void insertPerformanceScore(final RunMetadataFactory runMetadataFactory,
                                             final Connection connection,
                                             final DataSource datasource,
@@ -482,7 +481,6 @@ public final class Queries {
    * @throws ParseException if the XML document is invalid.
    * @throws RuntimeException if a parameter is missing.
    */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static int updatePerformanceScore(final RunMetadataFactory runMetadataFactory,
                                            final ChallengeDescription description,
                                            final Connection connection,
@@ -1132,7 +1130,7 @@ public final class Queries {
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
    */
-  //FIXME - do this with constraint cascade?
+  // FIXME - do this with constraint cascade?
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
   public static void deleteTeam(final int teamNumber,
                                 final ChallengeDescription description,
@@ -1318,7 +1316,7 @@ public final class Queries {
    * @param currentTournament tournament to delete the team from
    * @throws SQLException on a database error
    */
-  //FIXME - use cascade constraints
+  // FIXME - use cascade constraints
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static void deleteTeamFromTournament(final Connection connection,
                                               final ChallengeDescription description,
@@ -2295,7 +2293,7 @@ public final class Queries {
    * @param tournamentID the id of the tournament
    * @throws SQLException if a database error occurs
    */
-  //FIXME
+  // FIXME
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for table to modify")
   public static void deleteSubjectiveScores(final Connection connection,
                                             final String categoryName,
