@@ -923,6 +923,7 @@ public class TournamentSchedule implements Serializable {
    *           read
    * @throws IOException if there is an error reading the file
    */
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "Spotbugs doesn't know that StringUtils.isBlank filters out the null")
   private @Nullable TeamScheduleInfo parseLine(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
                                                final CellFileReader reader,
                                                final ColumnInformation ci)
