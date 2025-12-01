@@ -127,10 +127,10 @@ import net.mtu.eggplant.xml.XMLUtils;
         row.appendChild(FOPUtils.createStandardTableCell(document, String.valueOf(scoreEntry.getTeamNumber())));
 
         final String teamName = scoreEntry.getTeamName();
-        row.appendChild(FOPUtils.createStandardTableCell(document, null == teamName ? "" : teamName));
+        row.appendChild(FOPUtils.createStandardTableCell(document, teamName));
 
         final String organization = scoreEntry.getOrganization();
-        row.appendChild(FOPUtils.createStandardTableCell(document, null == organization ? "" : organization));
+        row.appendChild(FOPUtils.createStandardTableCell(document, organization));
 
         row.appendChild(FOPUtils.createStandardTableCell(document, scoreEntry.getFormattedScore()));
       }
