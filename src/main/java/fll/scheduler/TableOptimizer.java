@@ -145,7 +145,7 @@ public class TableOptimizer {
    * Compute the best table ordering for a set of teams at the
    * specified time.
    *
-   * @param checkCanceled if non-null, check if the optimization should finish
+   * @param checkCanceled check if the optimization should finish
    *          early
    */
   private void computeBestTableOrdering(final Map<TeamScheduleInfo, PerformanceTime> originalValues,
@@ -164,8 +164,7 @@ public class TableOptimizer {
     final List<Map<PerformanceTime, TeamScheduleInfo>> possibleValues = computePossibleValues(originalValues, time,
                                                                                               tables);
     for (final Map<PerformanceTime, TeamScheduleInfo> possibleValue : possibleValues) {
-      if (null != checkCanceled
-          && checkCanceled.isCanceled()) {
+      if (checkCanceled.isCanceled()) {
         // user interrupt
         break;
       }
@@ -255,23 +254,19 @@ public class TableOptimizer {
         // if the values are not null they are guaranteed to be keys for originalValues
         if (null != team1
             && null != team2) {
-          assignments.put(new PerformanceTime(time, tableColor, side1),
-                          team1);
-          assignments.put(new PerformanceTime(time, tableColor, side2),
-                          team2);
+          assignments.put(new PerformanceTime(time, tableColor, side1), team1);
+          assignments.put(new PerformanceTime(time, tableColor, side2), team2);
         } else if (null != team1
             && null == team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side1),
-                          team1);
+          assignments.put(new PerformanceTime(time, tableColor, side1), team1);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;
         } else if (null == team1
             && null != team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side2),
-                          team2);
+          assignments.put(new PerformanceTime(time, tableColor, side2), team2);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;

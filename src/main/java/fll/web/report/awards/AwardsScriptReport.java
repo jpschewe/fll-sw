@@ -42,7 +42,6 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
@@ -111,7 +110,7 @@ public class AwardsScriptReport extends BaseFLLServlet {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       response.reset();
       response.setContentType("application/pdf");
@@ -329,9 +328,20 @@ public class AwardsScriptReport extends BaseFLLServlet {
                             .collect(Collectors.toList());
   }
 
-  private List<AwardCategory> filterAwardOrder(final Connection connection,
-                                               final Tournament tournament,
-                                               final List<AwardCategory> fullAwardOrder)
+  /**
+   * Filter out non-numeric categories that are ignored for this tournament.
+   * Filter out head to head if head to head
+   * isn't being run in this tournament.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament
+   * @param fullAwardOrder all awards
+   * @return a new list that is a subset of {@code fullAwardOrder}
+   * @throws SQLException on a database error
+   */
+  public static List<AwardCategory> filterAwardOrder(final Connection connection,
+                                                     final Tournament tournament,
+                                                     final List<AwardCategory> fullAwardOrder)
       throws SQLException {
 
     final List<AwardCategory> filteredAwardOrder = new LinkedList<>();
@@ -355,7 +365,6 @@ public class AwardsScriptReport extends BaseFLLServlet {
     return filteredAwardOrder;
   }
 
-  @SuppressFBWarnings(value = { "DLS_DEAD_LOCAL_STORE" }, justification = "Switch statement requires storing of variable")
   private void addAwards(final ChallengeDescription description,
                          final Connection connection,
                          final Document document,
@@ -462,38 +471,36 @@ public class AwardsScriptReport extends BaseFLLServlet {
       }
       }
 
-      if (null != categoryPage) {
-        final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-        rootElement.appendChild(pageSequence);
+      final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+      rootElement.appendChild(pageSequence);
 
-        final String presenter = getCategoryPresenter(connection, tournament, category);
+      final String presenter = getCategoryPresenter(connection, tournament, category);
 
-        final Element header = createHeader(document, description, tournament,
-                                            null == prevCategory ? null : prevCategory.getTitle(), presenter);
-        pageSequence.appendChild(header);
+      final Element header = createHeader(document, description, tournament,
+                                          null == prevCategory ? null : prevCategory.getTitle(), presenter);
+      pageSequence.appendChild(header);
 
-        final @Nullable String beforeText;
-        if (iter.hasNext()) {
-          final AwardCategory nextCategory = iter.next();
-          beforeText = nextCategory.getTitle();
+      final @Nullable String beforeText;
+      if (iter.hasNext()) {
+        final AwardCategory nextCategory = iter.next();
+        beforeText = nextCategory.getTitle();
 
-          // move back
-          iter.previous();
-        } else {
-          beforeText = null;
-        }
-
-        final Element footer = createFooter(document, beforeText);
-        pageSequence.appendChild(footer);
-
-        final Element documentBody = FOPUtils.createBody(document);
-        pageSequence.appendChild(documentBody);
-
-        documentBody.appendChild(categoryPage);
-        categoryPage.setAttribute("page-break-after", "always");
-
-        prevCategory = category;
+        // move back
+        iter.previous();
+      } else {
+        beforeText = null;
       }
+
+      final Element footer = createFooter(document, beforeText);
+      pageSequence.appendChild(footer);
+
+      final Element documentBody = FOPUtils.createBody(document);
+      pageSequence.appendChild(documentBody);
+
+      documentBody.appendChild(categoryPage);
+      categoryPage.setAttribute("page-break-after", "always");
+
+      prevCategory = category;
     }
   }
 

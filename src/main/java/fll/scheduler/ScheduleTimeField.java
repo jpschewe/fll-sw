@@ -24,6 +24,7 @@ import javax.swing.text.MaskFormatter;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.FLLInternalException;
 
 /**
@@ -34,6 +35,7 @@ import fll.util.FLLInternalException;
  * @see TournamentSchedule#parseTime(String)
  * @see TournamentSchedule#formatTime(java.time.LocalTime)
  */
+@SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
 /* package */ class ScheduleTimeField extends JFormattedTextField {
 
   public static final String MASKFORMAT = "##:##";

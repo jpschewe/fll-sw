@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -18,7 +19,10 @@ import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.SessionAttributes;
 import fll.web.TournamentData;
+import fll.web.UserRole;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
@@ -40,6 +44,12 @@ public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.REPORT_GENERATOR, UserRole.JUDGE, UserRole.REF),
+                           false)) {
+      return;
+    }
+
     response.reset();
     response.setContentType("application/pdf");
     response.setHeader("Content-Disposition", "filename=TopScoreReportPerAwardGroup.pdf");
@@ -49,7 +59,7 @@ public class TopScoreReportPerAwardGroupPdf extends TopScoreReportPdf {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     try (Connection connection = datasource.getConnection()) {
       ScoreStandardization.computeSummarizedScoresIfNeeded(connection, description,
-                                                          tournamentData.getCurrentTournament());
+                                                           tournamentData.getCurrentTournament());
 
       final Tournament tournament = tournamentData.getCurrentTournament();
 

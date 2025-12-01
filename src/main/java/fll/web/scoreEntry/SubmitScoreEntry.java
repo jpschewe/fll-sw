@@ -25,6 +25,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.scores.MapTeamScore;
 import fll.scores.PerformanceTeamScore;
 import fll.util.FLLInternalException;
@@ -35,7 +36,6 @@ import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.ApiResult;
-import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -103,6 +103,8 @@ public class SubmitScoreEntry extends HttpServlet {
         throw new RuntimeException("Missing parameter: RunNumber");
       }
       final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
+      final RunMetadataFactory runMetadataFactory = tournamentData.getRunMetadataFactory();
+      final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
 
       final Tournament tournament = tournamentData.getCurrentTournament();
 
@@ -110,13 +112,13 @@ public class SubmitScoreEntry extends HttpServlet {
       if (deleteScore) {
         Queries.deletePerformanceScore(tournamentData, connection, teamNumber, runNumber);
 
-        final String message = String.format("<div class='success'>Deleted score for team %d run %d</div>", teamNumber,
-                                             runNumber);
+        final String message = String.format("<div class='success'>Deleted score for team %d run %s</div>", teamNumber,
+                                             runMetadata.getDisplayName());
         final ApiResult result = new ApiResult(true, Optional.of(message));
         jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
         final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
-        final int rowsUpdated = Queries.updatePerformanceScore(tournamentData.getRunMetadataFactory(),
+        final int rowsUpdated = Queries.updatePerformanceScore(runMetadataFactory,
                                                                challengeDescription, connection, datasource, teamScore);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");
@@ -124,8 +126,8 @@ public class SubmitScoreEntry extends HttpServlet {
           throw new FLLInternalException("Updated multiple rows!");
         }
 
-        final String message = String.format("<div class='success'>Edited score for team %d run %d</div>", teamNumber,
-                                             runNumber);
+        final String message = String.format("<div class='success'>Edited score for team %d run %s</div>", teamNumber,
+                                             runMetadata.getDisplayName());
         final ApiResult result = new ApiResult(true, Optional.of(message));
         jsonMapper.writeValue(writer, result);
       } else {
@@ -137,31 +139,17 @@ public class SubmitScoreEntry extends HttpServlet {
         final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
 
         if (Queries.performanceScoreExists(connection, tournament.getTournamentID(), teamNumber, runNumber)) {
-          final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %d. Check that you selected the correct team and enter the score again.</div>",
-                                               teamNumber, runNumber);
+          final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %s. Check that you selected the correct team and enter the score again.</div>",
+                                               teamNumber, runMetadata.getDisplayName());
 
           final ApiResult result = new ApiResult(false, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         } else {
-          final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(runNumber);
-          final String roundText;
-          if (runMetadata.isHeadToHead()) {
-            final String division = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(), teamNumber,
-                                                               runNumber);
-            final int playoffRun = Playoff.getPlayoffRound(connection, tournament.getTournamentID(), division,
-                                                           runNumber);
-            roundText = "playoff round "
-                + playoffRun;
-          } else {
-            roundText = "run Number "
-                + runNumber;
-          }
-
           Queries.insertPerformanceScore(tournamentData.getRunMetadataFactory(), connection, datasource,
                                          challengeDescription, tournament, teamScore.isVerified(), teamScore);
 
           final String message = String.format("<div class='success'>Entered score for team number %d %s</div>",
-                                               teamNumber, roundText);
+                                               teamNumber, runMetadata.getDisplayName());
           final ApiResult result = new ApiResult(true, Optional.of(message));
           jsonMapper.writeValue(writer, result);
         }

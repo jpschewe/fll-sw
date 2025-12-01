@@ -62,7 +62,8 @@ public class ScoreboardEndpoint {
       switch (message.getType()) {
       case REGISTER:
         final RegisterMessage registerMessage = (RegisterMessage) message;
-        this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session, GetHttpSessionConfigurator.getHttpSession(session));
+        this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session,
+                                                GetHttpSessionConfigurator.getHttpSession(session));
         break;
       case UPDATE:
         LOGGER.warn("{}: Received UPDATE message from client, ignoring", uuid);
@@ -89,7 +90,7 @@ public class ScoreboardEndpoint {
   }
 
   @OnError
-  public void onError(final Throwable t) throws Throwable {
+  public void onError(final Throwable t) {
     if (t instanceof EOFException) {
       LOGGER.debug("{}: Socket closed.", uuid);
     } else {

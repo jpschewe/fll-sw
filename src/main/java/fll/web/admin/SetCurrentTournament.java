@@ -14,7 +14,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
@@ -36,7 +35,6 @@ public class SetCurrentTournament extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  @SuppressFBWarnings(value = "HRS_REQUEST_PARAMETER_TO_HTTP_HEADER", justification = "Passing referrer along as the redirect")
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

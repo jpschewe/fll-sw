@@ -89,7 +89,7 @@ public class DisplayEndpoint {
   }
 
   @OnError
-  public void onError(final Throwable t) throws Throwable {
+  public void onError(final Throwable t) {
     if (t instanceof EOFException) {
       LOGGER.debug("Socket closed", t);
       end();

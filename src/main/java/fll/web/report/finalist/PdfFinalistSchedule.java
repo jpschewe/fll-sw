@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
@@ -52,6 +53,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 /**
  * Outputs the PDF showing times of finalist categories.
  */
+@SuppressFBWarnings(value = "FS_BAD_DATE_FORMAT_FLAG_COMBO", justification = "Intentionally don't want to output AM/PM")
 @WebServlet("/report/finalist/PdfFinalistSchedule")
 public class PdfFinalistSchedule extends BaseFLLServlet {
 

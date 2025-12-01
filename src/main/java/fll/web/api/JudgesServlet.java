@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Utilities;
 import fll.db.Queries;
@@ -81,8 +80,7 @@ public class JudgesServlet extends HttpServlet {
 
   }
 
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
+  // FIXME
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)

@@ -28,6 +28,10 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
 
+    <a class="wide" target="_topScoreReportPerAwardGroup"
+        href="<c:url value='/report/TopScoreReportPerAwardGroupPdf'/>">Top
+        Robot Match Scores (PDF)</a>
+
     <a class="wide" href="<c:url value='/report/TeamResults'/>"
         target="_blank">Team Rubrics. This is a zip file containing
         the results to return to the teams. This will take some time to

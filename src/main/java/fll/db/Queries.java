@@ -662,7 +662,6 @@ public final class Queries {
    * @param runNumber run number to delete
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final TournamentData tournamentData,
                                             final Connection connection,
                                             final int teamNumber,
@@ -1867,7 +1866,6 @@ public final class Queries {
    * @return 1 is tournament, 2 is teamNumber, 3 is runNumber
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "NP_LOAD_OF_KNOWN_NULL_VALUE" }, justification = "Findbugs bug 3477957")
   private static PreparedStatement getScoreStatsPrep(final Connection connection) throws SQLException {
     return connection.prepareStatement("SELECT Bye, NoShow, Verified FROM Performance WHERE Tournament = ? AND TeamNumber = ? AND RunNumber = ?");
   }

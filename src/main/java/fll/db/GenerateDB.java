@@ -239,35 +239,22 @@ public final class GenerateDB {
 
       // performance
 
-      // used for view below
-      final StringBuilder performanceColumns = new StringBuilder();
-      {
-        createStatement.append("CREATE TABLE Performance (");
-        performanceColumns.append("TeamNumber,");
-        createStatement.append(" TeamNumber INTEGER NOT NULL,");
-        performanceColumns.append("Tournament,");
-        createStatement.append(" Tournament INTEGER NOT NULL,");
-        performanceColumns.append("RunNumber,");
-        createStatement.append(" RunNumber INTEGER NOT NULL,");
-        performanceColumns.append("TimeStamp,");
-        createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
-        performanceColumns.append("NoShow,");
-        createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        performanceColumns.append("Bye,");
-        createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
-        createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        createStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
-        performanceColumns.append("ComputedTotal,");
-        createStatement.append(" ComputedTotal float DEFAULT NULL,");
-        performanceColumns.append("StandardizedScore"); // last column, no comma
-        createStatement.append(" StandardizedScore float default NULL,");
-        createStatement.append(" CONSTRAINT performance_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
-        createStatement.append(",CONSTRAINT performance_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
-        createStatement.append(",CONSTRAINT performance_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
-        createStatement.append(");");
-        stmt.executeUpdate(createStatement.toString());
-
-      }
+      createStatement.append("CREATE TABLE Performance (");
+      createStatement.append(" TeamNumber INTEGER NOT NULL,");
+      createStatement.append(" Tournament INTEGER NOT NULL,");
+      createStatement.append(" RunNumber INTEGER NOT NULL,");
+      createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
+      createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
+      createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
+      createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
+      createStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
+      createStatement.append(" ComputedTotal float DEFAULT NULL,");
+      createStatement.append(" StandardizedScore float default NULL,");
+      createStatement.append(" CONSTRAINT performance_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
+      createStatement.append(",CONSTRAINT performance_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+      createStatement.append(",CONSTRAINT performance_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+      createStatement.append(");");
+      stmt.executeUpdate(createStatement.toString());
       createPerformanceGoalsTables(connection, true);
 
       // loop over each subjective category and create a table for it
@@ -350,14 +337,7 @@ public final class GenerateDB {
           + " WHERE Performance.RunNumber IN ( SELECT run_number FROM run_metadata WHERE run_type = 'REGULAR_MATCH_PLAY' AND tournament_id = Performance.tournament )" //
           + " GROUP BY Performance.tournament, Performance.TeamNumber");
 
-      // verified performance scores
-      stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
-      stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT "
-          + performanceColumns.toString()
-          + " FROM Performance WHERE Verified = TRUE");
-
       setDefaultParameters(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
-
     }
 
   }
