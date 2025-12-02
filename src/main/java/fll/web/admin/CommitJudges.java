@@ -16,7 +16,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -77,8 +76,6 @@ public class CommitJudges extends BaseFLLServlet {
    *
    * @param tournament the current tournament
    */
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static void commitData(final HttpSession session,
                                  final Connection connection,
                                  final int tournament)
@@ -129,10 +126,10 @@ public class CommitJudges extends BaseFLLServlet {
     oldJudgeInfo.removeAll(newJudgeInfo);
     for (final JudgeInformation oldInfo : oldJudgeInfo) {
       try (
-          PreparedStatement deleteScores = connection.prepareStatement(String.format("DELETE FROM %s WHERE Judge = ? AND Tournament = ?",
-                                                                                     oldInfo.getCategory()))) {
+          PreparedStatement deleteScores = connection.prepareStatement("DELETE FROM subjective WHERE judge = ? AND tournament_id = ? AND category_name = ?")) {
         deleteScores.setInt(2, tournament);
         deleteScores.setString(1, oldInfo.getId());
+        deleteScores.setString(3, oldInfo.getCategory());
         deleteScores.executeUpdate();
       }
     }

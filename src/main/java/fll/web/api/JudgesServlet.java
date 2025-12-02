@@ -80,7 +80,6 @@ public class JudgesServlet extends HttpServlet {
 
   }
 
-  // FIXME
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)

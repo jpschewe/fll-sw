@@ -16,15 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
@@ -35,6 +28,12 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -96,7 +95,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
         message.append("<p class='warning'>You have not loaded a schedule. If you intend to do so you should go back to the <a href='index.jsp'>admin page</a> and do this before assigning judges.</p>");
       }
 
-      if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
+      if (checkForEnteredSubjectiveScores(connection, tournament)) {
         message.append("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
       }
 
@@ -118,30 +117,21 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     }
   }
 
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
-                                                         final List<SubjectiveScoreCategory> subjectiveCategories,
                                                          final int tournament)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      for (final SubjectiveScoreCategory category : subjectiveCategories) {
-        final String categoryName = category.getName();
-        prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
-        prep.setInt(1, tournament);
-        rs = prep.executeQuery();
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM subjective WHERE tournament_id = ?")) {
+      prep.setInt(1, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
-          return true;
+          final int count = rs.getInt(1);
+          return count > 0;
+        } else {
+          return false;
         }
       }
-      return false;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
-
   }
 
   private List<String> gatherJudgingStations(final Connection connection,

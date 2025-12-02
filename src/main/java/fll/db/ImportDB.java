@@ -1778,8 +1778,9 @@ public final class ImportDB {
 
   /**
    * Rework performance goal values into their own normalized tables.
+   * Rework subjective data to normalized tables.
    */
-  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Column names to drop depends on the goal names")
+  @SuppressFBWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Column names to drop depends on the goal names, also table names to drop come from category names")
   private static void upgrade51to52(final Connection connection,
                                     final boolean createConstraints,
                                     final ChallengeDescription description)
@@ -1839,6 +1840,86 @@ public final class ImportDB {
           final String name = element.getName();
           stmt.executeUpdate(String.format("ALTER TABLE Performance DROP COLUMN %s", name));
         }
+      }
+
+      // add new foreign key constraint to the tournament teams table
+      if (createConstraints) {
+        stmt.executeUpdate("ALTER TABLE Performance ADD CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeamss(TeamNumber, Tournament) ON DELETE CASCADE");
+      }
+
+    } // statements
+
+    GenerateDB.createSubjectiveTables(connection, createConstraints);
+
+    // reorganize the subjective goal data
+    try (Statement stmt = connection.createStatement();
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO subjective (tournament_id, category_name, judge, team_number, NoShow, note, comment_great_job, comment_think_about) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement goalInsert = connection.prepareStatement("INSERT INTO subjective_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)");
+        PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)")) {
+
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final String tableName = category.getName();
+
+        insert.setString(2, tableName);
+        goalInsert.setString(2, tableName);
+        enumGoalInsert.setString(2, tableName);
+
+        try (ResultSet rs = stmt.executeQuery(String.format("SELECT * FROM %s", tableName))) {
+          while (rs.next()) {
+
+            final int tournamentId = rs.getInt("Tournament");
+            final int teamNumber = rs.getInt("TeamNumber");
+            final String judge = castNonNull(rs.getString("Judge"));
+            final boolean isNoShow = rs.getBoolean("NoShow");
+            final String note = rs.getString("note");
+            final @Nullable String commentGreatJob = rs.getString("comment_great_job");
+            final @Nullable String commentThinkAbout = rs.getString("comment_think_about");
+
+            insert.setInt(1, tournamentId);
+            insert.setString(3, judge);
+            insert.setInt(4, teamNumber);
+            insert.setBoolean(5, isNoShow);
+            insert.setString(6, note);
+            insert.setString(7, commentGreatJob);
+            insert.setString(8, commentThinkAbout);
+            insert.executeUpdate();
+
+            if (!isNoShow) {
+              enumGoalInsert.setInt(1, tournamentId);
+              enumGoalInsert.setString(3, judge);
+              enumGoalInsert.setInt(4, teamNumber);
+
+              goalInsert.setInt(1, tournamentId);
+              goalInsert.setString(3, judge);
+              goalInsert.setInt(4, teamNumber);
+
+              for (final AbstractGoal element : category.getAllGoals()) {
+                if (!element.isComputed()) {
+                  final String name = element.getName();
+
+                  if (element.isEnumerated()) {
+                    final String value = rs.getString(name);
+                    enumGoalInsert.setString(5, name);
+                    enumGoalInsert.setString(6, value);
+                    enumGoalInsert.executeUpdate();
+                  } else {
+                    final double value = rs.getDouble(name);
+                    goalInsert.setString(5, name);
+                    goalInsert.setDouble(6, value);
+                    goalInsert.executeUpdate();
+                  }
+                } // !computed
+              } // foreach goal
+            } // has score
+          } // foreach score
+        } // result set
+      } // foreach category
+
+      // delete the subjective tables - needed for in-place database
+      // upgrades
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final String tableName = category.getName();
+        stmt.executeUpdate(String.format("DROP TABLE %s", tableName));
       }
     } // statements
 
@@ -2291,7 +2372,7 @@ public final class ImportDB {
     }
 
     if (importSubjective) {
-      importSubjectiveData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
+      importSubjectiveData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     }
 
     if (importFinalist) {
@@ -2300,7 +2381,7 @@ public final class ImportDB {
     }
 
     // update score totals
-    ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournamentID);
+    ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournament);
   }
 
   private static void importGlobalData(final Connection sourceConnection,
@@ -2318,12 +2399,11 @@ public final class ImportDB {
 
   private static void importSubjectiveData(final Connection sourceConnection,
                                            final Connection destinationConnection,
-                                           final ChallengeDescription description,
                                            final int sourceTournamentID,
                                            final int destTournamentID)
       throws SQLException {
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
+    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importAdvancingTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importAwardWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
@@ -2781,112 +2861,83 @@ public final class ImportDB {
 
   }
 
-  // FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
-                                       final int destTournamentID,
-                                       final ChallengeDescription description)
+                                       final int destTournamentID)
       throws SQLException {
-    // loop over each subjective category
-    for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
-      final String tableName = categoryElement.getName();
-      LOGGER.debug("Importing {}", tableName);
 
-      try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
-          + tableName
-          + " WHERE Tournament = ?")) {
-        destPrep.setInt(1, destTournamentID);
-        destPrep.executeUpdate();
-      }
+    try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM subjective"
+        + " WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
 
-      final StringBuilder columns = new StringBuilder();
-      int numColumns = 0;
-      columns.append(" Tournament,");
-      ++numColumns;
-      columns.append(" TeamNumber,");
-      ++numColumns;
-      columns.append(" NoShow,");
-      ++numColumns;
-      final List<AbstractGoal> goals = categoryElement.getAllGoals();
-      for (final AbstractGoal element : goals) {
-        if (!element.isComputed()) {
-          columns.append(" "
-              + element.getName()
-              + ",");
-          ++numColumns;
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_name, judge, team_number, NoSHow, note, comment_great_job, comment_think_about"
+            + " FROM subjective WHERE tournament_id = ?");
 
-          columns.append(" "
-              + GenerateDB.getGoalCommentColumnName(element)
-              + ",");
-          ++numColumns;
-        }
-      }
-      columns.append(" note,");
-      ++numColumns;
-      columns.append(" Judge,");
-      ++numColumns;
-      columns.append(" comment_great_job,");
-      ++numColumns;
-      columns.append(" comment_think_about");
-      ++numColumns;
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective (tournament_id, category_name, judge, team_number, NoSHow, note, comment_great_job, comment_think_about)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
 
-      importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
-                   sourceTournamentID);
+    importSubjectiveGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importSubjectiveEnumGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  private static void importSubjectiveGoals(final Connection sourceConnection,
+                                            final Connection destinationConnection,
+                                            final int sourceTournamentID,
+                                            final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing subjective_goals");
+
+    // should not be needed due to cascade constraints, but can't hurt
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM subjective_goals WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_name, judge, team_number, goal_name, goal_value, comment "
+            + "FROM subjective_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_goals (tournament_id, category_name, judge, team_number, goal_name, goal_value, comment)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
     }
   }
 
-  /**
-   * Common import code for importSubjective and importPerformance.
-   *
-   * @param columns the columns in the table, this should include Tournament,
-   *          TeamNumber, NoShow, Judge or Verified, then all elements for
-   *          category
-   * @param tableName the name of the table to update
-   * @param numColumns the number of columns
-   * @param destinationConnection
-   * @param destTournamentID
-   * @param sourceConnection
-   * @param sourceTournamentID
-   * @throws SQLException
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
-  private static void importCommon(final StringBuilder columns,
-                                   final String tableName,
-                                   final int numColumns,
-                                   final Connection destinationConnection,
-                                   final int destTournamentID,
-                                   final Connection sourceConnection,
-                                   final int sourceTournamentID)
+  private static void importSubjectiveEnumGoals(final Connection sourceConnection,
+                                                final Connection destinationConnection,
+                                                final int sourceTournamentID,
+                                                final int destTournamentID)
       throws SQLException {
-    final StringBuffer sql = new StringBuffer();
-    sql.append("INSERT INTO ");
-    sql.append(tableName);
-    sql.append(" (");
-    sql.append(columns.toString());
-    sql.append(") VALUES (");
-    for (int i = 0; i < numColumns; i++) {
-      if (i > 0) {
-        sql.append(", ");
-      }
-      sql.append("?");
-    }
-    sql.append(")");
-    try (PreparedStatement destPrep = destinationConnection.prepareStatement(sql.toString());
+    LOGGER.debug("Importing subjective_enum_goals");
 
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT "
-            + columns.toString()
-            + " FROM "
-            + tableName
-            + " WHERE Tournament = ?")) {
-
+    // should not be needed due to cascade constraints, but can't hurt
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM subjective_enum_goals WHERE tournament_id = ?")) {
       destPrep.setInt(1, destTournamentID);
-      sourcePrep.setInt(1, sourceTournamentID);
-      copyData(sourcePrep, 1, destPrep, 1, numColumns
-          - 1);
+      destPrep.executeUpdate();
     }
 
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_name, judge, team_number, goal_name, goal_value, comment "
+            + "FROM subjective_enum_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_enum_goals (tournament_id, category_name, judge, team_number, goal_name, goal_value, comment)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
+    }
   }
 
   private static void importPerformance(final Connection sourceConnection,
@@ -2910,7 +2961,6 @@ public final class ImportDB {
       copyData(sourcePrep, destPrep);
     }
 
-    // FIXME
     LOGGER.debug("Importing performance scores");
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance WHERE Tournament = ?")) {
@@ -2918,18 +2968,16 @@ public final class ImportDB {
       destPrep.executeUpdate();
     }
 
-    final StringBuilder columns = new StringBuilder();
-    columns.append(" Tournament,");
-    columns.append(" TeamNumber,");
-    columns.append(" RunNumber,");
-    columns.append(" TimeStamp,");
-    columns.append(" NoShow,");
-    columns.append(" Bye,");
-    columns.append(" Verified");
-    final int numColumns = 7;
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, RunNumber, TimeStamp, NoShow, Bye, Verified"
+            + " FROM Performance WHERE Tournament = ?");
 
-    importCommon(columns, "performance", numColumns, destinationConnection, destTournamentID, sourceConnection,
-                 sourceTournamentID);
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO Performance (Tournament, TeamNumber, RunNumber, TimeStamp, NoShow, Bye, Verified)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
 
     importPerformanceGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importPerformanceEnumGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
@@ -2965,7 +3013,7 @@ public final class ImportDB {
                                                  final int sourceTournamentID,
                                                  final int destTournamentID)
       throws SQLException {
-    LOGGER.debug("Importing performance_goals");
+    LOGGER.debug("Importing performance_enum_goals");
 
     try (
         PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance_enum_goals WHERE tournament_id = ?")) {

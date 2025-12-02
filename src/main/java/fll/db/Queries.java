@@ -1125,15 +1125,11 @@ public final class Queries {
    * all tables specified by the challengeDocument. It is not an error if the
    * team doesn't exist.
    *
-   * @param description describes the scoring of the tournament
    * @param teamNumber team to delete
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
    */
-  // FIXME - do this with constraint cascade?
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
   public static void deleteTeam(final int teamNumber,
-                                final ChallengeDescription description,
                                 final Connection connection)
       throws SQLException {
     final boolean autoCommit = connection.getAutoCommit();
@@ -1162,14 +1158,10 @@ public final class Queries {
       }
 
       // delete from subjective categories
-      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-        final String name = category.getName();
-        try (PreparedStatement prep = connection.prepareStatement("DELETE FROM "
-            + name
-            + " WHERE TeamNumber = ?")) {
-          prep.setInt(1, teamNumber);
-          prep.executeUpdate();
-        }
+      try (PreparedStatement prep = connection.prepareStatement("DELETE FROM subjective"
+          + " WHERE team_number = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.executeUpdate();
       }
 
       // delete from Performance
@@ -1311,29 +1303,21 @@ public final class Queries {
    * the TournamentTeams table.
    * 
    * @param connection database connection
-   * @param description used to get the subjective category names
    * @param teamNumber team to delete
    * @param currentTournament tournament to delete the team from
    * @throws SQLException on a database error
    */
-  // FIXME - use cascade constraints
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static void deleteTeamFromTournament(final Connection connection,
-                                              final ChallengeDescription description,
                                               final int teamNumber,
                                               final int currentTournament)
       throws SQLException {
 
     // delete from subjective categories
-    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      final String name = category.getName();
-      try (PreparedStatement prep = connection.prepareStatement("DELETE FROM "
-          + name
-          + " WHERE TeamNumber = ? AND Tournament = ?")) {
-        prep.setInt(1, teamNumber);
-        prep.setInt(2, currentTournament);
-        prep.executeUpdate();
-      }
+    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM subjective"
+        + " WHERE team_number = ? AND tournament_id = ?")) {
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
     }
 
     // delete from Performance
@@ -2293,18 +2277,19 @@ public final class Queries {
    * @param tournamentID the id of the tournament
    * @throws SQLException if a database error occurs
    */
-  // FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for table to modify")
   public static void deleteSubjectiveScores(final Connection connection,
                                             final String categoryName,
                                             final int teamNumber,
                                             final int tournamentID)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM "
-        + categoryName
-        + " WHERE Tournament = ? AND TeamNumber = ?")) {
+    try (PreparedStatement prep = connection.prepareStatement("DELETE FROM subjective"
+        + " WHERE tournament_id = ?" //
+        + " AND category_name = ?" //
+        + " AND team_number = ?" //
+    )) {
       prep.setInt(1, tournamentID);
-      prep.setInt(2, teamNumber);
+      prep.setString(2, categoryName);
+      prep.setInt(3, teamNumber);
       prep.executeUpdate();
     }
   }

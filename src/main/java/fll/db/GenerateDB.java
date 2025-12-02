@@ -30,7 +30,6 @@ import fll.util.FLLInternalException;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -235,66 +234,28 @@ public final class GenerateDB {
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 
-      final StringBuilder createStatement = new StringBuilder();
-
       // performance
-
-      createStatement.append("CREATE TABLE Performance (");
-      createStatement.append(" TeamNumber INTEGER NOT NULL,");
-      createStatement.append(" Tournament INTEGER NOT NULL,");
-      createStatement.append(" RunNumber INTEGER NOT NULL,");
-      createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
-      createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-      createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
-      createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-      createStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
-      createStatement.append(" ComputedTotal float DEFAULT NULL,");
-      createStatement.append(" StandardizedScore float default NULL,");
-      createStatement.append(" CONSTRAINT performance_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
-      createStatement.append(",CONSTRAINT performance_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
-      createStatement.append(",CONSTRAINT performance_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
-      createStatement.append(");");
-      stmt.executeUpdate(createStatement.toString());
+      final StringBuilder performanceCreateStatement = new StringBuilder();
+      performanceCreateStatement.append("CREATE TABLE Performance (");
+      performanceCreateStatement.append(" TeamNumber INTEGER NOT NULL,");
+      performanceCreateStatement.append(" Tournament INTEGER NOT NULL,");
+      performanceCreateStatement.append(" RunNumber INTEGER NOT NULL,");
+      performanceCreateStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
+      performanceCreateStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
+      performanceCreateStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
+      performanceCreateStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
+      performanceCreateStatement.append(" tablename varchar(64) DEFAULT 'UNKNOWN' NOT NULL,");
+      performanceCreateStatement.append(" ComputedTotal float DEFAULT NULL,");
+      performanceCreateStatement.append(" StandardizedScore float default NULL,");
+      performanceCreateStatement.append(" CONSTRAINT performance_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
+      performanceCreateStatement.append(",CONSTRAINT performance_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+      performanceCreateStatement.append(",CONSTRAINT performance_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+      performanceCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeamss(TeamNumber, Tournament) ON DELETE CASCADE");
+      performanceCreateStatement.append(");");
+      stmt.executeUpdate(performanceCreateStatement.toString());
       createPerformanceGoalsTables(connection, true);
 
-      // loop over each subjective category and create a table for it
-      for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
-        createStatement.setLength(0);
-
-        final String tableName = categoryElement.getName();
-
-        createStatement.append("CREATE TABLE "
-            + tableName
-            + " (");
-        createStatement.append(" TeamNumber INTEGER NOT NULL,");
-        createStatement.append(" Tournament INTEGER NOT NULL,");
-        createStatement.append(" Judge longvarchar NOT NULL,");
-        createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        for (final AbstractGoal element : categoryElement.getAllGoals()) {
-          final String columnDefinition = generateGoalColumnDefinition(element);
-          createStatement.append(" "
-              + columnDefinition
-              + ",");
-
-          createStatement.append(String.format(" %s longvarchar DEFAULT NULL,", getGoalCommentColumnName(element)));
-        }
-        createStatement.append(" note longvarchar DEFAULT NULL,");
-
-        createStatement.append(" comment_great_job longvarchar DEFAULT NULL,");
-        createStatement.append(" comment_think_about longvarchar DEFAULT NULL,");
-
-        createStatement.append(" CONSTRAINT "
-            + tableName
-            + "_pk PRIMARY KEY (TeamNumber, Tournament, Judge)");
-        createStatement.append(",CONSTRAINT "
-            + tableName
-            + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
-        createStatement.append(",CONSTRAINT "
-            + tableName
-            + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
-        createStatement.append(");");
-        stmt.executeUpdate(createStatement.toString());
-      }
+      createSubjectiveTables(connection, true);
 
       createSubjectiveComputedScoresTable(connection, true);
       createFinalScoresTable(connection, true);
@@ -370,6 +331,64 @@ public final class GenerateDB {
       enumSql.append(", CONSTRAINT performance_enum_goals_pk PRIMARY KEY (tournament_id, team_number, run_number, goal_name)");
       if (createConstraints) {
         enumSql.append(", CONSTRAINT performance_enum_goals_fk1 FOREIGN KEY(tournament_id, team_number, run_number) REFERENCES Performance(Tournament, TeamNumber, RunNumber) ON DELETE CASCADE");
+      }
+      enumSql.append(")");
+      stmt.executeUpdate(enumSql.toString());
+    }
+  }
+
+  /* package */ static void createSubjectiveTables(final Connection connection,
+                                                   final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder subjectiveCreateStatement = new StringBuilder();
+      subjectiveCreateStatement.append("CREATE TABLE subjective (");
+      subjectiveCreateStatement.append("  tournament_id INTEGER NOT NULL");
+      subjectiveCreateStatement.append(", category_name varchar NOT NULL");
+      subjectiveCreateStatement.append(", judge longvarchar NOT NULL");
+      subjectiveCreateStatement.append(", team_number INTEGER NOT NULL");
+      subjectiveCreateStatement.append(", NoShow boolean DEFAULT FALSE NOT NULL");
+      subjectiveCreateStatement.append(", note longvarchar DEFAULT NULL");
+      subjectiveCreateStatement.append(", comment_great_job longvarchar DEFAULT NULL");
+      subjectiveCreateStatement.append(", comment_think_about longvarchar DEFAULT NULL");
+      subjectiveCreateStatement.append(", CONSTRAINT subjective_pk PRIMARY KEY (team_number, tournament_id, judge, category_name)");
+      if (createConstraints) {
+        subjectiveCreateStatement.append(", CONSTRAINT subjective_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        subjectiveCreateStatement.append(", CONSTRAINT subjective_fk2 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        subjectiveCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(team_number, tournament_id) REFERENCES TournamentTeamss(TeamNumber, Tournament) ON DELETE CASCADE");
+
+      }
+      subjectiveCreateStatement.append(");");
+      stmt.executeUpdate(subjectiveCreateStatement.toString());
+
+      final StringBuilder countSql = new StringBuilder();
+      countSql.append("CREATE TABLE subjective_goals (");
+      countSql.append("  tournament_id INTEGER NOT NULL");
+      countSql.append(", category_name varchar NOT NULL");
+      countSql.append(", judge longvarchar NOT NULL");
+      countSql.append(", team_number INTEGER NOT NULL");
+      countSql.append(", goal_name varchar NOT NULL");
+      countSql.append(", goal_value double NOT NULL");
+      countSql.append(", comment longvarchar DEFAULT NULL");
+      countSql.append(", CONSTRAINT subjective_goals_pk PRIMARY KEY (tournament_id, team_number, judge, category_name, goal_name)");
+      if (createConstraints) {
+        countSql.append(", CONSTRAINT subjective_goals_fk1 FOREIGN KEY(tournament_id, team_number, judge, category_name) REFERENCES subjective(tournament_id, team_number, judge, category_name) ON DELETE CASCADE");
+      }
+      countSql.append(")");
+      stmt.executeUpdate(countSql.toString());
+
+      final StringBuilder enumSql = new StringBuilder();
+      enumSql.append("CREATE TABLE subjective_enum_goals (");
+      enumSql.append("  tournament_id INTEGER NOT NULL");
+      enumSql.append(", category_name varchar NOT NULL");
+      enumSql.append(", judge longvarchar NOT NULL");
+      enumSql.append(", team_number INTEGER NOT NULL");
+      enumSql.append(", goal_name varchar NOT NULL");
+      enumSql.append(", goal_value varchar NOT NULL");
+      enumSql.append(", comment longvarchar DEFAULT NULL");
+      enumSql.append(", CONSTRAINT subjective_enum_goals_pk PRIMARY KEY (tournament_id, team_number, judge, category_name, goal_name)");
+      if (createConstraints) {
+        enumSql.append(", CONSTRAINT subjective_enum_goals_fk1 FOREIGN KEY(tournament_id, team_number, judge, category_name) REFERENCES subjective(tournament_id, team_number, judge, category_name) ON DELETE CASCADE");
       }
       enumSql.append(")");
       stmt.executeUpdate(enumSql.toString());

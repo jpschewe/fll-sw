@@ -35,7 +35,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
-import fll.db.GenerateDB;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.RunMetadata;

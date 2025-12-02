@@ -14,10 +14,8 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -27,10 +25,8 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
-import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -172,8 +168,6 @@ public class SubjectiveScoresServlet extends HttpServlet {
    * @return the number of modified scores
    * @throws SQLException on a database error
    */
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   public static int processScores(final Connection connection,
                                   final ChallengeDescription challengeDescription,
                                   final Tournament currentTournament,
@@ -190,44 +184,56 @@ public class SubjectiveScoresServlet extends HttpServlet {
             + "' is not known");
       }
 
-      try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM "
-          + category //
-          + " WHERE TeamNumber = ?" //
-          + " AND Tournament = ?" //
-          + " AND Judge = ?" //
+      try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM subjective "
+          + " WHERE tournament_id " //
+          + " AND category_name = ?" //
+          + " AND judge = ?" //
+          + " AND = team_number = ?" //
       );
-          PreparedStatement noShowPrep = connection.prepareStatement("INSERT INTO "
-              + category //
-              + "(TeamNumber, Tournament, Judge, NoShow) VALUES(?, ?, ?, ?)");
 
-          PreparedStatement insertPrep = createInsertStatement(connection, categoryDescription);) {
-        deletePrep.setInt(2, currentTournament.getTournamentID());
+          PreparedStatement insert = connection.prepareStatement("INSERT INTO subjective"
+              + "(tounament_id, category_name, judge, team_number, NoShow, note, comment_great_job, comment_think_about)" //
+              + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
-        noShowPrep.setInt(2, currentTournament.getTournamentID());
-        noShowPrep.setBoolean(4, true);
+          PreparedStatement insertSimpleGoal = connection.prepareStatement("INSERT INTO subjective_goals" //
+              + " (tournament_id, category_name, judge, team_number, goal_name, goal_value, comment)" //
+              + " VALUES(?, ?, ?, ?, ?, ?, ?)" //
+          );
 
-        final int columnIndexOfFirstGoal = 8;
-        insertPrep.setInt(2, currentTournament.getTournamentID());
-        insertPrep.setBoolean(4, false);
+          PreparedStatement insertEnumGoal = connection.prepareStatement("INSERT INTO subjective_enum_goals" //
+              + " (tournament_id, category_name, judge, team_number, goal_name, goal_value, comment)" //
+              + " VALUES(?, ?, ?, ?, ?, ?, ?)" //
+          )) {
+        deletePrep.setInt(1, currentTournament.getTournamentID());
+        deletePrep.setString(2, category);
+
+        insert.setInt(1, currentTournament.getTournamentID());
+        insert.setString(2, category);
+
+        insertSimpleGoal.setInt(1, currentTournament.getTournamentID());
+        insertSimpleGoal.setString(2, category);
+
+        insertEnumGoal.setInt(1, currentTournament.getTournamentID());
+        insertEnumGoal.setString(2, category);
 
         for (final Map.Entry<String, Map<Integer, SubjectiveScore>> judgeEntry : catEntry.getValue().entrySet()) {
           final String judgeId = judgeEntry.getKey();
           deletePrep.setString(3, judgeId);
-          noShowPrep.setString(3, judgeId);
-          insertPrep.setString(3, judgeId);
+
+          insert.setString(3, judgeId);
+          insertSimpleGoal.setString(3, judgeId);
+          insertEnumGoal.setString(3, judgeId);
 
           for (final Map.Entry<Integer, SubjectiveScore> teamEntry : judgeEntry.getValue().entrySet()) {
             final int teamNumber = teamEntry.getKey();
+            deletePrep.setInt(4, teamNumber);
+            insert.setInt(4, teamNumber);
+            insertSimpleGoal.setInt(4, teamNumber);
+            insertEnumGoal.setInt(4, teamNumber);
+
             final SubjectiveScore score = teamEntry.getValue();
 
             if (score.getModified()) {
-              deletePrep.setInt(1, teamNumber);
-              noShowPrep.setInt(1, teamNumber);
-              insertPrep.setInt(1, teamNumber);
-              insertPrep.setString(5, score.getNote());
-              insertPrep.setString(6, score.getCommentGreatJob());
-              insertPrep.setString(7, score.getCommentThinkAbout());
-
               ++numModified;
               if (score.getDeleted()) {
                 if (LOGGER.isTraceEnabled()) {
@@ -251,8 +257,14 @@ public class SubjectiveScoresServlet extends HttpServlet {
                 }
 
                 deletePrep.executeUpdate();
-                noShowPrep.executeUpdate();
+
+                insert.setBoolean(5, true);
+                insert.setString(6, null);
+                insert.setString(7, null);
+                insert.setString(8, null);
+                insert.executeUpdate();
               } else {
+                // update score
                 if (LOGGER.isTraceEnabled()) {
                   LOGGER.trace("scores for team: "
                       + teamNumber
@@ -262,53 +274,54 @@ public class SubjectiveScoresServlet extends HttpServlet {
                       + category);
                 }
 
-                int goalIndex = 0;
+                deletePrep.executeUpdate();
+
+                insert.setBoolean(5, false);
+                insert.setString(6, score.getNote());
+                insert.setString(7, score.getCommentGreatJob());
+                insert.setString(8, score.getCommentThinkAbout());
+                insert.executeUpdate();
+
+                // insert goals and goal comments
+                boolean insertedGoalValue = false;
                 final Map<String, Double> standardSubScores = score.getStandardSubScores();
                 final Map<String, String> enumSubScores = score.getEnumSubScores();
                 final Map<String, String> goalComments = score.getGoalComments();
                 for (final AbstractGoal goalDescription : categoryDescription.getAllGoals()) {
                   if (!goalDescription.isComputed()) {
 
-                    // goal score
                     final String goalName = goalDescription.getName();
+                    insertSimpleGoal.setString(5, goalName);
+                    insertEnumGoal.setString(5, goalName);
+
+                    final String goalComment = goalComments.get(goalName);
+                    insertSimpleGoal.setString(7, goalComment);
+                    insertEnumGoal.setString(7, goalComment);
+
                     if (goalDescription.isEnumerated()) {
                       final String value = enumSubScores.get(goalName);
-                      if (null == value) {
-                        insertPrep.setNull(goalIndex
-                            + columnIndexOfFirstGoal, Types.VARCHAR);
-                      } else {
-                        insertPrep.setString(goalIndex
-                            + columnIndexOfFirstGoal, value.trim());
+                      if (null != value) {
+                        insertEnumGoal.setString(6, value);
+                        insertEnumGoal.executeUpdate();
+                        insertedGoalValue = true;
                       }
+
                     } else {
                       final Double value = standardSubScores.get(goalName);
-                      if (null == value) {
-                        insertPrep.setNull(goalIndex
-                            + columnIndexOfFirstGoal, Types.DOUBLE);
-                      } else {
-                        insertPrep.setDouble(goalIndex
-                            + columnIndexOfFirstGoal, value);
+                      if (null != value) {
+                        insertSimpleGoal.setDouble(6, value.doubleValue());
+                        insertSimpleGoal.executeUpdate();
+                        insertedGoalValue = true;
                       }
                     }
-                    ++goalIndex;
-
-                    // goal comment
-                    final String goalComment = goalComments.get(goalName);
-                    if (null == goalComment) {
-                      insertPrep.setNull(goalIndex
-                          + columnIndexOfFirstGoal, Types.LONGVARCHAR);
-                    } else {
-                      insertPrep.setString(goalIndex
-                          + columnIndexOfFirstGoal, goalComment);
-                    }
-                    ++goalIndex;
-
                   } // not computed
-
                 } // end foreach goal
 
-                deletePrep.executeUpdate();
-                insertPrep.executeUpdate();
+                if (!insertedGoalValue) {
+                  // if no goal values were stored, then delete any record of the score
+                  deletePrep.executeUpdate();
+                }
+
               } // update score
 
               final Set<String> nominations;
@@ -330,104 +343,10 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
     } // foreach category
 
-    removeNullSubjectiveRows(connection, currentTournament.getTournamentID(), challengeDescription);
-
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament.getTournamentID());
     tournament.recordSubjectiveModified(connection);
 
     return numModified;
-  }
-
-  /**
-   * Remove subjective score rows from database that are empty. These
-   * are rows that have null for all scores and is not a no show.
-   *
-   * @param connection database connection
-   * @param tournamentId which tournament to work on
-   * @param challengeDescription the challenge description
-   */
-  private static void removeNullSubjectiveRows(final Connection connection,
-                                               final int tournamentId,
-                                               final ChallengeDescription challengeDescription)
-      throws SQLException {
-    for (final SubjectiveScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
-      removeNullRows(tournamentId, connection, cat.getName(), cat);
-    }
-  }
-
-  /**
-   * Remove rows from the specified subjective category that are empty. These
-   * are rows that have null for all scores and is not a no show.
-   *
-   * @param currentTournament
-   * @param connection
-   * @param categoryName
-   * @param categoryElement
-   * @throws SQLException
-   */
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
-  private static void removeNullRows(final int currentTournament,
-                                     final Connection connection,
-                                     final String categoryName,
-                                     final SubjectiveScoreCategory categoryElement)
-      throws SQLException {
-    final List<AbstractGoal> goalDescriptions = categoryElement.getAllGoals();
-
-    final StringBuffer sql = new StringBuffer();
-    sql.append("DELETE FROM "
-        + categoryName
-        + " WHERE NoShow <> ? ");
-    for (final AbstractGoal goalDescription : goalDescriptions) {
-      sql.append(" AND "
-          + goalDescription.getName()
-          + " IS NULL ");
-    }
-
-    sql.append(" AND Tournament = ?");
-
-    try (PreparedStatement prep = connection.prepareStatement(sql.toString())) {
-      prep.setBoolean(1, true);
-      prep.setInt(2, currentTournament);
-      prep.executeUpdate();
-    }
-  }
-
-  /**
-   * Create the statement for inserting a score into category.
-   */
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
-  private static PreparedStatement createInsertStatement(final Connection connection,
-                                                         final SubjectiveScoreCategory categoryDescription)
-      throws SQLException {
-    final List<AbstractGoal> goalDescriptions = categoryDescription.getAllGoals();
-
-    final StringBuffer insertSQLColumns = new StringBuffer();
-    insertSQLColumns.append("INSERT INTO "
-        + categoryDescription.getName()
-        + " (TeamNumber, Tournament, Judge, NoShow, note, comment_great_job, comment_think_about");
-    final StringBuffer insertSQLValues = new StringBuffer();
-    insertSQLValues.append(") VALUES ( ?, ?, ?, ?, ?, ?, ?");
-
-    for (final AbstractGoal goalDescription : goalDescriptions) {
-      if (!goalDescription.isComputed()) {
-        insertSQLColumns.append(", "
-            + goalDescription.getName());
-        insertSQLValues.append(", ?");
-
-        // goal comment
-        insertSQLColumns.append(", "
-            + GenerateDB.getGoalCommentColumnName(goalDescription));
-        insertSQLValues.append(", ?");
-      }
-    }
-
-    final PreparedStatement insertPrep = connection.prepareStatement(insertSQLColumns.toString()
-        + insertSQLValues.toString()
-        + ")");
-
-    return insertPrep;
   }
 
   /**

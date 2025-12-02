@@ -20,8 +20,9 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.scores.DatabasePerformanceTeamScore;
-import fll.scores.DatabaseTeamScore;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.scores.PerformanceTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -177,7 +178,7 @@ public final class ScoreStandardization {
                                                      final Tournament tournament)
       throws SQLException {
     if (tournament.checkTournamentNeedsSummaryUpdate(connection)) {
-      ScoreStandardization.updateScoreTotals(challengeDescription, connection, tournament.getTournamentID());
+      ScoreStandardization.updateScoreTotals(challengeDescription, connection, tournament);
 
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournament.getTournamentID());
       ScoreStandardization.updateTeamTotalScores(connection, challengeDescription, tournament.getTournamentID());
@@ -289,14 +290,14 @@ public final class ScoreStandardization {
    */
   public static void updateScoreTotals(final ChallengeDescription description,
                                        final Connection connection,
-                                       final int tournament)
+                                       final Tournament tournament)
       throws SQLException {
-    updatePerformanceScoreTotals(description, connection, tournament);
+    updatePerformanceScoreTotals(description, connection, tournament.getTournamentID());
 
     updateSubjectiveScoreTotals(description, connection, tournament);
 
-    populateVirtualSubjectiveCategories(connection, description, tournament);
-    summarizeVirtualSubjectiveCategories(connection, tournament);
+    populateVirtualSubjectiveCategories(connection, description, tournament.getTournamentID());
+    summarizeVirtualSubjectiveCategories(connection, tournament.getTournamentID());
   }
 
   /**
@@ -306,62 +307,54 @@ public final class ScoreStandardization {
    * @param connection
    * @throws SQLException
    */
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   private static void updateSubjectiveScoreTotals(final ChallengeDescription description,
                                                   final Connection connection,
-                                                  final int tournament)
+                                                  final Tournament tournament)
       throws SQLException {
 
     try (
         PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE tournament = ?")) {
-      deletePrep.setInt(1, tournament);
+      deletePrep.setInt(1, tournament.getTournamentID());
       deletePrep.executeUpdate();
     }
 
-    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-      final String categoryName = subjectiveElement.getName();
+    try (PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO subjective_computed_scores"//
+        + " (category, tournament, team_number, judge, computed_total, no_show) " //
+        + " VALUES(?, ?, ?, ?, ?, ?)")) {
+      insertPrep.setInt(2, tournament.getTournamentID());
 
-      try (PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO subjective_computed_scores"//
-          + " (category, tournament, team_number, judge, computed_total, no_show) " //
-          + " VALUES(?, ?, ?, ?, ?, ?)");
-          PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM " //
-              + categoryName //
-              + " WHERE Tournament = ?")) {
-        selectPrep.setInt(1, tournament);
+      for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+        final String categoryName = subjectiveElement.getName();
 
         insertPrep.setString(1, categoryName);
-        insertPrep.setInt(2, tournament);
 
-        try (ResultSet rs = selectPrep.executeQuery()) {
-          while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
-            insertPrep.setInt(3, teamNumber);
+        for (final SubjectiveTeamScore teamScore : DatabaseSubjectiveTeamScore.getScoresForCategory(connection,
+                                                                                                    tournament,
+                                                                                                    subjectiveElement)) {
+          insertPrep.setInt(3, teamScore.getTeamNumber());
 
-            final DatabaseTeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-            final double computedTotal;
-            if (teamScore.isNoShow()) {
-              computedTotal = Double.NaN;
-            } else {
-              computedTotal = subjectiveElement.evaluate(teamScore);
-            }
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = Double.NaN;
+          } else {
+            computedTotal = subjectiveElement.evaluate(teamScore);
+          }
 
-            final String judge = rs.getString("Judge");
-            insertPrep.setString(4, judge);
+          final String judge = teamScore.getJudge();
+          insertPrep.setString(4, judge);
 
-            insertPrep.setBoolean(6, teamScore.isNoShow());
+          insertPrep.setBoolean(6, teamScore.isNoShow());
 
-            // insert category score
-            if (Double.isNaN(computedTotal)) {
-              insertPrep.setNull(5, Types.DOUBLE);
-            } else {
-              insertPrep.setDouble(5, computedTotal);
-            }
-            insertPrep.executeUpdate();
-          } // foreach result
-        } // ResultSet
-      } // prepared statements
-    } // foreach category
+          // insert category score
+          if (Double.isNaN(computedTotal)) {
+            insertPrep.setNull(5, Types.DOUBLE);
+          } else {
+            insertPrep.setDouble(5, computedTotal);
+          }
+          insertPrep.executeUpdate();
+        } // foreach result
+      } // foreach category
+    } // prepared statement
   }
 
   /**
@@ -428,8 +421,7 @@ public final class ScoreStandardization {
     }
   }
 
-  //FIXME
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and goal name need to be inserted as strings")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Goal name need to be inserted as string")
   private static void populateVirtualSubjectiveCategories(final Connection connection,
                                                           final ChallengeDescription description,
                                                           final int tournamentId)
@@ -447,15 +439,16 @@ public final class ScoreStandardization {
             PreparedStatement insert = connection.prepareStatement("INSERT INTO virtual_subjective_category (tournament_id, category_name, source_category_name, goal_name, team_number, goal_score)"
                 + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), TeamNumber, AVG(IFNULL("
                 + ref.getGoalName()
-                + ", 0)) FROM "
-                + ref.getCategory().getName()
-                + " WHERE Tournament = ?"
+                + ", 0)) FROM subjective"
+                + " WHERE tournament_id = ?"
+                + " AND category_name = ?"
                 + " GROUP BY TeamNumber")) {
           insert.setInt(1, tournamentId);
           insert.setString(2, category.getName());
           insert.setString(3, ref.getCategory().getName());
           insert.setString(4, ref.getGoalName());
           insert.setInt(5, tournamentId);
+          insert.setString(6, ref.getCategory().getName());
 
           insert.executeUpdate();
         }

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -23,11 +22,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
-import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
-import fll.db.Queries;
-import fll.util.FLLInternalException;
-import fll.xml.AbstractGoal;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -38,44 +33,97 @@ public final class DatabaseSubjectiveTeamScore {
   private DatabaseSubjectiveTeamScore() {
   }
 
+  private static Map<String, Double> fetchSimpleGoals(final int tournament,
+                                                      final String categoryName,
+                                                      final String judge,
+                                                      final int teamNumber,
+                                                      final Connection connection,
+                                                      final Map<String, @Nullable String> goalComments)
+      throws SQLException {
+    final Map<String, Double> values = new HashMap<>();
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT goal_name, goal_value, comment FROM subjective_goals" //
+            + " WHERE tournament_id = ?" //
+            + " AND category_name = ?" //
+            + " AND judge = ?" //
+            + " AND team_number = ?" //
+        )) {
+      prep.setInt(1, tournament);
+      prep.setString(2, categoryName);
+      prep.setString(3, judge);
+      prep.setInt(4, teamNumber);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String name = castNonNull(rs.getString(1));
+          final double value = rs.getDouble(2);
+          values.put(name, value);
+
+          final @Nullable String comment = rs.getString(3);
+          if (!StringUtils.isBlank(comment)) {
+            goalComments.put(name, comment);
+          }
+        }
+      }
+    }
+    return values;
+  }
+
+  private static Map<String, String> fetchEnumGoals(final int tournament,
+                                                    final String categoryName,
+                                                    final String judge,
+                                                    final int teamNumber,
+                                                    final Connection connection,
+                                                    final Map<String, @Nullable String> goalComments)
+      throws SQLException {
+    final Map<String, String> values = new HashMap<>();
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT goal_name, goal_value, comment FROM subjective_enum_goals" //
+            + " WHERE tournament_id = ?" //
+            + " AND category_name = ?" //
+            + " AND judge = ?" //
+            + " AND team_number = ?" //
+        )) {
+      prep.setInt(1, tournament);
+      prep.setString(2, categoryName);
+      prep.setString(3, judge);
+      prep.setInt(4, teamNumber);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final String name = castNonNull(rs.getString(1));
+          final String value = castNonNull(rs.getString(2));
+          values.put(name, value);
+
+          final @Nullable String comment = rs.getString(3);
+          if (!StringUtils.isBlank(comment)) {
+            goalComments.put(name, comment);
+          }
+        }
+      }
+    }
+    return values;
+  }
+
+  /**
+   * Assumes the result set is created from {@link #STANDARD_SUBJECTIVE_COLUMNS}.
+   */
   private static SubjectiveTeamScore fromResultSet(final Connection connection,
                                                    final SubjectiveScoreCategory category,
                                                    final Tournament tournament,
                                                    final ResultSet rs)
       throws SQLException {
 
-    final String judge = castNonNull(rs.getString("Judge"));
+    final String judge = castNonNull(rs.getString(1));
+    final int teamNumber = rs.getInt(2);
+    final boolean noShow = rs.getBoolean(3);
+    final @Nullable String note = rs.getString(4);
+    final @Nullable String commentGreatJob = rs.getString(5);
+    final @Nullable String commentThinkAbout = rs.getString(6);
 
-    final int teamNumber = rs.getInt("TeamNumber");
-    final boolean noShow = rs.getBoolean("NoShow");
-
-    final @Nullable String commentGreatJob = rs.getString("comment_great_job");
-    final @Nullable String commentThinkAbout = rs.getString("comment_think_about");
-    final @Nullable String note = rs.getString("note");
-
-    final Map<String, Double> simpleGoals = new HashMap<>();
-    final Map<String, String> enumGoals = new HashMap<>();
     final Map<String, @Nullable String> goalComments = new HashMap<>();
-    for (final AbstractGoal goal : category.getAllGoals()) {
-      if (goal.isEnumerated()) {
-        final String value = rs.getString(goal.getName());
-        if (null == value) {
-          throw new FLLInternalException("Found enumerated goal '"
-              + goal.getName()
-              + "' with null value in the database");
-        }
-        enumGoals.put(goal.getName(), value);
-      } else {
-        final double value = rs.getDouble(goal.getName());
-        simpleGoals.put(goal.getName(), value);
-      }
-
-      final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
-      final @Nullable String comment = rs.getString(commentColumn);
-      if (!StringUtils.isBlank(comment)) {
-        goalComments.put(goal.getName(), comment);
-      }
-    } // foreach goal
+    final Map<String, Double> simpleGoals = fetchSimpleGoals(tournament.getTournamentID(), category.getName(), judge,
+                                                             teamNumber, connection, goalComments);
+    final Map<String, String> enumGoals = fetchEnumGoals(tournament.getTournamentID(), category.getName(), judge,
+                                                         teamNumber, connection, goalComments);
 
     final Set<String> nominatedCategories = NonNumericNominees.getNomineesByJudgeForTeam(connection, tournament, judge,
                                                                                          teamNumber);
@@ -99,10 +147,12 @@ public final class DatabaseSubjectiveTeamScore {
                                           final SubjectiveScoreCategory category,
                                           final Tournament tournament)
       throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM "
-        + category.getName()
-        + " WHERE TOURNAMENT = ?")) {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM subjective"
+        + " WHERE tournament_id = ?" //
+        + " AND category_name = ?"//
+    )) {
       prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, category.getName());
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
           return rs.getInt(1) > 0;
@@ -112,6 +162,8 @@ public final class DatabaseSubjectiveTeamScore {
       }
     }
   }
+
+  private static final String STANDARD_SUBJECTIVE_COLUMNS = "judge, team_number, NoShow, note, comment_great_job, comment_think_about";
 
   /**
    * @param connection database connection
@@ -128,19 +180,21 @@ public final class DatabaseSubjectiveTeamScore {
       throws SQLException {
     final Collection<SubjectiveTeamScore> scores = new LinkedList<>();
 
-    final String teamNumbersStr = Queries.getTournamentTeams(connection, tournament.getTournamentID())//
-                                         .entrySet().stream() //
-                                         .map(Map.Entry::getValue) //
-                                         .filter(t -> t.getAwardGroup().equals(awardGroup)) //
-                                         .map(t -> String.valueOf(t.getTeamNumber())) //
-                                         .collect(Collectors.joining(", "));
-
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + category.getName()
-        + " WHERE Tournament = ? AND teamnumber IN ( "
-        + teamNumbersStr
-        + " )")) {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT "
+        + STANDARD_SUBJECTIVE_COLUMNS //
+        + " FROM subjective"
+        + " WHERE tournament_id = ?" //
+        + " AND category_name = ?" //
+        + " AND team_number IN ( " //
+        + "  SELECT TeamNumber FROM TournamentTeams"//
+        + "    WHERE Tournament = ?" //
+        + "    AND event_division = ?" //
+        + "  )" //
+    )) {
       prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, category.getName());
+      prep.setInt(3, tournament.getTournamentID());
+      prep.setString(4, awardGroup);
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -156,6 +210,8 @@ public final class DatabaseSubjectiveTeamScore {
   }
 
   /**
+   * Get all scores for a category at a tournament.
+   * 
    * @param connection database connection
    * @param tournament the tournament
    * @param category the category to get scores for
@@ -168,10 +224,14 @@ public final class DatabaseSubjectiveTeamScore {
       throws SQLException {
     final Collection<SubjectiveTeamScore> scores = new LinkedList<>();
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + category.getName()
-        + " WHERE Tournament = ?")) {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT  "
+        + STANDARD_SUBJECTIVE_COLUMNS //
+        + " FROM subjective" //
+        + " WHERE tournament_id = ?" //
+        + " AND category_name = ?" //
+    )) {
       prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, category.getName());
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -201,13 +261,16 @@ public final class DatabaseSubjectiveTeamScore {
       throws SQLException {
     final Collection<SubjectiveTeamScore> scores = new LinkedList<>();
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + category.getName()
-        + " WHERE Tournament = ?" //
-        + " AND teamnumber = ?" //
+    try (PreparedStatement prep = connection.prepareStatement("SELECT "
+        + STANDARD_SUBJECTIVE_COLUMNS //
+        + " FROM  subjective" //
+        + " WHERE tournament_id = ?" //
+        + " AND category_name = ?" //
+        + " AND team_number = ?" //
     )) {
       prep.setInt(1, tournament.getTournamentID());
-      prep.setInt(2, team.getTeamNumber());
+      prep.setString(2, category.getName());
+      prep.setInt(3, team.getTeamNumber());
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -239,15 +302,19 @@ public final class DatabaseSubjectiveTeamScore {
       throws SQLException {
     final Collection<SubjectiveTeamScore> scores = new LinkedList<>();
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + category.getName()
-        + " WHERE Tournament = ?" //
-        + " AND teamnumber = ?" //
+    try (PreparedStatement prep = connection.prepareStatement("SELECT "
+        + STANDARD_SUBJECTIVE_COLUMNS
+        + STANDARD_SUBJECTIVE_COLUMNS //
+        + " FROM  subjective" //
+        + " WHERE tournament_id = ?" //
+        + " AND category_name = ?" //
+        + " AND team_number = ?" //
         + " AND judge = ?" //
     )) {
       prep.setInt(1, tournament.getTournamentID());
-      prep.setInt(2, team.getTeamNumber());
-      prep.setString(3, judge);
+      prep.setString(2, category.getName());
+      prep.setInt(3, team.getTeamNumber());
+      prep.setString(4, judge);
 
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {

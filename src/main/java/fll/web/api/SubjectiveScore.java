@@ -294,15 +294,12 @@ public final class SubjectiveScore {
     final Collection<SubjectiveScore> scores = new LinkedList<>();
 
     for (final SubjectiveTeamScore dbScore : DatabaseSubjectiveTeamScore.getScoresForCategory(connection, tournament,
-                                                                                             category)) {
+                                                                                              category)) {
       final SubjectiveScore score = new SubjectiveScore();
       score.setScoreOnServer(true);
 
-      final int teamNumber = dbScore.getTeamNumber();
-      final String judge = dbScore.getJudge();
-
-      score.setTeamNumber(teamNumber);
-      score.setJudge(judge);
+      score.setTeamNumber(dbScore.getTeamNumber());
+      score.setJudge(dbScore.getJudge());
       score.setNoShow(dbScore.isNoShow());
       score.setNote(dbScore.getNote());
       score.setCommentGreatJob(dbScore.getCommentGreatJob());
