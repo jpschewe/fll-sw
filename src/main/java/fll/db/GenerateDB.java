@@ -355,7 +355,7 @@ public final class GenerateDB {
       if (createConstraints) {
         subjectiveCreateStatement.append(", CONSTRAINT subjective_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
         subjectiveCreateStatement.append(", CONSTRAINT subjective_fk2 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
-        subjectiveCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(team_number, tournament_id) REFERENCES TournamentTeams(TeamNumber, Tournament) ON DELETE CASCADE");
+        subjectiveCreateStatement.append(",CONSTRAINT subjective_fk3 FOREIGN KEY(team_number, tournament_id) REFERENCES TournamentTeams(TeamNumber, Tournament) ON DELETE CASCADE");
 
       }
       subjectiveCreateStatement.append(");");
