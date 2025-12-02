@@ -250,7 +250,7 @@ public final class GenerateDB {
       performanceCreateStatement.append(" CONSTRAINT performance_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
       performanceCreateStatement.append(",CONSTRAINT performance_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       performanceCreateStatement.append(",CONSTRAINT performance_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
-      performanceCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeamss(TeamNumber, Tournament) ON DELETE CASCADE");
+      performanceCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeams(TeamNumber, Tournament) ON DELETE CASCADE");
       performanceCreateStatement.append(");");
       stmt.executeUpdate(performanceCreateStatement.toString());
       createPerformanceGoalsTables(connection, true);
@@ -355,7 +355,7 @@ public final class GenerateDB {
       if (createConstraints) {
         subjectiveCreateStatement.append(", CONSTRAINT subjective_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
         subjectiveCreateStatement.append(", CONSTRAINT subjective_fk2 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
-        subjectiveCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(team_number, tournament_id) REFERENCES TournamentTeamss(TeamNumber, Tournament) ON DELETE CASCADE");
+        subjectiveCreateStatement.append(",CONSTRAINT performance_fk3 FOREIGN KEY(team_number, tournament_id) REFERENCES TournamentTeams(TeamNumber, Tournament) ON DELETE CASCADE");
 
       }
       subjectiveCreateStatement.append(");");
