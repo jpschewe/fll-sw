@@ -1886,12 +1886,12 @@ public final class ImportDB {
 
             if (!isNoShow) {
               enumGoalInsert.setInt(1, tournamentId);
-              enumGoalInsert.setString(3, judge);
-              enumGoalInsert.setInt(4, teamNumber);
+              enumGoalInsert.setString(4, judge);
+              enumGoalInsert.setInt(3, teamNumber);
 
               goalInsert.setInt(1, tournamentId);
               goalInsert.setString(3, judge);
-              goalInsert.setInt(4, teamNumber);
+              goalInsert.setInt(3, teamNumber);
 
               for (final AbstractGoal element : category.getAllGoals()) {
                 if (!element.isComputed()) {
