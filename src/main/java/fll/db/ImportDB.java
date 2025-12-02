@@ -1890,7 +1890,7 @@ public final class ImportDB {
               enumGoalInsert.setInt(3, teamNumber);
 
               goalInsert.setInt(1, tournamentId);
-              goalInsert.setString(3, judge);
+              goalInsert.setString(4, judge);
               goalInsert.setInt(3, teamNumber);
 
               for (final AbstractGoal element : category.getAllGoals()) {
