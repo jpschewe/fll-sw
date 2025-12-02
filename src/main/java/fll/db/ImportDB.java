@@ -1855,7 +1855,7 @@ public final class ImportDB {
     try (Statement stmt = connection.createStatement();
         PreparedStatement insert = connection.prepareStatement("INSERT INTO subjective (tournament_id, category_name, judge, team_number, NoShow, note, comment_great_job, comment_think_about) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
         PreparedStatement goalInsert = connection.prepareStatement("INSERT INTO subjective_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)");
-        PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)")) {
+        PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO subjective_enum_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)")) {
 
       for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
         final String tableName = category.getName();
