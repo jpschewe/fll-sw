@@ -1795,6 +1795,8 @@ public final class ImportDB {
         PreparedStatement goalInsert = connection.prepareStatement("INSERT INTO performance_goals (tournament_id, team_number, run_number, goal_name, goal_value) VALUES(?, ?, ?, ?, ?)");
         PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, team_number, run_number, goal_name, goal_value) VALUES(?, ?, ?, ?, ?)")) {
 
+      stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
+
       try (ResultSet rs = stmt.executeQuery("SELECT * FROM Performance")) {
         while (rs.next()) {
 
