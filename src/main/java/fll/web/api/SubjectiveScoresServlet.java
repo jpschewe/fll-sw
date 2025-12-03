@@ -185,7 +185,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
       }
 
       try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM subjective "
-          + " WHERE tournament_id " //
+          + " WHERE tournament_id = ?" //
           + " AND category_name = ?" //
           + " AND judge = ?" //
           + " AND = team_number = ?" //
