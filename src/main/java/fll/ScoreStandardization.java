@@ -422,7 +422,6 @@ public final class ScoreStandardization {
     }
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Goal name need to be inserted as string")
   private static void populateVirtualSubjectiveCategories(final Connection connection,
                                                           final ChallengeDescription description,
                                                           final int tournamentId)
