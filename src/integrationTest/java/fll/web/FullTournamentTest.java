@@ -69,7 +69,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.opencsv.CSVWriter;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Team;
 import fll.TestUtils;
@@ -827,7 +826,6 @@ public class FullTournamentTest {
 
   }
 
-  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
                                      final Tournament sourceTournament)
