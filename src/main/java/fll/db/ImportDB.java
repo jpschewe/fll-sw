@@ -1780,7 +1780,8 @@ public final class ImportDB {
    * Rework performance goal values into their own normalized tables.
    * Rework subjective data to normalized tables.
    */
-  @SuppressFBWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Column names to drop depends on the goal names, also table names to drop come from category names")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Column names to drop depends on the goal names, also table names to drop come from category names")
   private static void upgrade51to52(final Connection connection,
                                     final boolean createConstraints,
                                     final ChallengeDescription description)
@@ -1789,6 +1790,72 @@ public final class ImportDB {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
     GenerateDB.createPerformanceGoalsTables(connection, createConstraints);
+
+    // delete scores for teams that aren't in a tournament anymore
+    for (final Tournament tournament : Tournament.getTournaments(connection)) {
+      try (
+          PreparedStatement selectTournamentTeams = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE Tournament = ?");
+          PreparedStatement selectPerformanceTeams = connection.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ?");
+          PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance WHERE Tournament = ? AND TeamNumber = ?")) {
+        selectTournamentTeams.setInt(1, tournament.getTournamentID());
+        selectPerformanceTeams.setInt(1, tournament.getTournamentID());
+        deletePerformance.setInt(1, tournament.getTournamentID());
+
+        final Set<Integer> tournamentTeams = new HashSet<>();
+        try (ResultSet rs = selectTournamentTeams.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            tournamentTeams.add(teamNumber);
+          }
+        }
+
+        final Set<Integer> performanceTeams = new HashSet<>();
+        try (ResultSet rs = selectPerformanceTeams.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            performanceTeams.add(teamNumber);
+          }
+        }
+
+        performanceTeams.removeAll(tournamentTeams);
+        for (final int deleteTeam : performanceTeams) {
+          LOGGER.warn("Deleting performance scores for team {} in tournament {} due to that team no longer being in the tournament",
+                      deleteTeam, tournament.toString());
+          deletePerformance.setInt(2, deleteTeam);
+          deletePerformance.executeUpdate();
+        }
+
+        for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+          final String tableName = category.getName();
+
+          try (PreparedStatement selectSubjectiveTeams = connection.prepareStatement("SELEcT TeamNumber FROM "
+              + tableName
+              + " WHERE Tournament = ?");
+              PreparedStatement deleteSubjective = connection.prepareStatement("DELETE FROM "
+                  + tableName
+                  + " WHERE Tournament = ? AND TeamNumber = ?")) {
+            selectSubjectiveTeams.setInt(1, tournament.getTournamentID());
+            deleteSubjective.setInt(1, tournament.getTournamentID());
+
+            final Set<Integer> subjectiveTeams = new HashSet<>();
+            try (ResultSet rs = selectSubjectiveTeams.executeQuery()) {
+              while (rs.next()) {
+                final int teamNumber = rs.getInt(1);
+                subjectiveTeams.add(teamNumber);
+              }
+            }
+
+            subjectiveTeams.removeAll(tournamentTeams);
+            for (final int deleteTeam : subjectiveTeams) {
+              LOGGER.warn("Deleting subjective scores for team {} in category {} in tournament {} due to that team no longer being in the tournament",
+                          deleteTeam, category.getTitle(), tournament.toString());
+              deleteSubjective.setInt(2, deleteTeam);
+              deleteSubjective.executeUpdate();
+            }
+          }
+        }
+      }
+    }
 
     // reorganize the performance goal data
     try (Statement stmt = connection.createStatement();
