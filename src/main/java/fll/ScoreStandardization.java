@@ -286,7 +286,8 @@ public final class ScoreStandardization {
    * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
    * @see #updatePerformanceScoreTotals(ChallengeDescription, Connection, int)
-   * @see #updateSubjectiveScoreTotals(ChallengeDescription, Connection, int)
+   * @see #updateSubjectiveScoreTotals(ChallengeDescription, Connection,
+   *      Tournament)
    */
   public static void updateScoreTotals(final ChallengeDescription description,
                                        final Connection connection,
