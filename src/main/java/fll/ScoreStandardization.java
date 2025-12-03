@@ -435,23 +435,30 @@ public final class ScoreStandardization {
 
     for (VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
       for (SubjectiveGoalRef ref : category.getGoalReferences()) {
+        if (ref.getGoal().isEnumerated()) {
+          throw new FLLInternalException("Virtual categories referencing enumated goals are not supported");
+        } else {
+          try (
+              PreparedStatement insert = connection.prepareStatement("INSERT INTO virtual_subjective_category (tournament_id, category_name, source_category_name, goal_name, team_number, goal_score)"
+                  + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), subjective.team_number, AVG(IFNULL(goal_value, 0))" //
+                  + " FROM subjective, subjective_goals" //
+                  + "   WHERE subjective.tournament_id = ?" //
+                  + "     AND subjective.category_name = ?" //
+                  + "     AND subjective.tournament_id = subjective_goals.tournament_id" //
+                  + "     AND subjective.category_name = subjective_goals.category_name" //
+                  + "     AND subjective.team_number = subjective_goals.team_number" //
+                  + "     AND subjective_goals.goal_name = ?"
+                  + " GROUP BY subjective.team_number")) {
+            insert.setInt(1, tournamentId);
+            insert.setString(2, category.getName());
+            insert.setString(3, ref.getCategory().getName());
+            insert.setString(4, ref.getGoalName());
+            insert.setInt(5, tournamentId);
+            insert.setString(6, ref.getCategory().getName());
+            insert.setString(7, ref.getGoalName());
 
-        try (
-            PreparedStatement insert = connection.prepareStatement("INSERT INTO virtual_subjective_category (tournament_id, category_name, source_category_name, goal_name, team_number, goal_score)"
-                + " SELECT CAST(? AS INTEGER), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), CAST(? AS LONGVARCHAR), TeamNumber, AVG(IFNULL("
-                + ref.getGoalName()
-                + ", 0)) FROM subjective"
-                + " WHERE tournament_id = ?"
-                + " AND category_name = ?"
-                + " GROUP BY TeamNumber")) {
-          insert.setInt(1, tournamentId);
-          insert.setString(2, category.getName());
-          insert.setString(3, ref.getCategory().getName());
-          insert.setString(4, ref.getGoalName());
-          insert.setInt(5, tournamentId);
-          insert.setString(6, ref.getCategory().getName());
-
-          insert.executeUpdate();
+            insert.executeUpdate();
+          }
         }
       }
     }
