@@ -188,7 +188,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
           + " WHERE tournament_id = ?" //
           + " AND category_name = ?" //
           + " AND judge = ?" //
-          + " AND = team_number = ?" //
+          + " AND team_number = ?" //
       );
 
           PreparedStatement insert = connection.prepareStatement("INSERT INTO subjective"
