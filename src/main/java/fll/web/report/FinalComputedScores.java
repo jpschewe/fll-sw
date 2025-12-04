@@ -1063,7 +1063,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (-1 == rank) {
       rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
     } else {
-      rankText = String.format("%1$s(%2$d", Utilities.NON_BREAKING_SPACE, rank);
+      rankText = String.format("%1$s(%2$d)", Utilities.NON_BREAKING_SPACE, rank);
     }
 
     final String overallScoreText;
