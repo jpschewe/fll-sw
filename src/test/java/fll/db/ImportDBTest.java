@@ -5,6 +5,8 @@
  */
 package fll.db;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.hamcrest.collection.IsCollectionWithSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -97,7 +99,7 @@ public class ImportDBTest {
                                                                                                     tournament, team);
 
         // check that team 8777 has a no show in research
-        assertTrue(scores.size() == 1, "Should have exactly 1 score");
+        assertThat("Expecting only a single score", scores, IsCollectionWithSize.hasSize(1));
         final SubjectiveTeamScore score = scores.iterator().next();
         assertTrue(score.isNoShow(), "Should have a no show");
 
