@@ -134,8 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <body>
 
-    <form action="SubmitScoreEntry" method="POST" name="scoreEntry"
-        id="scoreEntry" class="fll-sw-ui-body">
+    <form name="scoreEntry" id="scoreEntry" class="fll-sw-ui-body">
         <c:choose>
             <c:when test="${not empty scoreEntrySelectedTable}">
                 <input type='hidden' name='tablename'
