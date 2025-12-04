@@ -192,7 +192,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
       );
 
           PreparedStatement insert = connection.prepareStatement("INSERT INTO subjective"
-              + "(tounament_id, category_name, judge, team_number, NoShow, note, comment_great_job, comment_think_about)" //
+              + "(tournament_id, category_name, judge, team_number, NoShow, note, comment_great_job, comment_think_about)" //
               + " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
           PreparedStatement insertSimpleGoal = connection.prepareStatement("INSERT INTO subjective_goals" //
