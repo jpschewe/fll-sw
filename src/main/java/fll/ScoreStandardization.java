@@ -17,7 +17,6 @@ import javax.sql.DataSource;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.scores.DatabasePerformanceTeamScore;
 import fll.scores.DatabaseSubjectiveTeamScore;
