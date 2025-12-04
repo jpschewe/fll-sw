@@ -8,7 +8,7 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 
 /**
  * Interface used for {@link EnumConditionStatement#getLeft()} and

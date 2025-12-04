@@ -301,7 +301,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
       throws SQLException {
     LOGGER.debug("Summarizing scores for {}", tournament.getDescription());
 
-    ScoreStandardization.updateScoreTotals(description, connection, tournament.getTournamentID());
+    ScoreStandardization.updateScoreTotals(description, connection, tournament);
 
     ScoreStandardization.summarizeScores(connection, description, tournament.getTournamentID());
 

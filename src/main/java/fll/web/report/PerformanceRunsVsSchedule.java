@@ -31,10 +31,10 @@ import fll.db.RunMetadataFactory;
 import fll.scheduler.PerformanceTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.scores.PerformanceTeamScore;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.TournamentData;
-import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
@@ -194,7 +194,7 @@ public final class PerformanceRunsVsSchedule {
     }
 
     private static String determineEditedTableDisplay(final String origTable) {
-      if ("ALL".equals(origTable)) {
+      if (PerformanceTeamScore.ALL_TABLE.equals(origTable)) {
         return "UNKNOWN";
       } else {
         return origTable;

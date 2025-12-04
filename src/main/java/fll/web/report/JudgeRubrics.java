@@ -17,11 +17,12 @@ import java.util.zip.ZipOutputStream;
 
 import javax.sql.DataSource;
 
-import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.documents.writers.SubjectivePdfWriter;
+import fll.scores.DatabaseSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -83,10 +84,11 @@ public class JudgeRubrics extends BaseFLLServlet {
                                                 .values()) {
           final String directory = String.valueOf(team.getTeamNumber());
 
-          final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForTeam(connection, category, tournament,
-                                                                                      team)
-                                                                    .stream().filter(s -> s.getJudge().equals(judge))
-                                                                    .toList();
+          final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForTeamAndJudge(connection,
+                                                                                                             category,
+                                                                                                             tournament,
+                                                                                                             team,
+                                                                                                             judge);
           if (!scores.isEmpty()) {
             final String filename = String.format("%s/%s.pdf", directory, category.getTitle());
             zipOut.putNextEntry(new ZipEntry(filename));

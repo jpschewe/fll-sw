@@ -8,14 +8,11 @@ package fll.db;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.zip.ZipInputStream;
@@ -26,8 +23,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
-import fll.web.playoff.DatabasePerformanceTeamScore;
-import fll.web.playoff.PerformanceTeamScore;
+import fll.scores.DatabasePerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 
@@ -65,20 +62,12 @@ public class TestComputedScores {
 
         final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
         final int tournamentID = tournament.getTournamentID();
-        try (
-            PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? and TeamNumber = ? AND RunNumber = ?")) {
-          selectPrep.setInt(1, tournamentID);
-          selectPrep.setInt(2, teamNumber);
-          selectPrep.setInt(3, runNumber);
-          try (ResultSet rs = selectPrep.executeQuery()) {
-            assertNotNull(rs, "Error getting performance scores");
-            assertTrue(rs.next(), "No scores found");
+        final PerformanceTeamScore score = DatabasePerformanceTeamScore.fetchTeamScore(tournamentID, teamNumber,
+                                                                                       runNumber, connection);
+        assertNotNull(score, "No scores found");
 
-            final PerformanceTeamScore score = new DatabasePerformanceTeamScore(teamNumber, runNumber, rs);
-            final double computedTotal = performanceElement.evaluate(score);
-            assertEquals(expectedTotal, computedTotal, 0D);
-          } // result set
-        } // prepared statement
+        final double computedTotal = performanceElement.evaluate(score);
+        assertEquals(expectedTotal, computedTotal, 0D);
       } // connection
     } finally {
       if (!tempFile.delete()) {

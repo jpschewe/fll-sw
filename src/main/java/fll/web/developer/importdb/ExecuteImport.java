@@ -86,9 +86,8 @@ public class ExecuteImport extends BaseFLLServlet {
 
         // update score totals
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
-        final int destTournamentID = destTournament.getTournamentID();
         final ChallengeDescription description = GlobalParameters.getChallengeDescription(destConnection);
-        ScoreStandardization.updateScoreTotals(description, destConnection, destTournamentID);
+        ScoreStandardization.updateScoreTotals(description, destConnection, destTournament);
 
         message.append(String.format("<p>Import of tournament %s successful.</p>", tournament));
         redirectUrl = SessionAttributes.getAttribute(session, ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY, String.class);

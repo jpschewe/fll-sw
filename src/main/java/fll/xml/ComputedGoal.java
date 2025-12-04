@@ -16,7 +16,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**

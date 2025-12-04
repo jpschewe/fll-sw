@@ -25,10 +25,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TournamentLevel.NoSuchTournamentLevelException;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.scores.DatabaseSubjectiveTeamScore;
 import fll.util.FLLInternalException;
 import fll.web.admin.Tournaments;
 import fll.xml.ChallengeDescription;
@@ -453,19 +453,14 @@ public final class Tournament implements Serializable {
   }
 
   /**
-   * Check if there are scores in the specified table for this tournament.
+   * Check if there are scores in performance for this tournament
    * 
    * @param connection database connection
-   * @param table table name to check
    * @return true if there are scores for this tournament
    * @throws SQLException
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
-  private boolean scoresInTable(final Connection connection,
-                                final String table)
-      throws SQLException {
-    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM "
-        + table
+  private boolean scoresInPerformance(final Connection connection) throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM performance"
         + " WHERE tournament = ?")) {
       prep.setInt(1, getTournamentID());
       try (ResultSet rs = prep.executeQuery()) {
@@ -494,12 +489,12 @@ public final class Tournament implements Serializable {
   public boolean containsScores(final Connection connection,
                                 final ChallengeDescription description)
       throws SQLException {
-    if (scoresInTable(connection, "performance")) {
+    if (scoresInPerformance(connection)) {
       return true;
     }
 
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
-      if (scoresInTable(connection, category.getName())) {
+      if (DatabaseSubjectiveTeamScore.categoryHasScores(connection, category, this)) {
         return true;
       }
     }
@@ -581,7 +576,7 @@ public final class Tournament implements Serializable {
       deleteScheduleSubj.setInt(1, tournamentID);
       deleteScheduleSubj.executeUpdate();
     }
-    
+
     try (
         PreparedStatement deleteScheduleSubj = connection.prepareStatement("DELETE FROM sched_durations WHERE tournament_id = ?")) {
       deleteScheduleSubj.setInt(1, tournamentID);

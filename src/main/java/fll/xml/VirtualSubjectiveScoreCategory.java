@@ -16,7 +16,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 import fll.web.report.awards.AwardCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 

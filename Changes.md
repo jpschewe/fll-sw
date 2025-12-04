@@ -1,3 +1,4 @@
+* #1282 - Rework database schema to not be dependent on the challenge description
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
 * #1296 - Add top performance scores (PDF) to tournament reporter page

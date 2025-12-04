@@ -6,7 +6,7 @@
 
 package fll.xml;
 
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 
 /**
  * Common interface for {@link CaseStatement#getResult()}.

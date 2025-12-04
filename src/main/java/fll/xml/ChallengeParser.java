@@ -41,9 +41,9 @@ import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
+import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FP;
-import fll.web.playoff.TeamScore;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.web.report.awards.HeadToHeadCategory;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;

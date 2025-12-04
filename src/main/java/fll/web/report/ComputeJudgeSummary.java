@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -167,7 +166,6 @@ public final class ComputeJudgeSummary {
    * @return the number of scores entered
    * @throws SQLException on a database error
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static int getNumScoresEntered(final Connection connection,
                                         final String judge,
                                         final String categoryName,
@@ -176,19 +174,20 @@ public final class ComputeJudgeSummary {
       throws SQLException {
     int numActual = -1;
     try (PreparedStatement getActual = connection.prepareStatement("SELECT COUNT(*)" //
-        + " FROM "
-        + categoryName //
-        + " WHERE tournament = ?" //
+        + " FROM subjective"
+        + " WHERE category_name = ?" //
+        + " AND tournament_id = ?" //
         + " AND judge = ?" //
-        + " AND TeamNumber IN (" //
+        + " AND team_number IN (" //
         + "  SELECT TeamNumber FROM TournamentTeams" //
         + "    WHERE Tournament = ?" //
         + "    AND judging_station = ?" //
         + ")")) {
-      getActual.setInt(1, tournamentID);
-      getActual.setString(2, judge);
-      getActual.setInt(3, tournamentID);
-      getActual.setString(4, station);
+      getActual.setString(1, categoryName);
+      getActual.setInt(2, tournamentID);
+      getActual.setString(3, judge);
+      getActual.setInt(4, tournamentID);
+      getActual.setString(5, station);
       try (ResultSet actual = getActual.executeQuery()) {
         if (actual.next()) {
           numActual = actual.getInt(1);

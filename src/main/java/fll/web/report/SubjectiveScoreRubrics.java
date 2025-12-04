@@ -13,9 +13,10 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.documents.writers.SubjectivePdfWriter;
+import fll.scores.DatabaseSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -60,9 +61,10 @@ public class SubjectiveScoreRubrics extends BaseFLLServlet {
 
       final Tournament tournament = Tournament.getCurrentTournament(connection);
 
-      final Collection<SubjectiveScore> scores = SubjectiveScore.getScoresForCategoryAndAwardGroup(connection,
-                                                                                                   tournament, category,
-                                                                                                   awardGroup);
+      final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForCategoryAndAwardGroup(connection,
+                                                                                                                  tournament,
+                                                                                                                  category,
+                                                                                                                  awardGroup);
 
       response.reset();
       response.setContentType("application/pdf");

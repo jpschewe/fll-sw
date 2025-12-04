@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.scores.DefaultPerformanceTeamScore;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -69,7 +70,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 2.0);
       enumGoals.put("robot_type", "rcx");
-      DummyTeamScore dummyTeamScore = new DummyTeamScore(0, 1, simpleGoals, enumGoals);
+      DefaultPerformanceTeamScore dummyTeamScore = new DefaultPerformanceTeamScore(0, 1, simpleGoals, enumGoals);
       double score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(260, score, 0);
 
@@ -77,7 +78,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 2.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DummyTeamScore(1, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(1, 1, simpleGoals, enumGoals);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(100, score, 0);
 
@@ -85,7 +86,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "rcx");
-      dummyTeamScore = new DummyTeamScore(2, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(2, 1, simpleGoals, enumGoals);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(230, score, 0);
 
@@ -93,7 +94,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DummyTeamScore(3, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(3, 1, simpleGoals, enumGoals);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(85, score, 0);
     }
@@ -126,7 +127,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "rcx");
-      DummyTeamScore dummyTeamScore = new DummyTeamScore(0, 1, simpleGoals, enumGoals);
+      DefaultPerformanceTeamScore dummyTeamScore = new DefaultPerformanceTeamScore(0, 1, simpleGoals, enumGoals);
       assertEquals(269, computed.evaluate(dummyTeamScore), 0);
       double score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(384, score, 0);
@@ -135,7 +136,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DummyTeamScore(1, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(1, 1, simpleGoals, enumGoals);
       assertEquals(0, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(115, score, 0);
@@ -144,7 +145,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "rcx");
-      dummyTeamScore = new DummyTeamScore(2, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(2, 1, simpleGoals, enumGoals);
       assertEquals(131, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(216, score, 0);
@@ -153,7 +154,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DummyTeamScore(3, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(3, 1, simpleGoals, enumGoals);
       assertEquals(0, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(85, score, 0);

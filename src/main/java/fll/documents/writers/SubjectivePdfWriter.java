@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -40,7 +39,6 @@ import org.w3c.dom.Element;
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.SubjectiveScore;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -49,6 +47,7 @@ import fll.Utilities;
 import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.scores.SubjectiveTeamScore;
 import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -278,7 +277,7 @@ public final class SubjectivePdfWriter {
                                final String teamName,
                                final String awardGroup,
                                final @Nullable LocalTime scheduledTime,
-                               final @Nullable SubjectiveScore score) {
+                               final @Nullable SubjectiveTeamScore score) {
     final Element header = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element pageHeaderTable = FOPUtils.createBasicTable(document);
@@ -423,7 +422,7 @@ public final class SubjectivePdfWriter {
 
   private void addInstructions(final Document document,
                                final Element header,
-                               final @Nullable SubjectiveScore score) {
+                               final @Nullable SubjectiveTeamScore score) {
     final Element directionsContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     // "Instructions\n in bold"
@@ -716,7 +715,7 @@ public final class SubjectivePdfWriter {
                                              final OutputStream stream,
                                              final ChallengeDescription description,
                                              final SubjectiveScoreCategory category,
-                                             final Collection<SubjectiveScore> scores)
+                                             final Collection<SubjectiveTeamScore> scores)
       throws IOException, SQLException {
 
     final Pair<Integer, Double> parameters = determineParameters(description, tournament.getName(), category);
@@ -740,7 +739,7 @@ public final class SubjectivePdfWriter {
 
   private Document createDocumentForScores(final Connection connection,
                                            final Tournament tournament,
-                                           final Collection<SubjectiveScore> scores,
+                                           final Collection<SubjectiveTeamScore> scores,
                                            final int pointSize)
       throws SQLException {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -754,7 +753,7 @@ public final class SubjectivePdfWriter {
       block.appendChild(document.createTextNode("No scores for category "
           + scoreCategory.getTitle()));
     } else {
-      for (final SubjectiveScore score : scores) {
+      for (final SubjectiveTeamScore score : scores) {
         final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, tournament,
                                                                                  score.getTeamNumber());
 
@@ -811,7 +810,7 @@ public final class SubjectivePdfWriter {
                               final int fontSize,
                               final double commentHeight,
                               final int[] columnWidths,
-                              final @Nullable SubjectiveScore score) {
+                              final @Nullable SubjectiveTeamScore score) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
 
     sheet.setAttribute("page-break-after", "always");
@@ -829,7 +828,7 @@ public final class SubjectivePdfWriter {
     comments.setAttribute("space-before", "3");
 
     if (null != score
-        && score.getNoShow()) {
+        && score.isNoShow()) {
       // add last so that it's on top of everything
       sheet.appendChild(FOPUtils.createWatermark(document, "NO SHOW", WATERMARK_OPACITY));
     }
@@ -865,7 +864,7 @@ public final class SubjectivePdfWriter {
   private Element createRubric(final Document document,
                                final int fontSize,
                                final int[] columnWidths,
-                               final @Nullable SubjectiveScore score) {
+                               final @Nullable SubjectiveTeamScore score) {
     final Element rubric = FOPUtils.createBasicTable(document);
     rubric.setAttribute("border-collapse", "separate");
 
@@ -969,10 +968,7 @@ public final class SubjectivePdfWriter {
   private List<Element> addRubricGoal(final Document document,
                                       final Element tableBody,
                                       final Goal goal,
-                                      final @Nullable SubjectiveScore score) {
-
-    final Map<String, Double> standardSubScores = null == score ? Collections.emptyMap() : score.getStandardSubScores();
-    final Map<String, String> goalComments = null == score ? Collections.emptyMap() : score.getGoalComments();
+                                      final @Nullable SubjectiveTeamScore score) {
 
     final List<RubricRange> sortedRubricRanges = goal.getRubric();
 
@@ -987,16 +983,12 @@ public final class SubjectivePdfWriter {
 
     final double goalScore;
     if (null == score
-        || score.getNoShow()) {
+        || score.isNoShow()) {
       // will compare to false for all ranges
       goalScore = Double.NaN;
     } else {
       final String goalName = goal.getName();
-      if (standardSubScores.containsKey(goalName)) {
-        goalScore = standardSubScores.get(goalName);
-      } else {
-        goalScore = Double.NaN;
-      }
+      goalScore = score.getRawScore(goalName);
     }
 
     final List<Element> cells = new LinkedList<>();
@@ -1010,7 +1002,7 @@ public final class SubjectivePdfWriter {
           && sortedRubricRanges.get(sortedRubricRanges.size()
               - 1).equals(rubricRange)) {
         // last range is where the goal comment is output
-        final String rawComment = goalComments.get(goal.getName());
+        final String rawComment = score.getGoalComment(goal.getName());
         if (null != rawComment) {
           final String trimmed = rawComment.trim();
           if (trimmed.isBlank()) {
@@ -1184,7 +1176,7 @@ public final class SubjectivePdfWriter {
    */
   private Element createCommentsBlock(final Document document,
                                       final double height,
-                                      final @Nullable SubjectiveScore score) {
+                                      final @Nullable SubjectiveTeamScore score) {
     final String virtualCategoryNames = virtualReferences.stream().map(VirtualSubjectiveScoreCategory::getTitle)
                                                          .collect(Collectors.joining(","));
     final Element commentsTable = FOPUtils.createBasicTable(document);
@@ -1332,7 +1324,7 @@ public final class SubjectivePdfWriter {
 
   private static final float WATERMARK_OPACITY = 0.5f;
 
-  private static String getJudgeInitials(final @Nullable SubjectiveScore score) {
+  private static String getJudgeInitials(final @Nullable SubjectiveTeamScore score) {
     if (null == score) {
       return "";
     } else {

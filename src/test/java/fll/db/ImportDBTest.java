@@ -5,6 +5,8 @@
  */
 package fll.db;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.hamcrest.collection.IsCollectionWithSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,18 +16,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import fll.Team;
 import fll.TestUtils;
+import fll.Tournament;
 import fll.Utilities;
+import fll.scores.DatabaseSubjectiveTeamScore;
+import fll.scores.SubjectiveTeamScore;
 import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * @author jpschewe
@@ -80,12 +88,23 @@ public class ImportDBTest {
                                                                                   connection);
         TestUtils.deleteImportData(importResult);
 
-        // check that team 8777 has a no show in research
-        try (ResultSet rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777")) {
-          assertTrue(rs.next(), "Should have a row");
-          assertTrue(rs.getBoolean(1), "Should have a no show");
+        final @Nullable Tournament tournament = Tournament.findTournamentByName(connection,
+                                                                                "12-11 Benjamin E. Mays International Magnet");
+        assertNotNull(tournament);
+        final Team team = Team.getTeamFromDatabase(connection, 8777);
+        final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
+        final @Nullable SubjectiveScoreCategory research = description.getSubjectiveCategoryByName("research");
+        assertNotNull(research, "Cannot find category 'research'");
 
-        }
+        final Collection<SubjectiveTeamScore> scores = DatabaseSubjectiveTeamScore.getScoresForTeam(connection,
+                                                                                                    research,
+                                                                                                    tournament, team);
+
+        // check that team 8777 has a no show in research
+        assertThat("Expecting only a single score", scores, IsCollectionWithSize.hasSize(1));
+        final SubjectiveTeamScore score = scores.iterator().next();
+        assertTrue(score.isNoShow(), "Should have a no show");
+
       } finally {
         if (!tempFile.delete()) {
           tempFile.deleteOnExit();

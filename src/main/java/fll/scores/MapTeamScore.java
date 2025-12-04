@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.playoff;
+package fll.scores;
 
 import java.util.Map;
 
@@ -29,12 +29,12 @@ public final class MapTeamScore extends BasePerformanceTeamScore {
   }
 
   @Override
-  public @Nullable String getEnumRawScore(final String goalName) {
+  protected @Nullable String internalGetEnumRawScore(final String goalName) {
     return map.get(goalName);
   }
 
   @Override
-  public double getRawScore(final String goalName) {
+  protected double internalGetRawScore(final String goalName) {
     final String value = map.get(goalName);
     if (null == value) {
       return Double.NaN;

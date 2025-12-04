@@ -13,7 +13,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 
 /**
  * Represents a variable reference.
@@ -83,7 +83,7 @@ public class VariableRef implements Evaluatable<TeamScore>, Serializable {
   }
 
   /**
-   * @see fll.xml.Evaluatable#evaluate(fll.web.playoff.TeamScore)
+   * @see fll.xml.Evaluatable#evaluate(fll.scores.TeamScore)
    * @see #getVariable()
    */
   @Override

@@ -21,11 +21,11 @@ import javax.swing.JOptionPane;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 
+import fll.scores.TeamScore;
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
 import fll.util.GuiUtils;
 import fll.util.TextAreaEditor;
-import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeValidationException;

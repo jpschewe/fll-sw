@@ -69,9 +69,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.opencsv.CSVWriter;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
-import fll.SubjectiveScore;
 import fll.Team;
 import fll.TestUtils;
 import fll.Tournament;
@@ -84,6 +82,9 @@ import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
+import fll.scores.DatabasePerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
+import fll.web.api.SubjectiveScore;
 import fll.web.developer.QueryHandler;
 import fll.web.playoff.Playoff;
 import fll.web.scoreEntry.ScoreEntry;
@@ -825,7 +826,6 @@ public class FullTournamentTest {
 
   }
 
-  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
                                      final Tournament sourceTournament)
@@ -839,28 +839,17 @@ public class FullTournamentTest {
       // judge -> teamNumber -> score
       final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<>();
 
-      try (PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
-          + category
-          + " WHERE Tournament = ?")) {
-        prep.setInt(1, sourceTournament.getTournamentID());
+      for (final SubjectiveScore score : SubjectiveScore.getCategoryScores(testDataConn, subjectiveElement,
+                                                                           sourceTournament)) {
+        // only modified scores are stored to the database
+        score.setModified(true);
 
-        try (ResultSet rs = prep.executeQuery()) {
-          while (rs.next()) {
+        final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
+                                                                                         k -> new HashMap<>());
+        judgeScores.put(score.getTeamNumber(), score);
+      } // foreach result
 
-            final SubjectiveScore score = SubjectiveScore.fromResultSet(testDataConn, subjectiveElement,
-                                                                        sourceTournament, rs);
-            // only modified scores are stored to the database
-            score.setModified(true);
-
-            final Map<Integer, SubjectiveScore> judgeScores = categoryScores.computeIfAbsent(score.getJudge(),
-                                                                                             k -> new HashMap<>());
-            judgeScores.put(score.getTeamNumber(), score);
-
-          } // foreach result
-
-          allScores.put(category, categoryScores);
-        } // allocate result set
-      } // allocate prep
+      allScores.put(category, categoryScores);
     } // foreach category
 
     // send data as HTTP post
@@ -898,101 +887,94 @@ public class FullTournamentTest {
           + runNumber);
     }
 
-    try (
-        PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
-      prep.setInt(1, sourceTournament.getTournamentID());
-      prep.setInt(2, runNumber);
-      prep.setInt(3, teamNumber);
+    final PerformanceTeamScore testTeamScore = DatabasePerformanceTeamScore.fetchTeamScore(sourceTournament.getTournamentID(),
+                                                                                           teamNumber, runNumber,
+                                                                                           testDataConn);
+    assertNotNull(testTeamScore, "Cannot find scores for "
+        + teamNumber
+        + " run "
+        + runNumber);
 
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          if (rs.getBoolean("BYE")) {
-            LOGGER.info("Run is a bye, not entering a score");
-            return;
+    if (testTeamScore.isBye()) {
+      LOGGER.info("Run is a bye, not entering a score");
+      return;
+    }
+
+    // need to get the score entry form
+    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
+        + "scoreEntry/select_team.jsp");
+
+    // select this entry
+    final WebElement teamSelect = selenium.findElement(By.id("select-teamnumber"));
+    seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(teamSelect, By.tagName("option")));
+    new Select(teamSelect).selectByValue(String.valueOf(teamNumber));
+
+    // submit the page
+    selenium.findElement(By.id("enter_submit")).click();
+
+    assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
+
+    if (testTeamScore.isNoShow()) {
+      selenium.findElement(By.id("no_show")).click();
+
+      final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
+      confirmScoreYesButton.click();
+    } else {
+      // walk over challenge descriptor to get all element names and then
+      // use the values from rs
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final Goal goal = (Goal) element;
+          final String name = goal.getName();
+          final double min = goal.getMin();
+          final double max = goal.getMax();
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Setting form parameter: "
+                + name
+                + " min: "
+                + min
+                + " max: "
+                + max);
           }
 
-          // need to get the score entry form
-          IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
-              + "scoreEntry/select_team.jsp");
-
-          // select this entry
-          final WebElement teamSelect = selenium.findElement(By.id("select-teamnumber"));
-          seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(teamSelect, By.tagName("option")));
-          new Select(teamSelect).selectByValue(String.valueOf(teamNumber));
-
-          // submit the page
-          selenium.findElement(By.id("enter_submit")).click();
-
-          assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-
-          if (rs.getBoolean("NoShow")) {
-            selenium.findElement(By.id("no_show")).click();
-
-            final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
-            confirmScoreYesButton.click();
+          if (goal.isEnumerated()) {
+            final String valueStr = testTeamScore.getEnumRawScore(name);
+            assertNotNull(valueStr);
+            final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
+            selenium.findElement(By.id(radioID
+                + "_span")).click();
+          } else if (goal.isYesNo()) {
+            final int value = (int) testTeamScore.getRawScore(name);
+            final String buttonID;
+            if (0 == value) {
+              buttonID = name
+                  + "_no_span";
+            } else {
+              buttonID = name
+                  + "_yes_span";
+            }
+            selenium.findElement(By.id(buttonID)).click();
           } else {
-            // walk over challenge descriptor to get all element names and then
-            // use the values from rs
-            for (final AbstractGoal element : performanceElement.getAllGoals()) {
-              if (!element.isComputed()) {
-                final Goal goal = (Goal) element;
-                final String name = goal.getName();
-                final double min = goal.getMin();
-                final double max = goal.getMax();
-                if (LOGGER.isDebugEnabled()) {
-                  LOGGER.debug("Setting form parameter: "
-                      + name
-                      + " min: "
-                      + min
-                      + " max: "
-                      + max);
-                }
+            final int value = (int) testTeamScore.getRawScore(name);
+            final WebElement scoreInput = selenium.findElement(By.name(name));
 
-                if (goal.isEnumerated()) {
-                  final String valueStr = rs.getString(name);
-                  final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
-                  selenium.findElement(By.id(radioID
-                      + "_span")).click();
-                } else if (goal.isYesNo()) {
-                  final int value = rs.getInt(name);
-                  final String buttonID;
-                  if (0 == value) {
-                    buttonID = name
-                        + "_no_span";
-                  } else {
-                    buttonID = name
-                        + "_yes_span";
-                  }
-                  selenium.findElement(By.id(buttonID)).click();
-                } else {
-                  final int value = rs.getInt(name);
-                  final WebElement scoreInput = selenium.findElement(By.name(name));
+            // setup backspace keys to delete all current text and then input the value
+            // without
+            // losing focus
+            final String currentText = scoreInput.getDomProperty("value");
+            final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
+            final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
+            scoreInput.sendKeys(keys);
+          }
+        } // !computed
+      } // foreach goal
 
-                  // setup backspace keys to delete all current text and then input the value
-                  // without
-                  // losing focus
-                  final String currentText = scoreInput.getDomProperty("value");
-                  final String backSpaces = Keys.BACK_SPACE.toString().repeat(currentText.length());
-                  final CharSequence keys = String.format("%s%s", backSpaces, String.valueOf(value));
-                  scoreInput.sendKeys(keys);
-                }
-              } // !computed
-            } // foreach goal
+      IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
+    } // not NoShow
 
-            IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
-          } // not NoShow
+    seleniumWait.until(ExpectedConditions.urlContains("select_team"));
 
-          seleniumWait.until(ExpectedConditions.urlContains("select_team"));
-
-          assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-        } else {
-          fail("Cannot find scores for "
-              + teamNumber
-              + " run "
-              + runNumber);
-        }
-      } // try ResultSet
-    } // try PreparedStatement
+    assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
   }
 
@@ -1018,124 +1000,114 @@ public class FullTournamentTest {
           + runNumber);
     }
 
-    try (
-        PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
-      prep.setInt(1, sourceTournament.getTournamentID());
-      prep.setInt(2, runNumber);
-      prep.setInt(3, teamNumber);
+    final PerformanceTeamScore testTeamScore = DatabasePerformanceTeamScore.fetchTeamScore(sourceTournament.getTournamentID(),
+                                                                                           teamNumber, runNumber,
+                                                                                           testDataConn);
+    assertNotNull(testTeamScore, "Cannot find scores for "
+        + teamNumber
+        + " run "
+        + runNumber);
 
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          if (rs.getBoolean("NoShow")) {
-            // no shows don't need verifying
-            return;
-          } else if (rs.getBoolean("BYE")) {
-            // byes don't need verifying
-            return;
-          } else {
-            // need to get the score entry form
-            IntegrationTestUtils.loadPage(selenium, seleniumWait, selectTeamPage);
+    if (testTeamScore.isNoShow()) {
+      // no shows don't need verifying
+      return;
+    } else if (testTeamScore.isBye()) {
+      // byes don't need verifying
+      return;
+    } else {
+      // need to get the score entry form
+      IntegrationTestUtils.loadPage(selenium, seleniumWait, selectTeamPage);
 
-            // search for the element by team number due to the run numbers changing in head
-            // to head
-            final WebElement verifySelectElement = selenium.findElement(By.id("select-verify-teamnumber"));
-            seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(verifySelectElement,
-                                                                                   By.tagName("option")));
-            final Select verifySelect = new Select(verifySelectElement);
-            boolean found = false;
-            for (final WebElement option : verifySelect.getOptions()) {
-              final String value = option.getDomProperty("value");
-              if (value.startsWith(teamNumber
-                  + "-")) {
-                verifySelect.selectByValue(value);
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              fail("Unable to find verification for team "
-                  + teamNumber);
-            }
-
-            // submit the page
-            selenium.findElement(By.id("verify_submit")).click();
-
-            // walk over challenge descriptor to get all element names and then
-            // use the values from rs
-            for (final AbstractGoal element : performanceElement.getAllGoals()) {
-              if (!element.isComputed()) {
-                final Goal goal = (Goal) element;
-                final String name = goal.getName();
-
-                if (goal.isEnumerated()) {
-                  // need check if the right radio button is selected
-                  final String value = rs.getString(name);
-
-                  final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                                   .getDomProperty("value");
-                  assertNotNull(formValue, "Null value for goal: "
-                      + name);
-
-                  assertEquals(value.toLowerCase(), formValue.toLowerCase(), "Wrong enum selected for goal: "
-                      + name);
-                } else if (goal.isYesNo()) {
-                  final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                                   .getDomProperty("value");
-                  assertNotNull(formValue, "Null value for goal: "
-                      + name);
-
-                  // yes/no
-                  final int value = rs.getInt(name);
-                  final String expectedValue;
-                  if (value == 0) {
-                    expectedValue = "no";
-                  } else {
-                    expectedValue = "yes";
-                  }
-                  assertEquals(expectedValue.toLowerCase(), formValue.toLowerCase(), "Wrong value for goal: "
-                      + name);
-                } else {
-                  final String formValue = selenium.findElement(By.name(name)).getDomProperty("value");
-                  assertNotNull(formValue, "Null value for goal: "
-                      + name);
-
-                  final int value = rs.getInt(name);
-                  final int formValueInt = Integer.parseInt(formValue);
-                  assertEquals(value, formValueInt, "Wrong value for goal: "
-                      + name);
-                }
-              } // !computed
-            } // foreach goal
-
-            // Set the verified field to yes
-            seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("Verified_yes_span"))).click();
-
-            // submit score
-            selenium.findElement(By.id("submit_score")).click();
-          } // not NoShow
-
-          LOGGER.debug("Checking for an alert");
-
-          // confirm selection, not going to bother checking the text
-          final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
-          confirmScoreYesButton.click();
-
-          // wait for upload dialog
-          final WebElement uploadCloseButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("score-entry-upload_close")));
-          uploadCloseButton.click();
-
-          // ensure we are on the select team page
-          seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("select-verify-teamnumber")));
-
-        } else {
-          fail("Cannot find scores for "
-              + teamNumber
-              + " run "
-              + runNumber);
+      // search for the element by team number due to the run numbers changing in head
+      // to head
+      final WebElement verifySelectElement = selenium.findElement(By.id("select-verify-teamnumber"));
+      seleniumWait.until(ExpectedConditions.presenceOfNestedElementLocatedBy(verifySelectElement,
+                                                                             By.tagName("option")));
+      final Select verifySelect = new Select(verifySelectElement);
+      boolean found = false;
+      for (final WebElement option : verifySelect.getOptions()) {
+        final String value = option.getDomProperty("value");
+        if (value.startsWith(teamNumber
+            + "-")) {
+          verifySelect.selectByValue(value);
+          found = true;
+          break;
         }
-      } // try ResultSet
-    } // try PreparedStatement
+      }
+      if (!found) {
+        fail("Unable to find verification for team "
+            + teamNumber);
+      }
 
+      // submit the page
+      selenium.findElement(By.id("verify_submit")).click();
+
+      // walk over challenge descriptor to get all element names and then
+      // use the values from rs
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final Goal goal = (Goal) element;
+          final String name = goal.getName();
+
+          if (goal.isEnumerated()) {
+            // need check if the right radio button is selected
+            final String value = testTeamScore.getEnumRawScore(name);
+
+            final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                             .getDomProperty("value");
+            assertNotNull(formValue, "Null value for goal: "
+                + name);
+
+            assertEquals(value.toLowerCase(), formValue.toLowerCase(), "Wrong enum selected for goal: "
+                + name);
+          } else if (goal.isYesNo()) {
+            final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                             .getDomProperty("value");
+            assertNotNull(formValue, "Null value for goal: "
+                + name);
+
+            // yes/no
+            final int value = (int) testTeamScore.getRawScore(name);
+            final String expectedValue;
+            if (value == 0) {
+              expectedValue = "no";
+            } else {
+              expectedValue = "yes";
+            }
+            assertEquals(expectedValue.toLowerCase(), formValue.toLowerCase(), "Wrong value for goal: "
+                + name);
+          } else {
+            final String formValue = selenium.findElement(By.name(name)).getDomProperty("value");
+            assertNotNull(formValue, "Null value for goal: "
+                + name);
+
+            final int value = (int) testTeamScore.getRawScore(name);
+            final int formValueInt = Integer.parseInt(formValue);
+            assertEquals(value, formValueInt, "Wrong value for goal: "
+                + name);
+          }
+        } // !computed
+      } // foreach goal
+
+      // Set the verified field to yes
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("Verified_yes_span"))).click();
+
+      // submit score
+      selenium.findElement(By.id("submit_score")).click();
+    } // not NoShow
+
+    LOGGER.debug("Checking for an alert");
+
+    // confirm selection, not going to bother checking the text
+    final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
+    confirmScoreYesButton.click();
+
+    // wait for upload dialog
+    final WebElement uploadCloseButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("score-entry-upload_close")));
+    uploadCloseButton.click();
+
+    // ensure we are on the select team page
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("select-verify-teamnumber")));
   }
 
   /**

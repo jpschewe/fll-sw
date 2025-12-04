@@ -30,10 +30,10 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
+import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FormatterUtils;
 import fll.util.GuiUtils;
-import fll.web.playoff.TeamScore;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;

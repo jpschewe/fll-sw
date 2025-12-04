@@ -6,7 +6,7 @@
 
 package fll.xml;
 
-import fll.web.playoff.TeamScore;
+import fll.scores.TeamScore;
 
 /**
  * Something that can have a score computed for.

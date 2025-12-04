@@ -13,9 +13,9 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.web.playoff.TeamScore;
 
 /**
  * A reference to a goal.
