@@ -939,6 +939,7 @@ public class FullTournamentTest {
 
           if (goal.isEnumerated()) {
             final String valueStr = testTeamScore.getEnumRawScore(name);
+            assertNotNull(valueStr);
             final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
             selenium.findElement(By.id(radioID
                 + "_span")).click();
