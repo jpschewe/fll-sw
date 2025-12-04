@@ -88,7 +88,9 @@ public class ImportDBTest {
                                                                                   connection);
         TestUtils.deleteImportData(importResult);
 
-        final Tournament tournament = Tournament.getCurrentTournament(connection);
+        final @Nullable Tournament tournament = Tournament.findTournamentByName(connection,
+                                                                                "12-11 Benjamin E. Mays International Magnet");
+        assertNotNull(tournament);
         final Team team = Team.getTeamFromDatabase(connection, 8777);
         final ChallengeDescription description = GlobalParameters.getChallengeDescription(connection);
         final @Nullable SubjectiveScoreCategory research = description.getSubjectiveCategoryByName("research");
