@@ -5,6 +5,7 @@
  */
 package fll.scores;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -19,13 +20,16 @@ public final class MapTeamScore extends BasePerformanceTeamScore {
   /**
    * @param teamNumber {@link #getTeamNumber()}
    * @param runNumber {@link #getRunNumber()}
+   * @param lastEdited {@link #getLastEdited()}
    * @param map used to read the goal scores
    */
   public MapTeamScore(final int teamNumber,
                       final int runNumber,
-                      final Map<String, String> map) {
+                      final Map<String, String> map,
+                      final LocalDateTime lastEdited) {
     super(teamNumber, runNumber);
     this.map = map;
+    this.lastEdited = lastEdited;
   }
 
   @Override
@@ -81,5 +85,12 @@ public final class MapTeamScore extends BasePerformanceTeamScore {
     } else {
       return table;
     }
+  }
+
+  private final LocalDateTime lastEdited;
+
+  @Override
+  public LocalDateTime getLastEdited() {
+    return lastEdited;
   }
 }

@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +43,7 @@ public final class DatabasePerformanceTeamScore {
                                                               final Connection connection)
       throws SQLException {
 
-    try (PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename" //
+    try (PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename, TimeStamp" //
         + " FROM performance WHERE TeamNumber = ? AND Tournament = ?"
         + " AND RunNumber = ?")) {
 
@@ -54,12 +56,14 @@ public final class DatabasePerformanceTeamScore {
           final boolean bye = result.getBoolean(2);
           final boolean verified = result.getBoolean(3);
           final String tablename = castNonNull(result.getString(4));
+          final Timestamp ts = (Timestamp) castNonNull(result.getTimestamp(5));
+          final LocalDateTime timestamp = ts.toLocalDateTime();
 
           final Map<String, Double> simpleGoals = fetchSimpleGoals(tournament, teamNumber, runNumber, connection);
           final Map<String, String> enumGoals = fetchEnumGoals(tournament, teamNumber, runNumber, connection);
 
           return new DefaultPerformanceTeamScore(teamNumber, runNumber, simpleGoals, enumGoals, tablename, noShow, bye,
-                                                 verified);
+                                                 verified, timestamp);
         } else {
           return null;
         }
