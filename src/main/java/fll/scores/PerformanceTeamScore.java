@@ -4,6 +4,8 @@
 
 package fll.scores;
 
+import java.time.LocalDateTime;
+
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
@@ -50,5 +52,11 @@ public interface PerformanceTeamScore extends TeamScore {
    */
   @SideEffectFree
   int getRunNumber();
+
+  /**
+   * @return when the score was last edited
+   */
+  @SideEffectFree
+  LocalDateTime getLastEdited();
 
 }

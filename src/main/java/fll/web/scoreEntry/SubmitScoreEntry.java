@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -117,9 +118,9 @@ public class SubmitScoreEntry extends HttpServlet {
         final ApiResult result = new ApiResult(true, Optional.of(message));
         jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
-        final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
-        final int rowsUpdated = Queries.updatePerformanceScore(runMetadataFactory,
-                                                               challengeDescription, connection, datasource, teamScore);
+        final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData, LocalDateTime.now());
+        final int rowsUpdated = Queries.updatePerformanceScore(runMetadataFactory, challengeDescription, connection,
+                                                               datasource, teamScore);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");
         } else if (rowsUpdated > 1) {
@@ -136,7 +137,7 @@ public class SubmitScoreEntry extends HttpServlet {
           throw new RuntimeException("Missing parameter: NoShow");
         }
 
-        final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
+        final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData, LocalDateTime.now());
 
         if (Queries.performanceScoreExists(connection, tournament.getTournamentID(), teamNumber, runNumber)) {
           final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %s. Check that you selected the correct team and enter the score again.</div>",

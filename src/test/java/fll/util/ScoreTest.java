@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,7 +71,8 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 2.0);
       enumGoals.put("robot_type", "rcx");
-      DefaultPerformanceTeamScore dummyTeamScore = new DefaultPerformanceTeamScore(0, 1, simpleGoals, enumGoals);
+      DefaultPerformanceTeamScore dummyTeamScore = new DefaultPerformanceTeamScore(0, 1, simpleGoals, enumGoals,
+                                                                                   LocalDateTime.now());
       double score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(260, score, 0);
 
@@ -78,7 +80,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 2.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DefaultPerformanceTeamScore(1, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(1, 1, simpleGoals, enumGoals, LocalDateTime.now());
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(100, score, 0);
 
@@ -86,7 +88,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "rcx");
-      dummyTeamScore = new DefaultPerformanceTeamScore(2, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(2, 1, simpleGoals, enumGoals, LocalDateTime.now());
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(230, score, 0);
 
@@ -94,7 +96,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DefaultPerformanceTeamScore(3, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(3, 1, simpleGoals, enumGoals, LocalDateTime.now());
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(85, score, 0);
     }
@@ -127,7 +129,8 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "rcx");
-      DefaultPerformanceTeamScore dummyTeamScore = new DefaultPerformanceTeamScore(0, 1, simpleGoals, enumGoals);
+      DefaultPerformanceTeamScore dummyTeamScore = new DefaultPerformanceTeamScore(0, 1, simpleGoals, enumGoals,
+                                                                                   LocalDateTime.now());
       assertEquals(269, computed.evaluate(dummyTeamScore), 0);
       double score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(384, score, 0);
@@ -136,7 +139,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DefaultPerformanceTeamScore(1, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(1, 1, simpleGoals, enumGoals, LocalDateTime.now());
       assertEquals(0, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(115, score, 0);
@@ -145,7 +148,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "rcx");
-      dummyTeamScore = new DefaultPerformanceTeamScore(2, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(2, 1, simpleGoals, enumGoals, LocalDateTime.now());
       assertEquals(131, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(216, score, 0);
@@ -154,7 +157,7 @@ public class ScoreTest {
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "nxt");
-      dummyTeamScore = new DefaultPerformanceTeamScore(3, 1, simpleGoals, enumGoals);
+      dummyTeamScore = new DefaultPerformanceTeamScore(3, 1, simpleGoals, enumGoals, LocalDateTime.now());
       assertEquals(0, computed.evaluate(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
       assertEquals(85, score, 0);

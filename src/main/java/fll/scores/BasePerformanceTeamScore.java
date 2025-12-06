@@ -4,6 +4,8 @@
 
 package fll.scores;
 
+import java.time.LocalDateTime;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
@@ -33,6 +35,10 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
   @Override
   @SideEffectFree
   public abstract String getTable();
+
+  @Override
+  @SideEffectFree
+  public abstract LocalDateTime getLastEdited();
 
   @Override
   @SideEffectFree

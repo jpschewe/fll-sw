@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1512,7 +1513,7 @@ public final class Playoff {
       final PerformanceTeamScore teamBscore = new DefaultPerformanceTeamScore(teamBteamNumber,
                                                                               performanceRunNumberToEnter, simpleGoals,
                                                                               enumGoals, PerformanceTeamScore.ALL_TABLE,
-                                                                              true, false, true);
+                                                                              true, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamBscore);
 
@@ -1520,7 +1521,7 @@ public final class Playoff {
       final PerformanceTeamScore teamAscore = new DefaultPerformanceTeamScore(teamAteamNumber,
                                                                               performanceRunNumberToEnter, simpleGoals,
                                                                               enumGoals, PerformanceTeamScore.ALL_TABLE,
-                                                                              true, false, true);
+                                                                              true, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamAscore);
     } else {
@@ -1528,7 +1529,7 @@ public final class Playoff {
       final PerformanceTeamScore teamAscore = new DefaultPerformanceTeamScore(teamAteamNumber,
                                                                               performanceRunNumberToEnter, simpleGoals,
                                                                               enumGoals, PerformanceTeamScore.ALL_TABLE,
-                                                                              false, false, true);
+                                                                              false, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamAscore);
 
@@ -1536,7 +1537,7 @@ public final class Playoff {
       final PerformanceTeamScore teamBscore = new DefaultPerformanceTeamScore(teamBteamNumber,
                                                                               performanceRunNumberToEnter, simpleGoals,
                                                                               enumGoals, PerformanceTeamScore.ALL_TABLE,
-                                                                              true, false, true);
+                                                                              true, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamBscore);
     }
