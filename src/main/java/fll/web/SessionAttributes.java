@@ -5,9 +5,14 @@
  */
 package fll.web;
 
-import jakarta.servlet.http.HttpSession;
+import java.io.Serializable;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import fll.util.FLLRuntimeException;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Keys for session variables. Each key has an associated accessor function as
@@ -167,5 +172,146 @@ public final class SessionAttributes {
    * passed to the next page.
    */
   public static final String STORED_PARAMETERS = "stored_parameters";
+
+  /**
+   * Key to check in request parameters to find a workflow ID.
+   * 
+   * @see #getWorkflowAttribute(HttpSession, String, String, Class)
+   */
+  public static final String WORKFLOW_ID = "workflow_id";
+
+  /**
+   * Get a workflow session attribute and send appropriate error if type is wrong.
+   * Note that null is always valid.
+   *
+   * @param session where to find the workflow session
+   * @param workflowId the identifier for the workflow
+   * @param attribute the attribute to get
+   * @param clazz the expected type
+   * @param <T> the expected type
+   * @return the attribute value or null if the attribute or workflow session
+   *         doesn't exist
+   */
+  public static <T> @Nullable T getWorkflowAttribute(final HttpSession session,
+                                                     final String workflowId,
+                                                     final String attribute,
+                                                     final Class<T> clazz) {
+    final @Nullable WorkflowSession workflowSession = getAttribute(session, getWorkflowSessionKey(workflowId),
+                                                                   WorkflowSession.class);
+    if (null == workflowSession) {
+      return null;
+    }
+
+    return workflowSession.getAttribute(attribute, clazz);
+  }
+
+  /**
+   * Get a session attribute and throw a {@link NullPointerException} if it's
+   * null.
+   *
+   * @param session where to get the attribute from
+   * @param workflowId the identifier for the workflow
+   * @param attribute the name of the attribute to retrieve
+   * @param <T> the type of value stored in the attribute
+   * @param clazz the type of value stored in the attribute
+   * @return the attribute value
+   * @see #getWorkflowAttribute(HttpSession, String, String, Class)
+   */
+  public static <T> T getNonNullWorkflowAttribute(final HttpSession session,
+                                                  final String workflowId,
+                                                  final String attribute,
+                                                  final Class<T> clazz) {
+    final T retval = getWorkflowAttribute(session, workflowId, attribute, clazz);
+    if (null == retval) {
+      throw new NullPointerException(String.format("Workflow session attribute %s is null in %s when it's not expected to be",
+                                                   attribute, workflowId));
+    }
+    return retval;
+  }
+
+  /**
+   * Set a workflow session attribute.
+   * 
+   * @param session where the workflow sessions are stored
+   * @param workflowId the identifier for the workflow
+   * @param attribute the attribute key
+   * @param value the value to set
+   * @see #getWorkflowAttribute(HttpSession, String, String, Class)
+   */
+  public static void setWorkflowAttribute(final HttpSession session,
+                                          final String workflowId,
+                                          final String attribute,
+                                          final Object value) {
+    final @Nullable WorkflowSession workflowSession = getAttribute(session, getWorkflowSessionKey(workflowId),
+                                                                   WorkflowSession.class);
+    if (null == workflowSession) {
+      throw new FLLRuntimeException(String.format("Workflow with id %s does not exist. Cannot set attribute %s on a non-existent session",
+                                                  workflowId, attribute));
+    }
+
+    workflowSession.setAttribute(attribute, value);
+  }
+
+  /**
+   * Create workflow specific session.
+   * 
+   * @param session the session that the workflow is associated with
+   * @return the ID for the workflow session
+   * @see #getWorkflowAttribute(HttpSession, String, String, Class)
+   * @see #setWorkflowAttribute(HttpSession, String, String, Object)
+   */
+  public static String createWorkflowSession(final HttpSession session) {
+    final WorkflowSession workflowSession = new WorkflowSession();
+    session.setAttribute(getWorkflowSessionKey(workflowSession.getId()), workflowSession);
+    return workflowSession.getId();
+  }
+
+  /**
+   * Clean up a workflow session created by
+   * {@link #createWorkflowSession(HttpSession)}.
+   * 
+   * @param session the session
+   * @param workflowId the workflow session id
+   */
+  public static void deleteWorkflowSession(final HttpSession session,
+                                           final String workflowId) {
+    session.removeAttribute(getWorkflowSessionKey(workflowId));
+  }
+
+  private static String getWorkflowSessionKey(final String workflowId) {
+    return ApplicationAttributes.PREFIX
+        + workflowId;
+  }
+
+  private static final class WorkflowSession implements Serializable {
+    private final ConcurrentHashMap<String, Object> data = new ConcurrentHashMap<>();
+
+    private final String id;
+
+    public String getId() {
+      return id;
+    }
+
+    /* package */ WorkflowSession() {
+      id = UUID.randomUUID().toString();
+    }
+
+    public <T> @Nullable T getAttribute(final String attribute,
+                                        final Class<T> clazz) {
+      final @Nullable Object o = data.get(attribute);
+      if (o == null
+          || clazz.isInstance(o)) {
+        return clazz.cast(o);
+      } else {
+        throw new ClassCastException(String.format("Expecting workflow session attribute '%s' to be of type '%s', but was of type '%s'",
+                                                   attribute, clazz, o.getClass()));
+      }
+    }
+
+    public void setAttribute(final String attribute,
+                             final Object value) {
+      data.put(attribute, value);
+    }
+  }
 
 }
