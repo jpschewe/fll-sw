@@ -5,9 +5,9 @@
  */
 package fll.web;
 
+import java.io.Serializable;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -283,8 +283,8 @@ public final class SessionAttributes {
         + workflowId;
   }
 
-  private static final class WorkflowSession {
-    private final ConcurrentMap<String, Object> data = new ConcurrentHashMap<>();
+  private static final class WorkflowSession implements Serializable {
+    private final ConcurrentHashMap<String, Object> data = new ConcurrentHashMap<>();
 
     private final String id;
 
