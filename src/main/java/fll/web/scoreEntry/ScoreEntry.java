@@ -246,13 +246,6 @@ public final class ScoreEntry {
             lRunNumber = runNumber;
           }
 
-          // store run number for redirects that need the current run number
-          // this only happens when editing scores
-          if (edit
-              && !StringUtils.isBlank(workflowId)) {
-            SessionAttributes.setWorkflowAttribute(session, workflowId, "RunNumber", runNumber);
-          }
-
           isBye = Queries.isBye(connection, tournamentId, teamNumber, lRunNumber);
           isNoShow = Queries.isNoShow(connection, tournamentId, teamNumber, lRunNumber);
         } else {
@@ -264,6 +257,13 @@ public final class ScoreEntry {
           isNoShow = false;
         }
         pageContext.setAttribute("lRunNumber", lRunNumber);
+
+        // store run number for redirects that need the current run number
+        // this only happens when editing scores
+        if (edit
+            && !StringUtils.isBlank(workflowId)) {
+          SessionAttributes.setWorkflowAttribute(session, workflowId, "RunNumber", lRunNumber);
+        }
 
         final RunMetadata runMetadata = tournamentData.getRunMetadataFactory().getRunMetadata(lRunNumber);
 
