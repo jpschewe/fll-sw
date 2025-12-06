@@ -1,3 +1,4 @@
+* #1293 - Send the user back to the page they started from when editing a score
 * #1282 - Rework database schema to not be dependent on the challenge description
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
