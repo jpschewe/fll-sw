@@ -469,7 +469,7 @@ public final class Playoff {
       // Above we check that all regular match play runs have been completed, so there
       // must not be any regular match play runs. So we just ask for the max run
       // number and go with that.
-      baseRunNumber = Queries.getMaxRunNumber(connection, tournament);
+      baseRunNumber = Queries.getMaxRunNumberForTournament(connection, tournament);
     } else {
       baseRunNumber = maxRoundForTeams;
     }
@@ -1010,7 +1010,7 @@ public final class Playoff {
                                  final List<? extends Team> teams)
       throws SQLException {
     for (final Team team : teams) {
-      final int maxRunCompleted = Queries.maxPerformanceRunNumberCompleted(connection, team.getTeamNumber());
+      final int maxRunCompleted = Queries.getMaxRunNumberForTeam(connection, team.getTeamNumber());
       for (int round = maxRunCompleted
           + 1; round <= baseRunNumber; ++round) {
         insertBye(connection, team, round);

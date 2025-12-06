@@ -41,7 +41,7 @@ public final class PlayoffSessionData implements Serializable {
 
     final int playoffMaxPerformanceRound = Playoff.getMaxPerformanceRound(connection,
                                                                           mCurrentTournament.getTournamentID());
-    final int maxPerformanceRound = Queries.getMaxRunNumber(connection, mCurrentTournament.getTournamentID());
+    final int maxPerformanceRound = Queries.getMaxRunNumberForTournament(connection, mCurrentTournament);
 
     mInitializedBrackets = new LinkedList<>();
     mUninitializedBrackets = new LinkedList<>();

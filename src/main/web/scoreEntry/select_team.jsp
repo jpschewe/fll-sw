@@ -5,7 +5,7 @@
 <fll-sw:required-roles roles="REF" allowSetup="false" />
 
 <%
-fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);
+fll.web.PageVariables.populateCompletedRunData(application, pageContext);
 %>
 
 <html>
@@ -196,11 +196,10 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                                     <option value='0'>Last
                                                         Run</option>
                                                     <c:forEach
-                                                        var="index"
-                                                        begin="1"
-                                                        end="${maxRunNumber}">
+                                                        items="${completedRunMetadata}"
+                                                        var="md">
                                                         <option
-                                                            value='${index }'>${index }</option>
+                                                            value='${md.runNumber}'>${md.displayName}</option>
                                                     </c:forEach>
                                                 </select>
                                             </td>

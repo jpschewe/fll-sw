@@ -7,6 +7,7 @@
 
 <%
 fll.web.report.ReportIndex.populateContext(application, session, pageContext, true);
+fll.web.PageVariables.populateCompletedRunData(application, pageContext);
 %>
 
 <html>
@@ -72,8 +73,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
     <!--  FinalComputedScores -->
     <div class="wide">
         Final Computed Scores
-        <form
-            action="<c:url value='/report/FinalComputedScores' />"
+        <form action="<c:url value='/report/FinalComputedScores' />"
             target="_finalComputedScores" method="POST">
             <input type="hidden" name="selector"
                 value="<%=fll.web.report.FinalComputedScores.ReportSelector.AWARD_GROUP.name()%>" />
@@ -337,8 +337,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, tr
             METHOD='POST'>
             Show scores for performance run
             <select name='RunNumber'>
-                <c:forEach var="index" begin="1" end="${maxRunNumber}">
-                    <option value='${index }'>${index }</option>
+                <c:forEach items="${completedRunMetadata}" var="md">
+                    <option value='${md.runNumber}'>${md.displayName}</option>
                 </c:forEach>
             </select>
             <input type='submit' value='Show Scores' />

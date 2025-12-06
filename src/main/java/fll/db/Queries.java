@@ -285,8 +285,8 @@ public final class Queries {
    *         tournament
    * @throws SQLException on a database error
    */
-  public static int getMaxRunNumber(final Connection connection,
-                                    final int teamNumber)
+  public static int getMaxRunNumberForTeam(final Connection connection,
+                                           final int teamNumber)
       throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
     try (
@@ -315,8 +315,8 @@ public final class Queries {
    * @return the highest run number that any team has completed
    * @throws SQLException on a database error
    */
-  public static int getMaxRunNumber(final Connection connection,
-                                    final Tournament tournament)
+  public static int getMaxRunNumberForTournament(final Connection connection,
+                                                 final Tournament tournament)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
@@ -2139,36 +2139,6 @@ public final class Queries {
         }
       }
     }
-  }
-
-  /**
-   * Get the max performance run number completed for the specified team in the
-   * current tournament. This does not check the verified flag.
-   *
-   * @param connection database connection
-   * @param teamNumber the team to check
-   * @return the max run number or 0 if no performance runs have been completed
-   * @throws SQLException on a database error
-   */
-  public static int maxPerformanceRunNumberCompleted(final Connection connection,
-                                                     final int teamNumber)
-      throws SQLException {
-    final int tournament = getCurrentTournament(connection);
-
-    try (PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
-        + " WHERE TeamNumber = ? AND Tournament = ?")) {
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, tournament);
-      try (ResultSet rs = prep.executeQuery()) {
-        if (rs.next()) {
-          final int runNumber = rs.getInt(1);
-          return runNumber;
-        } else {
-          return 0;
-        }
-      }
-    }
-
   }
 
   /**

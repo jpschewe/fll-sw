@@ -13,22 +13,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.WebUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Uninitialize a playoff division.
@@ -50,14 +52,15 @@ public class UninitializePlayoff extends BaseFLLServlet {
       return;
     }
 
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
       final boolean oldAutocommit = connection.getAutoCommit();
       connection.setAutoCommit(false);
       try {
-
-        final int tournamentID = Queries.getCurrentTournament(connection);
+        final Tournament tournament = tournamentData.getCurrentTournament();
+        final int tournamentID = tournament.getTournamentID();
 
         final String division = request.getParameter("division");
         if (null == division
@@ -88,7 +91,7 @@ public class UninitializePlayoff extends BaseFLLServlet {
         }
 
         final int playoffMaxPerformanceRound = Playoff.getMaxPerformanceRound(connection, tournamentID);
-        final int maxPerformanceRound = Queries.getMaxRunNumber(connection, tournamentID);
+        final int maxPerformanceRound = Queries.getMaxRunNumberForTournament(connection, tournament);
         if (maxRun == playoffMaxPerformanceRound
             && maxPerformanceRound <= maxRun) {
 

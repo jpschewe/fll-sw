@@ -1,3 +1,4 @@
+* #1299 - Editing performance runs dropdown now shows run names
 * #1293 - Send the user back to the page they started from when editing a score
 * Allow the head judge role to do everything the report generater (tournament reporter) can do
 * #1282 - Rework database schema to not be dependent on the challenge description
