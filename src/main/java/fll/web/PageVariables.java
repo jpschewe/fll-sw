@@ -4,11 +4,9 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web.scoreEntry;
+package fll.web;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,25 +17,27 @@ import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
 import fll.util.FLLRuntimeException;
-import fll.web.ApplicationAttributes;
-import fll.web.TournamentData;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Java code for scoreEntry/select_team.jsp.
+ * Populate page context variables that are used on multiple pages.
  */
-public final class SelectTeam {
+public final class PageVariables {
 
-  private SelectTeam() {
+  private PageVariables() {
   }
 
   /**
+   * Set the variable {@code completedRunMetadata} to the {@link List} of
+   * {@link RunMetadata} in order of run number for the runs that have seen scores
+   * in the current tournament.
+   * 
    * @param application get application variables
    * @param pageContext set page variables
    */
-  public static void populateContext(final ServletContext application,
-                                     final PageContext pageContext) {
+  public static void populateCompletedRunData(final ServletContext application,
+                                              final PageContext pageContext) {
 
     final List<RunMetadata> editMetadata = new LinkedList<>();
 
@@ -45,28 +45,18 @@ public final class SelectTeam {
     final RunMetadataFactory runMetadataFactory = tournamentData.getRunMetadataFactory();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-
-      try (
-          PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
-        prep.setInt(1, Queries.getCurrentTournament(connection));
-        try (ResultSet rs = prep.executeQuery()) {
-          final int maxRunNumber;
-          if (rs.next()) {
-            maxRunNumber = rs.getInt(1);
-          } else {
-            maxRunNumber = 1;
-          }
-          for (int runNumber = 1; runNumber <= maxRunNumber; ++runNumber) {
-            final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
-            editMetadata.add(runMetadata);
-          }
-          pageContext.setAttribute("editMetadata", editMetadata);
-        } // result set
-      } // prepared statement
-
+      final int maxRunNumber = Queries.getMaxRunNumberForTournament(connection, tournamentData.getCurrentTournament());
+      if (maxRunNumber > 0) {
+        for (int runNumber = 1; runNumber <= maxRunNumber; ++runNumber) {
+          final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
+          editMetadata.add(runMetadata);
+        }
+      }
     } catch (final SQLException e) {
       throw new FLLRuntimeException("Error talking to the database", e);
     }
+
+    pageContext.setAttribute("completedRunMetadata", editMetadata);
   }
 
 }

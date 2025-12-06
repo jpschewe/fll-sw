@@ -267,7 +267,7 @@ public final class ScoreEntry {
         pageContext.setAttribute("roundText", roundText);
 
         // check if this is the last run a team has completed
-        final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
+        final int maxRunCompleted = Queries.getMaxRunNumberForTeam(connection, teamNumber);
         pageContext.setAttribute("canDelete", Boolean.valueOf(lRunNumber == maxRunCompleted
             && edit));
 

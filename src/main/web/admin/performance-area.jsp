@@ -6,6 +6,7 @@
 fll.web.MainIndex.populateContext(request, application, pageContext);
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
 fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
+fll.web.PageVariables.populateCompletedRunData(application, pageContext);
 %>
 
 <html>
@@ -185,9 +186,8 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
                 Check that the right number of performance scores have
                 been entered
                 <select name='RunNumber'>
-                    <c:forEach var="index" begin="1"
-                        end="${maxRunNumber}">
-                        <option value='${index }'>${index }</option>
+                    <c:forEach items="${completedRunMetadata}" var="md">
+                        <option value='${md.runNumber}'>${md.displayName}</option>
                     </c:forEach>
                 </select>
                 <input type='submit' value='Show Scores for run' />
