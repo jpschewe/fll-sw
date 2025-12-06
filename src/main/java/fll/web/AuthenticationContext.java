@@ -221,6 +221,10 @@ public final class AuthenticationContext implements Serializable {
         && isHeadJudge()) {
       // head judge can do anything a judge can do
       return true;
+    } else if (requiredRoles.contains(UserRole.REPORT_GENERATOR)
+        && isHeadJudge()) {
+      // head judge can do anything a report generator can do
+      return true;
     } else {
       if (!roles.stream().filter(requiredRoles::contains).findAny().isPresent()) {
         LOGGER.debug("Missing a required role. User roles {} does not contain one of {}, redirecting to login.jsp",
