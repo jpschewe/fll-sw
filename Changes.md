@@ -1,6 +1,11 @@
+* Allow the head judge role to do everything the report generater (tournament reporter) can do
 * #1282 - Rework database schema to not be dependent on the challenge description
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
+
+Release 20.1.0
+==============
+
 * #1296 - Add top performance scores (PDF) to tournament reporter page
 * #1297 - Sort awards CSV file the same as the awards script
 * #1295 - Fix formatting of award winner write-up for non-ranked categories
