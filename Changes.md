@@ -1,3 +1,4 @@
+* #1299 - Editing performance runs dropdown now shows run names
 * Allow the head judge role to do everything the report generater (tournament reporter) can do
 
 Release 20.1.0

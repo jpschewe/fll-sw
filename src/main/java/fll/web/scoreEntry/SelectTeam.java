@@ -10,12 +10,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import fll.db.Queries;
+import fll.db.RunMetadata;
+import fll.db.RunMetadataFactory;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -33,6 +38,11 @@ public final class SelectTeam {
    */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
+
+    final List<RunMetadata> editMetadata = new LinkedList<>();
+
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final RunMetadataFactory runMetadataFactory = tournamentData.getRunMetadataFactory();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -46,7 +56,11 @@ public final class SelectTeam {
           } else {
             maxRunNumber = 1;
           }
-          pageContext.setAttribute("maxRunNumber", maxRunNumber);
+          for (int runNumber = 1; runNumber <= maxRunNumber; ++runNumber) {
+            final RunMetadata runMetadata = runMetadataFactory.getRunMetadata(runNumber);
+            editMetadata.add(runMetadata);
+          }
+          pageContext.setAttribute("editMetadata", editMetadata);
         } // result set
       } // prepared statement
 
