@@ -278,7 +278,7 @@ public final class SessionAttributes {
     session.removeAttribute(getWorkflowSessionKey(workflowId));
   }
 
-  private static final String getWorkflowSessionKey(final String workflowId) {
+  private static String getWorkflowSessionKey(final String workflowId) {
     return ApplicationAttributes.PREFIX
         + workflowId;
   }
@@ -292,7 +292,7 @@ public final class SessionAttributes {
       return id;
     }
 
-    public WorkflowSession() {
+    /* package */ WorkflowSession() {
       id = UUID.randomUUID().toString();
     }
 
