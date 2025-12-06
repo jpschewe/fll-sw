@@ -87,7 +87,7 @@ public class RunMetadataFactory {
   public List<RunMetadata> getAllRunMetadata() {
     final List<RunMetadata> allMetadata = new LinkedList<>();
     try (Connection connection = getDataSource().getConnection()) {
-      final int maxPerfRounds = Queries.getMaxRunNumber(connection, getTournament());
+      final int maxPerfRounds = Queries.getMaxRunNumberForTournament(connection, getTournament());
       final int maxMetadataRound = RunMetadata.getMaxRunNumber(connection, getTournament());
 
       for (int round = 1; round <= Math.max(maxPerfRounds, maxMetadataRound); ++round) {

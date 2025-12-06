@@ -257,15 +257,7 @@ public class FullTournamentTest {
      * --- Enter 3 runs for each team --- Use data from test data base,
      * converted from Field 2005. Enter 4th run and rest of playoffs.
      */
-    final int maxRuns;
-    try (
-        PreparedStatement maxRunPrep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
-      maxRunPrep.setInt(1, sourceTournament.getTournamentID());
-      try (ResultSet maxRunResult = maxRunPrep.executeQuery()) {
-        assertTrue(maxRunResult.next(), "No performance scores in test data");
-        maxRuns = maxRunResult.getInt(1);
-      }
-    }
+    final int maxRuns = Queries.getMaxRunNumberForTournament(testDataConn, sourceTournament);
 
     final PerformanceScoreCategory performanceElement = challengeDescription.getPerformance();
 
