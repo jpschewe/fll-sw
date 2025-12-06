@@ -113,7 +113,7 @@ public final class ScoreEntry {
    * Set variables in the page context.
    * Checks request for "displayScores" to force display of scores, even
    * when using a tablet.
-   *
+   * 
    * @param application for application variables
    * @param request the web request
    * @param response used to redirect on an error
@@ -127,6 +127,22 @@ public final class ScoreEntry {
                                         final HttpServletResponse response,
                                         final HttpSession session,
                                         final PageContext pageContext) {
+    final @Nullable String referrer = request.getHeader("Referer");
+
+    final @Nullable String workflowId = request.getParameter(SessionAttributes.WORKFLOW_ID);
+    pageContext.setAttribute(SessionAttributes.WORKFLOW_ID, workflowId);
+
+    // set redirect and include the workflow id (if one exists)
+    final String baseRedirect = StringUtils.isEmpty(referrer) ? "select_team.jsp" : referrer;
+    final String redirect;
+    if (!StringUtils.isBlank(workflowId)) {
+      redirect = String.format("%s%s%s=%s", baseRedirect, baseRedirect.contains("?") ? "&" : "?",
+                               SessionAttributes.WORKFLOW_ID, workflowId);
+    } else {
+      redirect = baseRedirect;
+    }
+    pageContext.setAttribute("redirect", redirect);
+
     final boolean edit = Boolean.parseBoolean(request.getParameter("EditFlag"));
 
     final boolean tabletEntry = isTabletEntry(request, session);
@@ -229,6 +245,13 @@ public final class ScoreEntry {
             }
 
             lRunNumber = runNumber;
+          }
+
+          // store run number for redirects that need the current run number
+          // this only happens when editing scores
+          if (edit
+              && !StringUtils.isBlank(workflowId)) {
+            SessionAttributes.setWorkflowAttribute(session, workflowId, "RunNumber", runNumber);
           }
 
           isBye = Queries.isBye(connection, tournamentId, teamNumber, lRunNumber);

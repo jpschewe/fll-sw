@@ -61,6 +61,7 @@ if (!fll.web.scoreEntry.ScoreEntry.populateContext(application, request, respons
 const roundText = "${roundText}";
 const teamNumber = "${team.teamNumber}";
 const runNumber = "${lRunNumber}";
+const redirect = "${redirect}";
 
 var EditFlag = false;
 <c:if test="${EditFlag}">
