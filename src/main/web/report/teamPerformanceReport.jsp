@@ -5,21 +5,20 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
 
-<fll-sw:required-roles roles="REF,JUDGE,REPORT_GENERATOR" allowSetup="false" />
+<fll-sw:required-roles roles="REF,JUDGE,REPORT_GENERATOR"
+    allowSetup="false" />
 
 <%
+fll.web.report.TeamPerformanceReport.populateContext(application, session, request, pageContext);
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
-pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
 %>
 
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>Team
-    <c:out value="${param.TeamNumber}" /> Performance Scores
-</title>
+<title>Team ${TeamNumber}" Performance Scores</title>
 
 <style>
 table#perf-data {
@@ -40,13 +39,13 @@ table#perf-data th, table#perf-data td {
 <body>
     <h1>
         Team
-        <c:out value="${param.TeamNumber}" />
+        <c:out value="${TeamNumber}" />
         Performance Scores
     </h1>
     <sql:query var="result" dataSource="${datasource}">
       SELECT RunNumber, ComputedTotal, NoShow, TIMESTAMP
         FROM Performance
-        WHERE TeamNumber = <c:out value="${param.TeamNumber}" />
+        WHERE TeamNumber = <c:out value="${TeamNumber}" />
           AND Performance.Tournament = <c:out value="${tournament}" />
         ORDER By RunNumber
     </sql:query>
@@ -76,7 +75,7 @@ table#perf-data th, table#perf-data td {
                 </td>
                 <td>
                     <a
-                        href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${param.TeamNumber}&EditFlag=true&RunNumber=${row.RunNumber}"/>'>Edit
+                        href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${TeamNumber}&EditFlag=true&RunNumber=${row.RunNumber}&workflow_id=${workflow_id} "/>'>Edit
                     </a>
                 </td>
             </tr>
