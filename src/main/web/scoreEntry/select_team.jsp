@@ -196,11 +196,10 @@ Entering scores for all tables. Teams are sorted in schedule order.
                                                     <option value='0'>Last
                                                         Run</option>
                                                     <c:forEach
-                                                        var="index"
-                                                        begin="1"
-                                                        end="${maxRunNumber}">
+                                                        items="${editMetadata}"
+                                                        var="md">
                                                         <option
-                                                            value='${index }'>${index }</option>
+                                                            value='${md.runNumber}'>${md.displayName}</option>
                                                     </c:forEach>
                                                 </select>
                                             </td>
