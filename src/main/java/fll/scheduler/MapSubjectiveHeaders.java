@@ -26,7 +26,6 @@ import javax.swing.JTextField;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -35,7 +34,7 @@ import fll.xml.SubjectiveScoreCategory;
  */
 /* package */ class MapSubjectiveHeaders extends JDialog {
 
-  private final Map<ScoreCategory, JTextField> filenameSuffixes = new HashMap<>();
+  private final Map<SubjectiveScoreCategory, JTextField> filenameSuffixes = new HashMap<>();
 
   private boolean canceled = true;
 
@@ -104,7 +103,7 @@ import fll.xml.SubjectiveScoreCategory;
    * @param category what to find
    * @return null if not found or no suffix
    */
-  public @Nullable String getFilenameSuffixForCategory(final ScoreCategory category) {
+  public @Nullable String getFilenameSuffixForCategory(final SubjectiveScoreCategory category) {
     final JTextField widget = filenameSuffixes.get(category);
     if (null != widget) {
       final String text = widget.getText();

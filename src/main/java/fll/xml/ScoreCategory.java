@@ -8,10 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,8 +22,10 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Base for {@link SubjectiveScoreCategory} and
  * {@link PerformanceScoreCategory}.
+ * 
+ * @param <T> type of score object supported
  */
-public abstract class ScoreCategory implements Evaluatable, Serializable, GoalScope {
+public abstract class ScoreCategory <T extends TeamScore> implements Evaluatable<T>, Serializable, GoalScope {
 
   /**
    * XML attribute name used for the weight of a score category.
@@ -177,42 +177,12 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   }
 
   @Override
-  public double evaluate(final TeamScore teamScore) {
-    if (!teamScore.scoreExists()) {
-      return Double.NaN;
-    } else if (teamScore.isNoShow()
-        || teamScore.isBye()) {
+  public double evaluate(final T teamScore) {
+    if (teamScore.isNoShow()) {
       return 0D;
     }
 
     return goalElements.stream().mapToDouble(g -> g.evaluate(teamScore)).sum();
-  }
-
-  /**
-   * Compute scores per goal group.
-   *
-   * @param teamScore the score to evaluate
-   * @return goal group to score, empty map if no score or a no show or no groups
-   *         defined
-   */
-  public Map<String, Double> getGoalGroupScores(final TeamScore teamScore) {
-    final Map<String, Double> goalGroupScores = new HashMap<>();
-
-    if (!teamScore.scoreExists()) {
-      return goalGroupScores;
-    } else if (teamScore.isNoShow()
-        || teamScore.isBye()) {
-      return goalGroupScores;
-    }
-
-    for (final GoalElement ge : goalElements) {
-      if (ge.isGoalGroup()) {
-        final GoalGroup group = (GoalGroup) ge;
-        final double groupScore = group.evaluate(teamScore);
-        goalGroupScores.merge(group.getTitle(), groupScore, Double::sum);
-      }
-    }
-    return goalGroupScores;
   }
 
   /**

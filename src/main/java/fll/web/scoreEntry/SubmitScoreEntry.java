@@ -35,7 +35,7 @@ import fll.web.TournamentData;
 import fll.web.UserRole;
 import fll.web.api.ApiResult;
 import fll.web.playoff.MapTeamScore;
-import fll.web.playoff.TeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -117,9 +117,9 @@ public class SubmitScoreEntry extends HttpServlet {
         final ApiResult result = new ApiResult(true, Optional.of(message));
         jsonMapper.writeValue(writer, result);
       } else if (Boolean.valueOf(formData.get("EditFlag"))) {
-        final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
-        final int rowsUpdated = Queries.updatePerformanceScore(runMetadataFactory, challengeDescription, connection,
-                                                               datasource, teamScore);
+        final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
+        final int rowsUpdated = Queries.updatePerformanceScore(runMetadataFactory,
+                                                               challengeDescription, connection, datasource, teamScore);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");
         } else if (rowsUpdated > 1) {
@@ -136,7 +136,7 @@ public class SubmitScoreEntry extends HttpServlet {
           throw new RuntimeException("Missing parameter: NoShow");
         }
 
-        final TeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
+        final PerformanceTeamScore teamScore = new MapTeamScore(teamNumber, runNumber, formData);
 
         if (Queries.performanceScoreExists(connection, tournament.getTournamentID(), teamNumber, runNumber)) {
           final String message = String.format("<div class='error'>Someone else has already entered a score for team %s run %s. Check that you selected the correct team and enter the score again.</div>",

@@ -9,10 +9,12 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.util.FLLInternalException;
+
 /**
- * A team score in a Map containing strings from form data.
+ * A team score in a Map containing strings from form data from the web.
  */
-public final class MapTeamScore extends TeamScore {
+public final class MapTeamScore extends BasePerformanceTeamScore {
 
   /**
    * @param teamNumber {@link #getTeamNumber()}
@@ -28,71 +30,45 @@ public final class MapTeamScore extends TeamScore {
 
   @Override
   public @Nullable String getEnumRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return null;
-    } else {
-      return map.get(goalName);
-    }
+    return map.get(goalName);
   }
 
   @Override
   public double getRawScore(final String goalName) {
-    if (!scoreExists()) {
+    final String value = map.get(goalName);
+    if (null == value) {
       return Double.NaN;
     } else {
-      final String value = map.get(goalName);
-      if (null == value) {
-        return Double.NaN;
-      } else {
-        return Double.parseDouble(value);
-      }
+      return Double.parseDouble(value);
     }
   }
 
-  /**
-   * @see fll.web.playoff.TeamScore#isNoShow()
-   */
   @Override
   public boolean isNoShow() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      final String noShow = map.get("NoShow");
-      if (null == noShow) {
-        throw new RuntimeException("Missing parameter: NoShow");
-      }
-      return noShow.equalsIgnoreCase("true")
-          || noShow.equalsIgnoreCase("t")
-          || noShow.equals("1");
-    }
+    return getBoolean("NoShow");
   }
 
   @Override
   public boolean isBye() {
-    // one cannot enter a BYE through the web interface
+    // can't get a bye from the web
     return false;
+  }
+
+  private boolean getBoolean(final String key) {
+    final String value = map.get(key);
+    if (null == value) {
+      throw new FLLInternalException("Missing parameter: "
+          + key);
+    }
+    return value.equalsIgnoreCase("true")
+        || value.equalsIgnoreCase("t")
+        || value.equals("1");
+
   }
 
   @Override
   public boolean isVerified() {
-    if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
-      return false;
-    } else if (!scoreExists()) {
-      return false;
-    } else {
-      final String verified = map.get("Verified");
-      if (null == verified) {
-        throw new RuntimeException("Missing parameter: Verified");
-      }
-      return verified.equalsIgnoreCase("true")
-          || verified.equalsIgnoreCase("t")
-          || verified.equals("1");
-    }
-  }
-
-  @Override
-  public boolean scoreExists() {
-    return true;
+    return getBoolean("Verified");
   }
 
   private final Map<String, String> map;

@@ -39,8 +39,8 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
-import fll.web.playoff.DatabaseTeamScore;
-import fll.web.playoff.TeamScore;
+import fll.web.playoff.DatabasePerformanceTeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -245,8 +245,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
-    final List<TeamScore> scores = getScores(connection, tournamentData.getCurrentTournament(), team,
-                                             regularMatchPlayRuns);
+    final List<PerformanceTeamScore> scores = getScores(connection, tournamentData.getCurrentTournament(), team,
+                                                        regularMatchPlayRuns);
     for (final GoalElement goalEle : performance.getGoalElements()) {
       if (goalEle.isGoalGroup()) {
         outputGoalGroup(document, tableBody, performance, scores, (GoalGroup) goalEle);
@@ -269,11 +269,9 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     totalCell.setAttribute("font-weight", TITLE_FONT_WEIGHT);
 
     final double bestTotalScore = bestTotalScore(performance, scores);
-    for (final TeamScore score : scores) {
+    for (final PerformanceTeamScore score : scores) {
       final Element scoreCell;
-      if (!score.scoreExists()) {
-        scoreCell = createCell(document, "");
-      } else if (score.isBye()) {
+      if (score.isBye()) {
         scoreCell = createCell(document, "Bye");
       } else if (score.isNoShow()) {
         scoreCell = createCell(document, "No Show");
@@ -302,7 +300,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static void outputGoalGroup(final Document document,
                                       final Element tableBody,
                                       final PerformanceScoreCategory performance,
-                                      final List<TeamScore> scores,
+                                      final List<PerformanceTeamScore> scores,
                                       final GoalGroup group) {
     final int numCols = scores.size()
         + 1;
@@ -329,7 +327,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static void outputGoal(final Document document,
                                  final Element tableBody,
                                  final PerformanceScoreCategory performance,
-                                 final List<TeamScore> scores,
+                                 final List<PerformanceTeamScore> scores,
                                  final AbstractGoal goal) {
     final double bestScore = bestScoreForGoal(scores, goal);
 
@@ -348,9 +346,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     titleCell.setAttribute("font-size", TITLE_FONT_SIZE);
     titleCell.setAttribute("font-weight", TITLE_FONT_WEIGHT);
 
-    for (final TeamScore score : scores) {
-      if (!score.scoreExists()
-          || score.isBye()
+    for (final PerformanceTeamScore score : scores) {
+      if (score.isBye()
           || score.isNoShow()) {
         row.appendChild(createCell(document, ""));
       } else {
@@ -404,12 +401,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
    * @return best total score
    */
   private static double bestTotalScore(final PerformanceScoreCategory performance,
-                                       final List<TeamScore> scores) {
+                                       final List<PerformanceTeamScore> scores) {
     double bestScore = Double.MAX_VALUE
         * -1;
-    for (final TeamScore score : scores) {
-      if (score.scoreExists()
-          && !score.isBye()
+    for (final PerformanceTeamScore score : scores) {
+      if (!score.isBye()
           && !score.isNoShow()) {
         final double computedValue = performance.evaluate(score);
         bestScore = Math.max(bestScore, computedValue);
@@ -423,13 +419,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   /**
    * @return the best score for the specified goal
    */
-  private static double bestScoreForGoal(final List<TeamScore> scores,
+  private static double bestScoreForGoal(final List<PerformanceTeamScore> scores,
                                          final AbstractGoal goal) {
     double bestScore = Double.MAX_VALUE
         * -1;
-    for (final TeamScore score : scores) {
-      if (score.scoreExists()
-          && !score.isBye()
+    for (final PerformanceTeamScore score : scores) {
+      if (!score.isBye()
           && !score.isNoShow()) {
         final double computedValue = goal.evaluate(score);
         bestScore = Math.max(bestScore, computedValue);
@@ -440,15 +435,20 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return bestScore;
   }
 
-  private static List<TeamScore> getScores(final Connection connection,
-                                           final Tournament tournament,
-                                           final TournamentTeam team,
-                                           final List<RunMetadata> regularMatchPlayRuns)
+  private static List<PerformanceTeamScore> getScores(final Connection connection,
+                                                      final Tournament tournament,
+                                                      final TournamentTeam team,
+                                                      final List<RunMetadata> regularMatchPlayRuns)
       throws SQLException {
-    final List<TeamScore> scores = new LinkedList<>();
+    final List<PerformanceTeamScore> scores = new LinkedList<>();
     for (final RunMetadata metadata : regularMatchPlayRuns) {
-      scores.add(new DatabaseTeamScore(tournament.getTournamentID(), team.getTeamNumber(), metadata.getRunNumber(),
-                                       connection));
+      final @Nullable PerformanceTeamScore score = DatabasePerformanceTeamScore.fetchTeamScore(tournament.getTournamentID(),
+                                                                                               team.getTeamNumber(),
+                                                                                               metadata.getRunNumber(),
+                                                                                               connection);
+      if (null != score) {
+        scores.add(score);
+      }
     }
     return scores;
   }

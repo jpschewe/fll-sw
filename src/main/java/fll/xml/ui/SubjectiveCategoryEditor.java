@@ -25,6 +25,7 @@ import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
 import fll.util.GuiUtils;
 import fll.util.TextAreaEditor;
+import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeValidationException;
@@ -34,7 +35,7 @@ import fll.xml.SubjectiveScoreCategory;
 /**
  * Editor for {@link SubjectiveScoreCategory} objects.
  */
-public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
+public class SubjectiveCategoryEditor extends ScoreCategoryEditor<TeamScore> {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 

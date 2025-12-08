@@ -20,7 +20,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Represents a case statement in a {@link ComputedGoal}.
  */
-public class CaseStatement implements Evaluatable, Serializable {
+public class CaseStatement implements Evaluatable<TeamScore>, Serializable {
 
   /**
    * XML tag used for this class.
@@ -147,7 +147,7 @@ public class CaseStatement implements Evaluatable, Serializable {
     ele.appendChild(conditionElement);
 
     final Element resultEle;
-    final Evaluatable result = getResult();
+    final Evaluatable<TeamScore> result = getResult();
     if (result instanceof ComplexPolynomial) {
       final ComplexPolynomial resultPoly = (ComplexPolynomial) result;
       resultEle = doc.createElement(RESULT_TAG_NAME);

@@ -1,3 +1,4 @@
+* #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1299 - Editing performance runs dropdown now shows run names
 * Allow the head judge role to do everything the report generater (tournament reporter) can do
 

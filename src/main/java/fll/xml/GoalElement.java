@@ -11,17 +11,18 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import fll.web.playoff.TeamScore;
 
 /**
  * Common data between {@link AbstractGoal} and {@link GoalGroup}.
  */
-public abstract class GoalElement implements Serializable, Evaluatable {
+public abstract class GoalElement implements Serializable, Evaluatable<TeamScore> {
 
   /**
    * XML attribute for goal title.

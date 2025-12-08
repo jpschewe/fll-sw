@@ -14,12 +14,13 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
 import fll.util.FormatterUtils;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.PerformanceScoreCategory;
 
 /**
  * Editor for {@link PerformanceScoreCategory} objects.
  */
-public class PerformanceEditor extends ScoreCategoryEditor {
+public class PerformanceEditor extends ScoreCategoryEditor<PerformanceTeamScore> {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 

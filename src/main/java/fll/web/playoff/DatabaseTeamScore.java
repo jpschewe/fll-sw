@@ -5,22 +5,18 @@
  */
 package fll.web.playoff;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
-import fll.db.GenerateDB;
 
 /**
  * TeamScore implementation for a performance score in the database.
  */
-public class DatabaseTeamScore extends TeamScore {
+public class DatabaseTeamScore extends BaseTeamScore {
 
   private final Map<String, @Nullable Object> data;
 
@@ -39,68 +35,13 @@ public class DatabaseTeamScore extends TeamScore {
     super(teamNumber);
 
     data = Utilities.resultSetRowToMap(rs);
-    scoreExists = true;
   }
 
   /**
-   * Create a database team score object for a performance score.
-   * 
-   * @param tournament the tournament
-   * @param teamNumber passed to superclass
-   * @param runNumber passed to superclass
-   * @param connection the connection to get the data from
-   * @throws SQLException if there is an error getting the data
+   * @param goalName the goal to get as a string
+   * @return the value or {@code null} if not found
    */
-  public DatabaseTeamScore(final int tournament,
-                           final int teamNumber,
-                           final int runNumber,
-                           final Connection connection)
-      throws SQLException {
-    super(teamNumber, runNumber);
-
-    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
-        + GenerateDB.PERFORMANCE_TABLE_NAME
-        + " WHERE TeamNumber = ? AND Tournament = ?"
-        + (NON_PERFORMANCE_RUN_NUMBER == getRunNumber() ? "" : " AND RunNumber = ?"))) {
-      if (NON_PERFORMANCE_RUN_NUMBER != getRunNumber()) {
-        prep.setInt(3, getRunNumber());
-      }
-
-      prep.setInt(1, getTeamNumber());
-      prep.setInt(2, tournament);
-      try (ResultSet result = prep.executeQuery()) {
-        if (result.next()) {
-          scoreExists = true;
-          data = Utilities.resultSetRowToMap(result);
-        } else {
-          scoreExists = false;
-          data = Collections.emptyMap();
-        }
-      }
-    }
-  }
-
-  /**
-   * Create a database team score object for a performance score, for use when
-   * the result set is already available.
-   *
-   * @param teamNumber passed to superclass
-   * @param runNumber passed to superclass
-   * @param rs the {@link ResultSet} to pull the scores from, the object is to be
-   *          closed by the caller
-   * @throws SQLException if there is an error getting the data
-   */
-  public DatabaseTeamScore(final int teamNumber,
-                           final int runNumber,
-                           final ResultSet rs)
-      throws SQLException {
-    super(teamNumber, runNumber);
-
-    data = Utilities.resultSetRowToMap(rs);
-    scoreExists = true;
-  }
-
-  private @Nullable String getString(final String goalName) {
+  protected final @Nullable String getString(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return null;
@@ -109,7 +50,11 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  private double getDouble(final String goalName) {
+  /**
+   * @param goalName the goal to get as a string
+   * @return the value or {@link Double#NaN} if not found
+   */
+  protected final double getDouble(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return Double.NaN;
@@ -120,7 +65,11 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
-  private boolean getBoolean(final String goalName) {
+  /**
+   * @param goalName the goal to get as a string
+   * @return the value or {@code false} if not found
+   */
+  protected final boolean getBoolean(final String goalName) {
     final Object value = data.get(goalName);
     if (null == value) {
       return false;
@@ -133,64 +82,17 @@ public class DatabaseTeamScore extends TeamScore {
 
   @Override
   public @Nullable String getEnumRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return null;
-    } else {
-      return getString(goalName);
-    }
+    return getString(goalName);
   }
 
   @Override
   public double getRawScore(final String goalName) {
-    if (!scoreExists()) {
-      return Double.NaN;
-    } else {
-      return getDouble(goalName);
-    }
+    return getDouble(goalName);
   }
 
   @Override
   public boolean isNoShow() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      return getBoolean("NoShow");
-    }
-  }
-
-  @Override
-  public boolean isBye() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      return getBoolean("Bye");
-    }
-  }
-
-  @Override
-  public boolean isVerified() {
-    if (!scoreExists()) {
-      return false;
-    } else {
-      return getBoolean("Verified");
-    }
-  }
-
-  @Override
-  public boolean scoreExists() {
-    return scoreExists;
-  }
-
-  private final boolean scoreExists;
-
-  @Override
-  public String getTable() {
-    final @Nullable String table = getString("tablename");
-    if (null == table) {
-      return "UNKNOWN";
-    } else {
-      return table;
-    }
+    return getBoolean("NoShow");
   }
 
 }

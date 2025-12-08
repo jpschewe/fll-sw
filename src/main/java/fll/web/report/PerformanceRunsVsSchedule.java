@@ -34,7 +34,7 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.TournamentData;
-import fll.web.playoff.TeamScore;
+import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
@@ -273,7 +273,7 @@ public final class PerformanceRunsVsSchedule {
     private String table;
 
     /**
-     * @return {@link TeamScore#getTable()}
+     * @return {@link PerformanceTeamScore#getTable()}
      */
     public String getTable() {
       return table;

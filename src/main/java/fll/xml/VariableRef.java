@@ -18,7 +18,7 @@ import fll.web.playoff.TeamScore;
 /**
  * Represents a variable reference.
  */
-public class VariableRef implements Evaluatable, Serializable {
+public class VariableRef implements Evaluatable<TeamScore>, Serializable {
 
   /**
    * XML tag for this class.
