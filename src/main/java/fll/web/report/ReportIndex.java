@@ -62,22 +62,7 @@ public final class ReportIndex {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       final int tournamentId = tournament.getTournamentID();
 
-      try (
-          PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
-        prep.setInt(1, Queries.getCurrentTournament(connection));
-
-        try (ResultSet rs = prep.executeQuery()) {
-          final int maxRunNumber;
-          if (rs.next()) {
-            maxRunNumber = rs.getInt(1);
-          } else {
-            maxRunNumber = 1;
-          }
-          pageContext.setAttribute("maxRunNumber", maxRunNumber);
-        } // result set
-      } // prepared statement
-
-      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
+      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection, tournamentId).values());
 
       final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, tournamentId);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
