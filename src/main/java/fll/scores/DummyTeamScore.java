@@ -3,14 +3,13 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.util;
+package fll.scores;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import fll.web.playoff.BasePerformanceTeamScore;
 import fll.web.playoff.Playoff;
 
 /**

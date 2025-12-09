@@ -2,9 +2,11 @@
  * This code is released under GPL; see LICENSE for details.
  */
 
-package fll.web.playoff;
+package fll.scores;
 
 import org.checkerframework.dataflow.qual.SideEffectFree;
+
+import fll.web.playoff.PerformanceTeamScore;
 
 /**
  * Base implementation of {@link PerformanceTeamScore}.

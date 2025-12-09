@@ -2,7 +2,7 @@
  * This code is released under GPL; see LICENSE for details.
  */
 
-package fll.web.playoff;
+package fll.scores;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.GenerateDB;
+import fll.web.playoff.PerformanceTeamScore;
 
 /**
  * Performance score from the database.

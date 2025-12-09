@@ -19,11 +19,11 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
+import fll.scores.DatabasePerformanceTeamScore;
+import fll.scores.DatabaseTeamScore;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.TournamentData;
-import fll.web.playoff.DatabasePerformanceTeamScore;
-import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
