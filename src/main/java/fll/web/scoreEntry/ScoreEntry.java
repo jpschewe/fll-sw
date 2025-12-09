@@ -1132,46 +1132,49 @@ public final class ScoreEntry {
             + runNumber);
       }
 
-      final PerformanceScoreCategory performanceElement = description.getPerformance();
-      for (final AbstractGoal element : performanceElement.getAllGoals()) {
-        if (!element.isComputed()) {
-          final Goal goal = (Goal) element;
-          final String name = goal.getName();
-          final String rawVarName = getVarNameForRawScore(name);
+      if (!teamScore.isBye()
+          && !teamScore.isNoShow()) {
+        final PerformanceScoreCategory performanceElement = description.getPerformance();
+        for (final AbstractGoal element : performanceElement.getAllGoals()) {
+          if (!element.isComputed()) {
+            final Goal goal = (Goal) element;
+            final String name = goal.getName();
+            final String rawVarName = getVarNameForRawScore(name);
 
-          if (goal.isEnumerated()) {
-            // enumerated
-            final String storedValue = teamScore.getEnumRawScore(name);
-            boolean found = false;
-            for (final EnumeratedValue valueElement : goal.getSortedValues()) {
-              final String value = valueElement.getValue();
-              if (value.equals(storedValue)) {
-                writer.println("  "
-                    + rawVarName
-                    + " = \""
-                    + value
-                    + "\";");
-                found = true;
+            if (goal.isEnumerated()) {
+              // enumerated
+              final String storedValue = teamScore.getEnumRawScore(name);
+              boolean found = false;
+              for (final EnumeratedValue valueElement : goal.getSortedValues()) {
+                final String value = valueElement.getValue();
+                if (value.equals(storedValue)) {
+                  writer.println("  "
+                      + rawVarName
+                      + " = \""
+                      + value
+                      + "\";");
+                  found = true;
+                }
               }
+              if (!found) {
+                throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
+                    + name
+                    + " value: "
+                    + storedValue);
+              }
+            } else {
+              // just use the value that is stored in the database
+              writer.println("  "
+                  + rawVarName
+                  + " = "
+                  + teamScore.getRawScore(name)
+                  + ";");
             }
-            if (!found) {
-              throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
-                  + name
-                  + " value: "
-                  + storedValue);
-            }
-          } else {
-            // just use the value that is stored in the database
-            writer.println("  "
-                + rawVarName
-                + " = "
-                + teamScore.getRawScore(name)
-                + ";");
-          }
-        } // !computed
-      } // foreach goal
-      // Always init the special double-check column
+          } // !computed
+        } // foreach goal
+      }
 
+      // Always init the special double-check column
       writer.println("  Verified = "
           + teamScore.isVerified()
           + ";");
