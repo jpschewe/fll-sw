@@ -11,11 +11,16 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
+import fll.Team;
+import fll.Tournament;
 
 /**
  * Performance score from the database.
@@ -23,6 +28,53 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 public final class DatabasePerformanceTeamScore {
 
   private DatabasePerformanceTeamScore() {
+  }
+
+  /**
+   * Fetch all performance scores for a team.
+   * 
+   * @param tournament the tournament
+   * @param team the Team
+   * @param connection database
+   * @return the scores sorted by {@link PerformanceTeamScore#getRunNumber()},
+   *         this may be an empty list
+   * @throws SQLException on a database error
+   */
+  public static List<PerformanceTeamScore> fetchTeamScores(final Tournament tournament,
+                                                           final Team team,
+                                                           final Connection connection)
+      throws SQLException {
+    final List<PerformanceTeamScore> scores = new LinkedList<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT RunNumber, NoShow, Bye, Verified, Tablename, TimeStamp" //
+            + " FROM performance WHERE TeamNumber = ? AND Tournament = ? ORDER BY RunNumber ASC")) {
+
+      prep.setInt(1, team.getTeamNumber());
+      prep.setInt(2, tournament.getTournamentID());
+      try (ResultSet result = prep.executeQuery()) {
+        while (result.next()) {
+          final int runNumber = result.getInt(1);
+          final boolean noShow = result.getBoolean(2);
+          final boolean bye = result.getBoolean(3);
+          final boolean verified = result.getBoolean(4);
+          final String tablename = castNonNull(result.getString(5));
+          final Timestamp ts = (Timestamp) castNonNull(result.getTimestamp(6));
+          final LocalDateTime timestamp = ts.toLocalDateTime();
+
+          final Map<String, Double> simpleGoals = fetchSimpleGoals(tournament.getTournamentID(), team.getTeamNumber(),
+                                                                   runNumber, connection);
+          final Map<String, String> enumGoals = fetchEnumGoals(tournament.getTournamentID(), team.getTeamNumber(),
+                                                               runNumber, connection);
+
+          final PerformanceTeamScore score = new DefaultPerformanceTeamScore(team.getTeamNumber(), runNumber,
+                                                                             simpleGoals, enumGoals, tablename, noShow,
+                                                                             bye, verified, timestamp);
+          scores.add(score);
+        }
+      }
+    }
+    return scores;
   }
 
   /**

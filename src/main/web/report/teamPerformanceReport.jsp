@@ -1,24 +1,18 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.db.Queries"%>
-<%@ page import="java.sql.Connection"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
-<%@ page import="javax.sql.DataSource"%>
-
 <fll-sw:required-roles roles="REF,JUDGE,REPORT_GENERATOR"
     allowSetup="false" />
 
 <%
 fll.web.report.TeamPerformanceReport.populateContext(application, session, request, pageContext);
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
-final Connection connection = datasource.getConnection();
 %>
 
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>Team ${TeamNumber}" Performance Scores</title>
+<title>${team.teamName }&nbsp;-&nbsp;${team.teamNumber}&nbsp;
+    Performance Scores</title>
 
 <style>
 table#perf-data {
@@ -37,45 +31,35 @@ table#perf-data th, table#perf-data td {
 </head>
 
 <body>
-    <h1>
-        Team
-        <c:out value="${TeamNumber}" />
-        Performance Scores
-    </h1>
-    <sql:query var="result" dataSource="${datasource}">
-      SELECT RunNumber, ComputedTotal, NoShow, TIMESTAMP
-        FROM Performance
-        WHERE TeamNumber = <c:out value="${TeamNumber}" />
-          AND Performance.Tournament = <c:out value="${tournament}" />
-        ORDER By RunNumber
-    </sql:query>
+    <h1>${team.teamName }&nbsp;-&nbsp;${team.teamNumber}&nbsp;Performance
+        Scores</h1>
     <table id="perf-data">
         <tr>
-            <th>Run Number</th>
+            <th>Run</th>
             <th>Score</th>
             <th>Last Edited</th>
             <th></th>
         </tr>
-        <c:forEach items="${result.rows}" var="row">
+        <c:forEach items="${data}" var="score">
             <tr>
-                <td>${row.RunNumber}</td>
+                <td>${score.runName}</td>
                 <td>
                     <c:choose>
-                        <c:when test="${row.NoShow == True}">
+                        <c:when test="${score.noShow == True}">
                         No Show
                     </c:when>
                         <c:otherwise>
-                    ${row.ComputedTotal}
+                    ${score.computedTotal}
                     </c:otherwise>
                     </c:choose>
                 </td>
                 <td class="right">
-                    <fmt:formatDate value="${row.TIMESTAMP}"
-                        pattern="h:mm" />
+                    <javatime:format value="${score.lastEdited}"
+                        pattern="h:mm " />
                 </td>
                 <td>
                     <a
-                        href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${TeamNumber}&EditFlag=true&RunNumber=${row.RunNumber}&workflow_id=${workflow_id} "/>'>Edit
+                        href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${team.teamNumber}&EditFlag=true&RunNumber=${score.runNumber}&workflow_id=${workflow_id} "/>'>Edit
                     </a>
                 </td>
             </tr>
