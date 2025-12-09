@@ -27,7 +27,7 @@ import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
 import fll.scores.DatabasePerformanceTeamScore;
-import fll.web.playoff.PerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 

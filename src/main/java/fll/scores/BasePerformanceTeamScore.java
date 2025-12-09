@@ -4,9 +4,9 @@
 
 package fll.scores;
 
-import org.checkerframework.dataflow.qual.SideEffectFree;
+import java.time.LocalDateTime;
 
-import fll.web.playoff.PerformanceTeamScore;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * Base implementation of {@link PerformanceTeamScore}.
@@ -42,5 +42,11 @@ public abstract class BasePerformanceTeamScore extends BaseTeamScore implements 
   }
 
   private final int runNumber;
+
+  /**
+   * @return when the score was last edited
+   */
+  @SideEffectFree
+  public abstract LocalDateTime getLastEdited();
 
 }

@@ -7,6 +7,8 @@ package fll.scores;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -93,6 +95,11 @@ public class DatabaseTeamScore extends BaseTeamScore {
   @Override
   public boolean isNoShow() {
     return getBoolean("NoShow");
+  }
+
+  protected final LocalDateTime getLastEdited() {
+    final Timestamp ts = (Timestamp) data.get("TimeStamp");
+    return ts.toLocalDateTime();
   }
 
 }
