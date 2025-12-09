@@ -1352,7 +1352,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       final Team team = Team.getTeamFromDatabase(connection, teamNumber);
       for (final SubjectiveTeamScore score : DatabaseSubjectiveTeamScore.getScoresForTeam(connection, category,
-                                                                                         tournament, team)) {
+                                                                                          tournament, team)) {
         final Iterator<Goal> iter = requiredGoals.iterator();
         while (!zeroInRequiredGoal
             && iter.hasNext()) {

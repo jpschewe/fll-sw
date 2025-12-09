@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,8 +26,10 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.GenerateDB;
 import fll.db.NonNumericNominees;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -347,6 +350,42 @@ public class SubjectiveScoresServlet extends HttpServlet {
     tournament.recordSubjectiveModified(connection);
 
     return numModified;
+  }
+
+  /**
+   * Create the statement for inserting a score into category.
+   */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
+  private static PreparedStatement createInsertStatement(final Connection connection,
+                                                         final SubjectiveScoreCategory categoryDescription)
+      throws SQLException {
+    final List<AbstractGoal> goalDescriptions = categoryDescription.getAllGoals();
+
+    final StringBuffer insertSQLColumns = new StringBuffer();
+    insertSQLColumns.append("INSERT INTO "
+        + categoryDescription.getName()
+        + " (TeamNumber, Tournament, Judge, NoShow, note, comment_great_job, comment_think_about");
+    final StringBuffer insertSQLValues = new StringBuffer();
+    insertSQLValues.append(") VALUES ( ?, ?, ?, ?, ?, ?, ?");
+
+    for (final AbstractGoal goalDescription : goalDescriptions) {
+      if (!goalDescription.isComputed()) {
+        insertSQLColumns.append(", "
+            + goalDescription.getName());
+        insertSQLValues.append(", ?");
+
+        // goal comment
+        insertSQLColumns.append(", "
+            + GenerateDB.getGoalCommentColumnName(goalDescription));
+        insertSQLValues.append(", ?");
+      }
+    }
+
+    final PreparedStatement insertPrep = connection.prepareStatement(insertSQLColumns.toString()
+        + insertSQLValues.toString()
+        + ")");
+
+    return insertPrep;
   }
 
   /**

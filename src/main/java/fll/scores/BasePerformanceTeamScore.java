@@ -79,5 +79,4 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
       return internalGetEnumRawScore(goalName);
     }
   }
-
 }
