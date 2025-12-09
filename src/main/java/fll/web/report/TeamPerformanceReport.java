@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
+import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
 import fll.scores.DatabasePerformanceTeamScore;
 import fll.scores.PerformanceTeamScore;
@@ -76,7 +77,7 @@ public final class TeamPerformanceReport {
                                     .map(s -> new Data(s.getRunNumber(),
                                                        metadataFactory.getRunMetadata(s.getRunNumber())
                                                                       .getDisplayName(),
-                                                       performanceCategory.evaluate(s), s.isNoShow(),
+                                                       performanceCategory.evaluate(s), s.isNoShow(), s.isBye(),
                                                        s.getLastEdited()))
                                     .toList();
 
@@ -96,11 +97,19 @@ public final class TeamPerformanceReport {
 
   /**
    * Data for the web page.
+   * 
+   * @param runNumber {@link PerformanceTeamScore#getRunNumber()}
+   * @param runName {@link RunMetadata#getDisplayName()}
+   * @param computedTotal the computed score
+   * @param noShow {@link PerformanceTeamScore#isNoShow()}
+   * @param bye {@link PerformanceTeamScore#isBye()}
+   * @param lastEdited {@link PerformanceTeamScore#getLastEdited()}
    */
   public record Data(int runNumber,
                      String runName,
                      double computedTotal,
                      boolean noShow,
+                     boolean bye,
                      LocalDateTime lastEdited) {
   }
 

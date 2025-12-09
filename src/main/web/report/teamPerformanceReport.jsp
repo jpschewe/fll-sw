@@ -49,6 +49,9 @@ table#perf-data th, table#perf-data td {
                         <c:when test="${score.noShow}">
                         No Show
                     </c:when>
+                        <c:when test="${score.bye}">
+                        Bye
+                    </c:when>
                         <c:otherwise>
                     ${score.computedTotal}
                     </c:otherwise>
