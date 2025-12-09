@@ -11,8 +11,8 @@ import java.io.Serializable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
-import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**

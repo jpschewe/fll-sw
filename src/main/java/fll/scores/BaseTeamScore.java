@@ -1,7 +1,7 @@
 /*
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.playoff;
+package fll.scores;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.SideEffectFree;

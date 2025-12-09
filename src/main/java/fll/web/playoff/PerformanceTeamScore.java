@@ -6,6 +6,8 @@ package fll.web.playoff;
 
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
+import fll.scores.TeamScore;
+
 /**
  * Represents a performance score.
  */

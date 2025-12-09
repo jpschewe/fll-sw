@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import fll.Team;
 import fll.db.GlobalParameters;
-import fll.util.DummyTeamScore;
+import fll.scores.DummyTeamScore;
 import fll.xml.ChallengeDescription;
 
 /**
