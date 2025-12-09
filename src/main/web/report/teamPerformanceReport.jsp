@@ -46,7 +46,7 @@ table#perf-data th, table#perf-data td {
                 <td>${score.runName}</td>
                 <td>
                     <c:choose>
-                        <c:when test="${score.noShow == True}">
+                        <c:when test="${score.noShow}">
                         No Show
                     </c:when>
                         <c:otherwise>
