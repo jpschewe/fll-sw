@@ -28,6 +28,7 @@ import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
 import fll.scores.MapTeamScore;
+
 import fll.scores.PerformanceTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
