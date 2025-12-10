@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import fll.Utilities;
 
 /**
@@ -98,7 +100,7 @@ public class DatabaseTeamScore extends BaseTeamScore {
   }
 
   protected final LocalDateTime getLastEdited() {
-    final Timestamp ts = (Timestamp) data.get("TimeStamp");
+    final Timestamp ts = (Timestamp) castNonNull(data.get("TimeStamp"));
     return ts.toLocalDateTime();
   }
 
