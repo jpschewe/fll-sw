@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Team;
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
@@ -1116,11 +1117,10 @@ public final class ScoreEntry {
     final int runNumber = ((Number) page.getAttribute("lRunNumber")).intValue();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final Tournament tournament = ApplicationAttributes.getTournamentData(application).getCurrentTournament();
 
     try (Connection connection = datasource.getConnection()) {
-      final int tournament = Queries.getCurrentTournament(connection);
-
-      final @Nullable PerformanceTeamScore teamScore = DatabasePerformanceTeamScore.fetchTeamScore(tournament,
+      final @Nullable PerformanceTeamScore teamScore = DatabasePerformanceTeamScore.fetchTeamScore(tournament.getTournamentID(),
                                                                                                    teamNumber,
                                                                                                    runNumber,
                                                                                                    connection);

@@ -22,6 +22,7 @@ public final class MapTeamScore extends BasePerformanceTeamScore {
    * @param runNumber {@link #getRunNumber()}
    * @param lastEdited {@link #getLastEdited()}
    * @param map used to read the goal scores
+   * @param lastEdited {@link #getLastEdited()}
    */
   public MapTeamScore(final int teamNumber,
                       final int runNumber,
