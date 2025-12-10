@@ -8,11 +8,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.Team;
+import fll.Tournament;
 import fll.db.GenerateDB;
-import fll.web.playoff.PerformanceTeamScore;
 
 /**
  * Performance score from the database.
@@ -75,6 +79,40 @@ public class DatabasePerformanceTeamScore extends BasePerformanceTeamScore {
   }
 
   /**
+   * Fetch all performance scores for a team.
+   * 
+   * @param tournament the tournament
+   * @param team the Team
+   * @param connection database
+   * @return the scores sorted by {@link PerformanceTeamScore#getRunNumber()},
+   *         this may be an empty list
+   * @throws SQLException on a database error
+   */
+  public static List<PerformanceTeamScore> fetchTeamScores(final Tournament tournament,
+                                                           final Team team,
+                                                           final Connection connection)
+      throws SQLException {
+    final List<PerformanceTeamScore> scores = new LinkedList<>();
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+        + GenerateDB.PERFORMANCE_TABLE_NAME
+        + " WHERE TeamNumber = ? AND Tournament = ?"
+        + " ORDER BY RunNumber ASC")) {
+
+      prep.setInt(1, team.getTeamNumber());
+      prep.setInt(2, tournament.getTournamentID());
+      try (ResultSet result = prep.executeQuery()) {
+        while (result.next()) {
+          final int runNumber = result.getInt("RunNumber");
+          final PerformanceTeamScore score = new DatabasePerformanceTeamScore(team.getTeamNumber(), runNumber, result);
+          scores.add(score);
+        }
+      }
+    }
+    return scores;
+  }
+
+  /**
    * Create a database team score object for a performance score.
    * 
    * @param tournament the tournament ID
@@ -108,4 +146,8 @@ public class DatabasePerformanceTeamScore extends BasePerformanceTeamScore {
     }
   }
 
+  @Override
+  public LocalDateTime getLastEdited() {
+    return delegate.getLastEdited();
+  }
 }

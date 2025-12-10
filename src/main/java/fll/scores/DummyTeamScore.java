@@ -5,6 +5,7 @@
  */
 package fll.scores;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,12 +27,14 @@ public class DummyTeamScore extends BasePerformanceTeamScore {
    * @param runNumber the run number the score is for
    * @param simpleGoals the simple goal values
    * @param enumGoals the enum goal values
+   * @param lastEdited {@link #getLastEdited()}
    */
   public DummyTeamScore(final int teamNumber,
                         final int runNumber,
                         final Map<String, Double> simpleGoals,
-                        final Map<String, String> enumGoals) {
-    this(teamNumber, runNumber, simpleGoals, enumGoals, false, false);
+                        final Map<String, String> enumGoals,
+                        final LocalDateTime lastEdited) {
+    this(teamNumber, runNumber, simpleGoals, enumGoals, false, false, lastEdited);
   }
 
   /**
@@ -41,18 +44,21 @@ public class DummyTeamScore extends BasePerformanceTeamScore {
    * @param enumGoals the enum goal values
    * @param noShow true if this is a no show
    * @param bye true if this is a bye
+   * @param lastEdited {@link #getLastEdited()}
    */
   public DummyTeamScore(final int teamNumber,
                         final int runNumber,
                         final Map<String, Double> simpleGoals,
                         final Map<String, String> enumGoals,
                         final boolean noShow,
-                        final boolean bye) {
+                        final boolean bye,
+                        final LocalDateTime lastEdited) {
     super(teamNumber, runNumber);
     this.simpleGoals = new HashMap<>(simpleGoals);
     this.enumGoals = new HashMap<>(enumGoals);
     this.noShow = noShow;
     this.bye = bye;
+    this.lastEdited = lastEdited;
   }
 
   @Override
@@ -100,4 +106,12 @@ public class DummyTeamScore extends BasePerformanceTeamScore {
   public String getTable() {
     return "ALL";
   }
+
+  private final LocalDateTime lastEdited;
+
+  @Override
+  public LocalDateTime getLastEdited() {
+    return lastEdited;
+  }
+
 }

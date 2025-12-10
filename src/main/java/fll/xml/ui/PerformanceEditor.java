@@ -13,8 +13,8 @@ import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
+import fll.scores.PerformanceTeamScore;
 import fll.util.FormatterUtils;
-import fll.web.playoff.PerformanceTeamScore;
 import fll.xml.PerformanceScoreCategory;
 
 /**

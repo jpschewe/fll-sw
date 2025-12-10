@@ -8,7 +8,7 @@ package fll.web.scoreboard;
 
 import fll.TournamentTeam;
 import fll.db.RunMetadata;
-import fll.web.playoff.PerformanceTeamScore;
+import fll.scores.PerformanceTeamScore;
 
 /**
  * Message sent to the client for a new score.
