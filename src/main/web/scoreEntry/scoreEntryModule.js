@@ -78,7 +78,7 @@ const score_entry_module = {}
         closeButton.innerText = "Close";
         closeButton.classList.add("fll-sw-ui-inactive");
         closeButton.addEventListener("click", () => {
-            window.location = "select_team.jsp";
+            window.location = redirect;
         });
         dialogContainer.appendChild(closeButton);
 

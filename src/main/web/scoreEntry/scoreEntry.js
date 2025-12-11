@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (cancelButton) {
         cancelButton.addEventListener("click", function() {
             yesCallback = function() {
-                window.location.assign("select_team.jsp");
+                window.location = redirect;
                 return false;
             };
 
