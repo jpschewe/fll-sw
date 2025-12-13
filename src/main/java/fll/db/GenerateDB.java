@@ -162,7 +162,7 @@ public final class GenerateDB {
           + " ,SideB varchar(64) NOT NULL" //
           + " ,sort_order INTEGER NOT NULL" //
           + " ,CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
-          + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
+          + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE"
           + ")");
 
       createTableDivision(connection, true);
@@ -184,8 +184,8 @@ public final class GenerateDB {
           + " run_number integer NOT NULL," // the performance run number for
                                             // this score
           + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" //
-          + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
-          + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" //
+          + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE" //
+          + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber) ON DELETE CASCADE" //
           + ")");
 
       createPlayoffTableData(connection, true);
@@ -206,8 +206,8 @@ public final class GenerateDB {
           + " ,wave LONGVARCHAR DEFAULT NULL" //
           + " ,judging_station varchar(64) NOT NULL"
           + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
-          + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
-          + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
+          + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber) ON DELETE CASCADE" //
+          + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE"
           + ")");
 
       tournamentParameters(connection);
@@ -231,7 +231,7 @@ public final class GenerateDB {
           + "  station varchar(64) NOT NULL," //
           + "  final_scores boolean DEFAULT FALSE NOT NULL,"
           + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
-          + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
+          + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE" //
           + ")");
 
       // performance
@@ -410,8 +410,8 @@ public final class GenerateDB {
       sql.append(",AssignedTable varchar(64) default NULL");
       sql.append(",CONSTRAINT playoff_table_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)");
       if (createConstraints) {
-        sql.append(",CONSTRAINT playoff_table_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
-        sql.append(",CONSTRAINT playoff_table_data_fk2 FOREIGN KEY(event_division, Tournament, PlayoffRound, LineNumber) REFERENCES PlayoffData(event_division, Tournament, PlayoffRound, LineNumber)");
+        sql.append(",CONSTRAINT playoff_table_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(",CONSTRAINT playoff_table_data_fk2 FOREIGN KEY(event_division, Tournament, PlayoffRound, LineNumber) REFERENCES PlayoffData(event_division, Tournament, PlayoffRound, LineNumber) ON DELETE CASCADE");
       }
       sql.append(")");
 
@@ -433,9 +433,9 @@ public final class GenerateDB {
       sql.append(" ,goal_score FLOAT");
       sql.append(" ,CONSTRAINT virtual_subjective_category_pk PRIMARY KEY(tournament_id, category_name, source_category_name, goal_name, team_number)");
       if (createConstraints) {
-        sql.append(",CONSTRAINT virtual_subjective_category_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        sql.append(",CONSTRAINT virtual_subjective_category_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        sql.append(",CONSTRAINT virtual_subjective_category_fk3 FOREIGN KEY(tournament_id, team_number) REFERENCES TournamentTeams(Tournament, TeamNumber)");
+        sql.append(",CONSTRAINT virtual_subjective_category_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(",CONSTRAINT virtual_subjective_category_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        sql.append(",CONSTRAINT virtual_subjective_category_fk3 FOREIGN KEY(tournament_id, team_number) REFERENCES TournamentTeams(Tournament, TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -462,8 +462,8 @@ public final class GenerateDB {
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,judge longvarchar DEFAULT NULL");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
-        sql.append(" ,CONSTRAINT non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -480,8 +480,8 @@ public final class GenerateDB {
       sql.append(" ,category LONGVARCHAR NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT finalist_non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
-        sql.append(" ,CONSTRAINT finalist_non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT finalist_non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT finalist_non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -508,7 +508,7 @@ public final class GenerateDB {
       sql.append(" ,room VARCHAR(32) DEFAULT NULL");
       sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category, division)");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT finalist_categories_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT finalist_categories_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -523,9 +523,9 @@ public final class GenerateDB {
       scheduleSql.append(" ,division VARCHAR(32) NOT NULL");
       scheduleSql.append(" ,CONSTRAINT finalist_schedule_pk PRIMARY KEY (tournament, category, division, judge_time)");
       if (createConstraints) {
-        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
-        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk3 FOREIGN KEY(tournament, category, division) REFERENCES finalist_categories(tournament, category, division)");
+        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        scheduleSql.append(" ,CONSTRAINT finalist_schedule_fk3 FOREIGN KEY(tournament, category, division) REFERENCES finalist_categories(tournament, category, division) ON DELETE CASCADE");
       }
       scheduleSql.append(")");
       stmt.executeUpdate(scheduleSql.toString());
@@ -567,7 +567,7 @@ public final class GenerateDB {
       sql.append(" ,fll_role VARCHAR(64) NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT auth_roles_pk PRIMARY KEY (fll_user, fll_role)");
-        sql.append(" ,CONSTRAINT auth_roles_fk1 FOREIGN KEY(fll_user) REFERENCES fll_authentication(fll_user)");
+        sql.append(" ,CONSTRAINT auth_roles_fk1 FOREIGN KEY(fll_user) REFERENCES fll_authentication(fll_user) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -583,7 +583,7 @@ public final class GenerateDB {
           + " ,param_value longvarchar NOT NULL" //
           + " ,tournament integer NOT NULL" //
           + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param, tournament)" //
-          + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
+          + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE" //
           + ")");
     }
   }
@@ -858,7 +858,7 @@ public final class GenerateDB {
       sql.append(" ,table_id INTEGER NOT NULL");
       sql.append(" ,CONSTRAINT table_division_pk PRIMARY KEY (playoff_division, tournament, table_id)");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT table_division_fk1 FOREIGN KEY(tournament, table_id) REFERENCES tablenames(tournament, PairID)");
+        sql.append(" ,CONSTRAINT table_division_fk1 FOREIGN KEY(tournament, table_id) REFERENCES tablenames(tournament, PairID) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -883,8 +883,8 @@ public final class GenerateDB {
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,CONSTRAINT schedule_pk PRIMARY KEY (tournament, team_number)");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
-        sql.append(" ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
         sql.append(" ,CONSTRAINT schedule_fk3 FOREIGN KEY(tournament, team_number) REFERENCES TournamentTeams(tournament, TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
@@ -938,7 +938,7 @@ public final class GenerateDB {
       sql.append(" ,checkin_time time NOT NULL");
       sql.append(" ,CONSTRAINT schedule_wave_checkin_pk PRIMARY KEY (tournament, wave)");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT schedule_wave_checkin_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT schedule_wave_checkin_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -963,7 +963,7 @@ public final class GenerateDB {
       createSql.append(" ,duration_minutes INTEGER NOT NULL");
       createSql.append(" ,CONSTRAINT sched_durations_pk PRIMARY KEY (tournament_id, key)");
       if (createConstraints) {
-        createSql.append(" ,CONSTRAINT sched_durations_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        createSql.append(" ,CONSTRAINT sched_durations_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       createSql.append(")");
       stmt.executeUpdate(createSql.toString());
@@ -993,8 +993,8 @@ public final class GenerateDB {
       sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 PRIMARY KEY (category, team_number, tournament, judge)");
-        sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        sql.append(" ,CONSTRAINT subjective_computed_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT subjective_computed_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
 
@@ -1022,8 +1022,8 @@ public final class GenerateDB {
       sql.append(" ,final_score float");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT final_scores_pk01 PRIMARY KEY (category, team_number, tournament)");
-        sql.append(" ,CONSTRAINT final_scores_fk01 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        sql.append(" ,CONSTRAINT final_scores_fk02 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT final_scores_fk01 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT final_scores_fk02 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
 
@@ -1050,8 +1050,8 @@ public final class GenerateDB {
       sql.append(" ,overall_score float");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT overall_scores_pk PRIMARY KEY (team_number, tournament)");
-        sql.append(" ,CONSTRAINT overall_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-        sql.append(" ,CONSTRAINT overall_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT overall_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT overall_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
 
@@ -1116,8 +1116,8 @@ public final class GenerateDB {
       subjectiveOverallAward.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_pk PRIMARY KEY (tournament_id, name, team_number)");
-        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       subjectiveOverallAward.append(")");
       stmt.executeUpdate(subjectiveOverallAward.toString());
@@ -1132,8 +1132,8 @@ public final class GenerateDB {
       subjectiveExtraAward.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_pk PRIMARY KEY (tournament_id, name, team_number)");
-        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       subjectiveExtraAward.append(")");
       stmt.executeUpdate(subjectiveExtraAward.toString());
@@ -1148,8 +1148,8 @@ public final class GenerateDB {
       subjectiveChallengeAward.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_pk PRIMARY KEY (tournament_id, name, team_number)");
-        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       subjectiveChallengeAward.append(")");
       stmt.executeUpdate(subjectiveChallengeAward.toString());
@@ -1170,8 +1170,8 @@ public final class GenerateDB {
       sql.append(" ,place INTEGER NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT virt_subjective_challenge_award_pk PRIMARY KEY (tournament_id, name, team_number)");
-        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT virt_subjective_challenge_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -1195,8 +1195,8 @@ public final class GenerateDB {
       sql.append(" ,award_group LONGVARCHAR");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT advancing_teams_pk PRIMARY KEY (tournament_id, team_number)");
-        sql.append(" ,CONSTRAINT advancing_teams_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        sql.append(" ,CONSTRAINT advancing_teams_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT advancing_teams_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        sql.append(" ,CONSTRAINT advancing_teams_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -1214,7 +1214,7 @@ public final class GenerateDB {
       sql.append(" ,bracket_name LONGVARCHAR NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT automatic_finished_playoff_pk PRIMARY KEY (tournament_id, bracket_name)");
-        sql.append(" ,CONSTRAINT automatic_finished_playoff_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT automatic_finished_playoff_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
 
       }
       sql.append(")");
@@ -1234,7 +1234,7 @@ public final class GenerateDB {
       sql.append(" ,sort_order INTEGER NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT award_group_order_pk PRIMARY KEY (tournament_id, award_group)");
-        sql.append(" ,CONSTRAINT award_group_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT award_group_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -1255,7 +1255,7 @@ public final class GenerateDB {
       writers.append(" ,writer_name LONGVARCHAR NOT NULL");
       if (createConstraints) {
         writers.append(" ,CONSTRAINT deliberation_writers_pk PRIMARY KEY (tournament_id, award_group, category_name, writer_number)");
-        writers.append(" ,CONSTRAINT deliberation_writers_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        writers.append(" ,CONSTRAINT deliberation_writers_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       writers.append(")");
       stmt.executeUpdate(writers.toString());
@@ -1269,8 +1269,8 @@ public final class GenerateDB {
       potentialWinners.append(" ,team_number INTEGER NOT NULL");
       if (createConstraints) {
         potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_pk PRIMARY KEY (tournament_id, award_group, category_name, team_number)");
-        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
-        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
+        potentialWinners.append(" ,CONSTRAINT deliberation_potential_winners_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber) ON DELETE CASCADE");
       }
       potentialWinners.append(")");
       stmt.executeUpdate(potentialWinners.toString());
@@ -1283,7 +1283,7 @@ public final class GenerateDB {
       numAwards.append(" ,num_awards INTEGER NOT NULL");
       if (createConstraints) {
         numAwards.append(" ,CONSTRAINT deliberation_num_awards_pk PRIMARY KEY (tournament_id, award_group, category_name)");
-        numAwards.append(" ,CONSTRAINT deliberation_num_awards_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        numAwards.append(" ,CONSTRAINT deliberation_num_awards_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       numAwards.append(")");
       stmt.executeUpdate(numAwards.toString());
@@ -1304,7 +1304,7 @@ public final class GenerateDB {
       sql.append(" ,sort_order INTEGER NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT deliberation_category_order_pk PRIMARY KEY (tournament_id, award_group, category_name)");
-        sql.append(" ,CONSTRAINT deliberation_category_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT deliberation_category_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -1323,7 +1323,7 @@ public final class GenerateDB {
       sql.append(" ,delayed_until TIMESTAMP NOT NULL");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT performance_delay_pk PRIMARY KEY(tournament_id, run_number)");
-        sql.append(" ,CONSTRAINT performance_delay_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT performance_delay_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
 
@@ -1351,7 +1351,7 @@ public final class GenerateDB {
       sql.append("   ,end_time TIME NOT NULL");
       if (createConstraints) {
         sql.append("   ,CONSTRAINT playoff_schedules_pk PRIMARY KEY(tournament_id, bracket_name)");
-        sql.append("   ,CONSTRAINT playoff_schedules_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append("   ,CONSTRAINT playoff_schedules_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
@@ -1364,7 +1364,7 @@ public final class GenerateDB {
       sql2.append("   ,slot_duration INTEGER NOT NULL");
       if (createConstraints) {
         sql2.append("   ,CONSTRAINT finalist_parameters_pk PRIMARY KEY(tournament_id, award_group)");
-        sql2.append("   ,CONSTRAINT finalist_parameters_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql2.append("   ,CONSTRAINT finalist_parameters_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id) ON DELETE CASCADE");
       }
       sql2.append(")");
       stmt.executeUpdate(sql2.toString());
