@@ -360,7 +360,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       if (ReportSelector.AWARD_GROUP.equals(selector)) {
         groups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
       } else if (ReportSelector.JUDGING_STATION.equals(selector)) {
-        groups = Queries.getJudgingStations(connection, tournament.getTournamentID());
+        groups = AwardsScriptReport.getJudgingStationOrder(connection, tournament);
       } else {
         throw new FLLInternalException(String.format("Unknown report selector: %s", selector));
       }

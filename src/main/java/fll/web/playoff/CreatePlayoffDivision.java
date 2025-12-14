@@ -15,6 +15,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
+import fll.Tournament;
+import fll.TournamentTeam;
+import fll.db.TournamentParameters;
+import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.BaseFLLServlet;
+import fll.web.MissingRequiredParameterException;
+import fll.web.SessionAttributes;
+import fll.web.TournamentData;
+import fll.web.UserRole;
+import fll.web.WebUtils;
+import fll.web.report.awards.AwardsScriptReport;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,20 +36,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
-import javax.sql.DataSource;
-
-import fll.Tournament;
-import fll.TournamentTeam;
-import fll.db.Queries;
-import fll.db.TournamentParameters;
-import fll.web.ApplicationAttributes;
-import fll.web.AuthenticationContext;
-import fll.web.BaseFLLServlet;
-import fll.web.MissingRequiredParameterException;
-import fll.web.SessionAttributes;
-import fll.web.UserRole;
-import fll.web.WebUtils;
-import fll.web.report.awards.AwardsScriptReport;
 
 /**
  * Create a new playoff division.
@@ -54,12 +54,13 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
       final int currentTournamentID = tournament.getTournamentID();
 
-      final List<String> judgingStations = Queries.getJudgingStations(connection, currentTournamentID);
+      final List<String> judgingStations = AwardsScriptReport.getJudgingStationOrder(connection, tournament);
       pageContext.setAttribute("judgingStations", judgingStations);
 
       final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);

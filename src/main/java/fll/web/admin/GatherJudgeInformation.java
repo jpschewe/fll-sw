@@ -16,26 +16,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.JudgeInformation;
+import fll.Tournament;
+import fll.scheduler.TournamentSchedule;
+import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.TournamentData;
+import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
+import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import javax.sql.DataSource;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.JudgeInformation;
-import fll.db.Queries;
-import fll.scheduler.TournamentSchedule;
-import fll.web.ApplicationAttributes;
-import fll.web.AuthenticationContext;
-import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
-import fll.web.UserRole;
-import fll.xml.ChallengeDescription;
-import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Get the information needed to edit judges and store it in the session.
@@ -84,25 +85,24 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-      final int tournament = Queries.getCurrentTournament(connection);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final Tournament tournament = tournamentData.getCurrentTournament();
+    try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
-      if (!TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
+      if (!TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
         message.append("<p class='warning'>You have not loaded a schedule. If you intend to do so you should go back to the <a href='index.jsp'>admin page</a> and do this before assigning judges.</p>");
       }
 
-      if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
+      if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament.getTournamentID())) {
         message.append("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
       }
 
-      session.setAttribute(JUDGES_KEY, JudgeInformation.getJudges(connection, tournament));
+      session.setAttribute(JUDGES_KEY, JudgeInformation.getJudges(connection, tournament.getTournamentID()));
 
-      session.setAttribute(STATIONS_KEY, gatherJudgingStations(connection, tournament));
+      session.setAttribute(STATIONS_KEY, AwardsScriptReport.getJudgingStationOrder(connection, tournament));
 
       session.setAttribute(CATEGORIES_KEY, gatherCategories(subjectiveCategories));
 
@@ -113,8 +113,6 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -123,32 +121,19 @@ public class GatherJudgeInformation extends BaseFLLServlet {
                                                          final List<SubjectiveScoreCategory> subjectiveCategories,
                                                          final int tournament)
       throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      for (final SubjectiveScoreCategory category : subjectiveCategories) {
-        final String categoryName = category.getName();
-        prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
+    for (final SubjectiveScoreCategory category : subjectiveCategories) {
+      final String categoryName = category.getName();
+      try (PreparedStatement prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?",
+                                                                              categoryName))) {
         prep.setInt(1, tournament);
-        rs = prep.executeQuery();
-        if (rs.next()) {
-          return true;
+        try (ResultSet rs = prep.executeQuery()) {
+          if (rs.next()) {
+            return true;
+          }
         }
       }
-      return false;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
-
-  }
-
-  private List<String> gatherJudgingStations(final Connection connection,
-                                             final int tournament)
-      throws SQLException {
-    final List<String> stations = Queries.getJudgingStations(connection, tournament);
-
-    return stations;
+    return false;
   }
 
   private Map<String, String> gatherCategories(final List<SubjectiveScoreCategory> subjectiveCategories) {
