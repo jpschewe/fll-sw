@@ -1,3 +1,4 @@
+* Sort judging groups in the same order as award groups
 * Fix issues when importing a tournament a second time
 * #1293 - Send the user back to the page they started from when editing a score
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects

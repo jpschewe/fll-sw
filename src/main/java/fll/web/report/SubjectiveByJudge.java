@@ -38,14 +38,15 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
-import fll.util.FP;
 import fll.util.FOPUtils.Margins;
+import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.TournamentData;
 import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
@@ -142,7 +143,7 @@ public class SubjectiveByJudge extends BaseFLLServlet {
 
     final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, tournament.getTournamentID());
 
-    for (final String judgingGroup : Queries.getJudgingStations(connection, tournament.getTournamentID())) {
+    for (final String judgingGroup : AwardsScriptReport.getJudgingStationOrder(connection, tournament)) {
       final Element ele = generateAwardGroupReport(connection, document, challengeDescription, tournament, teams,
                                                    judgingGroup);
       ele.setAttribute("keep-together.within-page", "always");

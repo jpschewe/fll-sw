@@ -79,8 +79,7 @@ public final class GatherTeamData {
         }
         tournamentEventDivisions.put(tournament.getTournamentID(), allEventDivisions);
 
-        final Collection<String> allJudgingStations = Queries.getJudgingStations(connection,
-                                                                                 tournament.getTournamentID());
+        final Collection<String> allJudgingStations = AwardsScriptReport.getJudgingStationOrder(connection, tournament);
         if (allJudgingStations.isEmpty()) {
           // special case for empty, always allow 1
           allJudgingStations.add("1");

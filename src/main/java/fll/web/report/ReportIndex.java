@@ -25,6 +25,7 @@ import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.web.TournamentData;
 import fll.web.WebUtils;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.finalist.FinalistSchedule;
@@ -55,9 +56,10 @@ public final class ReportIndex {
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
       final int tournamentId = tournament.getTournamentID();
 
       pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection, tournamentId).values());
@@ -80,8 +82,13 @@ public final class ReportIndex {
       final String categoryJudgesJson = WebUtils.escapeStringForJsonParse(jsonMapper.writeValueAsString(categoryJudges));
       pageContext.setAttribute("categoryJudgesJson", categoryJudgesJson);
 
-      pageContext.setAttribute("awardGroups", AwardsScriptReport.getAwardGroupOrder(connection, tournament));
-      pageContext.setAttribute("judgingStations", Queries.getJudgingStations(connection, tournamentId));
+      final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
+      pageContext.setAttribute("awardGroups", awardGroups);
+
+      // get judging stations and sort to match awardGroups
+      final List<String> judgingStations = AwardsScriptReport.getJudgingStationOrder(connection, tournament);
+      pageContext.setAttribute("judgingStations", judgingStations);
+
       pageContext.setAttribute("sortOrders", FinalComputedScores.SortOrder.values());
 
       if (setRedirect) {
