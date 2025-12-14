@@ -12,6 +12,20 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
+import fll.Tournament;
+import fll.TournamentTeam;
+import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
+import fll.web.TournamentData;
+import fll.web.UserRole;
+import fll.web.report.awards.AwardsScriptReport;
+import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,17 +33,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
-import javax.sql.DataSource;
-
-import fll.TournamentTeam;
-import fll.db.Queries;
-import fll.web.ApplicationAttributes;
-import fll.web.AuthenticationContext;
-import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
-import fll.web.UserRole;
-import fll.xml.ChallengeDescription;
-import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Commit the changes from edit_judging_groups.jsp.
@@ -52,10 +55,12 @@ public class CommitJudgingGroups extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
+    final Tournament tournament = tournamentData.getCurrentTournament();
     try (Connection connection = datasource.getConnection()) {
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final int currentTournamentID = tournament.getTournamentID();
 
-      pageContext.setAttribute("judgingGroups", Queries.getJudgingStations(connection, currentTournamentID));
+      pageContext.setAttribute("judgingGroups", AwardsScriptReport.getJudgingStationOrder(connection, tournament));
 
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, currentTournamentID);
       pageContext.setAttribute("teams", teams.values());
