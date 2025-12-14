@@ -28,7 +28,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -125,7 +124,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
     final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
     final List<String> eventDivisions = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
-    final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
+    final Collection<String> judgingGroups = AwardsScriptReport.getJudgingStationOrder(connection, tournament);
 
     final Iterator<SubjectiveScoreCategory> iter = subjectiveCategories.iterator();
     while (iter.hasNext()) {

@@ -329,6 +329,33 @@ public class AwardsScriptReport extends BaseFLLServlet {
   }
 
   /**
+   * Get the judging stations in the same order as
+   * {@link #getAwardGroupOrder(Connection, Tournament)}.
+   *
+   * @param connection database connection
+   * @param tournament the tournament to get the order or
+   * @return unmodifiable list of the judging stations in sorted order
+   */
+  public static List<String> getJudgingStationOrder(final Connection connection,
+                                                    final Tournament tournament)
+      throws SQLException {
+    final Collection<String> allJudgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+    final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                                tournament.getTournamentID());
+
+    // ensure all judging stations are in the list
+    final List<String> localSortedGroups = new LinkedList<>(sortedAwardGroups);
+    allJudgingStations.stream() //
+                      .filter(e -> !localSortedGroups.contains(e))//
+                      .forEach(localSortedGroups::add);
+
+    // remove anything not in the list of judging stations
+    return localSortedGroups.stream() //
+                            .filter(allJudgingStations::contains) //
+                            .collect(Collectors.toList());
+  }
+
+  /**
    * Filter out non-numeric categories that are ignored for this tournament.
    * Filter out head to head if head to head
    * isn't being run in this tournament.
