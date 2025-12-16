@@ -1,3 +1,4 @@
+* #1309 - Make edit note a panel on the right side
 * #1306 - Always open consolidated final scores in a new tab
 * Sort judging groups in the same order as award groups
 * Fix issues when importing a tournament a second time
