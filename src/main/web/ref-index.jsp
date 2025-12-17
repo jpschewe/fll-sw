@@ -26,10 +26,6 @@ fll.web.PageVariables.populateCompletedRunData(application, pageContext);
             [${tournament.name}]</b>
     </p>
 
-    <a class="wide"
-        href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
-        round score entry</a>
-
     <a class="wide" href="scoreEntry/choose-table.jsp">Score Entry -
         follow this link on the performance score entry computers.</a>
 
@@ -92,6 +88,12 @@ fll.web.PageVariables.populateCompletedRunData(application, pageContext);
 
     <a class="wide" href="<c:url value='/admin/PerformanceSheets' />"
         target="_new">Performance sheets for regular match play</a>
+
+    <a class="wide"
+        href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">
+        Score entry training</a>
+
+
 
 
 </body>
