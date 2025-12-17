@@ -78,6 +78,9 @@ function populateTeamsSelect() {
         const option = document.createElement("option");
         option.value = teamData.team.teamNumber;
         option.innerText = teamData.displayString;
+        if(tabletMode && teamData.nextTableAndSide == scoreEntrySelectedTable) {
+            option.classList.add('selected-table');
+        }
         selectBox.appendChild(option);
     }
 }
