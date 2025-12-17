@@ -88,12 +88,6 @@ Entering scores for all tables. Teams are sorted in schedule order.
         for.
     </a>
 
-    <div>
-        <a class="wide"
-            href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">Practice
-            round score entry</a>
-    </div>
-
     <div id='stored-values'></div>
 
     <c:if test="${empty scoreEntrySelectedTable}">
