@@ -66,6 +66,10 @@ table.score-entry .selected-range {
     display: none;
 }
 
+.no-scroll {
+    overflow: hidden !important; /* Prevent body/container scrollbars */
+}
+
 span.sliderTickMark {
     position: absolute;
     display: inline-block;
@@ -157,6 +161,36 @@ footer button {
     margin: 10px;
 }
 
+#enter-score_container {
+    display: flex;
+    height: 100vh;
+}
+
+#enter-score_main {
+    flex: 1; /* Takes up remaining space */
+    overflow-y: scroll;
+}
+
+#enter-score-note {
+    min-width: 150px;
+    width: 30%; /* Initial width */
+}
+
+#enter-score-note-text {
+    height: 90%;
+}
+
+#enter-score_resizer {
+    width: 8px;
+    cursor: col-resize;
+    background-color: #ccc;
+    transition: background-color 0.2s;
+}
+
+#enter-score_resizer:hover {
+    background-color: #888;
+}
+
 #enter-score-comment-great-job-button {
     margin-right: 20px;
 }
@@ -169,10 +203,13 @@ footer button {
     background-color: lightgrey;
 }
 
+/*
 #enter-score-note-button {
+text-align: right;
     background-color: purple;
     color: white;
 }
+*/
 
 /* make sure the other judge columns line up */
 .other-judge {
