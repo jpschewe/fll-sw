@@ -393,7 +393,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
     const row = document.createElement("tr");
     row.classList.add(rowClass);
 
-    for (let index = 0; index < ranges.length; ++index) {
+    for (let index = 0;index < ranges.length;++index) {
         const range = ranges[index];
 
         const numColumns = range.max - range.min + 1;
@@ -534,7 +534,7 @@ function setSliderTicks(goal) {
      * max: " + max + " spacing: " + spacing);
      */
 
-    for (let i = 0; i <= max - min; i++) {
+    for (let i = 0;i <= max - min;i++) {
         const tick = document.createElement("span");
         tick.classList.add("sliderTickMark");
         //tick.innerHtml = "&nbsp;";
@@ -545,7 +545,7 @@ function setSliderTicks(goal) {
 }
 
 function highlightRubric(goal, ranges, value) {
-    for (let index = 0; index < ranges.length; ++index) {
+    for (let index = 0;index < ranges.length;++index) {
         const range = ranges[index];
 
         const rangeCell = document.getElementById(getRubricCellId(goal, index));
@@ -878,7 +878,7 @@ function populateScoreSummary() {
         // assign ranks
         let rank = 0;
         let rankOffset = 1;
-        for (let i = 0; i < scoreDataList.length; ++i) {
+        for (let i = 0;i < scoreDataList.length;++i) {
             const scoreData = scoreDataList[i];
 
             if (i > 0) {
@@ -936,7 +936,7 @@ function populateScoreSummary() {
 
     let rank = 0;
     let rankOffset = 1;
-    for (let i = 0; i < teamsWithScores.length; ++i) {
+    for (let i = 0;i < teamsWithScores.length;++i) {
         const team = teamsWithScores[i];
         const computedScore = teamScores[team.teamNumber];
         const score = subjective_module.getScore(team.teamNumber);
@@ -1198,6 +1198,9 @@ function displayPage(header, content, footer) {
     enableHeader(header);
     enableContent(content);
     enableFooter(footer);
+
+    // by default always scroll the main content
+    document.getElementById("subjective_main").classList.remove("no-scroll");
 }
 
 function displayPageTop() {
@@ -1393,6 +1396,7 @@ function displayPageEnterScore() {
     populateEnterScoreRubricTitles(headerTable, false)
 
     displayPage(document.getElementById("header-enter-score"), document.getElementById("content-enter-score"), document.getElementById("footer-enter-score"));
+    document.getElementById("subjective_main").classList.add("no-scroll");
 
     removeChildren(document.getElementById("enter-score-goal-comments"));
 
@@ -1620,7 +1624,7 @@ function setupAfterContentLoaded() {
 
 
     const synchronizeButtons = document.getElementsByClassName("synchronize-button");
-    for (let i = 0; i < synchronizeButtons.length; i++) {
+    for (let i = 0;i < synchronizeButtons.length;i++) {
         synchronizeButtons.item(i).addEventListener("click", () => {
             // one button is in the panel, doing the remove for the footer buttons is a no-op
             sidePanel.classList.remove('open');
@@ -1730,13 +1734,49 @@ function setupAfterContentLoaded() {
         document.getElementById("enter-score-comment-think-about").classList.remove("fll-sw-ui-inactive");
         document.getElementById("enter-score-comment-think-about-text").focus();
     });
-    document.getElementById("enter-score-note-button").addEventListener('click', function() {
-        document.getElementById("enter-score-note").classList.remove("fll-sw-ui-inactive");
-        document.getElementById("enter-score-note-text").focus();
+
+    const enterScoreNoteButton = document.getElementById("enter-score-note-button");
+    enterScoreNoteButton.addEventListener('click', function() {
+        const hide = enterScoreNoteButton.classList.contains("fll-sw-button-pressed");
+        if (hide) {
+            enterScoreNoteButton.classList.remove("fll-sw-button-pressed");
+            document.getElementById("enter-score_resizer").classList.add("fll-sw-ui-inactive");
+            document.getElementById("enter-score-note").classList.add("fll-sw-ui-inactive");
+        } else {
+            enterScoreNoteButton.classList.add("fll-sw-button-pressed");
+            document.getElementById("enter-score_resizer").classList.remove("fll-sw-ui-inactive");
+            document.getElementById("enter-score-note").classList.remove("fll-sw-ui-inactive");
+            document.getElementById("enter-score-note-text").focus();
+        }
     });
-    document.getElementById("enter-score-note-close").addEventListener('click', function() {
-        document.getElementById("enter-score-note").classList.add("fll-sw-ui-inactive");
+
+    // resize code for edit note
+    const enterScoreResizer = document.getElementById('enter-score_resizer');
+    const enterScoreNote = document.getElementById('enter-score-note');
+
+    enterScoreResizer.addEventListener('mousedown', function(e) {
+        // Prevent text selection during drag
+        e.preventDefault();
+
+        document.addEventListener('mousemove', enterScoreNoteResize);
+        document.addEventListener('mouseup', enterScoreNoteStopResize);
     });
+
+    function enterScoreNoteResize(e) {
+        // Calculate new width: Total width minus current mouse X position
+        const newWidth = window.innerWidth - e.clientX;
+
+        // Apply width to the panel
+        if (newWidth > 150 && newWidth < 800) {
+            enterScoreNote.style.width = newWidth + 'px';
+        }
+    }
+
+    function enterScoreNoteStopResize() {
+        document.removeEventListener('mousemove', enterScoreNoteResize);
+        document.removeEventListener('mouseup', enterScoreNoteResize);
+    }
+    // end resize code
 
     document.getElementById("choose-judge_submit").addEventListener('click', function() {
         setJudge();
