@@ -1,3 +1,5 @@
+* #1308 - Make the practice score entry less obvious
+* #1306 - Always open consolidated final scores in a new tab
 * Sort judging groups in the same order as award groups
 * Fix issues when importing a tournament a second time
 * #1293 - Send the user back to the page they started from when editing a score
