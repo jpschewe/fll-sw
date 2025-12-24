@@ -169,11 +169,13 @@ footer button {
 #enter-score_main {
     flex: 1; /* Takes up remaining space */
     overflow-y: scroll;
+    height: 85%; /* makes room for the footer */
 }
 
 #enter-score-note {
     min-width: 150px;
     width: 30%; /* Initial width */
+    height: 85%; /* makes room for the footer */
 }
 
 #enter-score-note-text {
