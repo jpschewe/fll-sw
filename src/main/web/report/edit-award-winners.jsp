@@ -13,6 +13,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
+populateContext
 
 <link rel="stylesheet" type="text/css" href="edit-award-winners.css" />
 
@@ -54,7 +55,8 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
         <!-- end subjective categories -->
 
         <!-- virtual subjective categories -->
-        <c:forEach items="${challengeDescription.virtualSubjectiveCategories}"
+        <c:forEach
+            items="${challengeDescription.virtualSubjectiveCategories}"
             var="category">
 
             <c:set var="perAwardGroup" value="true" />
@@ -66,7 +68,8 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                 <c:set var="winners"
                     value="${virtualSubjectiveAwardWinners[category.title][awardGroup]}" />
                 <c:set var="categoryTitle" value="${category.title}" />
-                <c:set var="awardType" value="${virtualSubjectiveAwardType}" />
+                <c:set var="awardType"
+                    value="${virtualSubjectiveAwardType}" />
                 <c:set var="ranked" value="true" />
 
                 <%@ include file="edit-award-winners-table.jspf"%>
