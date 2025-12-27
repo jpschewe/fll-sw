@@ -161,19 +161,34 @@ footer button {
     margin: 10px;
 }
 
+#enter-score_rubric-container {
+    display: flex;
+}
+
 #enter-score_container {
     display: flex;
     height: 100vh;
 }
 
+#enter-score_score-table_header {
+    flex: 1; /* Takes up remaining space */
+}
+
 #enter-score_main {
     flex: 1; /* Takes up remaining space */
     overflow-y: scroll;
+    height: 85%; /* makes room for the footer */
+}
+
+#enter-score_edit-note-spacer {
+    min-width: 150px;
+    width: 30%; /* Initial width */
 }
 
 #enter-score-note {
     min-width: 150px;
     width: 30%; /* Initial width */
+    height: 85%; /* makes room for the footer */
 }
 
 #enter-score-note-text {
@@ -210,6 +225,16 @@ text-align: right;
     color: white;
 }
 */
+#enter-score-note-button {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.buttonbox-fill .fll-sw-button, #header-enter-score .fll-sw-button,
+    #enter-score_main .fll-sw-button {
+    border: 1px solid;
+    border-radius: 12px;
+}
 
 /* make sure the other judge columns line up */
 .other-judge {
