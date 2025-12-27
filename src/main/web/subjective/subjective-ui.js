@@ -1742,10 +1742,12 @@ function setupAfterContentLoaded() {
             enterScoreNoteButton.classList.remove("fll-sw-button-pressed");
             document.getElementById("enter-score_resizer").classList.add("fll-sw-ui-inactive");
             document.getElementById("enter-score-note").classList.add("fll-sw-ui-inactive");
+            document.getElementById('enter-score_edit-note-spacer').classList.add("fll-sw-ui-inactive");
         } else {
             enterScoreNoteButton.classList.add("fll-sw-button-pressed");
             document.getElementById("enter-score_resizer").classList.remove("fll-sw-ui-inactive");
             document.getElementById("enter-score-note").classList.remove("fll-sw-ui-inactive");
+            document.getElementById('enter-score_edit-note-spacer').classList.remove("fll-sw-ui-inactive");
             document.getElementById("enter-score-note-text").focus();
         }
     });
@@ -1753,6 +1755,7 @@ function setupAfterContentLoaded() {
     // resize code for edit note
     const enterScoreResizer = document.getElementById('enter-score_resizer');
     const enterScoreNote = document.getElementById('enter-score-note');
+    const enterScoreNoteSpacer = document.getElementById('enter-score_edit-note-spacer');
 
     enterScoreResizer.addEventListener('mousedown', function(e) {
         // Prevent text selection during drag
@@ -1769,6 +1772,9 @@ function setupAfterContentLoaded() {
         // Apply width to the panel
         if (newWidth > 150 && newWidth < 800) {
             enterScoreNote.style.width = newWidth + 'px';
+
+            const spacerWidth = newWidth + enterScoreResizer.clientWidth;
+            enterScoreNoteSpacer.style.width = spacerWidth + 'px';
         }
     }
 

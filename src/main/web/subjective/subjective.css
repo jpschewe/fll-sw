@@ -161,15 +161,28 @@ footer button {
     margin: 10px;
 }
 
+#enter-score_rubric-container {
+    display: flex;
+}
+
 #enter-score_container {
     display: flex;
     height: 100vh;
+}
+
+#enter-score_score-table_header {
+    flex: 1; /* Takes up remaining space */
 }
 
 #enter-score_main {
     flex: 1; /* Takes up remaining space */
     overflow-y: scroll;
     height: 85%; /* makes room for the footer */
+}
+
+#enter-score_edit-note-spacer {
+    min-width: 150px;
+    width: 30%; /* Initial width */
 }
 
 #enter-score-note {
