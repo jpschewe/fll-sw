@@ -152,14 +152,10 @@ public final class EditAwardWinners {
                                                                       }
                                                                       case NonNumericCategory awardCategory -> {
                                                                         try {
-                                                                          if (CategoriesIgnored.isNonNumericCategoryIgnored(connection,
-                                                                                                                            tournamentData.getCurrentTournament()
-                                                                                                                                          .getLevel(),
-                                                                                                                            awardCategory)) {
-                                                                            return false;
-                                                                          } else {
-                                                                            return true;
-                                                                          }
+                                                                          return !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
+                                                                                                                                tournamentData.getCurrentTournament()
+                                                                                                                                              .getLevel(),
+                                                                                                                                awardCategory);
                                                                         } catch (final SQLException e) {
                                                                           throw new FLLInternalException(e);
                                                                         }
