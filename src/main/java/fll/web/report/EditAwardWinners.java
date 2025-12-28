@@ -12,22 +12,29 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.db.AwardDeterminationOrder;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
+import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
@@ -74,13 +81,10 @@ public final class EditAwardWinners {
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
 
-      final List<NonNumericCategory> nonNumericCategories = CategoriesIgnored.getNonNumericCategories(description,
-                                                                                                      connection,
-                                                                                                      tournament);
-      page.setAttribute("nonNumericCategories", nonNumericCategories);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
       page.setAttribute("awardGroups", awardGroups);
@@ -124,10 +128,7 @@ public final class EditAwardWinners {
         overallAwardWinners.computeIfAbsent(winner.getName(), k -> new LinkedList<>()).add(winner);
       }
       page.setAttribute("overallAwardWinners", overallAwardWinners);
-
       page.setAttribute("awardGroupAwardWinners", awardGroupAwardWinners);
-
-      page.setAttribute("championshipAwardName", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
 
       // category -> award type
       final Map<String, String> awardTypes = new HashMap<>();
@@ -142,6 +143,37 @@ public final class EditAwardWinners {
         awardTypes.put(category.getTitle(), NON_NUMERIC_AWARD_TYPE);
       }
       page.setAttribute("awardTypes", awardTypes);
+
+      final List<AwardCategory> categories = AwardDeterminationOrder.get(connection, description).stream() //
+                                                                    .filter(category -> {
+                                                                      switch (category) {
+                                                                      case PerformanceScoreCategory awardCategory -> {
+                                                                        return false;
+                                                                      }
+                                                                      case NonNumericCategory awardCategory -> {
+                                                                        try {
+                                                                          if (CategoriesIgnored.isNonNumericCategoryIgnored(connection,
+                                                                                                                            tournamentData.getCurrentTournament()
+                                                                                                                                          .getLevel(),
+                                                                                                                            awardCategory)) {
+                                                                            return false;
+                                                                          } else {
+                                                                            return true;
+                                                                          }
+                                                                        } catch (final SQLException e) {
+                                                                          throw new FLLInternalException(e);
+                                                                        }
+                                                                      }
+                                                                      case HeadToHeadCategory awardCategory -> {
+                                                                        return false;
+                                                                      }
+                                                                      default -> {
+                                                                        return true;
+                                                                      }
+                                                                      }
+                                                                    }) //
+                                                                    .collect(Collectors.toList());
+      page.setAttribute("categories", categories);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);

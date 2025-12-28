@@ -56,4 +56,9 @@ public final class HeadToHeadCategory implements AwardCategory {
     }
   }
 
+  @Override
+  public boolean isRanked() {
+    return true;
+  }
+
 }
