@@ -260,4 +260,9 @@ public class VirtualSubjectiveScoreCategory implements Serializable, Evaluatable
     }
   }
 
+  @Override
+  public boolean isRanked() {
+    return true;
+  }
+
 }

@@ -311,4 +311,9 @@ public class PerformanceScoreCategory extends ScoreCategory<PerformanceTeamScore
     }
   }
 
+  @Override
+  public boolean isRanked() {
+    return true;
+  }
+
 }
