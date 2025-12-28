@@ -28,57 +28,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <div id="container">
-        <!-- subjective categories -->
-        <c:forEach items="${challengeDescription.subjectiveCategories}"
-            var="category">
-
-            <c:set var="perAwardGroup" value="true" />
-
-            <h1>${category.title}</h1>
-            <c:forEach items="${awardGroups}" var="awardGroup">
-
-                <h2>${awardGroup}</h2>
-                <c:set var="winners"
-                    value="${subjectiveAwardWinners[category.title][awardGroup]}" />
-                <c:set var="categoryTitle" value="${category.title}" />
-                <c:set var="awardType" value="${subjectiveAwardType}" />
-                <c:set var="ranked" value="true" />
-
-                <%@ include file="edit-award-winners-table.jspf"%>
-
-            </c:forEach>
-            <%-- foreach award group --%>
-
-            <%-- foreach subjective category --%>
-        </c:forEach>
-        <!-- end subjective categories -->
-
-        <!-- virtual subjective categories -->
-        <c:forEach items="${challengeDescription.virtualSubjectiveCategories}"
-            var="category">
-
-            <c:set var="perAwardGroup" value="true" />
-
-            <h1>${category.title}</h1>
-            <c:forEach items="${awardGroups}" var="awardGroup">
-
-                <h2>${awardGroup}</h2>
-                <c:set var="winners"
-                    value="${virtualSubjectiveAwardWinners[category.title][awardGroup]}" />
-                <c:set var="categoryTitle" value="${category.title}" />
-                <c:set var="awardType" value="${virtualSubjectiveAwardType}" />
-                <c:set var="ranked" value="true" />
-
-                <%@ include file="edit-award-winners-table.jspf"%>
-
-            </c:forEach>
-            <%-- foreach award group --%>
-
-            <%-- foreach virtual subjective category --%>
-        </c:forEach>
-        <!-- end virtual subjective categories -->
-
-        <c:forEach items="${nonNumericCategories}" var="category">
+        <c:forEach items="${categories}" var="category">
             <h1>${category.title}</h1>
 
             <c:set var="perAwardGroup" value="${category.perAwardGroup}" />
@@ -90,11 +40,11 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
 
                         <h2>${awardGroup}</h2>
                         <c:set var="winners"
-                            value="${extraAwardWinners[category.title][awardGroup]}" />
+                            value="${awardGroupAwardWinners[category.title][awardGroup]}" />
                         <c:set var="categoryTitle"
                             value="${category.title}" />
                         <c:set var="awardType"
-                            value="${nonNumericAwardType}" />
+                            value="${awardTypes[category.title]}" />
                         <c:set var="ranked" value="${category.ranked}" />
 
                         <%@ include file="edit-award-winners-table.jspf"%>
@@ -109,7 +59,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                         value="${overallAwardWinners[category.title]}" />
                     <c:set var="categoryTitle" value="${category.title}" />
                     <c:set var="awardType"
-                        value="${nonNumericAwardType}" />
+                        value="${awardTypes[category.title]}" />
                     <c:set var="ranked" value="${category.ranked}" />
 
                     <%@ include file="edit-award-winners-table.jspf"%>
@@ -118,26 +68,6 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                 </c:otherwise>
             </c:choose>
         </c:forEach>
-
-        <!-- championship -->
-        <h1>${championshipAwardName}</h1>
-        <c:forEach items="${awardGroups}" var="awardGroup">
-
-            <h2>${awardGroup}</h2>
-
-            <c:set var="categoryTitle" value="${championshipAwardName}" />
-            <c:set var="winners"
-                value="${extraAwardWinners[categoryTitle][awardGroup]}" />
-
-            <c:set var="awardType" value="${championshipAwardType}" />
-            <c:set var="ranked" value="true" />
-
-            <%@ include file="edit-award-winners-table.jspf"%>
-
-        </c:forEach>
-        <%-- foreach award group --%>
-        <!-- end championship -->
-
     </div>
 </body>
 </html>

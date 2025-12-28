@@ -149,9 +149,7 @@ public class NonNumericCategory implements AwardCategory, Serializable {
 
   private boolean ranked;
 
-  /**
-   * @return true if this category orders teams by place
-   */
+  @Override
   public boolean isRanked() {
     return ranked;
   }
