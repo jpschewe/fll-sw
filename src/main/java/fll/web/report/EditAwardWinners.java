@@ -28,6 +28,8 @@ import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.awards.ChampionshipCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -126,10 +128,20 @@ public final class EditAwardWinners {
       page.setAttribute("awardGroupAwardWinners", awardGroupAwardWinners);
 
       page.setAttribute("championshipAwardName", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
-      page.setAttribute("championshipAwardType", CHAMPIONSHIP_AWARD_TYPE);
-      page.setAttribute("nonNumericAwardType", NON_NUMERIC_AWARD_TYPE);
-      page.setAttribute("subjectiveAwardType", SUBJECTIVE_AWARD_TYPE);
-      page.setAttribute("virtualSubjectiveAwardType", VIRTUAL_SUBJECTIVE_AWARD_TYPE);
+
+      // category -> award type
+      final Map<String, String> awardTypes = new HashMap<>();
+      awardTypes.put(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE, CHAMPIONSHIP_AWARD_TYPE);
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        awardTypes.put(category.getTitle(), SUBJECTIVE_AWARD_TYPE);
+      }
+      for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
+        awardTypes.put(category.getTitle(), VIRTUAL_SUBJECTIVE_AWARD_TYPE);
+      }
+      for (final NonNumericCategory category : description.getNonNumericCategories()) {
+        awardTypes.put(category.getTitle(), NON_NUMERIC_AWARD_TYPE);
+      }
+      page.setAttribute("awardTypes", awardTypes);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);
