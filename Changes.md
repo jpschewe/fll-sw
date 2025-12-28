@@ -1,3 +1,4 @@
+* Add compression to the webserver. This reduces bandwidth used.
 * #1307 - Change the background color for the teams on the currently selected table in the pick list
 * #1308 - Make the practice score entry less obvious
 * #1306 - Always open consolidated final scores in a new tab
