@@ -41,7 +41,8 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                 <c:set var="winners"
                     value="${awardGroupAwardWinners[category.title][awardGroup]}" />
                 <c:set var="categoryTitle" value="${category.title}" />
-                <c:set var="awardType" value="${subjectiveAwardType}" />
+                <c:set var="awardType"
+                    value="${awardTypes[category.title]}" />
                 <c:set var="ranked" value="true" />
 
                 <%@ include file="edit-award-winners-table.jspf"%>
@@ -68,7 +69,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                     value="${awardGroupAwardWinners[category.title][awardGroup]}" />
                 <c:set var="categoryTitle" value="${category.title}" />
                 <c:set var="awardType"
-                    value="${virtualSubjectiveAwardType}" />
+                    value="${awardTypes[category.title]}" />
                 <c:set var="ranked" value="true" />
 
                 <%@ include file="edit-award-winners-table.jspf"%>
@@ -96,7 +97,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                         <c:set var="categoryTitle"
                             value="${category.title}" />
                         <c:set var="awardType"
-                            value="${nonNumericAwardType}" />
+                            value="${awardTypes[category.title]}" />
                         <c:set var="ranked" value="${category.ranked}" />
 
                         <%@ include file="edit-award-winners-table.jspf"%>
@@ -111,7 +112,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
                         value="${overallAwardWinners[category.title]}" />
                     <c:set var="categoryTitle" value="${category.title}" />
                     <c:set var="awardType"
-                        value="${nonNumericAwardType}" />
+                        value="${awardTypes[category.title]}" />
                     <c:set var="ranked" value="${category.ranked}" />
 
                     <%@ include file="edit-award-winners-table.jspf"%>
@@ -131,7 +132,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
             <c:set var="winners"
                 value="${awardGroupAwardWinners[categoryTitle][awardGroup]}" />
 
-            <c:set var="awardType" value="${championshipAwardType}" />
+            <c:set var="awardType" value="${awardTypes[categoryTitle]}" />
             <c:set var="ranked" value="true" />
 
             <%@ include file="edit-award-winners-table.jspf"%>
