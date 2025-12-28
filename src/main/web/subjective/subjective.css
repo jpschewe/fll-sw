@@ -62,6 +62,18 @@ table.score-entry .selected-range {
     width: 50%;
 }
 
+#enter-score-goal-comments .fll-sw-ui-dialog>div {
+    margin-left: 10px;
+}
+
+#enter-score-comment-great-job.fll-sw-ui-dialog>div {
+    margin-left: 10px;
+}
+
+#enter-score-comment-think-about.fll-sw-ui-dialog>div {
+    margin-left: 10px;
+}
+
 .hidden {
     display: none;
 }
