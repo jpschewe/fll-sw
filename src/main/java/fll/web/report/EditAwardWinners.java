@@ -88,36 +88,31 @@ public final class EditAwardWinners {
 
       final List<AwardWinner> subjectiveAwardWinnersList = AwardWinners.getSubjectiveAwardWinners(connection,
                                                                                                   tournament.getTournamentID());
+
       // category -> awardGroup -> winners
-      final Map<String, Map<String, List<AwardWinner>>> subjectiveAwardWinners = new HashMap<>();
+      final Map<String, Map<String, List<AwardWinner>>> awardGroupAwardWinners = new HashMap<>();
+
       for (final AwardWinner winner : subjectiveAwardWinnersList) {
-        final Map<String, List<AwardWinner>> awardGroupToWinners = subjectiveAwardWinners.computeIfAbsent(winner.getName(),
+        final Map<String, List<AwardWinner>> awardGroupToWinners = awardGroupAwardWinners.computeIfAbsent(winner.getName(),
                                                                                                           k -> new HashMap<>());
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
-      page.setAttribute("subjectiveAwardWinners", subjectiveAwardWinners);
 
       final List<AwardWinner> virtualSubjectiveAwardWinnersList = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
                                                                                                                 tournament.getTournamentID());
-      // category -> awardGroup -> winners
-      final Map<String, Map<String, List<AwardWinner>>> virtualSubjectiveAwardWinners = new HashMap<>();
       for (final AwardWinner winner : virtualSubjectiveAwardWinnersList) {
-        final Map<String, List<AwardWinner>> awardGroupToWinners = virtualSubjectiveAwardWinners.computeIfAbsent(winner.getName(),
-                                                                                                                 k -> new HashMap<>());
+        final Map<String, List<AwardWinner>> awardGroupToWinners = awardGroupAwardWinners.computeIfAbsent(winner.getName(),
+                                                                                                          k -> new HashMap<>());
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
-      page.setAttribute("virtualSubjectiveAwardWinners", virtualSubjectiveAwardWinners);
 
       final List<AwardWinner> extraAwardWinnersList = AwardWinners.getNonNumericAwardWinners(connection,
                                                                                              tournament.getTournamentID());
-      // category -> awardGroup -> winners
-      final Map<String, Map<String, List<AwardWinner>>> extraAwardWinners = new HashMap<>();
       for (final AwardWinner winner : extraAwardWinnersList) {
-        final Map<String, List<AwardWinner>> awardGroupToWinners = extraAwardWinners.computeIfAbsent(winner.getName(),
-                                                                                                     k -> new HashMap<>());
+        final Map<String, List<AwardWinner>> awardGroupToWinners = awardGroupAwardWinners.computeIfAbsent(winner.getName(),
+                                                                                                          k -> new HashMap<>());
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
-      page.setAttribute("extraAwardWinners", extraAwardWinners);
 
       final List<OverallAwardWinner> overallAwardWinnersList = AwardWinners.getNonNumericOverallAwardWinners(connection,
                                                                                                              tournament.getTournamentID());
@@ -127,6 +122,8 @@ public final class EditAwardWinners {
         overallAwardWinners.computeIfAbsent(winner.getName(), k -> new LinkedList<>()).add(winner);
       }
       page.setAttribute("overallAwardWinners", overallAwardWinners);
+
+      page.setAttribute("awardGroupAwardWinners", awardGroupAwardWinners);
 
       page.setAttribute("championshipAwardName", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
       page.setAttribute("championshipAwardType", CHAMPIONSHIP_AWARD_TYPE);
