@@ -63,6 +63,8 @@ public class TomcatLauncher {
 
     // set character encoding
     tomcat.getConnector().setURIEncoding(Utilities.DEFAULT_CHARSET.displayName());
+
+    tomcat.getConnector().setProperty("compression", "on");
   }
 
   /**
