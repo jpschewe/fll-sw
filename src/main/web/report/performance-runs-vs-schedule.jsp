@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="REF,HEAD_JUDGE" allowSetup="false" />
+<fll-sw:required-roles roles="REF,HEAD_JUDGE,SCORING_COORDINATOR"
+    allowSetup="false" />
 
 <%
 fll.web.report.PerformanceRunsVsSchedule.populateContext(application, pageContext);
@@ -82,7 +83,7 @@ table#perf-data th, table#perf-data td {
                         <td>&nbsp;</td>
                     </c:otherwise>
                 </c:choose>
-                
+
                 <td>${entry.formattedScore}</td>
                 <td>${entry.table}</td>
 

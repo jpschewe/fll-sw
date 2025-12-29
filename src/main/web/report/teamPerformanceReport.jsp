@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="REF,JUDGE,REPORT_GENERATOR"
+<fll-sw:required-roles
+    roles="REF,JUDGE,REPORT_GENERATOR,SCORING_COORDINATOR"
     allowSetup="false" />
 
 <%

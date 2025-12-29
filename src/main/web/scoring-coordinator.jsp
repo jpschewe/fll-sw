@@ -1,8 +1,9 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+<fll-sw:required-roles roles="SCORING_COORDINATOR" allowSetup="false" />
 
 <%
+fll.web.PageVariables.populateCompletedRunData(application, pageContext);
 fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
 

@@ -47,7 +47,7 @@ public class PerformanceSchedule extends BaseFLLServlet {
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.PUBLIC, UserRole.SCORING_COORDINATOR), false)) {
       return;
     }
 
