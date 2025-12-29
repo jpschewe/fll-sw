@@ -48,7 +48,7 @@ public final class FormParameterStorage implements Serializable {
     this.parameters = new HashMap<>(parameters);
   }
 
-  private static final String getOriginalUri(final HttpServletRequest request) {
+  private static String getOriginalUri(final HttpServletRequest request) {
     final Object forwardUriObj = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
     final String origUri;
     if (null != forwardUriObj) {
