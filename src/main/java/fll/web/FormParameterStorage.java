@@ -10,9 +10,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import com.google.common.base.Objects;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +30,14 @@ public final class FormParameterStorage implements Serializable {
 
   private static final String SESSION_KEY = FormParameterStorage.class.getName();
 
+  /**
+   * This key will be set to {@link Boolean#TRUE} in the workflow session if the
+   * parameters should be applied on the next page load. The workflow session will
+   * also be deleted on the next page load with this workflow session.
+   */
+  public static final String APPLY_PARAMETERS = SESSION_KEY
+      + "_APPLY";
+
   private final @Nullable String originalUri;
 
   private final Map<String, String[]> parameters;
@@ -40,16 +48,7 @@ public final class FormParameterStorage implements Serializable {
     this.parameters = new HashMap<>(parameters);
   }
 
-  /**
-   * Store any form parameters found in {@code request} for later application with
-   * {@link #applyParameters(HttpServletRequest, HttpSession)}.
-   * 
-   * @param request the request
-   * @param session where the session variables are stored
-   */
-  public static void storeParameters(final HttpServletRequest request,
-                                     final HttpSession session) {
-
+  private static final String getOriginalUri(final HttpServletRequest request) {
     final Object forwardUriObj = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
     final String origUri;
     if (null != forwardUriObj) {
@@ -57,19 +56,35 @@ public final class FormParameterStorage implements Serializable {
     } else {
       origUri = request.getRequestURI();
     }
+    return origUri;
+  }
+
+  /**
+   * Store any form parameters found in {@code request} for later application with
+   * {@link #applyParameters(HttpServletRequest, HttpSession)}.
+   * 
+   * @param request the request
+   * @param session used to access the the workflow session parameters
+   * @param workflowId used to set the workflow session parameters
+   */
+  public static void storeParameters(final HttpServletRequest request,
+                                     final HttpSession session,
+                                     final String workflowId) {
+
+    final String origUri = getOriginalUri(request);
 
     final Map<String, String[]> params = request.getParameterMap();
     if (null != params
-        && !params.isEmpty()
-        && null != origUri) {
+        && !params.isEmpty()) {
       // only need to store form parameters when forwarded and parameters exist
 
       final FormParameterStorage storage = new FormParameterStorage(origUri, params);
-      session.setAttribute(SESSION_KEY, storage);
-      LOGGER.debug("Stored parameters: {}", params.keySet());
+
+      SessionAttributes.setWorkflowAttribute(session, workflowId, SESSION_KEY, storage);
+      LOGGER.debug("Stored parameters: {} in workflow {}", params.keySet(), workflowId);
     }
 
-    session.setAttribute(SessionAttributes.REDIRECT_URL, origUri);
+    SessionAttributes.setWorkflowAttribute(session, workflowId, SessionAttributes.REDIRECT_URL, origUri);
 
     LOGGER.debug("forward.request_uri: {}", request.getAttribute("jakarta.servlet.forward.request_uri"));
     LOGGER.debug("URI: {}", request.getRequestURI());
@@ -78,11 +93,13 @@ public final class FormParameterStorage implements Serializable {
     LOGGER.debug("forward.servlet_path: {}", request.getAttribute("jakarta.servlet.forward.servlet_path"));
     LOGGER.debug("forward.path_info: {}", request.getAttribute("jakarta.servlet.forward.path_info"));
     LOGGER.debug("forward.query_string: {}", request.getAttribute("jakarta.servlet.forward.query_string"));
+    LOGGER.debug("Workflow id: {}", workflowId);
   }
 
   /**
-   * If the request is for the URI that the parameters are stored, return a new
-   * request object with the form parameters added.
+   * If {@link #APPLY_PARAMETERS} is set to {@link Boolean#TRUE}, return a new
+   * request object with the form parameters added and delete the workflow
+   * session.
    * 
    * @param request original request
    * @param session where session variables are stored
@@ -91,20 +108,35 @@ public final class FormParameterStorage implements Serializable {
   public static HttpServletRequest applyParameters(final HttpServletRequest request,
                                                    final HttpSession session) {
 
-    final FormParameterStorage storage = SessionAttributes.getAttribute(session, SESSION_KEY,
-                                                                        FormParameterStorage.class);
+    @MonotonicNonNull
+    String workflowId = request.getParameter(SessionAttributes.WORKFLOW_ID);
+    if (StringUtils.isBlank(workflowId)) {
+      LOGGER.trace("applyParameters: No workflow ID");
+      return request;
+    }
 
-    final String path = request.getRequestURI();
+    final @Nullable Boolean applyParams = SessionAttributes.getWorkflowAttribute(session, workflowId, APPLY_PARAMETERS,
+                                                                                 Boolean.class);
 
-    if (null != storage
-        && Objects.equal(storage.originalUri, path)) {
+    if (!Boolean.TRUE.equals(applyParams)) {
+      // not time to apply
+      LOGGER.trace("applyParameters: Apply is not true: {} in workflow {}", applyParams, workflowId);
+      return request;
+    }
 
-      // make sure we don't get the parameters a second time
-      session.removeAttribute(SESSION_KEY);
+    final @Nullable FormParameterStorage storage = SessionAttributes.getWorkflowAttribute(session, workflowId,
+                                                                                          SESSION_KEY,
+                                                                                          FormParameterStorage.class);
 
-      LOGGER.debug("Found stored parameters: {}", storage.parameters.keySet());
+    // clean up the workflow session
+    SessionAttributes.deleteWorkflowSession(session, workflowId);
+
+    if (null != storage) {
+      LOGGER.debug("applyParameters: Found stored parameters: {} in workflow {}", storage.parameters.keySet(),
+                   workflowId);
       return new AdditionalParameterServletRequest(request, storage.parameters);
     } else {
+      LOGGER.trace("applyParameters: Storage is null in workflow {}", workflowId);
       return request;
     }
 
