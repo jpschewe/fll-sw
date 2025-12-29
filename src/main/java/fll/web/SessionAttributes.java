@@ -253,6 +253,27 @@ public final class SessionAttributes {
   }
 
   /**
+   * Remove a workflow session attribute.
+   * 
+   * @param session where the workflow sessions are stored
+   * @param workflowId the identifier for the workflow
+   * @param attribute the attribute key
+   * @see #getWorkflowAttribute(HttpSession, String, String, Class)
+   */
+  public static void removeWorkflowAttribute(final HttpSession session,
+                                             final String workflowId,
+                                             final String attribute) {
+    final @Nullable WorkflowSession workflowSession = getAttribute(session, getWorkflowSessionKey(workflowId),
+                                                                   WorkflowSession.class);
+    if (null == workflowSession) {
+      throw new FLLRuntimeException(String.format("Workflow with id %s does not exist. Cannot set attribute %s on a non-existent session",
+                                                  workflowId, attribute));
+    }
+
+    workflowSession.removeAttribute(attribute);
+  }
+
+  /**
    * Create workflow specific session.
    * 
    * @param session the session that the workflow is associated with
@@ -312,6 +333,11 @@ public final class SessionAttributes {
                              final Object value) {
       data.put(attribute, value);
     }
+
+    public void removeAttribute(final String attribute) {
+      data.remove(attribute);
+    }
+
   }
 
 }
