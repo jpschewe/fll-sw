@@ -7,6 +7,7 @@ fll.web.MainIndex.populateContext(request, application, pageContext);
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
 fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 fll.web.PageVariables.populateCompletedRunData(application, pageContext);
+fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
 
 <html>
@@ -74,7 +75,7 @@ fll.web.PageVariables.populateCompletedRunData(application, pageContext);
     </div>
 
     <a class="wide" href="<c:url value='/report/unverifiedRuns.jsp' />">Unverified
-        runs. Unverfied performance runs.</a>
+        runs. Unverified performance runs.</a>
 
     <a class="wide" href="<c:url value='/admin/PerformanceSchedule' />"
         target="_new">Performance Schedule</a>

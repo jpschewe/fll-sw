@@ -4,6 +4,7 @@
 
 <%
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true);
+fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
 
 <html>
@@ -440,13 +441,14 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
 
 
         <li>
-            <a href='<c:url value="edit_select_team.jsp"/>'>Edit
+            <a href="<c:url value='/admin/edit_select_team.jsp'/>">Edit
                 team data</a>
         </li>
 
 
         <li>
-            <a id='remote-control' href='remoteControl.jsp'>Remote
+            <a id='remote-control'
+                href="<c:url value='/admin/remoteControl.jsp'/>">Remote
                 control of display</a>
         </li>
 
