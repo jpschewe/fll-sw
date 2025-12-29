@@ -10,10 +10,13 @@ package fll.web;
  * Roles that a user can be in.
  */
 public enum UserRole {
-  PUBLIC("This role has no special permissions"), REPORT_GENERATOR(
-      "This role can run reports, but not enter scores"), REF("This role can enter performance scores"), JUDGE(
-          "This role can enter subjective scores"), HEAD_JUDGE(
-              "This role is a judge that can run reports"), ADMIN("This role can do anything");
+  PUBLIC("This role has no special permissions"), //
+  SCORING_COORDINATOR("Manages most things in the performance area"), //
+  REPORT_GENERATOR("This role can run reports, but not enter scores"), //
+  REF("This role can enter performance scores"), //
+  JUDGE("This role can enter subjective scores"), //
+  HEAD_JUDGE("This role is a judge that can run reports"), //
+  ADMIN("This role can do anything");
 
   UserRole(final String description) {
     this.description = description;
