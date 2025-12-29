@@ -1,7 +1,8 @@
 <%@page import="fll.web.display.DisplayInfo"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="ADMIN" allowSetup="false" />
+<fll-sw:required-roles roles="ADMIN,SCORING_COORDINATOR"
+    allowSetup="false" />
 
 <%
 fll.web.admin.RemoteControl.populateContext(application, pageContext);

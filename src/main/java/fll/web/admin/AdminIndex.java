@@ -89,8 +89,6 @@ public final class AdminIndex {
       }
       pageContext.setAttribute("categoryNameToColumn", categoryNameToColumn);
 
-      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
-
       if (setRedirect) {
         session.setAttribute(SessionAttributes.REDIRECT_URL, "/admin/index.jsp");
       }

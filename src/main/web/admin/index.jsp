@@ -4,6 +4,7 @@
 
 <%
 fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true);
+fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
 
 <html>
@@ -266,38 +267,40 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
                     </li>
 
                     <!-- subjective sheets -->
-        <c:forEach items="${challengeDescription.subjectiveCategories}"
-            var="category">
+                    <c:forEach
+                        items="${challengeDescription.subjectiveCategories}"
+                        var="category">
 
-            <c:set var="columns"
-                value="${categoryNameToColumn[category.name]}" />
+                        <c:set var="columns"
+                            value="${categoryNameToColumn[category.name]}" />
 
-            <c:forEach items="${columns}" var="columnName">
+                        <c:forEach items="${columns}" var="columnName">
 
-                <c:choose>
-                    <c:when test="${columns.size() gt 1}">
-                        <li>
-                            <a target="_${category.name}-${columnName}"
-                                href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                sheets for ${category.title} schedule
-                                ${columnName}</a>
-                        </li>
-                    </c:when>
-                    <c:otherwise>
-                        <li>
-                            <a target="_${category.name}"
-                                href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
-                                sheets for ${category.title}</a>
-                        </li>
-                    </c:otherwise>
-                </c:choose>
-            </c:forEach>
+                            <c:choose>
+                                <c:when test="${columns.size() gt 1}">
+                                    <li>
+                                        <a
+                                            target="_${category.name}-${columnName}"
+                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                            sheets for ${category.title}
+                                            schedule ${columnName}</a>
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li>
+                                        <a target="_${category.name}"
+                                            href="<c:url value='SubjectiveSheets/${category.name}/${columnName}'/>">Subjective
+                                            sheets for ${category.title}</a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
 
-        </c:forEach>
-        <!-- end subjective sheets -->
+                    </c:forEach>
+                    <!-- end subjective sheets -->
 
-        <!-- Team schedules -->
-        <li>
+                    <!-- Team schedules -->
+                    <li>
                         <a href="<c:url value='/admin/TeamSchedules' />"
                             target="_blank">Team Schedules</a>
                     </li>
@@ -329,7 +332,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
                     </li>
                 </ul>
             </c:if>
-        <!-- end schedule loaded -->
+            <!-- end schedule loaded -->
         </li>
 
         <li>
@@ -438,13 +441,14 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
 
 
         <li>
-            <a href='<c:url value="edit_select_team.jsp"/>'>Edit
+            <a href="<c:url value='/admin/edit_select_team.jsp'/>">Edit
                 team data</a>
         </li>
 
 
         <li>
-            <a id='remote-control' href='remoteControl.jsp'>Remote
+            <a id='remote-control'
+                href="<c:url value='/admin/remoteControl.jsp'/>">Remote
                 control of display</a>
         </li>
 
@@ -516,6 +520,80 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext, true
         </li>
 
     </ol>
+
+    <h2>Troubleshooting Subjective</h2>
+    <ul>
+        <li>
+            Load an offline datafile from the subjective application.
+            <i>Use this when synchronize isn't working</i>
+            .
+            <form name="subjective-offline"
+                action="<c:url value='/admin/SubjectiveOffline'/>"
+                method="POST" ENCTYPE="multipart/form-data">
+
+                <input type="file" size="32"
+                    name="subjectiveOfflineFile" />
+
+                <input id='subjectiveOfflineData' type="submit"
+                    value="Upload" />
+            </form>
+        </li>
+    </ul>
+
+    <h2>Sectionals and State</h2>
+    Sections and State run a Head to Head competition after regular
+    match play.
+
+    <ol>
+        <li>
+            Once regular match play has been completed you will need to
+            setup the <a href="<c:url value='/playoff' />" target="_h2h">head
+                to head brackets</a>.
+        </li>
+
+
+        <li>
+            <b>State Only</b>
+            <i>This is only done when 2 servers are used on site</i>
+            .
+            <form name="import-finalist" action="ProcessImportFinalist"
+                method="POST" ENCTYPE="multipart/form-data">
+                Specify the file that was exported from the judges
+                server with the finalist data
+                <input type="file" size="32" name="finalistFile" />
+
+                <!-- performance file upload button -->
+                <input id='uploadFinalistData' type="submit"
+                    value="Upload" />
+            </form>
+        </li>
+
+        <li>
+            Print the <a href='<c:url value="/report/PlayoffReport" />'
+                target="_blank">Winners of each head to head bracket</a>.
+            This is needed for the awards ceremony.
+        </li>
+
+    </ol>
+
+    <h2>2 server setup</h2>
+    <ul>
+
+        <li>
+            <a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
+                the final judges room database</a> and send it to the head
+            computer person.
+            <i>This is only done when 2 servers are used on site</i>
+            .
+        </li>
+
+        <li>
+            <a href="<c:url value='/admin/ExportFinalistData' />">Export
+                finalist data</a> to bring to the performance computer.
+            <i>This is only done when 2 servers are used on site</i>
+            .
+        </li>
+    </ul>
 
     <h2>After the tournament</h2>
     <ul>

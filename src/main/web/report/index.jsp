@@ -8,6 +8,7 @@
 <%
 fll.web.report.ReportIndex.populateContext(application, session, pageContext, true);
 fll.web.PageVariables.populateCompletedRunData(application, pageContext);
+fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
 
 <html>
