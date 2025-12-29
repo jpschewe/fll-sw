@@ -1060,15 +1060,25 @@ function populateScoreSummary() {
         scoreSummaryContent.appendChild(commentRow);
         commentRow.classList.add("score-summary_comment");
         commentRow.classList.add("fll-sw-ui-inactive");
-        if (score && score.commentGreatJob) {
+        if (score && !score.noShow) {
             const row = document.createElement("div");
             commentRow.appendChild(row);
-            row.innerText = score.commentGreatJob;
+            if (score.commentGreatJob) {
+                row.innerText = score.commentGreatJob;
+            } else {
+                row.classList.add("warning");
+                row.innerText = "Missing Great Job comment";
+            }
         }
-        if (score && score.commentThinkAbout) {
+        if (score && !score.noShow) {
             const row = document.createElement("div");
             commentRow.appendChild(row);
-            row.innerText = score.commentThinkAbout;
+            if (score.commentThinkAbout) {
+                row.innerText = score.commentThinkAbout;
+            } else {
+                row.classList.add("warning");
+                row.innerText = "Missing Think About comment";
+            }
         }
         if (score && score.goalComments) {
             for (const [_, goalComment] of Object.entries(score.goalComments)) {
