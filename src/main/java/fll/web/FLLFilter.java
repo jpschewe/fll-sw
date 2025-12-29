@@ -105,6 +105,8 @@ public class FLLFilter implements Filter {
           }
 
           // keep browser from caching any content
+          // TODO consider allowing some caching
+          // https://github.com/jpschewe/fll-sw/issues/1316
           httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
           httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
           httpResponse.setDateHeader("Expires", 0); // proxy server cache
