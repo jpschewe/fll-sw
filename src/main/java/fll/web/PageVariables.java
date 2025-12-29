@@ -13,7 +13,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
@@ -61,8 +60,9 @@ public final class PageVariables {
   }
 
   /**
-   * Set the variable {@code tournamentTeams} to the {@link Collection} of
-   * {@link TournamentTeam} objects for the current tournament.
+   * Set the variable {@code tournamentTeams} to the {@link java.util.Collection}
+   * of
+   * {@link fll.TournamentTeam} objects for the current tournament.
    * 
    * @param application get application variables
    * @param pageContext set page variables
