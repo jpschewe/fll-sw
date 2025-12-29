@@ -61,8 +61,9 @@ public final class PageVariables {
   }
 
   /**
-   * Set the variable {@code tournamentTeams} to the {@link Collection} of
-   * {@link TournamentTeam} objects for the current tournament.
+   * Set the variable {@code tournamentTeams} to the {@link java.util.Collection}
+   * of
+   * {@link fll.TournamentTeam} objects for the current tournament.
    * 
    * @param application get application variables
    * @param pageContext set page variables
