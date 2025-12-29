@@ -20,6 +20,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -52,8 +53,7 @@ public class SetCurrentTournament extends BaseFLLServlet {
 
     try (Connection connection = datasource.getConnection()) {
       final String currentTournamentParam = request.getParameter("currentTournament");
-      if (null != currentTournamentParam
-          && !"".equals(currentTournamentParam)) {
+      if (!StringUtils.isBlank(currentTournamentParam)) {
         final int newTournamentID = Integer.parseInt(currentTournamentParam);
         if (!Tournament.doesTournamentExist(connection, newTournamentID)) {
           message.append(String.format("<p class='error'>Tournament with id %d is unknown</p>", newTournamentID));
@@ -73,8 +73,6 @@ public class SetCurrentTournament extends BaseFLLServlet {
 
     session.setAttribute("message", message.toString());
 
-    final String referrer = request.getHeader("Referer");
-    response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
-
+    WebUtils.redirectToReferer(request, response, "index.jsp");
   }
 }
