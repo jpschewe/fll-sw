@@ -1,3 +1,5 @@
+* Fix display of run name on performance run report
+* #1304 - Add scoring coordinator role
 * #1300 - Use workflow session to handle login redirects - this avoids issues with multiple tabs and which page is being redirected
 * #1305 - Keep display other judges in sync
 * #1311 - Sort edit award winners page in the same order as the awards script

@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="REF" allowSetup="false" />
+<fll-sw:required-roles roles="SCORING_COORDINATOR" allowSetup="false" />
 
 <%
 fll.web.PageVariables.populateCompletedRunData(application, pageContext);
@@ -9,15 +9,16 @@ fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 
 <html>
 <head>
-<title>Ref Links</title>
+<title>Scoring Coordinator</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
-    <h1>Ref links</h1>
+    <h1>Scoring Coordinator - ${challengeDescription.title }</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
+
     <p>
         The current tournament is
         <b>${tournamentData.currentTournament.description} on
@@ -25,8 +26,12 @@ fll.web.PageVariables.populateTournamentTeams(application, pageContext);
             [${tournamentData.currentTournament.name}]</b>
     </p>
 
-    <a class="wide" href="scoreEntry/choose-table.jsp">Score Entry -
-        follow this link on the performance score entry computers.</a>
+    <a class="wide" id='remote-control'
+        href="<c:url value='/admin/remoteControl.jsp'/>">Remote
+        control of display</a>
+
+    <a class="wide" href="<c:url value='/admin/edit_select_team.jsp'/>">Edit
+        team data</a>
 
     <a class="wide"
         href="<c:url value='/report/regular-match-play-runs.jsp' />">Regular
@@ -87,13 +92,6 @@ fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 
     <a class="wide" href="<c:url value='/admin/PerformanceSheets' />"
         target="_new">Performance sheets for regular match play</a>
-
-    <a class="wide"
-        href="<c:url value='/scoreEntry/scoreEntry.jsp?tablet=true&practice=true&showScores=false'/>">
-        Score entry training</a>
-
-
-
 
 </body>
 </html>
