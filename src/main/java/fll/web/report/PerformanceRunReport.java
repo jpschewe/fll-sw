@@ -24,6 +24,7 @@ import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNul
 import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
+import fll.scores.PerformanceTeamScore;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.MissingRequiredParameterException;
@@ -128,7 +129,11 @@ public final class PerformanceRunReport {
    * Data for the web page.
    * 
    * @param teamNumber {@link Team#getTeamNumber()}
-   * @param teamName {@link
+   * @param teamName {@link Team#getTeamName()}
+   * @param organization {@link Team#getOrganization()}
+   * @param noShow {@link PerformanceTeamScore#isNoShow()}
+   * @param computedTotal score total
+   * @param lastEdited when the score was last edited
    */
   public record Data(int teamNumber,
                      String teamName,
