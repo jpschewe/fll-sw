@@ -1367,8 +1367,13 @@ function displayPageScoreSummary() {
     populateScoreSummary();
 
     const displayOtherJudgesButton = document.getElementById("score-summary_show-other-judges");
-    const displayOtherJudges = displayOtherJudgesButton.classList.contains("fll-sw-button-pressed");
-    displayOrHideCommentsOrNotes(!displayOtherJudges, displayOtherJudgesButton, '.other-judge');
+    syncCommentsOrNotesWithButton(displayOtherJudgesButton, '.other-judge');
+
+    const displayCommentsButton = document.getElementById("score-summary_show-comments");
+    syncCommentsOrNotesWithButton(displayCommentsButton, '.score-summary_comment');
+
+    const displayNotesButton = document.getElementById("score-summary_show-notes");
+    syncCommentsOrNotesWithButton(displayNotesButton, '.score-summary_note');
 
     updateMainHeader();
 }
@@ -1909,6 +1914,15 @@ function displayOrHideCommentsOrNotes(hide, button, selector) {
         button.classList.add("fll-sw-button-pressed");
     }
 
+    syncCommentsOrNotesWithButton(button, selector);
+}
+
+/**
+ * @param button the button that controls the display of the elemnets
+ * @param selector CSS selector to find all elements to display/hide
+ */
+function syncCommentsOrNotesWithButton(button, selector) {
+    const hide = !button.classList.contains("fll-sw-button-pressed");
     for (const element of document.querySelectorAll(selector)) {
         if (hide) {
             element.classList.add("fll-sw-ui-inactive");
