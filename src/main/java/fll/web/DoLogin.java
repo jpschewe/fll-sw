@@ -13,6 +13,11 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.CloseableThreadContext;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.db.Authentication;
 import fll.util.FLLRuntimeException;
 import jakarta.servlet.ServletContext;
@@ -59,61 +64,95 @@ public class DoLogin extends BaseFLLServlet {
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    try (Connection connection = datasource.getConnection()) {
+    @MonotonicNonNull
+    String workflowId = request.getParameter(SessionAttributes.WORKFLOW_ID);
 
-      // check for authentication table
-      if (Authentication.isAuthenticationEmpty(connection)) {
-        LOGGER.warn("No authentication information in the database");
-        SessionAttributes.appendToMessage(session,
-                                          "<p class='error'>No authentication information in the database - see administrator</p>");
-        response.sendRedirect(response.encodeRedirectURL("login.jsp"));
-        return;
-      }
+    try (
+        CloseableThreadContext.Instance requestCtx = CloseableThreadContext.push(String.format("workflowId:%s",
+                                                                                               StringUtils.isBlank(workflowId)
+                                                                                                   ? "NOT_SPECIFIED"
+                                                                                                   : workflowId))) {
 
-      LOGGER.trace("Form parameters: {}", request.getParameterMap());
-      final String user = request.getParameter("user");
-
-      // compute hash
-      final String pass = request.getParameter("pass");
-      if (null == user
-          || user.isEmpty()
-          || null == pass
-          || pass.isEmpty()) {
-        LOGGER.warn("Form fields missing");
-        SessionAttributes.appendToMessage(session, "<p class='error'>You must fill out all fields in the form.</p>");
-        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
-        return;
-      }
-
-      // check for locked account
-      if (Authentication.isAccountLocked(connection, user)) {
-        LOGGER.warn("Account {} is locked", user);
-        SessionAttributes.appendToMessage(session,
-                                          "<p class='error'>Account is locked. Wait for it to unlock or contact an admin.</p>");
-        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
-        return;
-      }
-
-      if (Authentication.checkValidPassword(connection, user, pass)) {
-        Authentication.recordSuccessfulLogin(connection, user);
-
-        // store authentication information
-        LOGGER.info("User {} logged in", user);
-        final Set<UserRole> roles = Authentication.getRoles(connection, user);
-        final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, roles);
-        session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
-
-        WebUtils.sendRedirect(response, session);
+      final String loginRedirect;
+      if (StringUtils.isBlank(workflowId)) {
+        loginRedirect = "/login.jsp";
       } else {
-        Authentication.recordFailedLogin(connection, user);
-
-        LOGGER.warn("Incorrect login credentials user: {}", user);
-        SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
-        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
+        loginRedirect = String.format("/login.jsp?%s=%s", SessionAttributes.WORKFLOW_ID, workflowId);
       }
 
-    } catch (final SQLException e) {
-      throw new FLLRuntimeException(e);
+      try (Connection connection = datasource.getConnection()) {
+
+        // check for authentication table
+        if (Authentication.isAuthenticationEmpty(connection)) {
+          LOGGER.warn("No authentication information in the database");
+          SessionAttributes.appendToMessage(session,
+                                            "<p class='error'>No authentication information in the database - see administrator</p>");
+          response.sendRedirect(response.encodeRedirectURL(loginRedirect));
+          return;
+        }
+
+        LOGGER.trace("Form parameters: {}", request.getParameterMap());
+        final String user = request.getParameter("user");
+
+        // compute hash
+        final String pass = request.getParameter("pass");
+        if (null == user
+            || user.isEmpty()
+            || null == pass
+            || pass.isEmpty()) {
+          LOGGER.warn("Form fields missing");
+          SessionAttributes.appendToMessage(session, "<p class='error'>You must fill out all fields in the form.</p>");
+          response.sendRedirect(response.encodeRedirectURL(loginRedirect));
+          return;
+        }
+
+        // check for locked account
+        if (Authentication.isAccountLocked(connection, user)) {
+          LOGGER.warn("Account {} is locked", user);
+          SessionAttributes.appendToMessage(session,
+                                            "<p class='error'>Account is locked. Wait for it to unlock or contact an admin.</p>");
+          response.sendRedirect(response.encodeRedirectURL(loginRedirect));
+          return;
+        }
+
+        if (Authentication.checkValidPassword(connection, user, pass)) {
+          Authentication.recordSuccessfulLogin(connection, user);
+
+          // store authentication information
+          LOGGER.info("User {} logged in", user);
+          final Set<UserRole> roles = Authentication.getRoles(connection, user);
+          final AuthenticationContext newAuth = AuthenticationContext.loggedIn(user, roles);
+          session.setAttribute(SessionAttributes.AUTHENTICATION, newAuth);
+
+          // redirect to / if there is no redirect URL in the workflow session or no
+          // workflow session
+          String redirectUrl;
+          if (StringUtils.isBlank(workflowId)) {
+            redirectUrl = "/";
+          } else {
+            // set workflow attribute that the form parameters should be applied
+            SessionAttributes.setWorkflowAttribute(session, workflowId, FormParameterStorage.APPLY_PARAMETERS,
+                                                   Boolean.TRUE);
+
+            final @Nullable String workflowRedirect = SessionAttributes.getWorkflowAttribute(session, workflowId,
+                                                                                             SessionAttributes.REDIRECT_URL,
+                                                                                             String.class);
+            redirectUrl = String.format("%s?%s=%s", StringUtils.isBlank(workflowRedirect) ? "/" : workflowRedirect,
+                                        SessionAttributes.WORKFLOW_ID, workflowId);
+            LOGGER.debug("Valid login redirecting to '{}'", redirectUrl);
+          }
+          response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+        } else {
+          Authentication.recordFailedLogin(connection, user);
+
+          LOGGER.warn("Incorrect login credentials user: {}", user);
+          SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
+          response.sendRedirect(response.encodeRedirectURL(loginRedirect));
+        }
+
+      } catch (final SQLException e) {
+        throw new FLLRuntimeException(e);
+      }
     }
   }
 
