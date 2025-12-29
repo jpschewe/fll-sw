@@ -1062,17 +1062,20 @@ function populateScoreSummary() {
         commentRow.classList.add("fll-sw-ui-inactive");
         if (score && score.commentGreatJob) {
             const row = document.createElement("div");
+            row.classList.add("score-summary_comment-row");
             commentRow.appendChild(row);
             row.innerText = score.commentGreatJob;
         }
         if (score && score.commentThinkAbout) {
             const row = document.createElement("div");
+            row.classList.add("score-summary_comment-row");
             commentRow.appendChild(row);
             row.innerText = score.commentThinkAbout;
         }
         if (score && score.goalComments) {
             for (const [_, goalComment] of Object.entries(score.goalComments)) {
                 const row = document.createElement("div");
+                row.classList.add("score-summary_comment-row");
                 commentRow.appendChild(row);
                 row.innerText = goalComment;
             }
