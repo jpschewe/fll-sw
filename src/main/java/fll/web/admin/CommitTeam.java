@@ -72,7 +72,7 @@ public class CommitTeam extends BaseFLLServlet {
       throws IOException, ServletException {
     final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
+    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN, UserRole.SCORING_COORDINATOR), false)) {
       return;
     }
 

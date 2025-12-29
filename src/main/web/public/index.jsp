@@ -3,7 +3,7 @@
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
 <%
-fll.web.PublicIndex.populateContext(application, pageContext);
+fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
 
 <html>
@@ -23,7 +23,12 @@ fll.web.PublicIndex.populateContext(application, pageContext);
         <div class="wide">${ScorePageText }</div>
     </c:if>
 
-    <div class="wide">Current Tournament -&gt; ${tournamentName }</div>
+    <div class="wide">
+        Current tournament -&gt;
+        <b>${tournamentData.currentTournament.description} on
+            ${tournamentData.currentTournament.dateString}
+            [${tournamentData.currentTournament.name}]</b>
+    </div>
 
     <a class="wide" href='<c:url value="/welcome.jsp"/>'>Welcome
         Page</a>
@@ -52,16 +57,14 @@ fll.web.PublicIndex.populateContext(application, pageContext);
             Team schedule for
             <select name='TeamNumber'>
                 <c:forEach items="${tournamentTeams}" var="team">
-                    <option value='<c:out value="${team.teamNumber}"/>'>
-                        <c:out value="${team.teamNumber}" /> -
-                        <c:out value="${team.teamName}" />
-                    </option>
+                    <option value='${team.teamNumber}'>
+                        ${team.teamNumber} - ${team.teamName}</option>
                 </c:forEach>
             </select>
             <input type='submit' value='Output Schedule' />
         </form>
     </div>
-    
+
     <a class="wide"
         href='<c:url value="/report/finalist/FinalistTeams.jsp"/>'>
         Finalist Teams (State only)</a>

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.JudgeInformation;
 import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
@@ -61,8 +60,6 @@ public final class ReportIndex {
 
       final Tournament tournament = tournamentData.getCurrentTournament();
       final int tournamentId = tournament.getTournamentID();
-
-      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection, tournamentId).values());
 
       final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, tournamentId);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);

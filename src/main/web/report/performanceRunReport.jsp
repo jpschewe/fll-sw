@@ -6,7 +6,8 @@
 <%@ page import="java.sql.Connection"%>
 <%@ page import="javax.sql.DataSource"%>
 
-<fll-sw:required-roles roles="REF,JUDGE,REPORT_GENERATOR"
+<fll-sw:required-roles
+    roles="REF,JUDGE,REPORT_GENERATOR,SCORING_COORDINATOR"
     allowSetup="false" />
 
 <%
