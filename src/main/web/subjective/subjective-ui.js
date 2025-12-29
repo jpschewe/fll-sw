@@ -393,7 +393,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
     const row = document.createElement("tr");
     row.classList.add(rowClass);
 
-    for (let index = 0; index < ranges.length; ++index) {
+    for (let index = 0;index < ranges.length;++index) {
         const range = ranges[index];
 
         const numColumns = range.max - range.min + 1;
@@ -534,7 +534,7 @@ function setSliderTicks(goal) {
      * max: " + max + " spacing: " + spacing);
      */
 
-    for (let i = 0; i <= max - min; i++) {
+    for (let i = 0;i <= max - min;i++) {
         const tick = document.createElement("span");
         tick.classList.add("sliderTickMark");
         //tick.innerHtml = "&nbsp;";
@@ -545,7 +545,7 @@ function setSliderTicks(goal) {
 }
 
 function highlightRubric(goal, ranges, value) {
-    for (let index = 0; index < ranges.length; ++index) {
+    for (let index = 0;index < ranges.length;++index) {
         const range = ranges[index];
 
         const rangeCell = document.getElementById(getRubricCellId(goal, index));
@@ -878,7 +878,7 @@ function populateScoreSummary() {
         // assign ranks
         let rank = 0;
         let rankOffset = 1;
-        for (let i = 0; i < scoreDataList.length; ++i) {
+        for (let i = 0;i < scoreDataList.length;++i) {
             const scoreData = scoreDataList[i];
 
             if (i > 0) {
@@ -936,7 +936,7 @@ function populateScoreSummary() {
 
     let rank = 0;
     let rankOffset = 1;
-    for (let i = 0; i < teamsWithScores.length; ++i) {
+    for (let i = 0;i < teamsWithScores.length;++i) {
         const team = teamsWithScores[i];
         const computedScore = teamScores[team.teamNumber];
         const score = subjective_module.getScore(team.teamNumber);
@@ -1356,6 +1356,10 @@ function displayPageScoreSummary() {
 
     populateScoreSummary();
 
+    const displayOtherJudgesButton = document.getElementById("score-summary_show-other-judges");
+    const displayOtherJudges = displayOtherJudgesButton.classList.contains("fll-sw-button-pressed");
+    displayOrHideCommentsOrNotes(!displayOtherJudges, displayOtherJudgesButton, '.other-judge');
+
     updateMainHeader();
 }
 
@@ -1620,7 +1624,7 @@ function setupAfterContentLoaded() {
 
 
     const synchronizeButtons = document.getElementsByClassName("synchronize-button");
-    for (let i = 0; i < synchronizeButtons.length; i++) {
+    for (let i = 0;i < synchronizeButtons.length;i++) {
         synchronizeButtons.item(i).addEventListener("click", () => {
             // one button is in the panel, doing the remove for the footer buttons is a no-op
             sidePanel.classList.remove('open');

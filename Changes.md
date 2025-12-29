@@ -1,3 +1,4 @@
+* #1305 - Keep display other judges in sync
 * #1311 - Sort edit award winners page in the same order as the awards script
 * Add compression to the webserver. This reduces bandwidth used.
 * #1307 - Change the background color for the teams on the currently selected table in the pick list
