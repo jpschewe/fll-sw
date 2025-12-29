@@ -21,7 +21,8 @@ import jakarta.servlet.http.HttpSession;
 /**
  * Keep track of form parameters through a handle a redirect.
  * The form parameters are stored using
- * {@link #storeParameters(HttpServletRequest, HttpSession)} and applied using
+ * {@link #storeParameters(HttpServletRequest, HttpSession, String)} and applied
+ * using
  * {@link #applyParameters(HttpServletRequest, HttpSession)}.
  */
 public final class FormParameterStorage implements Serializable {
