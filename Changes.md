@@ -1,3 +1,4 @@
+* #1304 - Add scoring coordinator role
 * #1305 - Keep display other judges in sync
 * #1311 - Sort edit award winners page in the same order as the awards script
 * Add compression to the webserver. This reduces bandwidth used.
