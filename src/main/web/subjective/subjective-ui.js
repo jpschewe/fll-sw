@@ -1355,6 +1355,10 @@ function displayPageScoreSummary() {
 
     populateScoreSummary();
 
+    const displayOtherJudgesButton = document.getElementById("score-summary_show-other-judges");
+    const displayOtherJudges = displayOtherJudgesButton.classList.contains("fll-sw-button-pressed");
+    displayOrHideCommentsOrNotes(!displayOtherJudges, displayOtherJudgesButton, '.other-judge');
+
     updateMainHeader();
 }
 

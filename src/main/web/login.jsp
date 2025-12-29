@@ -21,6 +21,9 @@
     <form method="POST" action="<c:url value='/DoLogin'/>" name="login"
         data-ajax="false">
 
+        <input type='hidden' name="workflow_id"
+            value='${param.workflow_id}' />
+
         <div>
             <label for="user"> Username:</label>
             <input type="text" size="15" maxlength="64" name="user"

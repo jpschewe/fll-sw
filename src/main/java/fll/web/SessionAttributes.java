@@ -22,6 +22,8 @@ import jakarta.servlet.http.HttpSession;
  */
 public final class SessionAttributes {
 
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
   private SessionAttributes() {
     // no instances
   }
@@ -196,9 +198,12 @@ public final class SessionAttributes {
                                                      final String workflowId,
                                                      final String attribute,
                                                      final Class<T> clazz) {
+    LOGGER.trace("Requesting attribute {} from workflow {}", attribute, workflowId);
+
     final @Nullable WorkflowSession workflowSession = getAttribute(session, getWorkflowSessionKey(workflowId),
                                                                    WorkflowSession.class);
     if (null == workflowSession) {
+      LOGGER.debug("workflow {} does not exist", workflowId);
       return null;
     }
 
@@ -245,11 +250,32 @@ public final class SessionAttributes {
     final @Nullable WorkflowSession workflowSession = getAttribute(session, getWorkflowSessionKey(workflowId),
                                                                    WorkflowSession.class);
     if (null == workflowSession) {
-      throw new FLLRuntimeException(String.format("Workflow with id %s does not exist. Cannot set attribute %s on a non-existent session",
+      throw new FLLRuntimeException(String.format("Workflow with id '%s' does not exist. Cannot set attribute %s on a non-existent session",
                                                   workflowId, attribute));
     }
 
     workflowSession.setAttribute(attribute, value);
+  }
+
+  /**
+   * Remove a workflow session attribute.
+   * 
+   * @param session where the workflow sessions are stored
+   * @param workflowId the identifier for the workflow
+   * @param attribute the attribute key
+   * @see #getWorkflowAttribute(HttpSession, String, String, Class)
+   */
+  public static void removeWorkflowAttribute(final HttpSession session,
+                                             final String workflowId,
+                                             final String attribute) {
+    final @Nullable WorkflowSession workflowSession = getAttribute(session, getWorkflowSessionKey(workflowId),
+                                                                   WorkflowSession.class);
+    if (null == workflowSession) {
+      throw new FLLRuntimeException(String.format("Workflow with id %s does not exist. Cannot set attribute %s on a non-existent session",
+                                                  workflowId, attribute));
+    }
+
+    workflowSession.removeAttribute(attribute);
   }
 
   /**
@@ -275,6 +301,7 @@ public final class SessionAttributes {
    */
   public static void deleteWorkflowSession(final HttpSession session,
                                            final String workflowId) {
+    LOGGER.trace("Removing workflow session {}", workflowId);
     session.removeAttribute(getWorkflowSessionKey(workflowId));
   }
 
@@ -298,6 +325,7 @@ public final class SessionAttributes {
 
     public <T> @Nullable T getAttribute(final String attribute,
                                         final Class<T> clazz) {
+      LOGGER.trace("Fetching workflow attribute {} from workflow {} data: {}", attribute, id, data);
       final @Nullable Object o = data.get(attribute);
       if (o == null
           || clazz.isInstance(o)) {
@@ -312,6 +340,11 @@ public final class SessionAttributes {
                              final Object value) {
       data.put(attribute, value);
     }
+
+    public void removeAttribute(final String attribute) {
+      data.remove(attribute);
+    }
+
   }
 
 }
