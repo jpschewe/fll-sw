@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<fll-sw:required-roles roles="REF" allowSetup="false" />
+<fll-sw:required-roles roles="REF,SCORING_COORDINATOR"
+    allowSetup="false" />
 
 <%
 fll.web.report.RegularMatchPlayRuns.populateContext(application, pageContext);

@@ -3,9 +3,6 @@
 <fll-sw:required-roles roles="REF" allowSetup="false" />
 
 <%
-fll.web.MainIndex.populateContext(request, application, pageContext);
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext, false);
-fll.web.report.ReportIndex.populateContext(application, session, pageContext, false);
 fll.web.PageVariables.populateCompletedRunData(application, pageContext);
 fll.web.PageVariables.populateTournamentTeams(application, pageContext);
 %>
@@ -23,8 +20,9 @@ fll.web.PageVariables.populateTournamentTeams(application, pageContext);
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <p>
         The current tournament is
-        <b>${tournament.description} on ${tournament.dateString}
-            [${tournament.name}]</b>
+        <b>${tournamentData.currentTournament.description} on
+            ${tournamentData.currentTournament.dateString}
+            [${tournamentData.currentTournament.name}]</b>
     </p>
 
     <a class="wide" href="scoreEntry/choose-table.jsp">Score Entry -

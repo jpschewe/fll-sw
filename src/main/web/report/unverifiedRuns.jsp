@@ -6,7 +6,9 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
 
-<fll-sw:required-roles roles="REF,HEAD_JUDGE,REPORT_GENERATOR" allowSetup="false" />
+<fll-sw:required-roles
+    roles="REF,HEAD_JUDGE,REPORT_GENERATOR,SCORING_COORDINATOR"
+    allowSetup="false" />
 
 <%
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
