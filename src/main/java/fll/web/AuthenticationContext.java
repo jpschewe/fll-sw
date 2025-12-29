@@ -236,8 +236,11 @@ public final class AuthenticationContext implements Serializable {
                                                              .collect(Collectors.joining(", "))
                                               + "</p>");
 
-        FormParameterStorage.storeParameters(request, session);
-        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
+        // always create a new workflow session so that it can be deleted on apply
+        final String workflowId = SessionAttributes.createWorkflowSession(session);
+        FormParameterStorage.storeParameters(request, session, workflowId);
+        response.sendRedirect(response.encodeRedirectURL(String.format("/login.jsp?%s=%s",
+                                                                       SessionAttributes.WORKFLOW_ID, workflowId)));
         return false;
       } else {
         return true;
