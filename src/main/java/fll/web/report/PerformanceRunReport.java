@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.db.Queries;
@@ -33,7 +34,7 @@ public final class PerformanceRunReport {
                                      final HttpSession session,
                                      final HttpServletRequest request,
                                      final PageContext page) {
-    @Nullable
+    @MonotonicNonNull
     String workflowId = request.getParameter(SessionAttributes.WORKFLOW_ID);
 
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
