@@ -116,7 +116,7 @@ public class FLLFilter implements Filter {
 
           } else {
             LOGGER.debug("No footer filter. async?: {}", request.isAsyncStarted());
-            chain.doFilter(request, response);
+            chain.doFilter(httpRequest, response);
           }
 
         } // URI context
