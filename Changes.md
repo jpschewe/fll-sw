@@ -1,3 +1,4 @@
+* #1303 - Track and display last page access for users
 * #1312 - Display warning when missing key comments in judging app
 * Fix display of run name on performance run report
 * #1304 - Add scoring coordinator role
