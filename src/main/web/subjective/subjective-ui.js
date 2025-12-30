@@ -1062,6 +1062,7 @@ function populateScoreSummary() {
         commentRow.classList.add("fll-sw-ui-inactive");
         if (score && !score.noShow) {
             const row = document.createElement("div");
+            row.classList.add("score-summary_comment-row");
             commentRow.appendChild(row);
             if (score.commentGreatJob) {
                 row.innerText = score.commentGreatJob;
@@ -1072,6 +1073,7 @@ function populateScoreSummary() {
         }
         if (score && !score.noShow) {
             const row = document.createElement("div");
+            row.classList.add("score-summary_comment-row");
             commentRow.appendChild(row);
             if (score.commentThinkAbout) {
                 row.innerText = score.commentThinkAbout;
@@ -1083,6 +1085,7 @@ function populateScoreSummary() {
         if (score && score.goalComments) {
             for (const [_, goalComment] of Object.entries(score.goalComments)) {
                 const row = document.createElement("div");
+                row.classList.add("score-summary_comment-row");
                 commentRow.appendChild(row);
                 row.innerText = goalComment;
             }
