@@ -63,7 +63,7 @@ public class ScoreboardEndpoint {
       case REGISTER:
         final RegisterMessage registerMessage = (RegisterMessage) message;
         this.uuid = ScoreboardUpdates.addClient(registerMessage.getDisplayUuid(), session,
-                                                GetHttpSessionConfigurator.getHttpSession(session));
+                                                GetHttpSessionConfigurator.getHttpSession(session).getServletContext());
         break;
       case UPDATE:
         LOGGER.warn("{}: Received UPDATE message from client, ignoring", uuid);
