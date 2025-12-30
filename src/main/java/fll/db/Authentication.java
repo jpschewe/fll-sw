@@ -434,4 +434,21 @@ public final class Authentication {
     // recording a successful login will unlock the account
     recordSuccessfulLogin(connection, username);
   }
+
+  /**
+   * @param connection database connection
+   * @param username user to record a page access for
+   * @throws SQLException on a database error
+   */
+  public static void recordAccess(final Connection connection,
+                                  final String username)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE fll_authentication " //
+        + " SET last_access = CURRENT_TIMESTAMP " //
+        + " WHERE fll_user = ?")) {
+      prep.setString(1, username);
+      prep.executeUpdate();
+    }
+  }
+
 }
