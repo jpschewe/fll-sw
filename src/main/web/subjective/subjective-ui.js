@@ -454,6 +454,15 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
             });
 
             commentButton.addEventListener("click", function() {
+                // position the dialog so that it allows the judge to see the goal being commented on
+                const rowRect = row.getBoundingClientRect();
+                if (rowRect.top >= window.innerHeight / 2) {
+                    popupContent.style.marginTop = "10px";
+                } else {
+                    const offset = rowRect.top + rowRect.height + 40;
+                    popupContent.style.marginTop = offset + "px";
+                }
+
                 popup.classList.remove("fll-sw-ui-inactive");
                 textarea.focus();
             });
