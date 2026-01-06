@@ -54,7 +54,7 @@ table.score-entry .selected-range {
 
 .comment-text {
     width: 100%;
-    height: 90%; /* leave room for the done button */
+    height: 75%; /* leave room for the done button */
     margin-bottom: 10px;
 }
 
