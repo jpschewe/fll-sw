@@ -426,8 +426,6 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
             popupContent.appendChild(textarea);
             textarea.id = getGoalTextId(goal);
             textarea.classList.add('comment-text');
-            textarea.setAttribute("rows", "20");
-            textarea.setAttribute("cols", "60");
             if (!isBlank(goalComment)) {
                 textarea.value = goalComment;
                 commentButton.classList.add("comment-entered");
