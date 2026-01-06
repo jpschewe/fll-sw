@@ -130,26 +130,32 @@
 
             <div>
                 <span>
+                    Score:
+                    <span id="enter-score_total-score">0</span>
+                </span>
+
+                <span class="right-align">
                     <button type='button' id="enter-score-note-button"
                         class='fll-sw-button'>Edit Note</button>
                 </span>
 
-                <span>
-                    Score:
-                    <span id="enter-score_total-score">0</span>
-                </span>
             </div>
 
-            <table id='enter-score_score-table_header'
-                class='score-entry'>
-            </table>
+            <div id='enter-score_rubric-container'>
+                <table id='enter-score_score-table_header'
+                    class='score-entry'>
+                </table>
+
+                <span id='enter-score_edit-note-spacer'
+                    class='fll-sw-ui-inactive'>&nbsp;</span>
+            </div>
 
         </div>
 
         <!--  end headers -->
     </header>
 
-    <main>
+    <main id="subjective_main">
 
         <div id="content-top" class="fll-sw-ui-content">
             <p id='index-page_messages'></p>
@@ -215,37 +221,49 @@
             <div id='review-mode_container'>
                 <div id='review-mode_glasspane'></div>
 
-                <div id='enter-score_main'>
-                    <table id='enter-score_score-table'
-                        class="score-entry">
-                    </table>
+                <div id='enter-score_container' class='no-scroll'>
+                    <div id='enter-score_main'>
+                        <table id='enter-score_score-table'
+                            class="score-entry">
+                        </table>
 
-                    <!-- comment grid -->
-                    <table class='full-width'>
-                        <tr>
-                            <td>
-                                <button type='button'
-                                    id="enter-score-comment-great-job-button"
-                                    class="center fll-sw-button full-width">Great
-                                    Job...</button>
-                            </td>
-                            <td>
-                                <button type='button'
-                                    id="enter-score-comment-think-about-button"
-                                    class="center fll-sw-button full-width">Think
-                                    About...</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class='comments-display'
-                                id='enter-score-comment-great-job-display'></td>
-                            <td class='comments-display'
-                                id='enter-score-comment-think-about-display'></td>
-                        </tr>
-                    </table>
-                    <!-- end comment grid -->
+                        <!-- comment grid -->
+                        <table class='full-width'>
+                            <tr>
+                                <td>
+                                    <button type='button'
+                                        id="enter-score-comment-great-job-button"
+                                        class="center fll-sw-button full-width">Great
+                                        Job...</button>
+                                </td>
+                                <td>
+                                    <button type='button'
+                                        id="enter-score-comment-think-about-button"
+                                        class="center fll-sw-button full-width">Think
+                                        About...</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class='comments-display'
+                                    id='enter-score-comment-great-job-display'></td>
+                                <td class='comments-display'
+                                    id='enter-score-comment-think-about-display'></td>
+                            </tr>
+                        </table>
+                        <!-- end comment grid -->
 
-                    <div id='enter-score_nominates'></div>
+                        <div id='enter-score_nominates'></div>
+                    </div>
+
+                    <div class='fll-sw-ui-inactive'
+                        id="enter-score_resizer"></div>
+
+                    <div class='fll-sw-ui-inactive'
+                        id="enter-score-note">
+                        <textarea class='comment-text'
+                            id="enter-score-note-text"></textarea>
+                    </div>
+
                 </div>
             </div>
 
@@ -379,23 +397,11 @@
     <div id="enter-score-goal-comments"></div>
 
     <div class='fll-sw-ui-dialog fll-sw-ui-inactive'
-        id="enter-score-note">
-        <div class='comment-dialog'>
-            <textarea class='comment-text' id="enter-score-note-text"
-                rows="20" cols="60"></textarea>
-
-            <button type='button' id="enter-score-note-close">
-                Done</button>
-        </div>
-    </div>
-
-    <div class='fll-sw-ui-dialog fll-sw-ui-inactive'
         id='enter-score-comment-great-job'>
         <div class='comment-dialog'>
             <div>Great Job...</div>
             <textarea class='comment-text'
-                id="enter-score-comment-great-job-text" rows="20"
-                cols="60"></textarea>
+                id="enter-score-comment-great-job-text"></textarea>
 
             <button type='button'
                 id="enter-score-comment-great-job-close">Done</button>
@@ -407,8 +413,7 @@
         <div class='comment-dialog'>
             <div>Think About...</div>
             <textarea class='comment-text'
-                id="enter-score-comment-think-about-text" rows="20"
-                cols="60"></textarea>
+                id="enter-score-comment-think-about-text"></textarea>
 
             <button type='button'
                 id="enter-score-comment-think-about-close">
