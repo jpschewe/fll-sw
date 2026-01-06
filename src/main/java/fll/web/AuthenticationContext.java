@@ -108,6 +108,14 @@ public final class AuthenticationContext implements Serializable {
   }
 
   /**
+   * @return is this user a scoring coordinator
+   */
+  public boolean isScoringCoordinator() {
+    return roles.contains(UserRole.ADMIN)
+        || roles.contains(UserRole.SCORING_COORDINATOR);
+  }
+
+  /**
    * @return is this user a report generator, includes admin and head judge
    */
   public boolean isReportGenerator() {
@@ -145,6 +153,7 @@ public final class AuthenticationContext implements Serializable {
    */
   public boolean isRef() {
     return roles.contains(UserRole.ADMIN)
+        || roles.contains(UserRole.SCORING_COORDINATOR)
         || roles.contains(UserRole.REF);
   }
 
@@ -218,12 +227,16 @@ public final class AuthenticationContext implements Serializable {
         && isPublic()) {
       return true;
     } else if (requiredRoles.contains(UserRole.JUDGE)
-        && isHeadJudge()) {
-      // head judge can do anything a judge can do
+        && isJudge()) {
       return true;
     } else if (requiredRoles.contains(UserRole.REPORT_GENERATOR)
-        && isHeadJudge()) {
-      // head judge can do anything a report generator can do
+        && isReportGenerator()) {
+      return true;
+    } else if (requiredRoles.contains(UserRole.REF)
+        && isRef()) {
+      return true;
+    } else if (requiredRoles.contains(UserRole.SCORING_COORDINATOR)
+        && isScoringCoordinator()) {
       return true;
     } else {
       if (!roles.stream().filter(requiredRoles::contains).findAny().isPresent()) {
@@ -236,14 +249,16 @@ public final class AuthenticationContext implements Serializable {
                                                              .collect(Collectors.joining(", "))
                                               + "</p>");
 
-        FormParameterStorage.storeParameters(request, session);
-        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
+        // always create a new workflow session so that it can be deleted on apply
+        final String workflowId = SessionAttributes.createWorkflowSession(session);
+        FormParameterStorage.storeParameters(request, session, workflowId);
+        response.sendRedirect(response.encodeRedirectURL(String.format("/login.jsp?%s=%s",
+                                                                       SessionAttributes.WORKFLOW_ID, workflowId)));
         return false;
       } else {
         return true;
       }
     }
-
   }
 
 }

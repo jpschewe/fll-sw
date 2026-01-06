@@ -1792,14 +1792,23 @@ public final class ImportDB {
     GenerateDB.createPerformanceGoalsTables(connection, createConstraints);
 
     // delete scores for teams that aren't in a tournament anymore
+    // delete schedule entries for teams that aren't in the tournament anymore
     for (final Tournament tournament : Tournament.getTournaments(connection)) {
       try (
           PreparedStatement selectTournamentTeams = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE Tournament = ?");
           PreparedStatement selectPerformanceTeams = connection.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ?");
-          PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance WHERE Tournament = ? AND TeamNumber = ?")) {
+          PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance WHERE Tournament = ? AND TeamNumber = ?");
+          PreparedStatement selectScheduleTeams = connection.prepareStatement("SELEcT team_number FROM schedule WHERE Tournament = ?");
+          PreparedStatement deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ? AND team_number = ?");
+          PreparedStatement deleteSchedulePerf = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ? AND team_number = ?");
+          PreparedStatement deleteScheduleSubjective = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ? AND team_number = ?")) {
         selectTournamentTeams.setInt(1, tournament.getTournamentID());
         selectPerformanceTeams.setInt(1, tournament.getTournamentID());
+        selectScheduleTeams.setInt(1, tournament.getTournamentID());
         deletePerformance.setInt(1, tournament.getTournamentID());
+        deleteScheduleSubjective.setInt(1, tournament.getTournamentID());
+        deleteSchedulePerf.setInt(1, tournament.getTournamentID());
+        deleteSchedule.setInt(1, tournament.getTournamentID());
 
         final Set<Integer> tournamentTeams = new HashSet<>();
         try (ResultSet rs = selectTournamentTeams.executeQuery()) {
@@ -1823,6 +1832,27 @@ public final class ImportDB {
                       deleteTeam, tournament.toString());
           deletePerformance.setInt(2, deleteTeam);
           deletePerformance.executeUpdate();
+        }
+
+        final Set<Integer> scheduleTeams = new HashSet<>();
+        try (ResultSet rs = selectScheduleTeams.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            scheduleTeams.add(teamNumber);
+          }
+        }
+        scheduleTeams.removeAll(tournamentTeams);
+        for (final int deleteTeam : scheduleTeams) {
+          LOGGER.warn("Deleting schedule for team {} in tournament {} due to that team no longer being in the tournament",
+                      deleteTeam, tournament.toString());
+          deleteScheduleSubjective.setInt(2, deleteTeam);
+          deleteScheduleSubjective.executeUpdate();
+
+          deleteSchedulePerf.setInt(2, deleteTeam);
+          deleteSchedulePerf.executeUpdate();
+
+          deleteSchedule.setInt(2, deleteTeam);
+          deleteSchedule.executeUpdate();
         }
 
         for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {

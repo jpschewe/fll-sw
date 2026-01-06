@@ -1,4 +1,14 @@
 * #1309 - Make edit note a panel on the right side
+* Add border under comments on the judge score summary display
+* #1312 - Display warning when missing key comments in judging app
+* Fix display of run name on performance run report
+* #1304 - Add scoring coordinator role
+* #1300 - Use workflow session to handle login redirects - this avoids issues with multiple tabs and which page is being redirected
+* #1305 - Keep display other judges in sync
+* #1311 - Sort edit award winners page in the same order as the awards script
+* Add compression to the webserver. This reduces bandwidth used.
+* #1307 - Change the background color for the teams on the currently selected table in the pick list
+* #1308 - Make the practice score entry less obvious
 * #1306 - Always open consolidated final scores in a new tab
 * Sort judging groups in the same order as award groups
 * Fix issues when importing a tournament a second time

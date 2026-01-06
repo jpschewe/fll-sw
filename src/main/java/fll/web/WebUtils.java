@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
@@ -420,6 +421,31 @@ public final class WebUtils {
 
     LOGGER.trace("Redirecting to {}", redirect);
     response.sendRedirect(response.encodeRedirectURL(whereTo));
+  }
+
+  /**
+   * Redirect to the referer. If the refereer is empty or the login page, then
+   * redirect to {@code defaultRedirect}.
+   * 
+   * @param request used to fetch the referer
+   * @param response used to redirect
+   * @param defaultRedirect where to go when there is no referer
+   * @throws IOException see {@link HttpServletResponse#sendRedirect(String)}
+   */
+  public static void redirectToReferer(final HttpServletRequest request,
+                                       final HttpServletResponse response,
+                                       final String defaultRedirect)
+      throws IOException {
+    final String redirect;
+    final String referrer = request.getHeader("Referer");
+    if (StringUtils.isEmpty(referrer)) {
+      redirect = defaultRedirect;
+    } else if (referrer.contains("login.jsp")) {
+      redirect = defaultRedirect;
+    } else {
+      redirect = referrer;
+    }
+    response.sendRedirect(response.encodeRedirectURL(redirect));
   }
 
   /**

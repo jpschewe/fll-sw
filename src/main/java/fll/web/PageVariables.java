@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
@@ -53,10 +54,28 @@ public final class PageVariables {
         }
       }
     } catch (final SQLException e) {
-      throw new FLLRuntimeException("Error talking to the database", e);
+      throw new FLLRuntimeException(e);
     }
 
     pageContext.setAttribute("completedRunMetadata", editMetadata);
+  }
+
+  /**
+   * Set the variable {@code tournamentTeams} to the {@link java.util.Collection}
+   * of
+   * {@link fll.TournamentTeam} objects for the current tournament.
+   * 
+   * @param application get application variables
+   * @param pageContext set page variables
+   */
+  public static void populateTournamentTeams(final ServletContext application,
+                                             final PageContext pageContext) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values());
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException(e);
+    }
   }
 
 }

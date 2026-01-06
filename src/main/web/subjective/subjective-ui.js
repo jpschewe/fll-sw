@@ -1054,19 +1054,32 @@ function populateScoreSummary() {
         scoreSummaryContent.appendChild(commentRow);
         commentRow.classList.add("score-summary_comment");
         commentRow.classList.add("fll-sw-ui-inactive");
-        if (score && score.commentGreatJob) {
+        if (score && !score.noShow) {
             const row = document.createElement("div");
+            row.classList.add("score-summary_comment-row");
             commentRow.appendChild(row);
-            row.innerText = score.commentGreatJob;
+            if (score.commentGreatJob) {
+                row.innerText = score.commentGreatJob;
+            } else {
+                row.classList.add("warning");
+                row.innerText = "Missing Great Job comment";
+            }
         }
-        if (score && score.commentThinkAbout) {
+        if (score && !score.noShow) {
             const row = document.createElement("div");
+            row.classList.add("score-summary_comment-row");
             commentRow.appendChild(row);
-            row.innerText = score.commentThinkAbout;
+            if (score.commentThinkAbout) {
+                row.innerText = score.commentThinkAbout;
+            } else {
+                row.classList.add("warning");
+                row.innerText = "Missing Think About comment";
+            }
         }
         if (score && score.goalComments) {
             for (const [_, goalComment] of Object.entries(score.goalComments)) {
                 const row = document.createElement("div");
+                row.classList.add("score-summary_comment-row");
                 commentRow.appendChild(row);
                 row.innerText = goalComment;
             }
@@ -1352,6 +1365,15 @@ function displayPageScoreSummary() {
     document.getElementById("side-panel_enter-scores").parentNode.classList.remove('fll-sw-ui-inactive');
 
     populateScoreSummary();
+
+    const displayOtherJudgesButton = document.getElementById("score-summary_show-other-judges");
+    syncCommentsOrNotesWithButton(displayOtherJudgesButton, '.other-judge');
+
+    const displayCommentsButton = document.getElementById("score-summary_show-comments");
+    syncCommentsOrNotesWithButton(displayCommentsButton, '.score-summary_comment');
+
+    const displayNotesButton = document.getElementById("score-summary_show-notes");
+    syncCommentsOrNotesWithButton(displayNotesButton, '.score-summary_note');
 
     updateMainHeader();
 }
@@ -1935,6 +1957,15 @@ function displayOrHideCommentsOrNotes(hide, button, selector) {
         button.classList.add("fll-sw-button-pressed");
     }
 
+    syncCommentsOrNotesWithButton(button, selector);
+}
+
+/**
+ * @param button the button that controls the display of the elemnets
+ * @param selector CSS selector to find all elements to display/hide
+ */
+function syncCommentsOrNotesWithButton(button, selector) {
+    const hide = !button.classList.contains("fll-sw-button-pressed");
     for (const element of document.querySelectorAll(selector)) {
         if (hide) {
             element.classList.add("fll-sw-ui-inactive");

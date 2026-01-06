@@ -36,7 +36,7 @@ public class SubjectiveScoreCategory extends ScoreCategory<TeamScore> implements
    */
   /* package */ static final String NAME_ATTRIBUTE = "name";
 
-  /*package*/ static final String TITLE_ATTRIBUTE = ChallengeDescription.TITLE_ATTRIBUTE;
+  /* package */ static final String TITLE_ATTRIBUTE = ChallengeDescription.TITLE_ATTRIBUTE;
 
   /**
    * The XML attribute to write the description to.
@@ -295,6 +295,11 @@ public class SubjectiveScoreCategory extends ScoreCategory<TeamScore> implements
       return getTitle().equals(other.getTitle())
           && getPerAwardGroup() == other.getPerAwardGroup();
     }
+  }
+
+  @Override
+  public boolean isRanked() {
+    return true;
   }
 
 }

@@ -18,3 +18,7 @@ SELECT {
     margin-left: 40px;
     margin-top: 10px;
 }
+
+option.selected-table {
+    background-color: grey;
+}

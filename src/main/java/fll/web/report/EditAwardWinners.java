@@ -12,22 +12,31 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.db.AwardDeterminationOrder;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
 import fll.db.CategoriesIgnored;
 import fll.db.OverallAwardWinner;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
+import fll.web.TournamentData;
+import fll.web.report.awards.AwardCategory;
 import fll.web.report.awards.AwardsScriptReport;
 import fll.web.report.awards.ChampionshipCategory;
+import fll.web.report.awards.HeadToHeadCategory;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.jsp.PageContext;
 
@@ -72,13 +81,10 @@ public final class EditAwardWinners {
 
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
 
-      final List<NonNumericCategory> nonNumericCategories = CategoriesIgnored.getNonNumericCategories(description,
-                                                                                                      connection,
-                                                                                                      tournament);
-      page.setAttribute("nonNumericCategories", nonNumericCategories);
+    try (Connection connection = datasource.getConnection()) {
+      final Tournament tournament = tournamentData.getCurrentTournament();
 
       final List<String> awardGroups = AwardsScriptReport.getAwardGroupOrder(connection, tournament);
       page.setAttribute("awardGroups", awardGroups);
@@ -88,36 +94,31 @@ public final class EditAwardWinners {
 
       final List<AwardWinner> subjectiveAwardWinnersList = AwardWinners.getSubjectiveAwardWinners(connection,
                                                                                                   tournament.getTournamentID());
+
       // category -> awardGroup -> winners
-      final Map<String, Map<String, List<AwardWinner>>> subjectiveAwardWinners = new HashMap<>();
+      final Map<String, Map<String, List<AwardWinner>>> awardGroupAwardWinners = new HashMap<>();
+
       for (final AwardWinner winner : subjectiveAwardWinnersList) {
-        final Map<String, List<AwardWinner>> awardGroupToWinners = subjectiveAwardWinners.computeIfAbsent(winner.getName(),
+        final Map<String, List<AwardWinner>> awardGroupToWinners = awardGroupAwardWinners.computeIfAbsent(winner.getName(),
                                                                                                           k -> new HashMap<>());
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
-      page.setAttribute("subjectiveAwardWinners", subjectiveAwardWinners);
 
       final List<AwardWinner> virtualSubjectiveAwardWinnersList = AwardWinners.getVirtualSubjectiveAwardWinners(connection,
                                                                                                                 tournament.getTournamentID());
-      // category -> awardGroup -> winners
-      final Map<String, Map<String, List<AwardWinner>>> virtualSubjectiveAwardWinners = new HashMap<>();
       for (final AwardWinner winner : virtualSubjectiveAwardWinnersList) {
-        final Map<String, List<AwardWinner>> awardGroupToWinners = virtualSubjectiveAwardWinners.computeIfAbsent(winner.getName(),
-                                                                                                                 k -> new HashMap<>());
+        final Map<String, List<AwardWinner>> awardGroupToWinners = awardGroupAwardWinners.computeIfAbsent(winner.getName(),
+                                                                                                          k -> new HashMap<>());
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
-      page.setAttribute("virtualSubjectiveAwardWinners", virtualSubjectiveAwardWinners);
 
       final List<AwardWinner> extraAwardWinnersList = AwardWinners.getNonNumericAwardWinners(connection,
                                                                                              tournament.getTournamentID());
-      // category -> awardGroup -> winners
-      final Map<String, Map<String, List<AwardWinner>>> extraAwardWinners = new HashMap<>();
       for (final AwardWinner winner : extraAwardWinnersList) {
-        final Map<String, List<AwardWinner>> awardGroupToWinners = extraAwardWinners.computeIfAbsent(winner.getName(),
-                                                                                                     k -> new HashMap<>());
+        final Map<String, List<AwardWinner>> awardGroupToWinners = awardGroupAwardWinners.computeIfAbsent(winner.getName(),
+                                                                                                          k -> new HashMap<>());
         awardGroupToWinners.computeIfAbsent(winner.getAwardGroup(), k -> new LinkedList<>()).add(winner);
       }
-      page.setAttribute("extraAwardWinners", extraAwardWinners);
 
       final List<OverallAwardWinner> overallAwardWinnersList = AwardWinners.getNonNumericOverallAwardWinners(connection,
                                                                                                              tournament.getTournamentID());
@@ -127,12 +128,48 @@ public final class EditAwardWinners {
         overallAwardWinners.computeIfAbsent(winner.getName(), k -> new LinkedList<>()).add(winner);
       }
       page.setAttribute("overallAwardWinners", overallAwardWinners);
+      page.setAttribute("awardGroupAwardWinners", awardGroupAwardWinners);
 
-      page.setAttribute("championshipAwardName", ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE);
-      page.setAttribute("championshipAwardType", CHAMPIONSHIP_AWARD_TYPE);
-      page.setAttribute("nonNumericAwardType", NON_NUMERIC_AWARD_TYPE);
-      page.setAttribute("subjectiveAwardType", SUBJECTIVE_AWARD_TYPE);
-      page.setAttribute("virtualSubjectiveAwardType", VIRTUAL_SUBJECTIVE_AWARD_TYPE);
+      // category -> award type
+      final Map<String, String> awardTypes = new HashMap<>();
+      awardTypes.put(ChampionshipCategory.CHAMPIONSHIP_AWARD_TITLE, CHAMPIONSHIP_AWARD_TYPE);
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        awardTypes.put(category.getTitle(), SUBJECTIVE_AWARD_TYPE);
+      }
+      for (final VirtualSubjectiveScoreCategory category : description.getVirtualSubjectiveCategories()) {
+        awardTypes.put(category.getTitle(), VIRTUAL_SUBJECTIVE_AWARD_TYPE);
+      }
+      for (final NonNumericCategory category : description.getNonNumericCategories()) {
+        awardTypes.put(category.getTitle(), NON_NUMERIC_AWARD_TYPE);
+      }
+      page.setAttribute("awardTypes", awardTypes);
+
+      final List<AwardCategory> categories = AwardDeterminationOrder.get(connection, description).stream() //
+                                                                    .filter(category -> {
+                                                                      switch (category) {
+                                                                      case PerformanceScoreCategory awardCategory -> {
+                                                                        return false;
+                                                                      }
+                                                                      case NonNumericCategory awardCategory -> {
+                                                                        try {
+                                                                          return !CategoriesIgnored.isNonNumericCategoryIgnored(connection,
+                                                                                                                                tournamentData.getCurrentTournament()
+                                                                                                                                              .getLevel(),
+                                                                                                                                awardCategory);
+                                                                        } catch (final SQLException e) {
+                                                                          throw new FLLInternalException(e);
+                                                                        }
+                                                                      }
+                                                                      case HeadToHeadCategory awardCategory -> {
+                                                                        return false;
+                                                                      }
+                                                                      default -> {
+                                                                        return true;
+                                                                      }
+                                                                      }
+                                                                    }) //
+                                                                    .collect(Collectors.toList());
+      page.setAttribute("categories", categories);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);

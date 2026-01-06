@@ -13,7 +13,9 @@ import fll.db.AwardWinners;
 /**
  * Store information about the championship.
  * This is a non-numeric category.
- * @see AwardWinners#getNonNumericAwardWinner(java.sql.Connection, int, String, int)
+ * 
+ * @see AwardWinners#getNonNumericAwardWinner(java.sql.Connection, int, String,
+ *      int)
  */
 public final class ChampionshipCategory implements AwardCategory {
 
@@ -62,6 +64,11 @@ public final class ChampionshipCategory implements AwardCategory {
       return getTitle().equals(other.getTitle())
           && getPerAwardGroup() == other.getPerAwardGroup();
     }
+  }
+
+  @Override
+  public boolean isRanked() {
+    return true;
   }
 
 }

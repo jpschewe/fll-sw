@@ -23,4 +23,9 @@ public interface AwardCategory extends Serializable {
    */
   boolean getPerAwardGroup();
 
+  /**
+   * @return true if this category orders teams by place
+   */
+  boolean isRanked();
+
 }

@@ -139,6 +139,19 @@ input[type=range] {
     margin-top: 30px;
 }
 
+.score-summary_comment-row:after {
+    content: "";
+    background: black;
+    position: relative;
+    display: block;
+    bottom: 0;
+    left: 0;
+    width: 75%;
+    height: 1px;
+
+    /*border-bottom: 1px solid black;*/
+}
+
 .nominate-label {
     font-weight: bold;
     display: inline-block;

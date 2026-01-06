@@ -55,7 +55,9 @@ public class FLLFilter implements Filter {
                        final ServletResponse response,
                        final FilterChain chain)
       throws IOException, ServletException {
-    try (CloseableThreadContext.Instance requestCtx = CloseableThreadContext.push(request.getRequestId())) {
+    try (
+        CloseableThreadContext.Instance requestCtx = CloseableThreadContext.push(String.format("requestId:%s",
+                                                                                               request.getRequestId()))) {
 
       if (response instanceof HttpServletResponse
           && request instanceof HttpServletRequest) {
@@ -64,7 +66,9 @@ public class FLLFilter implements Filter {
         final String path = origHttpRequest.getRequestURI();
         final HttpSession session = origHttpRequest.getSession();
 
-        try (CloseableThreadContext.Instance uriContext = CloseableThreadContext.push(path)) {
+        try (CloseableThreadContext.Instance uriContext = CloseableThreadContext.push(String.format("%s session:%s",
+                                                                                                    path,
+                                                                                                    session.getId()))) {
 
           LOGGER.trace("Redirect URL is {}", SessionAttributes.getRedirectURL(session));
           LOGGER.trace("forward.request_uri: {}", origHttpRequest.getAttribute("jakarta.servlet.forward.request_uri"));
@@ -76,8 +80,8 @@ public class FLLFilter implements Filter {
           LOGGER.trace("forward.query_string: {}",
                        origHttpRequest.getAttribute("jakarta.servlet.forward.query_string"));
 
-          LOGGER.debug("request content type: {} character encoding: {}", request.getContentType(),
-                       request.getCharacterEncoding());
+          LOGGER.debug("request content type: {} character encoding: {}", origHttpRequest.getContentType(),
+                       origHttpRequest.getCharacterEncoding());
 
           final HttpServletRequest httpRequest = FormParameterStorage.applyParameters(origHttpRequest, session);
 
@@ -105,18 +109,20 @@ public class FLLFilter implements Filter {
           }
 
           // keep browser from caching any content
+          // TODO consider allowing some caching
+          // https://github.com/jpschewe/fll-sw/issues/1316
           httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
           httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
           httpResponse.setDateHeader("Expires", 0); // proxy server cache
 
           if (!noFooter(path)
-              || request.isAsyncStarted()) {
+              || httpRequest.isAsyncStarted()) {
 
             modifyResponseContent(path, httpRequest, httpResponse, chain, session);
 
           } else {
-            LOGGER.debug("No footer filter. async?: {}", request.isAsyncStarted());
-            chain.doFilter(request, response);
+            LOGGER.debug("No footer filter. async?: {}", httpRequest.isAsyncStarted());
+            chain.doFilter(httpRequest, response);
           }
 
         } // URI context
@@ -317,8 +323,11 @@ public class FLLFilter implements Filter {
     formatter.format("  <ul>%n");
     formatter.format("    <li><a href='%s/index.jsp'>Main Index</a></li>%n", contextPath);
 
+    if (auth.isScoringCoordinator()) {
+      formatter.format("    <li><a href='%s/scoring-coordinator.jsp'>Scoring Coordinator</a></li>%n", contextPath);
+    }
+
     if (auth.isAdmin()) {
-      formatter.format("    <li><a href='%s/admin/performance-area.jsp'>Scoring Coordinator</a></li>%n", contextPath);
       formatter.format("    <li><a href='%s/admin/index.jsp'>Admin</a></li>%n", contextPath);
     }
 
