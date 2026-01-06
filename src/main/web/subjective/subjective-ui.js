@@ -456,7 +456,7 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
             commentButton.addEventListener("click", function() {
                 // position the dialog so that it allows the judge to see the goal being commented on
                 const rowRect = row.getBoundingClientRect();
-                if (rowRect.top >= window.innerHeight / 2) {
+                if (rowRect.top >= window.innerHeight / 3) {
                     popupContent.style.marginTop = "10px";
                 } else {
                     const offset = rowRect.top + rowRect.height + 40;
