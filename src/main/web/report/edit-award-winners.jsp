@@ -13,6 +13,7 @@ fll.web.report.EditAwardWinners.populateContext(application, pageContext);
 
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
+populateContext
 
 <link rel="stylesheet" type="text/css" href="edit-award-winners.css" />
 

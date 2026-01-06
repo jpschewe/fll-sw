@@ -426,8 +426,6 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
             popupContent.appendChild(textarea);
             textarea.id = getGoalTextId(goal);
             textarea.classList.add('comment-text');
-            textarea.setAttribute("rows", "20");
-            textarea.setAttribute("cols", "60");
             if (!isBlank(goalComment)) {
                 textarea.value = goalComment;
                 commentButton.classList.add("comment-entered");
@@ -458,15 +456,11 @@ function addRubricToScoreEntry(table, goal, goalComment, ranges, rowClass) {
             commentButton.addEventListener("click", function() {
                 // position the dialog so that it allows the judge to see the goal being commented on
                 const rowRect = row.getBoundingClientRect();
-                if (rowRect.top >= window.innerHeight / 2) {
-                    const height = rowRect.top - 140;
+                if (rowRect.top >= window.innerHeight / 3) {
                     popupContent.style.marginTop = "10px";
-                    popupContent.style.height = height + "px";
                 } else {
                     const offset = rowRect.top + rowRect.height + 40;
-                    const height = window.innerHeight - offset - 40;
                     popupContent.style.marginTop = offset + "px";
-                    popupContent.style.height = height + "px";
                 }
 
                 popup.classList.remove("fll-sw-ui-inactive");
@@ -1211,6 +1205,9 @@ function displayPage(header, content, footer) {
     enableHeader(header);
     enableContent(content);
     enableFooter(footer);
+
+    // by default always scroll the main content
+    document.getElementById("subjective_main").classList.remove("no-scroll");
 }
 
 function displayPageTop() {
@@ -1415,6 +1412,7 @@ function displayPageEnterScore() {
     populateEnterScoreRubricTitles(headerTable, false)
 
     displayPage(document.getElementById("header-enter-score"), document.getElementById("content-enter-score"), document.getElementById("footer-enter-score"));
+    document.getElementById("subjective_main").classList.add("no-scroll");
 
     removeChildren(document.getElementById("enter-score-goal-comments"));
 
@@ -1752,13 +1750,55 @@ function setupAfterContentLoaded() {
         document.getElementById("enter-score-comment-think-about").classList.remove("fll-sw-ui-inactive");
         document.getElementById("enter-score-comment-think-about-text").focus();
     });
-    document.getElementById("enter-score-note-button").addEventListener('click', function() {
-        document.getElementById("enter-score-note").classList.remove("fll-sw-ui-inactive");
-        document.getElementById("enter-score-note-text").focus();
+
+    const enterScoreNoteButton = document.getElementById("enter-score-note-button");
+    enterScoreNoteButton.addEventListener('click', function() {
+        const hide = enterScoreNoteButton.classList.contains("fll-sw-button-pressed");
+        if (hide) {
+            enterScoreNoteButton.classList.remove("fll-sw-button-pressed");
+            document.getElementById("enter-score_resizer").classList.add("fll-sw-ui-inactive");
+            document.getElementById("enter-score-note").classList.add("fll-sw-ui-inactive");
+            document.getElementById('enter-score_edit-note-spacer').classList.add("fll-sw-ui-inactive");
+        } else {
+            enterScoreNoteButton.classList.add("fll-sw-button-pressed");
+            document.getElementById("enter-score_resizer").classList.remove("fll-sw-ui-inactive");
+            document.getElementById("enter-score-note").classList.remove("fll-sw-ui-inactive");
+            document.getElementById('enter-score_edit-note-spacer').classList.remove("fll-sw-ui-inactive");
+            document.getElementById("enter-score-note-text").focus();
+        }
     });
-    document.getElementById("enter-score-note-close").addEventListener('click', function() {
-        document.getElementById("enter-score-note").classList.add("fll-sw-ui-inactive");
+
+    // resize code for edit note
+    const enterScoreResizer = document.getElementById('enter-score_resizer');
+    const enterScoreNote = document.getElementById('enter-score-note');
+    const enterScoreNoteSpacer = document.getElementById('enter-score_edit-note-spacer');
+
+    enterScoreResizer.addEventListener('mousedown', function(e) {
+        // Prevent text selection during drag
+        e.preventDefault();
+
+        document.addEventListener('mousemove', enterScoreNoteResize);
+        document.addEventListener('mouseup', enterScoreNoteStopResize);
     });
+
+    function enterScoreNoteResize(e) {
+        // Calculate new width: Total width minus current mouse X position
+        const newWidth = window.innerWidth - e.clientX;
+
+        // Apply width to the panel
+        if (newWidth > 150 && newWidth < 800) {
+            enterScoreNote.style.width = newWidth + 'px';
+
+            const spacerWidth = newWidth + enterScoreResizer.clientWidth;
+            enterScoreNoteSpacer.style.width = spacerWidth + 'px';
+        }
+    }
+
+    function enterScoreNoteStopResize() {
+        document.removeEventListener('mousemove', enterScoreNoteResize);
+        document.removeEventListener('mouseup', enterScoreNoteResize);
+    }
+    // end resize code
 
     document.getElementById("choose-judge_submit").addEventListener('click', function() {
         setJudge();
