@@ -152,6 +152,10 @@ input[type=range] {
     /*border-bottom: 1px solid black;*/
 }
 
+.score-summary_comment-row.warning {
+    width: 50%;
+}
+
 .nominate-label {
     font-weight: bold;
     display: inline-block;
