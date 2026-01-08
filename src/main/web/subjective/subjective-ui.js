@@ -1078,10 +1078,12 @@ function populateScoreSummary() {
         }
         if (score && score.goalComments) {
             for (const [_, goalComment] of Object.entries(score.goalComments)) {
-                const row = document.createElement("div");
-                row.classList.add("score-summary_comment-row");
-                commentRow.appendChild(row);
-                row.innerText = goalComment;
+                if (goalComment) {
+                    const row = document.createElement("div");
+                    row.classList.add("score-summary_comment-row");
+                    commentRow.appendChild(row);
+                    row.innerText = goalComment;
+                }
             }
         }
 
