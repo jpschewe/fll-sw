@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
 /**
- * Support for report/unverifiedRuns.jsp
+ * Support for report/unverifiedRuns.jsp.
  */
 public final class UnverifiedRuns {
 
