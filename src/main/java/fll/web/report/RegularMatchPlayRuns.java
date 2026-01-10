@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -71,10 +70,10 @@ public final class RegularMatchPlayRuns {
                                                                       .map(String::valueOf) //
                                                                       .collect(Collectors.joining(","));
 
-      final SortedMap<TournamentTeam, List<String>> data = new TreeMap<>(TournamentTeam.TEAM_NUMBER_COMPARATOR);
+      final SortedMap<TournamentTeam, List<ScoreData>> data = new TreeMap<>(TournamentTeam.TEAM_NUMBER_COMPARATOR);
 
       try (
-          PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, computedtotal, noshow, bye FROM performance" //
+          PreparedStatement prep = connection.prepareStatement("SELECT teamnumber, computedtotal, noshow, bye, RunNumber FROM performance" //
               + " WHERE tournament = ?" //
               + "   AND runnumber IN ("
               + regularMatchPlayRunNumbers
@@ -89,6 +88,7 @@ public final class RegularMatchPlayRuns {
             final boolean scoreIsNull = rs.wasNull();
             final boolean noShow = rs.getBoolean(3);
             final boolean bye = rs.getBoolean(4);
+            final int runNumber = rs.getInt(5);
 
             final TournamentTeam team = TournamentTeam.getTournamentTeamFromDatabase(connection, currentTournament,
                                                                                      teamNumber);
@@ -103,7 +103,7 @@ public final class RegularMatchPlayRuns {
               value = Utilities.getFormatForScoreType(performanceScoreType).format(score);
             }
 
-            data.computeIfAbsent(team, k -> new LinkedList<>()).add(value);
+            data.computeIfAbsent(team, k -> new LinkedList<>()).add(new ScoreData(runNumber, value));
           }
         }
       }
@@ -113,7 +113,7 @@ public final class RegularMatchPlayRuns {
       data.forEach((team,
                     performanceData) -> {
         while (performanceData.size() < numberOfRuns) {
-          performanceData.add("&nbsp;");
+          performanceData.add(new ScoreData(-1, "&nbsp;"));
         }
       });
       page.setAttribute("data", data);
@@ -121,6 +121,16 @@ public final class RegularMatchPlayRuns {
     } catch (final SQLException e) {
       throw new FLLInternalException("Error getting data for performance runs", e);
     }
+  }
+
+  /**
+   * Score data to display.
+   * 
+   * @param runNumber -1 if no score, otherwise the run number
+   * @param score the string representation of the score
+   */
+  public record ScoreData(int runNumber,
+                          String score) {
   }
 
 }
