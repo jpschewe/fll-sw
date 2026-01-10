@@ -31,6 +31,38 @@ public final class DatabasePerformanceTeamScore {
   }
 
   /**
+   * Find all unverified performance scores for a tournament.
+   * 
+   * @param tournament the tournament
+   * @param connection database
+   * @return unverified performance scores
+   * @throws SQLException on a database error
+   */
+  public static List<PerformanceTeamScore> fetchUnverifiedScores(final Tournament tournament,
+                                                                 final Connection connection)
+      throws SQLException {
+    final List<PerformanceTeamScore> scores = new LinkedList<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename, TimeStamp, RunNumber, TeamNumber" //
+            + " FROM performance WHERE Tournament = ? AND Verified <> TRUE ORDER BY RunNumber ASC")) {
+
+      prep.setInt(1, tournament.getTournamentID());
+      try (ResultSet result = prep.executeQuery()) {
+        while (result.next()) {
+          final int runNumber = result.getInt(6);
+          final int teamNumber = result.getInt(7);
+
+          final PerformanceTeamScore score = fetchScore(tournament.getTournamentID(), teamNumber, runNumber, connection,
+                                                        result);
+          scores.add(score);
+        }
+      }
+    }
+    return scores;
+  }
+
+  /**
    * Fetch all performance scores for a team.
    * 
    * @param tournament the tournament
@@ -47,29 +79,17 @@ public final class DatabasePerformanceTeamScore {
     final List<PerformanceTeamScore> scores = new LinkedList<>();
 
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT RunNumber, NoShow, Bye, Verified, Tablename, TimeStamp" //
+        PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename, TimeStamp, RunNumber" //
             + " FROM performance WHERE TeamNumber = ? AND Tournament = ? ORDER BY RunNumber ASC")) {
 
       prep.setInt(1, team.getTeamNumber());
       prep.setInt(2, tournament.getTournamentID());
       try (ResultSet result = prep.executeQuery()) {
         while (result.next()) {
-          final int runNumber = result.getInt(1);
-          final boolean noShow = result.getBoolean(2);
-          final boolean bye = result.getBoolean(3);
-          final boolean verified = result.getBoolean(4);
-          final String tablename = castNonNull(result.getString(5));
-          final Timestamp ts = (Timestamp) castNonNull(result.getTimestamp(6));
-          final LocalDateTime timestamp = ts.toLocalDateTime();
+          final int runNumber = result.getInt(6);
 
-          final Map<String, Double> simpleGoals = fetchSimpleGoals(tournament.getTournamentID(), team.getTeamNumber(),
-                                                                   runNumber, connection);
-          final Map<String, String> enumGoals = fetchEnumGoals(tournament.getTournamentID(), team.getTeamNumber(),
-                                                               runNumber, connection);
-
-          final PerformanceTeamScore score = new DefaultPerformanceTeamScore(team.getTeamNumber(), runNumber,
-                                                                             simpleGoals, enumGoals, tablename, noShow,
-                                                                             bye, verified, timestamp);
+          final PerformanceTeamScore score = fetchScore(tournament.getTournamentID(), team.getTeamNumber(), runNumber,
+                                                        connection, result);
           scores.add(score);
         }
       }
@@ -104,23 +124,36 @@ public final class DatabasePerformanceTeamScore {
       prep.setInt(3, runNumber);
       try (ResultSet result = prep.executeQuery()) {
         if (result.next()) {
-          final boolean noShow = result.getBoolean(1);
-          final boolean bye = result.getBoolean(2);
-          final boolean verified = result.getBoolean(3);
-          final String tablename = castNonNull(result.getString(4));
-          final Timestamp ts = (Timestamp) castNonNull(result.getTimestamp(5));
-          final LocalDateTime timestamp = ts.toLocalDateTime();
-
-          final Map<String, Double> simpleGoals = fetchSimpleGoals(tournament, teamNumber, runNumber, connection);
-          final Map<String, String> enumGoals = fetchEnumGoals(tournament, teamNumber, runNumber, connection);
-
-          return new DefaultPerformanceTeamScore(teamNumber, runNumber, simpleGoals, enumGoals, tablename, noShow, bye,
-                                                 verified, timestamp);
+          return fetchScore(tournament, teamNumber, runNumber, connection, result);
         } else {
           return null;
         }
       }
     }
+  }
+
+  /**
+   * Be very careful using this method to ensure that the columns in the select
+   * statement line up.
+   */
+  private static DefaultPerformanceTeamScore fetchScore(final int tournament,
+                                                        final int teamNumber,
+                                                        final int runNumber,
+                                                        final Connection connection,
+                                                        final ResultSet result)
+      throws SQLException {
+    final boolean noShow = result.getBoolean(1);
+    final boolean bye = result.getBoolean(2);
+    final boolean verified = result.getBoolean(3);
+    final String tablename = castNonNull(result.getString(4));
+    final Timestamp ts = (Timestamp) castNonNull(result.getTimestamp(5));
+    final LocalDateTime timestamp = ts.toLocalDateTime();
+
+    final Map<String, Double> simpleGoals = fetchSimpleGoals(tournament, teamNumber, runNumber, connection);
+    final Map<String, String> enumGoals = fetchEnumGoals(tournament, teamNumber, runNumber, connection);
+
+    return new DefaultPerformanceTeamScore(teamNumber, runNumber, simpleGoals, enumGoals, tablename, noShow, bye,
+                                           verified, timestamp);
   }
 
   private static Map<String, Double> fetchSimpleGoals(final int tournament,

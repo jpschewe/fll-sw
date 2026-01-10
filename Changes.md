@@ -1,3 +1,5 @@
+* Add edit link to regular match play runs report
+* Display run name on unverified runs page
 * #1317 - handle no scores when creating top performance score reports
 * #1309 - Make edit note a panel on the right side
 * Add border under comments on the judge score summary display

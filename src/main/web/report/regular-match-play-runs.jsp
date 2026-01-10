@@ -54,8 +54,15 @@ table#perf-data th, table#perf-data td {
                 <td>${entry.key.teamName}</td>
                 <td>${entry.key.organization}</td>
 
-                <c:forEach items="${entry.value}" var="score">
-                    <td>${score}</td>
+                <c:forEach items="${entry.value}" var="scoreData">
+                    <td>${scoreData.score}
+                        <c:if test="${scoreData.runNumber > 0}">
+                    &nbsp;-&nbsp;
+                                        <a
+                                href='<c:url value="/scoreEntry/scoreEntry.jsp?TeamNumber=${entry.key.teamNumber}&EditFlag=true&RunNumber=${scoreData.runNumber}"/>'>Edit
+                            </a>
+                        </c:if>
+                    </td>
                 </c:forEach>
             </tr>
         </c:forEach>
