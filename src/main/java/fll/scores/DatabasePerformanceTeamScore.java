@@ -31,6 +31,38 @@ public final class DatabasePerformanceTeamScore {
   }
 
   /**
+   * Find all unverified performance scores for a tournament.
+   * 
+   * @param tournament the tournament
+   * @param connection database
+   * @return unverified performance scores
+   * @throws SQLException on a database error
+   */
+  public static List<PerformanceTeamScore> fetchUnverifiedScores(final Tournament tournament,
+                                                                 final Connection connection)
+      throws SQLException {
+    final List<PerformanceTeamScore> scores = new LinkedList<>();
+
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT NoShow, Bye, Verified, Tablename, TimeStamp, RunNumber, TeamNumber" //
+            + " FROM performance WHERE Tournament = ? AND Verified <> TRUE ORDER BY RunNumber ASC")) {
+
+      prep.setInt(1, tournament.getTournamentID());
+      try (ResultSet result = prep.executeQuery()) {
+        while (result.next()) {
+          final int runNumber = result.getInt(6);
+          final int teamNumber = result.getInt(7);
+
+          final PerformanceTeamScore score = fetchScore(tournament.getTournamentID(), teamNumber, runNumber, connection,
+                                                        result);
+          scores.add(score);
+        }
+      }
+    }
+    return scores;
+  }
+
+  /**
    * Fetch all performance scores for a team.
    * 
    * @param tournament the tournament
