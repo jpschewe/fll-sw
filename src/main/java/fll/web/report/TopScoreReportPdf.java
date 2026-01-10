@@ -101,40 +101,46 @@ import net.mtu.eggplant.xml.XMLUtils;
       final String group = groupEntry.getKey();
       final List<Top10.ScoreEntry> groupScores = groupEntry.getValue();
 
-      final Element table = FOPUtils.createBasicTable(document);
-      documentBody.appendChild(table);
-      table.setAttribute("page-break-after", "always");
+      if (!groupScores.isEmpty()) {
+        final Element table = FOPUtils.createBasicTable(document);
+        documentBody.appendChild(table);
+        table.setAttribute("page-break-after", "always");
 
-      table.appendChild(FOPUtils.createTableColumn(document, 1)); // rank
-      table.appendChild(FOPUtils.createTableColumn(document, 1)); // team number
-      table.appendChild(FOPUtils.createTableColumn(document, 2)); // team name
-      table.appendChild(FOPUtils.createTableColumn(document, 2)); // organization
-      table.appendChild(FOPUtils.createTableColumn(document, 1)); // score
+        table.appendChild(FOPUtils.createTableColumn(document, 1)); // rank
+        table.appendChild(FOPUtils.createTableColumn(document, 1)); // team number
+        table.appendChild(FOPUtils.createTableColumn(document, 2)); // team name
+        table.appendChild(FOPUtils.createTableColumn(document, 2)); // organization
+        table.appendChild(FOPUtils.createTableColumn(document, 1)); // score
 
-      final Element header = createHeader(document, challengeTitle, groupIdentifier, group, tournament);
-      table.appendChild(header);
+        final Element header = createHeader(document, challengeTitle, groupIdentifier, group, tournament);
+        table.appendChild(header);
 
-      final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
-      table.appendChild(tableBody);
+        final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+        table.appendChild(tableBody);
 
-      for (final Top10.ScoreEntry scoreEntry : groupScores) {
-        final Element row = FOPUtils.createTableRow(document);
-        tableBody.appendChild(row);
-        FOPUtils.keepWithPrevious(row);
+        for (final Top10.ScoreEntry scoreEntry : groupScores) {
+          final Element row = FOPUtils.createTableRow(document);
+          tableBody.appendChild(row);
+          FOPUtils.keepWithPrevious(row);
 
-        row.appendChild(FOPUtils.createStandardTableCell(document, String.valueOf(scoreEntry.getRank())));
+          row.appendChild(FOPUtils.createStandardTableCell(document, String.valueOf(scoreEntry.getRank())));
 
-        row.appendChild(FOPUtils.createStandardTableCell(document, String.valueOf(scoreEntry.getTeamNumber())));
+          row.appendChild(FOPUtils.createStandardTableCell(document, String.valueOf(scoreEntry.getTeamNumber())));
 
-        final String teamName = scoreEntry.getTeamName();
-        row.appendChild(FOPUtils.createStandardTableCell(document, teamName));
+          final String teamName = scoreEntry.getTeamName();
+          row.appendChild(FOPUtils.createStandardTableCell(document, teamName));
 
-        final String organization = scoreEntry.getOrganization();
-        row.appendChild(FOPUtils.createStandardTableCell(document, organization));
+          final String organization = scoreEntry.getOrganization();
+          row.appendChild(FOPUtils.createStandardTableCell(document, organization));
 
-        row.appendChild(FOPUtils.createStandardTableCell(document, scoreEntry.getFormattedScore()));
+          row.appendChild(FOPUtils.createStandardTableCell(document, scoreEntry.getFormattedScore()));
+        }
+
+      } else {
+        final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+        documentBody.appendChild(block);
+        block.appendChild(document.createTextNode(String.format("No scores for %s: %s", groupIdentifier, group)));
       }
-
     }
 
     return document;

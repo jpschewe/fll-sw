@@ -1,3 +1,4 @@
+* #1317 - handle no scores when creating top performance score reports
 * #1309 - Make edit note a panel on the right side
 * Add border under comments on the judge score summary display
 * #1312 - Display warning when missing key comments in judging app
