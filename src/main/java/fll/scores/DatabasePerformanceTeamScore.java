@@ -101,8 +101,7 @@ public class DatabasePerformanceTeamScore extends BasePerformanceTeamScore {
           final int runNumber = result.getInt(6);
           final int teamNumber = result.getInt(7);
 
-          final PerformanceTeamScore score = fetchScore(tournament.getTournamentID(), teamNumber, runNumber, connection,
-                                                        result);
+          final PerformanceTeamScore score = new DatabasePerformanceTeamScore(teamNumber, runNumber, result);
           scores.add(score);
         }
       }
