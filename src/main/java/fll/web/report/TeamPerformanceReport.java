@@ -46,7 +46,6 @@ public final class TeamPerformanceReport {
     String workflowId = request.getParameter(SessionAttributes.WORKFLOW_ID);
 
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
-    page.setAttribute("tournament", tournamentData.getCurrentTournament().getTournamentID());
 
     final ChallengeDescription descritpion = ApplicationAttributes.getChallengeDescription(application);
 
