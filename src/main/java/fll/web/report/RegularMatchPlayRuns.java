@@ -108,15 +108,11 @@ public final class RegularMatchPlayRuns {
         }
       }
 
-      final int maxScoresPerTeam = data.entrySet().stream() //
-                                       .map(Map.Entry::getValue) //
-                                       .mapToInt(d -> d.size()) //
-                                       .max().orElse(0);
-
-      // fill out scores to max seen
+      // fill out scores to number of runs
+      final int numberOfRuns = regularMatchPlayRounds.size();
       data.forEach((team,
                     performanceData) -> {
-        while (performanceData.size() < maxScoresPerTeam) {
+        while (performanceData.size() < numberOfRuns) {
           performanceData.add("&nbsp;");
         }
       });
