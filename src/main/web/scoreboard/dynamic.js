@@ -25,6 +25,8 @@ const TOP_SCORES_MAX_RANK = 5;
 let topScoresAwardGroup = null;
 let topScoresDisplayAllTeams = false;
 
+let clockEnabled = false;
+
 const awardGroupColors = new Map();
 
 function topScoresChangeAwardGroup() {
@@ -441,6 +443,28 @@ function messageReceived(event) {
     }
 }
 
+function updateClock() {
+    const today = new Date();
+    // mod 12 to not use 24-hour time
+    let h = today.getHours() % 12;
+    let m = today.getMinutes();
+    m = padClockValue(m);
+
+    document.getElementById('clock').innerHTML = h + ":" + m;
+
+    // update every 60 seconds
+    setTimeout(updateClock, 60000);
+}
+
+// Helper function to add a leading zero to numbers less than 10
+function padClockValue(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
     initMostRecent();
 
@@ -499,6 +523,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);
     }
+
+    updateClock();
 
     openSocket();
 });
