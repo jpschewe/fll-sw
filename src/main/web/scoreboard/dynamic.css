@@ -58,6 +58,19 @@ table.spacer img {
     font-size: medium;
 }
 
+#title-top, #title-bottom {
+    display: flex;
+    align-items: center;
+}
+
+#awardGroupTitle, #scorePageText {
+    flex: 1;
+}
+
+#clock {
+    padding-left: 10px;
+}
+
 .automatic_scroll {
     overflow: hidden;
 }

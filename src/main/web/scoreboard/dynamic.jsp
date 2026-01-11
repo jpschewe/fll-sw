@@ -50,9 +50,15 @@ const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
 
         <div id='left'>
             <div id='title' class='center bold'>
-                ${awardGroupTitle}
-                <br />
-                ${ScorePageText }
+                <div id='title-top'>
+                    <span id='clock'>12:01</span>
+
+                    <span id='awardGroupTitle'>
+                        ${awardGroupTitle} </span>
+                </div>
+                <div id='title-bottom'>
+                    <span id="scorePageText"> ${ScorePageText }</span>
+                </div>
             </div>
 
             <div id='all_teams'>
