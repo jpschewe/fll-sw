@@ -42,6 +42,8 @@ const REGISTER_MESSAGE_TYPE = "${REGISTER_MESSAGE_TYPE}";
 const UPDATE_MESSAGE_TYPE = "${UPDATE_MESSAGE_TYPE}";
 const DELETE_MESSAGE_TYPE = "${DELETE_MESSAGE_TYPE}";
 const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
+
+const INITIAL_SCORE_PAGE_TEXT = "${ScorePageText}"
 </script>
 
 </head>
@@ -51,13 +53,13 @@ const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
         <div id='left'>
             <div id='title' class='center bold'>
                 <div id='title-top'>
-                    <span id='clock'>12:01</span>
+                    <span id='clock'></span>
 
                     <span id='awardGroupTitle'>
                         ${awardGroupTitle} </span>
                 </div>
                 <div id='title-bottom'>
-                    <span id="scorePageText"> ${ScorePageText }</span>
+                    <span id="scorePageText"></span>
                 </div>
             </div>
 
