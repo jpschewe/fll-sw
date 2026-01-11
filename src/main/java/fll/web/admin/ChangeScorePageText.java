@@ -20,6 +20,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.scoreboard.ScoreboardUpdates;
 
 /**
  * Change the text on the scoreboard pages.
@@ -42,6 +43,7 @@ public class ChangeScorePageText extends BaseFLLServlet {
     final String newText = request.getParameter("ScorePageText");
     if (null != newText) {
       application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, newText);
+      ScoreboardUpdates.updateScoreText(newText);
     }
 
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));

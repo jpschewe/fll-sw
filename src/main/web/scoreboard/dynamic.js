@@ -443,6 +443,8 @@ function messageReceived(event) {
         location.reload();
     } else if (message.type == RELOAD_MESSAGE_TYPE) {
         location.reload();
+    } else if (message.type == SCORE_TEXT_MESSAGE_TYPE) {
+        updateScorePageText(message.text);
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
         console.log("Full message: " + event.data);

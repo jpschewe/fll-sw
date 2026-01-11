@@ -156,6 +156,7 @@ public final class Dynamic {
       page.setAttribute("UPDATE_MESSAGE_TYPE", Message.MessageType.UPDATE.toString());
       page.setAttribute("DELETE_MESSAGE_TYPE", Message.MessageType.DELETE.toString());
       page.setAttribute("RELOAD_MESSAGE_TYPE", Message.MessageType.RELOAD.toString());
+      page.setAttribute("SCORE_TEXT_MESSAGE_TYPE", Message.MessageType.SCORE_TEXT.toString());
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error talking to the database", e);

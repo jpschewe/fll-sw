@@ -197,18 +197,8 @@ public final class ScoreboardUpdates {
       final DeleteMessage message = new DeleteMessage();
       try {
         final String msg = Utilities.createJsonMapper().writeValueAsString(message);
-        final Set<String> toRemove = new HashSet<>();
-        for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-          final Session client = entry.getValue();
-          if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
-            toRemove.add(entry.getKey());
-          }
-        }
 
-        // remove clients that had issues
-        for (final String uuid : toRemove) {
-          removeClient(uuid);
-        }
+        sendToAll(msg);
       } catch (final JsonProcessingException e) {
         throw new FLLInternalException("Error converting DeleteMessage to JSON", e);
       }
@@ -225,22 +215,42 @@ public final class ScoreboardUpdates {
       final String msg = Utilities.createJsonMapper().writeValueAsString(message);
 
       // TODO: make this smarter and only require the displays that changed to reload
-      final Set<String> toRemove = new HashSet<>();
-      for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-        THREAD_POOL.execute(() -> {
-          final Session client = entry.getValue();
-          if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
-            toRemove.add(entry.getKey());
-          }
-        });
-      }
-
-      // remove clients that had issues
-      for (final String uuid : toRemove) {
-        removeClient(uuid);
-      }
+      sendToAll(msg);
     } catch (final JsonProcessingException e) {
       throw new FLLInternalException("Error converting ReloadMessage to JSON", e);
+    }
+  }
+
+  /**
+   * Update the message that is displayed on the scoreboard.
+   * 
+   * @param text message to display on the scoreboard
+   */
+  public static void updateScoreText(final String text) {
+    final ScoreTextMessage message = new ScoreTextMessage(text);
+    try {
+      final String msg = Utilities.createJsonMapper().writeValueAsString(message);
+
+      sendToAll(msg);
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting ScoreTextMessage to JSON", e);
+    }
+  }
+
+  private static void sendToAll(final String msg) {
+    final Set<String> toRemove = new HashSet<>();
+    for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
+      THREAD_POOL.execute(() -> {
+        final Session client = entry.getValue();
+        if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
+          toRemove.add(entry.getKey());
+        }
+      });
+    }
+
+    // remove clients that had issues
+    for (final String uuid : toRemove) {
+      removeClient(uuid);
     }
   }
 
