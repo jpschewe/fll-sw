@@ -19,8 +19,6 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.TournamentData;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.PageContext;
 
 /**
@@ -32,8 +30,6 @@ public final class UnverifiedRuns {
   }
 
   public static void populateContext(final ServletContext application,
-                                     final HttpSession session,
-                                     final HttpServletRequest request,
                                      final PageContext page) {
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final Tournament tournament = tournamentData.getCurrentTournament();
