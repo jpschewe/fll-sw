@@ -283,10 +283,7 @@ public final class WebUtils {
   public static LocalTime getTimeRequestParameter(final HttpServletRequest request,
                                                   final String parameter)
       throws MissingRequiredParameterException, DateTimeParseException {
-    final String str = request.getParameter(parameter);
-    if (null == str) {
-      throw new MissingRequiredParameterException(parameter);
-    }
+    final String str = getNonNullRequestParameter(request, parameter);
     final LocalTime value = LocalTime.parse(str, WEB_TIME_FORMAT);
     return value;
   }
@@ -301,10 +298,7 @@ public final class WebUtils {
   public static int getIntRequestParameter(final HttpServletRequest request,
                                            final String parameter)
       throws MissingRequiredParameterException, NumberFormatException {
-    final String str = request.getParameter(parameter);
-    if (null == str) {
-      throw new MissingRequiredParameterException(parameter);
-    }
+    final String str = getNonNullRequestParameter(request, parameter);
     final int value = Integer.parseInt(str);
     return value;
   }
@@ -338,31 +332,33 @@ public final class WebUtils {
   public static double getDoubleRequestParameter(final HttpServletRequest request,
                                                  final String parameter)
       throws MissingRequiredParameterException, NumberFormatException {
-    final String str = request.getParameter(parameter);
-    if (null == str) {
-      throw new MissingRequiredParameterException(parameter);
-    }
+    final String str = getNonNullRequestParameter(request, parameter);
     final double value = Double.parseDouble(str);
     return value;
   }
 
   /**
+   * Looks for boolean values and "on", which is what checkboxes default to.
+   * 
    * @param request where to get the parameter from
    * @param parameter the parameter to get
    * @param defaultValue the value to return if the parameter is not present
    * @return the value
-   * @throws NumberFormatException if the value isn't parsable as an integer
    */
+  // there isn't a method without a default value because checkboxes don't set a
+  // value when not checked
   public static boolean getBooleanRequestParameter(final HttpServletRequest request,
                                                    final String parameter,
-                                                   final boolean defaultValue)
-      throws NumberFormatException {
+                                                   final boolean defaultValue) {
     final String str = request.getParameter(parameter);
     if (null == str) {
       return defaultValue;
+    } else if ("on".equals(str.toLowerCase())) {
+      return true;
+    } else {
+      final boolean value = Boolean.parseBoolean(str);
+      return value;
     }
-    final boolean value = Boolean.parseBoolean(str);
-    return value;
   }
 
   /**

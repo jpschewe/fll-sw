@@ -25,6 +25,14 @@ const TOP_SCORES_MAX_RANK = 5;
 let topScoresAwardGroup = null;
 let topScoresDisplayAllTeams = false;
 
+let clockEnabled = false;
+
+// set to true if the clock should never be enabled, even when a message comes in to enable it
+let clockDisabled = false;
+
+// set to true if the score page text enabled, even when a message comes in to enable it
+let scorePageTextDisabled = false;
+
 const awardGroupColors = new Map();
 
 function topScoresChangeAwardGroup() {
@@ -435,9 +443,63 @@ function messageReceived(event) {
         location.reload();
     } else if (message.type == RELOAD_MESSAGE_TYPE) {
         location.reload();
+    } else if (message.type == SCORE_TEXT_MESSAGE_TYPE) {
+        updateScorePageText(message.text);
+    } else if (message.type == CLOCK_ENABLED_MESSAGE_TYPE) {
+        if (clockEnabled != message.clockEnabled) {
+            clockEnabled = message.clockEnabled;
+            updateClock();
+        }
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
         console.log("Full message: " + event.data);
+    }
+}
+
+function updateClock() {
+    const clockElement = document.getElementById('clock');
+
+    if (clockDisabled) {
+        clockElement.classList.add("fll-sw-ui-inactive");
+        // don't start the clock timer'
+        return;
+    }
+
+    if (clockEnabled) {
+        clockElement.classList.remove("fll-sw-ui-inactive");
+    } else {
+        clockElement.classList.add("fll-sw-ui-inactive");
+        // don't start the clock timer'
+        return;
+    }
+
+    const today = new Date();
+    // mod 12 to not use 24-hour time
+    let h = today.getHours() % 12;
+    let m = today.getMinutes();
+    m = padClockValue(m);
+
+    clockElement.innerHTML = h + ":" + m;
+
+    // update every 60 seconds
+    setTimeout(updateClock, 60000);
+}
+
+// Helper function to add a leading zero to numbers less than 10
+function padClockValue(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+function updateScorePageText(text) {
+    const scorePageTextElement = document.getElementById('scorePageText');
+
+    if (scorePageTextDisabled) {
+        scorePageTextElement.classList.add("fll-sw-ui-inactive");
+    } else {
+        scorePageTextElement.innerText = text;
     }
 }
 
@@ -447,6 +509,9 @@ document.addEventListener("DOMContentLoaded", () => {
     topScoresChangeAwardGroup();
 
     if ("all_teams_top_scores" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("most_recent").classList.add("fll-sw-ui-inactive");
 
         topScoresDisplayAllTeams = true;
@@ -454,6 +519,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);
     } else if ("all_teams_no_scroll" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
         const allTeams = document.getElementById("all_teams");
@@ -462,6 +530,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("all_teams").classList.add("manual_scroll");
     } else if ("all_teams_auto_scroll" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
         const allTeams = document.getElementById("all_teams");
@@ -471,12 +542,18 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);
     } else if ("top_scores" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
         const topScores = document.getElementById("top_scores");
         const container = document.getElementById("container");
         container.appendChild(topScores);
     } else if ("top_scores_all" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
         const topScores = document.getElementById("top_scores");
@@ -485,12 +562,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         topScoresDisplayAllTeams = true;
     } else if ("most_recent" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("left").classList.add("fll-sw-ui-inactive");
         document.getElementById("right").classList.add("fll-sw-ui-inactive");
         const mostRecent = document.getElementById("most_recent");
         const container = document.getElementById("container");
         container.appendChild(mostRecent);
     } else if ("most_recent_all_teams" == layout) {
+        clockDisabled = true;
+        scorePageTextDisabled = true;
+
         document.getElementById("top_scores").classList.add("fll-sw-ui-inactive");
 
         document.getElementById("all_teams").classList.add("automatic_scroll");
@@ -499,6 +582,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("all_teams").classList.add("automatic_scroll");
         requestAnimationFrame(allTeamsDoScroll);
     }
+
+    clockEnabled = INITIAL_CLOCK_ENABLED;
+    updateClock();
+
+    updateScorePageText(INITIAL_SCORE_PAGE_TEXT);
 
     openSocket();
 });

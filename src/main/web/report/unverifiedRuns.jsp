@@ -5,7 +5,7 @@
     allowSetup="false" />
 
 <%
-fll.web.report.UnverifiedRuns.populateContext(application, session, request, pageContext);
+fll.web.report.UnverifiedRuns.populateContext(application, pageContext);
 %>
 
 <html>

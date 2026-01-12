@@ -13,7 +13,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;

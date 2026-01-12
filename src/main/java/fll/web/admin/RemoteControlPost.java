@@ -9,6 +9,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -85,61 +86,107 @@ public class RemoteControlPost extends BaseFLLServlet {
       application.setAttribute("slideShowInterval", Integer.valueOf(slideIntervalStr));
     }
 
-    final List<DisplayInfo> toDelete = new LinkedList<>();
+    // collect all of the displays to delete
+    final Set<DisplayInfo> toDelete = new HashSet<>();
     for (final DisplayInfo display : displays) {
       if (null != request.getParameter(display.getDeleteFormParamName())) {
         toDelete.add(display);
-      } else {
-        if (DisplayInfo.DEFAULT_DISPLAY_NAME.equals(request.getParameter(display.getRemotePageFormParamName()))) {
+      }
+    }
+
+    // handle all of the setting of follow default, then we can be smarter about
+    // which displays get notified.
+    final Set<DisplayInfo> followingDefault = new HashSet<>();
+    final Set<DisplayInfo> newlyfollowingDefault = new HashSet<>();
+    for (final DisplayInfo display : displays) {
+      if (toDelete.contains(display)) {
+        continue;
+      }
+
+      final boolean displayFollowDefault = DisplayInfo.DEFAULT_DISPLAY_NAME.equals(request.getParameter(display.getRemotePageFormParamName()));
+      if (displayFollowDefault) {
+        followingDefault.add(display);
+
+        if (displayFollowDefault != display.isFollowDefault()) {
           display.setFollowDefault();
-        } else {
-          display.setRemotePage(WebUtils.getNonNullRequestParameter(request, display.getRemotePageFormParamName()));
+          newlyfollowingDefault.add(display);
         }
+      }
+    }
 
-        display.setSpecialUrl(request.getParameter(display.getSpecialUrlFormParamName()));
+    // handle all parameters
+    for (final DisplayInfo display : displays) {
+      if (toDelete.contains(display)) {
+        continue;
+      }
 
-        display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
+      if (followingDefault.contains(display)) {
+        // nothing to do
+        continue;
+      } else {
+        final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
+                                                                             display.getRemotePageFormParamName());
+        display.setRemotePage(displayRemotePage);
+      }
 
-        if (display.isHeadToHead()) {
-          final List<DisplayInfo.H2HBracketDisplay> brackets = new LinkedList<>();
-          final int numBrackets = WebUtils.getIntRequestParameter(request,
-                                                                  display.getHead2HeadNumBracketsFormParamName());
-          for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
-            final String bracket = WebUtils.getNonNullRequestParameter(request,
-                                                                       display.getHead2HeadBracketFormParamName(bracketIdx));
+      display.setSpecialUrl(request.getParameter(display.getSpecialUrlFormParamName()));
 
-            final String firstRoundStr = request.getParameter(display.getHead2HeadFirstRoundFormParamName(bracketIdx));
-            final int firstRound;
-            if (null == firstRoundStr) {
-              // there are no head to head rounds yet, just use 1
-              firstRound = 1;
-            } else {
-              firstRound = Integer.parseInt(firstRoundStr);
-            }
+      display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
 
-            final DisplayInfo.H2HBracketDisplay bracketInfo = new DisplayInfo.H2HBracketDisplay(display, bracketIdx,
-                                                                                                bracket, firstRound);
-            brackets.add(bracketInfo);
+      if (display.isHeadToHead()) {
+        final List<DisplayInfo.H2HBracketDisplay> brackets = new LinkedList<>();
+        final int numBrackets = WebUtils.getIntRequestParameter(request,
+                                                                display.getHead2HeadNumBracketsFormParamName());
+        for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
+          final String bracket = WebUtils.getNonNullRequestParameter(request,
+                                                                     display.getHead2HeadBracketFormParamName(bracketIdx));
+
+          final String firstRoundStr = request.getParameter(display.getHead2HeadFirstRoundFormParamName(bracketIdx));
+          final int firstRound;
+          if (null == firstRoundStr) {
+            // there are no head to head rounds yet, just use 1
+            firstRound = 1;
+          } else {
+            firstRound = Integer.parseInt(firstRoundStr);
           }
-          display.setBrackets(brackets);
-        } // head to head
 
-        // award groups to display
-        final String awardGroupsFormParamName = display.getAwardGroupsFormParamName();
-        final String @Nullable [] awardGroupsParamValues = request.getParameterValues(awardGroupsFormParamName);
-        if (null == awardGroupsParamValues) {
-          throw new MissingRequiredParameterException(awardGroupsFormParamName);
+          final DisplayInfo.H2HBracketDisplay bracketInfo = new DisplayInfo.H2HBracketDisplay(display, bracketIdx,
+                                                                                              bracket, firstRound);
+          brackets.add(bracketInfo);
         }
-        final List<String> awardGroupsToDisplay = Arrays.asList(awardGroupsParamValues);
-        final List<String> currentAwardGroupsToDisplay = display.getScoreboardAwardGroups();
-        if (!awardGroupsToDisplay.equals(currentAwardGroupsToDisplay)) {
-          display.setScoreboardAwardGroups(awardGroupsToDisplay);
-          ScoreboardUpdates.awardGroupChange();
+        display.setBrackets(brackets);
+      } // head to head
+
+      // award groups to display
+      final String awardGroupsFormParamName = display.getAwardGroupsFormParamName();
+      final String @Nullable [] awardGroupsParamValues = request.getParameterValues(awardGroupsFormParamName);
+      if (null == awardGroupsParamValues) {
+        throw new MissingRequiredParameterException(awardGroupsFormParamName);
+      }
+      final List<String> awardGroupsToDisplay = Arrays.asList(awardGroupsParamValues);
+      final List<String> currentAwardGroupsToDisplay = display.getScoreboardAwardGroups();
+      if (!awardGroupsToDisplay.equals(currentAwardGroupsToDisplay)) {
+        display.setScoreboardAwardGroups(awardGroupsToDisplay);
+        ScoreboardUpdates.awardGroupChange();
+      }
+
+      final boolean scoreBoardClockEnabled = WebUtils.getBooleanRequestParameter(request,
+                                                                                 display.getScoreboardClockEnabledParamName(),
+                                                                                 false);
+      LOGGER.warn("Display {} clock {}", display.getUuid(), scoreBoardClockEnabled);
+      if (scoreBoardClockEnabled != display.isScoreboardClockEnabled()) {
+        display.setScoreboardClockEnabled(scoreBoardClockEnabled);
+        ScoreboardUpdates.sendClockEnabledMessage(display, scoreBoardClockEnabled);
+
+        if (display.isDefaultDisplay()) {
+          for (final DisplayInfo d : followingDefault) {
+            ScoreboardUpdates.sendClockEnabledMessage(d, scoreBoardClockEnabled);
+          }
         }
+      }
+    }
 
-      } // display to keep
-    } // foreach display
-
+    // remove displays
     for (final DisplayInfo display : toDelete) {
       DisplayHandler.removeDisplay(display.getUuid());
     }
@@ -151,6 +198,8 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
     }
 
+    LOGGER.trace("FIXME use this list to determine who should have URLs set to defaultDisplay.url: {}",
+                 newlyfollowingDefault);
     DisplayHandler.sendUpdateUrl();
 
     SessionAttributes.appendToMessage(session, "<i id='success'>Successfully set remote control parameters</i>");

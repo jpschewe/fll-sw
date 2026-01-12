@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -197,18 +198,8 @@ public final class ScoreboardUpdates {
       final DeleteMessage message = new DeleteMessage();
       try {
         final String msg = Utilities.createJsonMapper().writeValueAsString(message);
-        final Set<String> toRemove = new HashSet<>();
-        for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-          final Session client = entry.getValue();
-          if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
-            toRemove.add(entry.getKey());
-          }
-        }
 
-        // remove clients that had issues
-        for (final String uuid : toRemove) {
-          removeClient(uuid);
-        }
+        sendToAll(msg);
       } catch (final JsonProcessingException e) {
         throw new FLLInternalException("Error converting DeleteMessage to JSON", e);
       }
@@ -225,23 +216,51 @@ public final class ScoreboardUpdates {
       final String msg = Utilities.createJsonMapper().writeValueAsString(message);
 
       // TODO: make this smarter and only require the displays that changed to reload
-      final Set<String> toRemove = new HashSet<>();
-      for (final Map.Entry<String, Session> entry : ALL_CLIENTS.entrySet()) {
-        THREAD_POOL.execute(() -> {
-          final Session client = entry.getValue();
-          if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
-            toRemove.add(entry.getKey());
-          }
-        });
-      }
-
-      // remove clients that had issues
-      for (final String uuid : toRemove) {
-        removeClient(uuid);
-      }
+      sendToAll(msg);
     } catch (final JsonProcessingException e) {
       throw new FLLInternalException("Error converting ReloadMessage to JSON", e);
     }
+  }
+
+  /**
+   * Update the message that is displayed on the scoreboard.
+   * 
+   * @param text message to display on the scoreboard
+   */
+  public static void updateScoreText(final String text) {
+    final ScoreTextMessage message = new ScoreTextMessage(text);
+    try {
+      final String msg = Utilities.createJsonMapper().writeValueAsString(message);
+
+      sendToAll(msg);
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting ScoreTextMessage to JSON", e);
+    }
+  }
+
+  private static void sendToAll(final String msg) {
+    // create a copy to avoid errors from the client being removed while this is
+    // running
+    final Map<String, Session> copy = new HashMap<>(ALL_CLIENTS);
+    for (final Map.Entry<String, Session> entry : copy.entrySet()) {
+      THREAD_POOL.execute(() -> {
+        sendToOne(entry.getValue(), entry.getKey(), msg);
+      });
+    }
+  }
+
+  /**
+   * Send a message to the specified session and remove it if there is an error
+   * sending.
+   */
+  private static void sendToOne(final Session client,
+                                final String uuid,
+                                final String msg) {
+    THREAD_POOL.execute(() -> {
+      if (!WebUtils.sendWebsocketTextMessage(client, msg)) {
+        removeClient(uuid);
+      }
+    });
   }
 
   /**
@@ -338,6 +357,27 @@ public final class ScoreboardUpdates {
       return WebUtils.sendWebsocketTextMessage(client, data);
     } else {
       return true;
+    }
+  }
+
+  /**
+   * @param display the display to send the message to
+   * @param scoreBoardClockEnabled if the clock is enabled
+   */
+  public static void sendClockEnabledMessage(final DisplayInfo display,
+                                             final boolean scoreBoardClockEnabled) {
+    final ClockEnabledMessage message = new ClockEnabledMessage(scoreBoardClockEnabled);
+    try {
+      final String msg = Utilities.createJsonMapper().writeValueAsString(message);
+
+      final Session session = ALL_CLIENTS.get(display.getUuid());
+      if (null == session) {
+        return;
+      }
+
+      sendToOne(session, display.getUuid(), msg);
+    } catch (final JsonProcessingException e) {
+      throw new FLLInternalException("Error converting ScoreTextMessage to JSON", e);
     }
   }
 
