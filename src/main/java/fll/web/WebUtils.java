@@ -338,22 +338,27 @@ public final class WebUtils {
   }
 
   /**
+   * Looks for boolean values and "on", which is what checkboxes default to.
+   * 
    * @param request where to get the parameter from
    * @param parameter the parameter to get
    * @param defaultValue the value to return if the parameter is not present
    * @return the value
-   * @throws NumberFormatException if the value isn't parsable as an integer
    */
+  // there isn't a method without a default value because checkboxes don't set a
+  // value when not checked
   public static boolean getBooleanRequestParameter(final HttpServletRequest request,
                                                    final String parameter,
-                                                   final boolean defaultValue)
-      throws NumberFormatException {
+                                                   final boolean defaultValue) {
     final String str = request.getParameter(parameter);
     if (null == str) {
       return defaultValue;
+    } else if ("on".equals(str.toLowerCase())) {
+      return true;
+    } else {
+      final boolean value = Boolean.parseBoolean(str);
+      return value;
     }
-    final boolean value = Boolean.parseBoolean(str);
-    return value;
   }
 
   /**
