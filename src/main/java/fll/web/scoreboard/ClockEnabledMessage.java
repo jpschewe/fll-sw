@@ -12,7 +12,7 @@ final class ClockEnabledMessage extends Message {
   /**
    * @param clockEnabled {@link #isClockEnabled()}
    */
-  public ClockEnabledMessage(final boolean clockEnabled) {
+  ClockEnabledMessage(final boolean clockEnabled) {
     super(Message.MessageType.CLOCK_ENABLED);
     this.clockEnabled = clockEnabled;
   }
