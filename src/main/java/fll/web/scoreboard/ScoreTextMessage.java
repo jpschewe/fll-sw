@@ -12,7 +12,7 @@ final class ScoreTextMessage extends Message {
   /**
    * @param text {@link #getText()}
    */
-  public ScoreTextMessage(final String text) {
+  ScoreTextMessage(final String text) {
     super(Message.MessageType.SCORE_TEXT);
     this.text = text;
   }
