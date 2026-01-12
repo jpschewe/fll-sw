@@ -446,10 +446,7 @@ function messageReceived(event) {
     } else if (message.type == SCORE_TEXT_MESSAGE_TYPE) {
         updateScorePageText(message.text);
     } else if (message.type == CLOCK_ENABLED_MESSAGE_TYPE) {
-        if (clockEnabled != message.clockEnabled) {
-            clockEnabled = message.clockEnabled;
-            updateClock();
-        }
+        clockEnabled = message.clockEnabled;
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
         console.log("Full message: " + event.data);
@@ -461,7 +458,7 @@ function updateClock() {
 
     if (clockDisabled) {
         clockElement.classList.add("fll-sw-ui-inactive");
-        // don't start the clock timer'
+        // don't start the clock timer if it's disabled
         return;
     }
 
@@ -469,8 +466,6 @@ function updateClock() {
         clockElement.classList.remove("fll-sw-ui-inactive");
     } else {
         clockElement.classList.add("fll-sw-ui-inactive");
-        // don't start the clock timer'
-        return;
     }
 
     const today = new Date();
