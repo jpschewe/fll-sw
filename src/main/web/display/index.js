@@ -89,6 +89,12 @@ function displayPage(urlStr) {
     const newParams = new URLSearchParams(newUrl.search);
 
     if (null == displayWindow || displayWindow.location.pathname != newUrl.pathname || currentParams != newParams) {
+        console.log("1: " + (null == displayWindow));
+        if (null != displayWindow) {
+            console.log("2: " + (displayWindow.location.pathname != newUrl.pathname));
+            console.log("3: " + (currentParams != newParams));
+        }
+
         // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
         newParams.append(DISPLAY_UUID_PARAMETER_NAME, displayUuid);
         newUrl.search = newParams;

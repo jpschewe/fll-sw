@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -114,7 +115,9 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
     }
 
-    // handle all parameters
+    // Handle all parameters other than the URL change.
+    // The idea is that this will get all of the parameters on the DisplayInfo
+    // object set before it's used to load the initial page.
     for (final DisplayInfo display : displays) {
       if (toDelete.contains(display)) {
         continue;
@@ -123,13 +126,7 @@ public class RemoteControlPost extends BaseFLLServlet {
       if (followingDefault.contains(display)) {
         // nothing to do
         continue;
-      } else {
-        final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
-                                                                             display.getRemotePageFormParamName());
-        display.setRemotePage(displayRemotePage);
       }
-
-      display.setSpecialUrl(request.getParameter(display.getSpecialUrlFormParamName()));
 
       display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
 
@@ -198,9 +195,40 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
     }
 
-    LOGGER.trace("FIXME use this list to determine who should have URLs set to defaultDisplay.url: {}",
-                 newlyfollowingDefault);
-    DisplayHandler.sendUpdateUrl();
+    // notify displays that changed URLs
+    for (final DisplayInfo display : displays) {
+      if (toDelete.contains(display)) {
+        continue;
+      }
+
+      if (newlyfollowingDefault.contains(display)) {
+        // update the page displayed as we don't know what is currently on this display
+        DisplayHandler.sendDisplayUrl(display);
+        continue;
+      }
+      if (followingDefault.contains(display)) {
+        // this will be handled when the default display is visited
+        continue;
+      }
+
+      boolean needsUpdate = false;
+      final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
+                                                                           display.getRemotePageFormParamName());
+      if (!displayRemotePage.equals(display.getRemotePage())) {
+        display.setRemotePage(displayRemotePage);
+        needsUpdate = true;
+      }
+
+      final @Nullable String specialUrl = request.getParameter(display.getSpecialUrlFormParamName());
+      if (!Objects.equals(specialUrl, display.getSpecialUrl())) {
+        display.setSpecialUrl(specialUrl);
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        DisplayHandler.sendDisplayUrl(display);
+      }
+    }
 
     SessionAttributes.appendToMessage(session, "<i id='success'>Successfully set remote control parameters</i>");
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));

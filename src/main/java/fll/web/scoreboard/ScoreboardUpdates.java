@@ -208,7 +208,6 @@ public final class ScoreboardUpdates {
     try {
       final String msg = Utilities.createJsonMapper().writeValueAsString(message);
 
-      // TODO: make this smarter and only require the displays that changed to reload
       sendToAll(msg);
     } catch (final JsonProcessingException e) {
       throw new FLLInternalException("Error converting ReloadMessage to JSON", e);
@@ -261,6 +260,7 @@ public final class ScoreboardUpdates {
    * changed. Executed asynchronously.
    */
   public static void awardGroupChange() {
+    // TODO: make this smarter and only require the displays that changed to reload
     reload();
   }
 
