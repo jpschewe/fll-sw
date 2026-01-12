@@ -206,6 +206,25 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
                                     value='<%=DisplayInfo.SCOREBOARD_REMOTE_PAGE%>' />
                             </c:otherwise>
                         </c:choose>
+
+                        <c:choose>
+                            <c:when
+                                test="${displayInfo.scoreboardClockEnabled}">
+                                <input type='checkbox'
+                                    id='${displayInfo.scoreboardClockEnabledParamName}'
+                                    name='${displayInfo.scoreboardClockEnabledParamName}'
+                                    checked />
+                            </c:when>
+                            <c:otherwise>
+                                <input type='checkbox'
+                                    id='${displayInfo.scoreboardClockEnabledParamName}'
+                                    name='${displayInfo.scoreboardClockEnabledParamName}' />
+                            </c:otherwise>
+                        </c:choose>
+                        <label
+                            for='${displayInfo.scoreboardClockEnabledParamName}'>Clock
+                            Enabled</label>
+
                     </td>
                 </c:forEach>
             </tr>

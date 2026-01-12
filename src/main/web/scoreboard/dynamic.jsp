@@ -42,6 +42,11 @@ const REGISTER_MESSAGE_TYPE = "${REGISTER_MESSAGE_TYPE}";
 const UPDATE_MESSAGE_TYPE = "${UPDATE_MESSAGE_TYPE}";
 const DELETE_MESSAGE_TYPE = "${DELETE_MESSAGE_TYPE}";
 const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
+const SCORE_TEXT_MESSAGE_TYPE = "${SCORE_TEXT_MESSAGE_TYPE}";
+const CLOCK_ENABLED_MESSAGE_TYPE = "${CLOCK_ENABLED_MESSAGE_TYPE}";
+
+const INITIAL_SCORE_PAGE_TEXT = "${ScorePageText}"
+const INITIAL_CLOCK_ENABLED = parseBoolean("${ClockEnabled}");
 </script>
 
 </head>
@@ -50,9 +55,15 @@ const RELOAD_MESSAGE_TYPE = "${RELOAD_MESSAGE_TYPE}";
 
         <div id='left'>
             <div id='title' class='center bold'>
-                ${awardGroupTitle}
-                <br />
-                ${ScorePageText }
+                <div id='title-top'>
+                    <span id='clock'></span>
+
+                    <span id='awardGroupTitle'>
+                        ${awardGroupTitle} </span>
+                </div>
+                <div id='title-bottom'>
+                    <span id="scorePageText"></span>
+                </div>
             </div>
 
             <div id='all_teams'>

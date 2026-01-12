@@ -57,11 +57,6 @@ public final class ApplicationAttributes {
   }
 
   /**
-   * {@link String} that is displayed on the big screen display.
-   */
-  public static final String SCORE_PAGE_TEXT = "ScorePageText";
-
-  /**
    * {@link String} that keeps track of the division of the brackets being
    * displayed.
    */
@@ -196,6 +191,10 @@ public final class ApplicationAttributes {
   }
 
   /**
+   * {@link String} that is displayed on the big screen display.
+   */
+  public static final String SCORE_PAGE_TEXT = "ScorePageText";
+  /**
    * Clear any attributes that depends on that database.
    * 
    * @param application variable store
@@ -206,7 +205,6 @@ public final class ApplicationAttributes {
     application.removeAttribute(DISPLAY_PAGE);
     application.removeAttribute(PLAYOFF_DIVISION);
     application.removeAttribute(PLAYOFF_RUN_NUMBER);
-    application.removeAttribute(SCORE_PAGE_TEXT);
     application.removeAttribute(TOURNAMENT_DATA);
   }
 }

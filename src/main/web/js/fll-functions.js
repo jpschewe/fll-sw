@@ -21,7 +21,7 @@ function _log(str) {
  *          the object to remove
  */
 function removeFromArray(ar, obj) {
-    for (var i = 0; i < ar.length; i++) {
+    for (var i = 0;i < ar.length;i++) {
         if (ar[i] === obj) {
             ar.splice(i, 1);
         }
@@ -217,3 +217,12 @@ function centerText(text, width) {
         return text;
     }
 }
+
+function parseBoolean(str) {
+    if (str === undefined || str === null) {
+        return false;
+    }
+    const lowerCaseStr = str.toLowerCase();
+    return (lowerCaseStr === "true" || lowerCaseStr === "yes" || lowerCaseStr === "1");
+}
+

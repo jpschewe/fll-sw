@@ -533,6 +533,30 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
         + "awardGroups";
   }
 
+  private boolean scoreboardClockEnabled = false;
+
+  /**
+   * @return true if the scoreboard clock should be displayed
+   */
+  public boolean isScoreboardClockEnabled() {
+    return scoreboardClockEnabled;
+  }
+
+  /**
+   * @param v see {@link #isScoreboardClockEnabled()}
+   */
+  public void setScoreboardClockEnabled(final boolean v) {
+    scoreboardClockEnabled = v;
+  }
+
+  /**
+   * @return name of parameter for the scoreboard clock being enabled
+   */
+  public String getScoreboardClockEnabledParamName() {
+    return getFormParamPrefix()
+        + "scoreboardClockEnabled";
+  }
+
   /**
    * This returns a URL starting with a slash. It is expected that the consumer of
    * this information will prepend the context path.
