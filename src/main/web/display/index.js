@@ -81,28 +81,16 @@ function displayPage(urlStr) {
         return;
     }
 
-    // compare search parameters (excluding the display_uuid) and the pathname
-    const currentParams = null == displayWindow ? new URLSearchParams() : new URLSearchParams(displayWindow.location.search);
-    currentParams.delete("display_uuid");
-
     const newUrl = new URL(urlStr, window.location);
     const newParams = new URLSearchParams(newUrl.search);
 
-    if (null == displayWindow || displayWindow.location.pathname != newUrl.pathname || currentParams != newParams) {
-        console.log("1: " + (null == displayWindow));
-        if (null != displayWindow) {
-            console.log("2: " + (displayWindow.location.pathname != newUrl.pathname));
-            console.log("3: " + (currentParams != newParams));
-        }
+    // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
+    newParams.append(DISPLAY_UUID_PARAMETER_NAME, displayUuid);
+    newUrl.search = newParams;
 
-        // add UUID to the URL so that the display page can use it to get the DisplayInfo object       
-        newParams.append(DISPLAY_UUID_PARAMETER_NAME, displayUuid);
-        newUrl.search = newParams;
-
-        displayWindow = window.open(newUrl, 'displayWindow', windowOptions);
-        if (!displayWindow || displayWindow.closed || typeof displayWindow.closed == 'undefined') {
-            alert("For this page to work you need to disable the popup blocker for this site");
-        }
+    displayWindow = window.open(newUrl, 'displayWindow', windowOptions);
+    if (!displayWindow || displayWindow.closed || typeof displayWindow.closed == 'undefined') {
+        alert("For this page to work you need to disable the popup blocker for this site");
     }
 }
 
