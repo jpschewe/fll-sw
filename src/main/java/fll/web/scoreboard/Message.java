@@ -21,7 +21,7 @@ import fll.util.FLLInternalException;
    * Types of messages that can be sent to a display client.
    */
   /* package */ enum MessageType {
-    REGISTER, UPDATE, DELETE, RELOAD, SCORE_TEXT;
+    REGISTER, UPDATE, DELETE, RELOAD, SCORE_TEXT, CLOCK_ENABLED;
   }
 
   /**
