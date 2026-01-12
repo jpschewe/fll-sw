@@ -212,7 +212,7 @@ public final class DisplayHandler {
   }
 
   /**
-   * Send a message and remove the display if there is an error.
+   * Send a message to a display. If there is an error, remove the display.
    */
   private static void send(final String uuid,
                            final DisplaySocket socket,

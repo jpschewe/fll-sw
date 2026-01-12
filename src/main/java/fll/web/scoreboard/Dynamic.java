@@ -157,6 +157,9 @@ public final class Dynamic {
       page.setAttribute("DELETE_MESSAGE_TYPE", Message.MessageType.DELETE.toString());
       page.setAttribute("RELOAD_MESSAGE_TYPE", Message.MessageType.RELOAD.toString());
       page.setAttribute("SCORE_TEXT_MESSAGE_TYPE", Message.MessageType.SCORE_TEXT.toString());
+      page.setAttribute("CLOCK_ENABLED_MESSAGE_TYPE", Message.MessageType.CLOCK_ENABLED.toString());
+
+      page.setAttribute("ClockEnabled", displayInfo.isScoreboardClockEnabled());
 
     } catch (final SQLException e) {
       throw new FLLInternalException("Error talking to the database", e);

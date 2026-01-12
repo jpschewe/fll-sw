@@ -445,6 +445,11 @@ function messageReceived(event) {
         location.reload();
     } else if (message.type == SCORE_TEXT_MESSAGE_TYPE) {
         updateScorePageText(message.text);
+    } else if (message.type == CLOCK_ENABLED_MESSAGE_TYPE) {
+        if (clockEnabled != message.clockEnabled) {
+            clockEnabled = message.clockEnabled;
+            updateClock();
+        }
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
         console.log("Full message: " + event.data);
@@ -578,6 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(allTeamsDoScroll);
     }
 
+    clockEnabled = INITIAL_CLOCK_ENABLED;
     updateClock();
 
     updateScorePageText(INITIAL_SCORE_PAGE_TEXT);
