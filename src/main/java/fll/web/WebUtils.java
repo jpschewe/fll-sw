@@ -283,10 +283,7 @@ public final class WebUtils {
   public static LocalTime getTimeRequestParameter(final HttpServletRequest request,
                                                   final String parameter)
       throws MissingRequiredParameterException, DateTimeParseException {
-    final String str = request.getParameter(parameter);
-    if (null == str) {
-      throw new MissingRequiredParameterException(parameter);
-    }
+    final String str = getNonNullRequestParameter(request, parameter);
     final LocalTime value = LocalTime.parse(str, WEB_TIME_FORMAT);
     return value;
   }
@@ -301,10 +298,7 @@ public final class WebUtils {
   public static int getIntRequestParameter(final HttpServletRequest request,
                                            final String parameter)
       throws MissingRequiredParameterException, NumberFormatException {
-    final String str = request.getParameter(parameter);
-    if (null == str) {
-      throw new MissingRequiredParameterException(parameter);
-    }
+    final String str = getNonNullRequestParameter(request, parameter);
     final int value = Integer.parseInt(str);
     return value;
   }
@@ -338,10 +332,7 @@ public final class WebUtils {
   public static double getDoubleRequestParameter(final HttpServletRequest request,
                                                  final String parameter)
       throws MissingRequiredParameterException, NumberFormatException {
-    final String str = request.getParameter(parameter);
-    if (null == str) {
-      throw new MissingRequiredParameterException(parameter);
-    }
+    final String str = getNonNullRequestParameter(request, parameter);
     final double value = Double.parseDouble(str);
     return value;
   }
