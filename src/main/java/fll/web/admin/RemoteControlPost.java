@@ -198,6 +198,8 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
     }
 
+    LOGGER.trace("FIXME use this list to determine who should have URLs set to defaultDisplay.url: {}",
+                 newlyfollowingDefault);
     DisplayHandler.sendUpdateUrl();
 
     SessionAttributes.appendToMessage(session, "<i id='success'>Successfully set remote control parameters</i>");
