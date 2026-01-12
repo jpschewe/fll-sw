@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -233,8 +234,8 @@ public final class ScoreboardUpdates {
   private static void sendToAll(final String msg) {
     // create a copy to avoid errors from the client being removed while this is
     // running
-    final Set<Map.Entry<String, Session>> entries = new HashSet<>(ALL_CLIENTS.entrySet());
-    for (final Map.Entry<String, Session> entry : entries) {
+    final Map<String, Session> copy = new HashMap<>(ALL_CLIENTS);
+    for (final Map.Entry<String, Session> entry : copy.entrySet()) {
       THREAD_POOL.execute(() -> {
         sendToOne(entry.getValue(), entry.getKey(), msg);
       });
