@@ -264,6 +264,11 @@ public class H2HUpdateWebSocket {
    * @param displayInfo the display information for the display
    */
   public static void updateDisplayedBracket(final DisplayInfo displayInfo) {
+    if (displayInfo.isDefaultDisplay()) {
+      // nothing to do as there isn't a display that is actually the default display
+      return;
+    }
+
     // used to find the sockets to talk to
     final String h2hUuid = displayInfo.getUuid();
 
