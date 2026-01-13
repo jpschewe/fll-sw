@@ -9,9 +9,12 @@ package fll.web.admin;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -94,42 +97,55 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
     }
 
+    final Map<DisplayInfo, Boolean> displaysNeedingUrlUpdate = new HashMap<>();
+
     // handle all of the setting of follow default, then we can be smarter about
     // which displays get notified.
+    // Also set the page URL
     final Set<DisplayInfo> followingDefault = new HashSet<>();
-    final Set<DisplayInfo> newlyfollowingDefault = new HashSet<>();
     for (final DisplayInfo display : displays) {
       if (toDelete.contains(display)) {
         continue;
       }
 
-      final boolean displayFollowDefault = DisplayInfo.DEFAULT_DISPLAY_NAME.equals(request.getParameter(display.getRemotePageFormParamName()));
+      final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
+                                                                           display.getRemotePageFormParamName());
+
+      final boolean displayFollowDefault = DisplayInfo.DEFAULT_REMOTE_PAGE.equals(displayRemotePage);
       if (displayFollowDefault) {
         followingDefault.add(display);
 
         if (displayFollowDefault != display.isFollowDefault()) {
           display.setFollowDefault();
-          newlyfollowingDefault.add(display);
+
+          // update the page displayed as we don't know what is currently on this display
+          displaysNeedingUrlUpdate.put(display, true);
+        }
+      } else {
+        if (!displayRemotePage.equals(display.getRemotePage())) {
+          display.setRemotePage(displayRemotePage);
+          displaysNeedingUrlUpdate.put(display, true);
+        }
+
+        final @Nullable String specialUrl = request.getParameter(display.getSpecialUrlFormParamName());
+        if (!Objects.equals(specialUrl, display.getSpecialUrl())) {
+          display.setSpecialUrl(specialUrl);
+          displaysNeedingUrlUpdate.put(display, true);
         }
       }
     }
 
-    // handle all parameters
+    // handle the other paramters
     for (final DisplayInfo display : displays) {
       if (toDelete.contains(display)) {
         continue;
       }
 
       if (followingDefault.contains(display)) {
-        // nothing to do
+        // handled when the default display is processed
+        LOGGER.trace("display {} is following default", display.getUuid());
         continue;
-      } else {
-        final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
-                                                                             display.getRemotePageFormParamName());
-        display.setRemotePage(displayRemotePage);
       }
-
-      display.setSpecialUrl(request.getParameter(display.getSpecialUrlFormParamName()));
 
       display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
 
@@ -173,15 +189,16 @@ public class RemoteControlPost extends BaseFLLServlet {
       final boolean scoreBoardClockEnabled = WebUtils.getBooleanRequestParameter(request,
                                                                                  display.getScoreboardClockEnabledParamName(),
                                                                                  false);
-      LOGGER.warn("Display {} clock {}", display.getUuid(), scoreBoardClockEnabled);
+
       if (scoreBoardClockEnabled != display.isScoreboardClockEnabled()) {
         display.setScoreboardClockEnabled(scoreBoardClockEnabled);
-        ScoreboardUpdates.sendClockEnabledMessage(display, scoreBoardClockEnabled);
 
         if (display.isDefaultDisplay()) {
           for (final DisplayInfo d : followingDefault) {
             ScoreboardUpdates.sendClockEnabledMessage(d, scoreBoardClockEnabled);
           }
+        } else {
+          ScoreboardUpdates.sendClockEnabledMessage(display, scoreBoardClockEnabled);
         }
       }
     }
@@ -191,16 +208,20 @@ public class RemoteControlPost extends BaseFLLServlet {
       DisplayHandler.removeDisplay(display.getUuid());
     }
 
+    // notify displays that changed URLs
+
+    for (final Map.Entry<DisplayInfo, Boolean> entry : displaysNeedingUrlUpdate.entrySet()) {
+      if (entry.getValue()) {
+        DisplayHandler.sendDisplayUrl(entry.getKey());
+      }
+    }
+
     // notify brackets that there may be changes
     for (final DisplayInfo display : displays) {
       if (!toDelete.contains(display)) {
         H2HUpdateWebSocket.updateDisplayedBracket(display);
       }
     }
-
-    LOGGER.trace("FIXME use this list to determine who should have URLs set to defaultDisplay.url: {}",
-                 newlyfollowingDefault);
-    DisplayHandler.sendUpdateUrl();
 
     SessionAttributes.appendToMessage(session, "<i id='success'>Successfully set remote control parameters</i>");
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));

@@ -97,7 +97,7 @@ function addBracket(displayName) {
     roundDiv.appendChild(roundSelect);
     roundSelect.setAttribute("name", lDisplayPrefix + "playoffRoundNumber_" + bracketIndex);
     let round;
-    for (round = 1; round <= numPlayoffRounds; ++round) {
+    for (round = 1;round <= numPlayoffRounds;++round) {
         const option = document.createElement("option");
         roundSelect.appendChild(option);
         option.setAttribute("value", round);
@@ -129,14 +129,14 @@ function removeBracket(displayName) {
 document.addEventListener("DOMContentLoaded", function() {
     updateButtonStates();
 
-    for (const displayName of displayNames) {
-        const prefix = displayPrefix(displayName);
+    for (const uuid of displayUuids) {
+        const prefix = displayPrefix(uuid);
         document.getElementById(prefix + "add_bracket").addEventListener("click", function() {
-            addBracket(displayName);
+            addBracket(uuid);
         });
 
         document.getElementById(prefix + "remove_bracket").addEventListener("click", function() {
-            removeBracket(displayName);
+            removeBracket(uuid);
         });
     }
 });
