@@ -104,7 +104,7 @@ public class RemoteControlPost extends BaseFLLServlet {
         continue;
       }
 
-      final boolean displayFollowDefault = DisplayInfo.DEFAULT_DISPLAY_NAME.equals(request.getParameter(display.getRemotePageFormParamName()));
+      final boolean displayFollowDefault = DisplayInfo.DEFAULT_REMOTE_PAGE.equals(request.getParameter(display.getRemotePageFormParamName()));
       if (displayFollowDefault) {
         followingDefault.add(display);
 
@@ -124,7 +124,8 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
 
       if (followingDefault.contains(display)) {
-        // nothing to do
+        // handled when the default display is processed
+        LOGGER.trace("display {} is following default", display.getUuid());
         continue;
       }
 
@@ -170,15 +171,16 @@ public class RemoteControlPost extends BaseFLLServlet {
       final boolean scoreBoardClockEnabled = WebUtils.getBooleanRequestParameter(request,
                                                                                  display.getScoreboardClockEnabledParamName(),
                                                                                  false);
-      LOGGER.warn("Display {} clock {}", display.getUuid(), scoreBoardClockEnabled);
+
       if (scoreBoardClockEnabled != display.isScoreboardClockEnabled()) {
         display.setScoreboardClockEnabled(scoreBoardClockEnabled);
-        ScoreboardUpdates.sendClockEnabledMessage(display, scoreBoardClockEnabled);
 
         if (display.isDefaultDisplay()) {
           for (final DisplayInfo d : followingDefault) {
             ScoreboardUpdates.sendClockEnabledMessage(d, scoreBoardClockEnabled);
           }
+        } else {
+          ScoreboardUpdates.sendClockEnabledMessage(display, scoreBoardClockEnabled);
         }
       }
     }
