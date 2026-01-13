@@ -1,3 +1,9 @@
+* #1282 - Rework database schema to not be dependent on the challenge description
+* #1117 - Upgrade database on software startup. Most users won't see any effect from this.
+
+Release 20.2.0
+==============
+
 * #1319 - only notify displays where the URL changed that the URL changed
 * #1318 - Update score board text on the dynamic scoreboard when it changes
 * #1310 - Add a clock to the scoreboard display
@@ -22,9 +28,7 @@
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1299 - Editing performance runs dropdown now shows run names
 * Allow the head judge role to do everything the report generater (tournament reporter) can do
-* #1282 - Rework database schema to not be dependent on the challenge description
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
-* #1117 - Upgrade database on software startup. Most users won't see any effect from this.
 
 Release 20.1.0
 ==============
