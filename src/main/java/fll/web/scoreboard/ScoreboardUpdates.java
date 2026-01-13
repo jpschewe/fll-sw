@@ -49,7 +49,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.Session;
 
 /**
@@ -72,12 +71,12 @@ public final class ScoreboardUpdates {
    * 
    * @param client the session to add
    * @param displayUuid uuid for the display, if null, generate a UUID
-   * @param httpSession used to lookup the application context
+   * @param application used to get application data
    * @return the UUID for the scoreboard
    */
   public static String addClient(final @Nullable String displayUuid,
                                  final Session client,
-                                 final HttpSession httpSession) {
+                                 final ServletContext application) {
     final String uuid;
     if (StringUtils.isBlank(displayUuid)) {
       uuid = DisplayHandler.registerStandaloneScoreboard(client);
@@ -85,7 +84,6 @@ public final class ScoreboardUpdates {
       uuid = displayUuid;
     }
 
-    final ServletContext application = httpSession.getServletContext();
     ALL_CLIENTS.put(uuid, client);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
