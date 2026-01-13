@@ -1,3 +1,5 @@
+Release 20.2.0
+==============
 * #1319 - only notify displays where the URL changed that the URL changed
 * #1318 - Update score board text on the dynamic scoreboard when it changes
 * #1310 - Add a clock to the scoreboard display
