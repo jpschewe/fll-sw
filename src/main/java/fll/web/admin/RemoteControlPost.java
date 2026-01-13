@@ -9,9 +9,11 @@ package fll.web.admin;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -114,6 +116,42 @@ public class RemoteControlPost extends BaseFLLServlet {
         }
       }
     }
+    
+    final Map<DisplayInfo, Boolean> updateDisplays = new HashMap<>();
+    for (final DisplayInfo display : displays) {
+      if (toDelete.contains(display)) {
+        continue;
+      }
+
+      if (newlyfollowingDefault.contains(display)) {
+        // update the page displayed as we don't know what is currently on this display
+        DisplayHandler.sendDisplayUrl(display);
+        continue;
+      }
+      if (followingDefault.contains(display)) {
+        // this will be handled when the default display is visited
+        continue;
+      }
+
+      boolean needsUpdate = false;
+      final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
+                                                                           display.getRemotePageFormParamName());
+      if (!displayRemotePage.equals(display.getRemotePage())) {
+        display.setRemotePage(displayRemotePage);
+        needsUpdate = true;
+      }
+
+      final @Nullable String specialUrl = request.getParameter(display.getSpecialUrlFormParamName());
+      if (!Objects.equals(specialUrl, display.getSpecialUrl())) {
+        display.setSpecialUrl(specialUrl);
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        updateDisplays.put(display, true);
+      }
+    }
+
 
     // Handle all parameters other than the URL change.
     // The idea is that this will get all of the parameters on the DisplayInfo
@@ -190,45 +228,18 @@ public class RemoteControlPost extends BaseFLLServlet {
       DisplayHandler.removeDisplay(display.getUuid());
     }
 
+    // notify displays that changed URLs
+      
+    for(final Map.Entry<DisplayInfo, Boolean> entry : updateDisplays.entrySet()) {
+      if(entry.getValue()) {
+        DisplayHandler.sendDisplayUrl(entry.getKey());
+      }
+    }
+
     // notify brackets that there may be changes
     for (final DisplayInfo display : displays) {
       if (!toDelete.contains(display)) {
         H2HUpdateWebSocket.updateDisplayedBracket(display);
-      }
-    }
-
-    // notify displays that changed URLs
-    for (final DisplayInfo display : displays) {
-      if (toDelete.contains(display)) {
-        continue;
-      }
-
-      if (newlyfollowingDefault.contains(display)) {
-        // update the page displayed as we don't know what is currently on this display
-        DisplayHandler.sendDisplayUrl(display);
-        continue;
-      }
-      if (followingDefault.contains(display)) {
-        // this will be handled when the default display is visited
-        continue;
-      }
-
-      boolean needsUpdate = false;
-      final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
-                                                                           display.getRemotePageFormParamName());
-      if (!displayRemotePage.equals(display.getRemotePage())) {
-        display.setRemotePage(displayRemotePage);
-        needsUpdate = true;
-      }
-
-      final @Nullable String specialUrl = request.getParameter(display.getSpecialUrlFormParamName());
-      if (!Objects.equals(specialUrl, display.getSpecialUrl())) {
-        display.setSpecialUrl(specialUrl);
-        needsUpdate = true;
-      }
-
-      if (needsUpdate) {
-        DisplayHandler.sendDisplayUrl(display);
       }
     }
 
