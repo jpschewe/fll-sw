@@ -64,13 +64,26 @@ public final class DisplayHandler {
    * 
    * @param uuid from {@link #registerDisplay(String, String, Session)}
    * @return the display information
-   * @throws UnknownDisplayException if a display with the specified uuid isn't
+   * @throws UnknownDisplayException if a display with the specified UUID isn't
    *           found
    */
   public static DisplayInfo getDisplay(final String uuid) throws UnknownDisplayException {
+    final DisplayData data = getDisplayData(uuid);
+    return data.getInfo();
+  }
+
+  /**
+   * Get the data for a particular UUID.
+   * 
+   * @param uuid from {@link #registerDisplay(String, String, Session)}
+   * @return the display data
+   * @throws UnknownDisplayException if a display with the specified UUID isn't
+   *           found
+   */
+  private static DisplayData getDisplayData(final String uuid) throws UnknownDisplayException {
     synchronized (LOCK) {
       if (DISPLAYS.containsKey(uuid)) {
-        return DISPLAYS.get(uuid).getInfo();
+        return DISPLAYS.get(uuid);
       } else {
         throw new UnknownDisplayException(uuid);
       }
@@ -181,7 +194,7 @@ public final class DisplayHandler {
     }
 
     send(uuid, data.getSocket(), new AssignUuidMessage(uuid));
-    sendCurrentUrl(data);
+    sendDisplayUrl(data);
 
     return data;
   }
@@ -196,12 +209,46 @@ public final class DisplayHandler {
     }
     for (final DisplayData d : data) {
       THREAD_POOL.execute(() -> {
-        sendCurrentUrl(d);
+        sendDisplayUrl(d);
       });
     }
   }
 
-  private static void sendCurrentUrl(final DisplayData data) {
+  /**
+   * Send the current URL to the specified display. This executes asynchronously.
+   * If {@code display} is the default display, all displays following
+   * the default display get the message.
+   * 
+   * @param display the display to send to
+   */
+  public static void sendDisplayUrl(final DisplayInfo display) {
+    try {
+      if (display.isDefaultDisplay()) {
+        // notify all displays that are following default
+        final List<DisplayData> data;
+        synchronized (LOCK) {
+          data = new LinkedList<>(DISPLAYS.values());
+        }
+        for (final DisplayData d : data) {
+          if (d.getInfo().isFollowDefault()) {
+            THREAD_POOL.execute(() -> {
+              sendDisplayUrl(d);
+            });
+          }
+        }
+      } else {
+        final DisplayData data = getDisplayData(display.getUuid());
+        THREAD_POOL.execute(() -> {
+          sendDisplayUrl(data);
+        });
+      }
+    } catch (final UnknownDisplayException e) {
+      LOGGER.warn("Unable to find display with UUID: {} while sending update URL", display.getUuid());
+    }
+
+  }
+
+  private static void sendDisplayUrl(final DisplayData data) {
     try {
       final DisplayInfo resolved = resolveDisplay(data.getInfo().getUuid());
       final String url = resolved.getUrl();
