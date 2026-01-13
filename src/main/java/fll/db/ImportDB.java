@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
@@ -223,28 +224,16 @@ public final class ImportDB {
   private static void importAuthentication(final Connection sourceConnection,
                                            final Connection destConnection)
       throws SQLException {
-    try (Statement source = sourceConnection.createStatement();
-        ResultSet sourceData = source.executeQuery("SELECT fll_user, fll_pass FROM fll_authentication");
-        PreparedStatement dest = destConnection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
-      while (sourceData.next()) {
-        final String user = sourceData.getString("fll_user");
-        final String pass = sourceData.getString("fll_pass");
-        dest.setString(1, user);
-        dest.setString(2, pass);
-        dest.executeUpdate();
-      }
+    try (
+        PreparedStatement source = sourceConnection.prepareStatement("SELECT fll_user, fll_pass, num_failures, last_failure, last_access FROM fll_authentication");
+        PreparedStatement dest = destConnection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass, num_failures, last_failure, last_access) VALUES(?, ?, ?, ?, ?)")) {
+
+      copyData(source, 0, dest, 0, -1);
     }
 
-    try (Statement source = sourceConnection.createStatement();
-        ResultSet sourceData = source.executeQuery("SELECT fll_user, fll_role FROM auth_roles");
+    try (PreparedStatement source = sourceConnection.prepareStatement("SELECT fll_user, fll_role FROM auth_roles");
         PreparedStatement dest = destConnection.prepareStatement("INSERT INTO auth_roles (fll_user, fll_role) VALUES(?, ?)")) {
-      while (sourceData.next()) {
-        final String user = sourceData.getString("fll_user");
-        final String role = sourceData.getString("fll_role");
-        dest.setString(1, user);
-        dest.setString(2, role);
-        dest.executeUpdate();
-      }
+      copyData(source, 0, dest, 0, -1);
     }
   }
 
@@ -837,6 +826,11 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 52) {
       upgrade51to52(connection, createConstraints, challengeDescription);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 53) {
+      upgrade52to53(connection);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -2026,6 +2020,21 @@ public final class ImportDB {
   }
 
   /**
+   * Add last access column to authentication table.
+   */
+  private static void upgrade52to53(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 52 to 53");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (!checkForColumnInTable(connection, "fll_authentication", "last_access")) {
+        stmt.executeUpdate("ALTER TABLE fll_authentication ADD COLUMN last_access TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL");
+      }
+    }
+
+    setDBVersion(connection, 53);
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -2591,12 +2600,30 @@ public final class ImportDB {
     }
   }
 
+  /**
+   * Calls {@link #copyData(PreparedStatement, int, PreparedStatement, int, int)}
+   * with a {@code sourceOffset} of {@code 0}, {@code destOffset} of {@code 1} and
+   * {@code columnCountOverride} of {@code -1}.
+   */
   private static void copyData(final PreparedStatement sourcePrep,
                                final PreparedStatement destPrep)
       throws SQLException {
     copyData(sourcePrep, 0, destPrep, 1, -1);
   }
 
+  /**
+   * Copy data from {@code sourcePrep} to {@code destPrep}. {@code sourcePrep} is
+   * a select statement and {@code destPrep} is a matching insert statement.
+   * Source index + {@code sourceOffset} is used to populate dest parameter +
+   * {@code destOffset}.
+   * 
+   * @param sourceOffset Usually set to {@code 0}
+   * @param destOffset Set to {@code 1} when the first parameter to insert is the
+   *          tournament identifier
+   * @param columnCountOverride if not {@code -1}, then use this instead of
+   *          {@link ResultSetMetaData#getColumnCount()} for the number of columns
+   * @throws SQLException on a database error
+   */
   private static void copyData(final PreparedStatement sourcePrep,
                                final int sourceOffset,
                                final PreparedStatement destPrep,

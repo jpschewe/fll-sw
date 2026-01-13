@@ -40,7 +40,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 52;
+  public static final int DATABASE_VERSION = 53;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -545,6 +545,7 @@ public final class GenerateDB {
           + " ,fll_pass char(32)"//
           + " ,num_failures INTEGER DEFAULT 0 NOT NULL" //
           + " ,last_failure TIMESTAMP DEFAULT NULL" //
+          + " ,last_access TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL" //
           + " ,CONSTRAINT fll_authentication_pk PRIMARY KEY (fll_user)" //
           + ")");
     }

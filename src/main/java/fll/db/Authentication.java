@@ -20,15 +20,16 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.UserRole;
 import fll.web.setup.CreateDB;
+import jakarta.servlet.ServletContext;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -135,6 +136,33 @@ public final class Authentication {
             users.add(user);
           }
         }
+      }
+    }
+    return users;
+  }
+
+  /**
+   * Get the list of current users known to the system and the details about them.
+   * 
+   * @param connection the database connection
+   * @return {@link UserInformation} for each user
+   * @throws SQLException on a database error
+   */
+  public static Collection<UserInformation> getUserInfo(final Connection connection) throws SQLException {
+    final Collection<UserInformation> users = new LinkedList<>();
+    try (Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT fll_user, num_failures, last_failure, last_access from fll_authentication");) {
+      while (rs.next()) {
+        final String user = castNonNull(rs.getString(1));
+        final int numFailures = rs.getInt(2);
+        final @Nullable Timestamp lastFailure = rs.getTimestamp(3);
+        final Timestamp lastAccess = castNonNull(rs.getTimestamp(4));
+
+        final Set<UserRole> roles = getRoles(connection, user);
+        final UserInformation info = new UserInformation(user, lastAccess.toLocalDateTime(), numFailures,
+                                                         null == lastFailure ? null : lastFailure.toLocalDateTime(),
+                                                         roles);
+        users.add(info);
       }
     }
     return users;
@@ -434,4 +462,38 @@ public final class Authentication {
     // recording a successful login will unlock the account
     recordSuccessfulLogin(connection, username);
   }
+
+  /**
+   * @param connection database connection
+   * @param username user to record a page access for
+   * @throws SQLException on a database error
+   */
+  public static void recordAccess(final Connection connection,
+                                  final String username)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE fll_authentication " //
+        + " SET last_access = CURRENT_TIMESTAMP " //
+        + " WHERE fll_user = ?")) {
+      prep.setString(1, username);
+      prep.executeUpdate();
+    }
+  }
+
+  /**
+   * Information about a user.
+   * 
+   * @param username the username
+   * @param lastAccess when the user last accessed a page
+   * @param loginFailures the number of login failures since the last successful
+   *          login
+   * @param lastLoginFailure the time of the last login failure
+   * @param roles the roles that the user has
+   */
+  public record UserInformation(String username,
+                                LocalDateTime lastAccess,
+                                int loginFailures,
+                                @Nullable LocalDateTime lastLoginFailure,
+                                Set<UserRole> roles) {
+  }
+
 }
