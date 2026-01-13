@@ -447,26 +447,25 @@ function messageReceived(event) {
         updateScorePageText(message.text);
     } else if (message.type == CLOCK_ENABLED_MESSAGE_TYPE) {
         clockEnabled = message.clockEnabled;
+        showHideClock();
     } else {
         console.log("Ignoring unexpected message type: " + message.type);
         console.log("Full message: " + event.data);
     }
 }
 
-function updateClock() {
+function showHideClock() {
     const clockElement = document.getElementById('clock');
-
-    if (clockDisabled) {
-        clockElement.classList.add("fll-sw-ui-inactive");
-        // don't start the clock timer if it's disabled
-        return;
-    }
 
     if (clockEnabled) {
         clockElement.classList.remove("fll-sw-ui-inactive");
     } else {
         clockElement.classList.add("fll-sw-ui-inactive");
     }
+}
+
+function updateClock() {
+    const clockElement = document.getElementById('clock');
 
     const today = new Date();
     // mod 12 to not use 24-hour time
@@ -578,8 +577,14 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(allTeamsDoScroll);
     }
 
-    clockEnabled = INITIAL_CLOCK_ENABLED;
-    updateClock();
+    if (clockDisabled) {
+        clockElement.classList.add("fll-sw-ui-inactive");
+        // don't start the clock timer if it's disabled    
+    } else {
+        clockEnabled = INITIAL_CLOCK_ENABLED;
+        showHideClock();
+        updateClock();
+    }
 
     updateScorePageText(INITIAL_SCORE_PAGE_TEXT);
 
