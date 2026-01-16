@@ -48,7 +48,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 
     <c:if test="${authentication.admin}">
         <a class="wide"
-            href="<c:url value='/admin/performance-area.jsp' />">Scoring
+            href="<c:url value='/scoring-coordinator.jsp' />">Scoring
             Coordinator</a>
     </c:if>
 
