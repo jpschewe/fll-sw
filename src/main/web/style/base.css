@@ -127,3 +127,7 @@ li.no-marker {
 .right-align {
     float: right;
 }
+
+.fll-sw-hide-cursor {
+    cursor: none;
+}

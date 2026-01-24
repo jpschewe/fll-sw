@@ -1,3 +1,5 @@
+* Hide the cursor on the display pages
+
 Release 20.2.0
 ==============
 * #1319 - only notify displays where the URL changed that the URL changed
