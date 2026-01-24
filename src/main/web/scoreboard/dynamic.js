@@ -27,9 +27,6 @@ let topScoresDisplayAllTeams = false;
 
 let clockEnabled = false;
 
-// set to true if the clock should never be enabled, even when a message comes in to enable it
-let clockDisabled = false;
-
 // set to true if the score page text enabled, even when a message comes in to enable it
 let scorePageTextDisabled = false;
 
@@ -502,6 +499,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     topScoresChangeAwardGroup();
 
+    // set to true if the clock should never be enabled, even when a message comes in to enable it
+    let clockDisabled = false;
+
     if ("all_teams_top_scores" == layout) {
         clockDisabled = true;
         scorePageTextDisabled = true;
@@ -578,6 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (clockDisabled) {
+        const clockElement = document.getElementById('clock');
         clockElement.classList.add("fll-sw-ui-inactive");
         // don't start the clock timer if it's disabled    
     } else {
