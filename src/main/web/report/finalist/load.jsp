@@ -22,6 +22,9 @@ fll.ScoreStandardization.computeSummarizedScoresIfNeeded(application);
 
 <script type='text/javascript' src='finalist_load.js'></script>
 
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
+
 </head>
 
 <body>
