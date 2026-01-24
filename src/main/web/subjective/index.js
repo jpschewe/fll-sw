@@ -62,14 +62,6 @@ function promptForReload() {
 }
 
 function reloadData() {
-    if (subjective_module.checkForModifiedScores()) {
-        document.getElementById("confirm-modified-scores-dialog").classList.remove("fll-sw-ui-inactive");
-    } else {
-        reloadDataConfirmed();
-    }
-}
-
-function reloadDataConfirmed() {
     document.getElementById("index-page_choose_clear").classList.add("fll-sw-ui-inactive");
 
     subjective_module.clearAllData();
@@ -88,6 +80,7 @@ function checkTournament() {
             reloadData();
         } else if (storedTournament.name != serverTournament.name
             || storedTournament.tournamentID != serverTournament.tournamentID) {
+            subjective_module.log(`Tournament mismatch, loading new data. Stored: ${storedTournament.name}. Server: ${serverTournament.name}`);
             reloadData();
         } else if (!subjective_module.checkForModifiedScores()) {
             // nothing is modified, just reload

@@ -1,3 +1,4 @@
+* Don't prompt the judge for modified score overwrite when the tournament changes
 * Hide the cursor on the display pages
 
 Release 20.2.0
