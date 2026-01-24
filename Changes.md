@@ -1,3 +1,4 @@
+* Don't prompt the judge for modified score overwrite when the tournament changes
 * Hide the cursor on the display pages
 * #1303 - Track and display last page access for users
 * #1282 - Rework database schema to not be dependent on the challenge description
