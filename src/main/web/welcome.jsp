@@ -23,7 +23,7 @@ fll.web.Welcome.populateContext(pageContext);
 
 </head>
 
-<body>
+<body class='fll-sw-hide-cursor'>
 
     <div class='center'>
         <h1>${challengeDescription.title }</h1>

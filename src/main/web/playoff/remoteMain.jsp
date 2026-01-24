@@ -2,7 +2,7 @@
 
 <fll-sw:required-roles roles="PUBLIC" allowSetup="false" />
 
-<html>
+<html class="fll-sw-hide-cursor">
 <head>
 <title>Playoff Brackets</title>
 <link rel="stylesheet" type="text/css"

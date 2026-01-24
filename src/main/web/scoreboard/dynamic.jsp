@@ -50,7 +50,7 @@ const INITIAL_CLOCK_ENABLED = parseBoolean("${ClockEnabled}");
 </script>
 
 </head>
-<body class='scoreboard'>
+<body class='scoreboard fll-sw-hide-cursor'>
     <div id='container'>
 
         <div id='left'>

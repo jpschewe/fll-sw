@@ -27,6 +27,7 @@ FONT {
 body {
     margin: 0;
     padding: 0;
+    cursor: none;
 }
 
 div.img {
