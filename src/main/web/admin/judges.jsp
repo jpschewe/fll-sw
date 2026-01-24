@@ -40,10 +40,10 @@ categories["${cat.key}"] = "${cat.value}";
         judging forms. There must be at least 1 judge for each category.</p>
 
     <p>
-        Removing the ID of a judge will delete that judge. However it
-        will
-        <b>not</b>
-        delete that judge's scores.
+        Removing or renaming the ID of a judge will delete that judge
+        and
+        <b>their scores</b>
+        .
     </p>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
