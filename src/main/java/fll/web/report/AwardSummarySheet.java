@@ -9,6 +9,7 @@ package fll.web.report;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -159,6 +160,12 @@ public class AwardSummarySheet extends BaseFLLServlet {
     headerBlock.appendChild(groupSection);
     groupSection.appendChild(document.createTextNode("Judging Group: "));
     groupSection.appendChild(document.createTextNode(groupName));
+
+    final Element timestampEle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    headerBlock.appendChild(timestampEle);
+    timestampEle.setAttribute("font-size", "8pt");
+    timestampEle.appendChild(document.createTextNode(FinalComputedScores.REPORT_TIMESTAMP_FORMATTER.format(LocalDateTime.now())));
+    timestampEle.setAttribute("padding-left", "3pt");
 
     boolean first = true;
     for (AwardCategory category : AwardDeterminationOrder.get(connection, challengeDescription)) {
