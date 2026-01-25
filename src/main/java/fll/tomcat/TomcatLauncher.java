@@ -192,7 +192,12 @@ public class TomcatLauncher {
 
     // add log4j access log valve
     final Log4jAccessLog accessLogValve = new Log4jAccessLog();
-    accessLogValve.setPattern("%h %{X-Forwarded-For}i \"%r\" %s %S");
+    // %{XXX}i - incoming HTTP header
+    // %r request
+    // %s HTTP status code
+    // %S session ID
+    // %D microseconds to process request
+    accessLogValve.setPattern("%{X-Forwarded-Host}i %h %{X-Forwarded-For}i \"%r\" %s %S %D");
     tomcat.getHost().getPipeline().addValve(accessLogValve);
   }
 
