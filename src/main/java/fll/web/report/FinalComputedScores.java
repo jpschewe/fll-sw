@@ -120,6 +120,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final double FOOTER_MARGIN_INCHES = 1;
 
+  /**
+   * Format used to add timestamps to reports.
+   */
   public static final DateTimeFormatter REPORT_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
                                                                                                                 2)
                                                                                                    .appendLiteral('/')
