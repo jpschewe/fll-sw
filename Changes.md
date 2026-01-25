@@ -1,9 +1,9 @@
-* Add timestamp to awards summary sheet
-* Don't prompt the judge for modified score overwrite when the tournament changes
-* Hide the cursor on the display pages
 * #1303 - Track and display last page access for users
 * #1282 - Rework database schema to not be dependent on the challenge description
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
+* Add timestamp to awards summary sheet
+* Don't prompt the judge for modified score overwrite when the tournament changes
+* Hide the cursor on the display pages
 
 Release 20.2.0
 ==============
