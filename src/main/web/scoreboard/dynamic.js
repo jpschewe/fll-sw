@@ -394,7 +394,7 @@ function initMostRecent() {
 
 
 function socketOpened(_) {
-    console.log("Socket opened");
+    console.log(`Socket opened. UUID ${displayUuid}`);
 
     const message = new Object()
     message.type = REGISTER_MESSAGE_TYPE;
@@ -446,8 +446,7 @@ function messageReceived(event) {
         clockEnabled = message.clockEnabled;
         showHideClock();
     } else {
-        console.log("Ignoring unexpected message type: " + message.type);
-        console.log("Full message: " + event.data);
+        console.log(`Ignoring unexpected message: ${event.data}`);
     }
 }
 
