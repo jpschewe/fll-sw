@@ -120,21 +120,24 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final double FOOTER_MARGIN_INCHES = 1;
 
-  private static final DateTimeFormatter REPORT_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
-                                                                                                                 2)
-                                                                                                    .appendLiteral('/')
-                                                                                                    .appendValue(ChronoField.DAY_OF_MONTH,
-                                                                                                                 2)
-                                                                                                    .appendLiteral('/')
-                                                                                                    .appendValue(ChronoField.YEAR,
-                                                                                                                 4)
-                                                                                                    .appendLiteral(' ')
-                                                                                                    .appendValue(ChronoField.HOUR_OF_DAY,
-                                                                                                                 2)
-                                                                                                    .appendLiteral(':')
-                                                                                                    .appendValue(ChronoField.MINUTE_OF_HOUR,
-                                                                                                                 2)
-                                                                                                    .toFormatter();
+  /**
+   * Format used to add timestamps to reports.
+   */
+  public static final DateTimeFormatter REPORT_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
+                                                                                                                2)
+                                                                                                   .appendLiteral('/')
+                                                                                                   .appendValue(ChronoField.DAY_OF_MONTH,
+                                                                                                                2)
+                                                                                                   .appendLiteral('/')
+                                                                                                   .appendValue(ChronoField.YEAR,
+                                                                                                                4)
+                                                                                                   .appendLiteral(' ')
+                                                                                                   .appendValue(ChronoField.HOUR_OF_DAY,
+                                                                                                                2)
+                                                                                                   .appendLiteral(':')
+                                                                                                   .appendValue(ChronoField.MINUTE_OF_HOUR,
+                                                                                                                2)
+                                                                                                   .toFormatter();
 
   /**
    * Group name for all values of the group.
