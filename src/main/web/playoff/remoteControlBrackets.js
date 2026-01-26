@@ -13,7 +13,7 @@ function isDisplayInfoDifferent(newAllBracketData) {
     }
 
     const length = allBracketData.length
-    for (let i = 0; i < length; i++) {
+    for (let i = 0;i < length;i++) {
         // Check if we have nested arrays
         const oldBracketInfo = allBracketData[i];
         const newBracketInfo = newAllBracketData[i];
@@ -208,6 +208,17 @@ function openSocket() {
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;
+}
+
+function startScrolling() {
+    const topElement = document.getElementById("top");
+    const bottomElement = document.getElementById("bottom");
+    const scrollElement = window;
+    const endPauseSeconds = 3;
+    // if less than 1, then Chromebooks don't appear to scroll
+    const pixelsToScroll = 2;
+
+    startEndlessScroll(scrollElement, topElement, bottomElement, endPauseSeconds, pixelsToScroll, secondsBetweenScrolls)
 }
 
 document.addEventListener("DOMContentLoaded", function() {

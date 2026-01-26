@@ -9,11 +9,6 @@
 let scoreEventSource = null;
 let displayOrganization = true;
 
-let prevScrollTimestamp = 0;
-// if less than 1, then Chromebooks don't appear to scroll
-const pixelsToScroll = 2;
-let scrollingDown = true;
-
 // maximum number of rows in the most recent table
 const MOST_RECENT_MAX_ROWS = 20;
 
@@ -286,24 +281,6 @@ function addToAllTeams(scoreUpdate) {
     teamTable.classList.remove("fll-sw-ui-inactive");
 }
 
-function allTeamsDoScroll(timestamp) {
-    const diff = timestamp - prevScrollTimestamp;
-    if (diff / 1000.0 >= secondsBetweenScrolls) {
-        if (scrollingDown && elementIsVisible(document.getElementById("all_teams_bottom"))) {
-            scrollingDown = false;
-        } else if (!scrollingDown
-            && elementIsVisible(document.getElementById("all_teams_top"))) {
-            scrollingDown = true;
-        }
-
-        const scrollAmount = scrollingDown ? pixelsToScroll : -1 * pixelsToScroll;
-        document.getElementById("all_teams").scrollBy(0, scrollAmount);
-        prevScrollTimestamp = timestamp;
-    }
-
-    requestAnimationFrame(allTeamsDoScroll);
-}
-
 function addToMostRecent(tableBody, scoreUpdate) {
     const rowId = "most_recent_" + scoreUpdate.team.teamNumber + "_run_" + scoreUpdate.runNumber;
     const prevRow = document.getElementById(rowId);
@@ -493,6 +470,17 @@ function updateScorePageText(text) {
     }
 }
 
+function startAllTeamsScroll() {
+    const topElement = document.getElementById("all_teams_top");
+    const bottomElement = document.getElementById("all_teams_bottom");
+    const scrollElement = document.getElementById("all_teams");
+    const endPauseSeconds = 3;
+    // if less than 1, then Chromebooks don't appear to scroll
+    const pixelsToScroll = 2;
+
+    startEndlessScroll(scrollElement, topElement, bottomElement, endPauseSeconds, pixelsToScroll, secondsBetweenScrolls)
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     initMostRecent();
 
@@ -510,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
         topScoresDisplayAllTeams = true;
 
         document.getElementById("all_teams").classList.add("automatic_scroll");
-        requestAnimationFrame(allTeamsDoScroll);
+        startAllTeamsScroll();
     } else if ("all_teams_no_scroll" == layout) {
         clockDisabled = true;
         scorePageTextDisabled = true;
@@ -533,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container.appendChild(allTeams);
 
         document.getElementById("all_teams").classList.add("automatic_scroll");
-        requestAnimationFrame(allTeamsDoScroll);
+        startAllTeamsScroll();
     } else if ("top_scores" == layout) {
         clockDisabled = true;
         scorePageTextDisabled = true;
@@ -570,10 +558,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("top_scores").classList.add("fll-sw-ui-inactive");
 
         document.getElementById("all_teams").classList.add("automatic_scroll");
-        requestAnimationFrame(allTeamsDoScroll);
+        startAllTeamsScroll();
     } else {
         document.getElementById("all_teams").classList.add("automatic_scroll");
-        requestAnimationFrame(allTeamsDoScroll);
+        startAllTeamsScroll();
     }
 
     if (clockDisabled) {

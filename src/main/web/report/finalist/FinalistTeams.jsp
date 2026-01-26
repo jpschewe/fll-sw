@@ -26,32 +26,23 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 <script type="text/javascript">
   let prevScrollTimestamp = 0;
   const secondsBetweenScrolls = parseFloat("${scrollRate}");
-  // if less than 2, Chromeboook doesn't scroll
-  const pixelsToScroll = 2;
 
-  function reload() {
-    window.scrollTo(0, 0);
-    location.reload(true);
-  }
+  function startScrolling() {
+    const topElement = document.getElementById("top");
+    const bottomElement = document.getElementById("bottom");
+    const scrollElement = window;
+    const endPauseSeconds = 3;
+    // if less than 1, then Chromebooks don't appear to scroll
+    const pixelsToScroll = 2;
 
-  function scrollDown(timestamp) {
-    if (!elementIsVisible(document.getElementById("bottom"))) {
-      const diff = timestamp - prevScrollTimestamp;
-      if (diff / 1000.0 >= secondsBetweenScrolls) {
-        window.scrollBy(0, pixelsToScroll);
-        prevScrollTimestamp = timestamp;
-      }
-      requestAnimationFrame(scrollDown);
-    } else {
-      // show the bottom for a bit and then reload
-      setTimeout(reload, 3000);
-    }
+    startEndlessScroll(scrollElement, topElement, bottomElement,
+        endPauseSeconds, pixelsToScroll, secondsBetweenScrolls)
   }
 
   document.addEventListener("DOMContentLoaded", function() {
     <c:if test="${param.finalistTeamsScroll}">
     console.log("Starting scroll");
-    requestAnimationFrame(scrollDown);
+    startScrolling();
     </c:if>
   });
 </script>
@@ -61,6 +52,8 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 <body class='scoreboard fll-sw-hide-cursor'>
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Teams in finalist judging</h1>
+
+    <div id="top">&nbsp;</div>
 
     <table border='1'>
         <tr>
