@@ -512,27 +512,7 @@ public final class Utilities {
       return new int[0];
     }
 
-    final int lbracket = str.indexOf('[');
-    if (-1 == lbracket) {
-      throw new FLLRuntimeException("No '[' found in string: '"
-          + str
-          + "'");
-    }
-    final int rbracket = str.indexOf(']', lbracket);
-    if (-1 == rbracket) {
-      throw new FLLRuntimeException("No ']' found in string: '"
-          + str
-          + "'");
-    }
-    final String[] strings;
-    if (lbracket
-        + 1 == rbracket) {
-      strings = new String[0];
-    } else {
-      strings = str.substring(lbracket
-          + 1, rbracket).split(",");
-    }
-
+    final String[] strings = parseListOfStrings(str);
     final int[] values = new int[strings.length];
     for (int i = 0; i < strings.length; ++i) {
       values[i] = Integer.parseInt(strings[i].trim());
