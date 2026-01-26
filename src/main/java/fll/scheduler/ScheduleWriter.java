@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -780,17 +781,14 @@ public final class ScheduleWriter {
     return performanceTimes;
   }
 
-  private static Document createPerformanceSchedulePerTable(final Connection connection,
-                                                            final TournamentData tournamentData,
-                                                            final TournamentSchedule schedule,
-                                                            final boolean displayAwardGroup,
-                                                            final boolean displayNotes)
-      throws SQLException {
-
-    final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection,
-                                                                                         tournamentData.getCurrentTournament());
-
-    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = collectPerformanceTimes(schedule);
+  /**
+   * Create a standard document with the default margins and a simple footer.
+   * 
+   * @param schedule if not null, put the schedule name in the footer, otherwise
+   *          just use
+   *          {@link FOPUtils#createSimpleFooter(Document)}
+   */
+  private static ImmutablePair<Document, Element> createSimpleDocument(final @Nullable TournamentSchedule schedule) {
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -808,12 +806,36 @@ public final class ScheduleWriter {
     rootElement.appendChild(pageSequence);
     pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
-    final String footerText = String.format("Tournament: %s", schedule.getName());
-    final Element footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
+    final Element footer;
+    if (null != schedule) {
+      final String footerText = String.format("Tournament: %s", schedule.getName());
+      footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
+    } else {
+      footer = FOPUtils.createSimpleFooter(document);
+    }
     pageSequence.appendChild(footer);
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
+
+    return ImmutablePair.of(document, documentBody);
+  }
+
+  private static Document createPerformanceSchedulePerTable(final Connection connection,
+                                                            final TournamentData tournamentData,
+                                                            final TournamentSchedule schedule,
+                                                            final boolean displayAwardGroup,
+                                                            final boolean displayNotes)
+      throws SQLException {
+
+    final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection,
+                                                                                         tournamentData.getCurrentTournament());
+
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(schedule);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
+
+    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = collectPerformanceTimes(schedule);
 
     tables.forEach(tableInfo -> {
       addScheduleForTableSide(tournamentData.getRunMetadataFactory(), tables, schedule, displayAwardGroup, displayNotes,
@@ -853,29 +875,11 @@ public final class ScheduleWriter {
                                                     final TournamentSchedule schedule) {
     final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = collectPerformanceTimes(schedule);
 
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element rootElement = FOPUtils.createRoot(document);
-    document.appendChild(rootElement);
-
-    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
-    rootElement.appendChild(layoutMasterSet);
-
-    final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
-    layoutMasterSet.appendChild(pageMaster);
-
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(schedule);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
 
     final String headerText = String.format("Tournament: %s", schedule.getName());
-
-    final Element footer = FOPUtils.createSimpleFooter(document, headerText, FOPUtils.PAGE_SEQUENCE_NAME);
-    pageSequence.appendChild(footer);
-
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
 
     final Element ele = createPerformanceScheduleTable(runMetadataFactory, tables, schedule, headerText, document,
                                                        performanceTimes, true, false);
@@ -1151,27 +1155,9 @@ public final class ScheduleWriter {
 
   private static Document createTeamSchedules(final RunMetadataFactory runMetadataFactory,
                                               final TournamentSchedule schedule) {
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element rootElement = FOPUtils.createRoot(document);
-    document.appendChild(rootElement);
-
-    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
-    rootElement.appendChild(layoutMasterSet);
-
-    final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
-    layoutMasterSet.appendChild(pageMaster);
-
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
-
-    final Element footer = FOPUtils.createSimpleFooter(document);
-    pageSequence.appendChild(footer);
-
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(null);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
 
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
     Collections.sort(scheduleEntries, TournamentSchedule.ComparatorByTeam.INSTANCE);
@@ -1212,27 +1198,9 @@ public final class ScheduleWriter {
   private static Document createTeamSchedule(final RunMetadataFactory runMetadataFactory,
                                              final TournamentSchedule schedule,
                                              final int teamNumber) {
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element rootElement = FOPUtils.createRoot(document);
-    document.appendChild(rootElement);
-
-    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
-    rootElement.appendChild(layoutMasterSet);
-
-    final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
-    layoutMasterSet.appendChild(pageMaster);
-
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
-
-    final Element footer = FOPUtils.createSimpleFooter(document);
-    pageSequence.appendChild(footer);
-
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(null);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
 
     final @Nullable TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
     if (null != si) {
@@ -1391,28 +1359,9 @@ public final class ScheduleWriter {
   }
 
   private static Document createSubjectiveSchedulesByCategory(final TournamentSchedule schedule) {
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element rootElement = FOPUtils.createRoot(document);
-    document.appendChild(rootElement);
-
-    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
-    rootElement.appendChild(layoutMasterSet);
-
-    final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
-    layoutMasterSet.appendChild(pageMaster);
-
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
-
-    final String footerText = String.format("Tournament: %s", schedule.getName());
-    final Element footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
-    pageSequence.appendChild(footer);
-
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(schedule);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
 
     for (final String subjectiveStation : schedule.getSubjectiveStations()) {
       final Element table = outputSubjectiveScheduleByCategory(document, schedule, subjectiveStation);
@@ -1576,29 +1525,9 @@ public final class ScheduleWriter {
                                                 TournamentSchedule.ORGANIZATION_HEADER,
                                                 TournamentSchedule.TEAM_NAME_HEADER, "Station",
                                                 TournamentSchedule.JUDGE_GROUP_HEADER, "Time" };
-
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element rootElement = FOPUtils.createRoot(document);
-    document.appendChild(rootElement);
-
-    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
-    rootElement.appendChild(layoutMasterSet);
-
-    final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
-    layoutMasterSet.appendChild(pageMaster);
-
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
-
-    final String headerFooterText = String.format("Tournament: %s", schedule.getName());
-    final Element footer = FOPUtils.createSimpleFooter(document, headerFooterText, FOPUtils.PAGE_SEQUENCE_NAME);
-    pageSequence.appendChild(footer);
-
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(schedule);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
 
     final Element table = FOPUtils.createBasicTable(document);
     documentBody.appendChild(table);
@@ -1617,7 +1546,8 @@ public final class ScheduleWriter {
     final Element headerRow1 = FOPUtils.createTableRow(document);
     header.appendChild(headerRow1);
 
-    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerFooterText);
+    final String headerText = String.format("Tournament: %s", schedule.getName());
+    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerText);
     headerRow1.appendChild(tournamentHeader);
     tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.length));
     FOPUtils.addBorders(tournamentHeader, FOPUtils.STANDARD_BORDER_WIDTH, FOPUtils.STANDARD_BORDER_WIDTH,
@@ -1747,28 +1677,9 @@ public final class ScheduleWriter {
   }
 
   private static Document createSubjectiveSchedulesByJudgingStation(final TournamentSchedule schedule) {
-    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element rootElement = FOPUtils.createRoot(document);
-    document.appendChild(rootElement);
-
-    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
-    rootElement.appendChild(layoutMasterSet);
-
-    final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
-    layoutMasterSet.appendChild(pageMaster);
-
-    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
-    rootElement.appendChild(pageSequence);
-    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
-
-    final String footerText = String.format("Tournament: %s", schedule.getName());
-    final Element footer = FOPUtils.createSimpleFooter(document, footerText, FOPUtils.PAGE_SEQUENCE_NAME);
-    pageSequence.appendChild(footer);
-
-    final Element documentBody = FOPUtils.createBody(document);
-    pageSequence.appendChild(documentBody);
+    final ImmutablePair<Document, Element> simpleDocument = createSimpleDocument(schedule);
+    final Document document = simpleDocument.getLeft();
+    final Element documentBody = simpleDocument.getRight();
 
     for (final String subjectiveStation : schedule.getSubjectiveStations()) {
       final Element ele = createSubjectiveScheduleByJudgingStation(schedule, document, subjectiveStation);
