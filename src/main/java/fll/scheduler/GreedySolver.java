@@ -1551,23 +1551,9 @@ public class GreedySolver {
 
     try (CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
                                                               Utilities.DEFAULT_CHARSET))) {
-      final List<String> line = new ArrayList<>();
-      line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
-      line.add(TournamentSchedule.TEAM_NAME_HEADER);
-      line.add(TournamentSchedule.ORGANIZATION_HEADER);
-      line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      for (final SubjectiveStation station : subjectiveStations) {
-        line.add(station.getName());
-      }
-      for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
-        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
-            + 1));
-        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
-            + 1));
-      }
-      csv.writeNext(line.toArray(new String[line.size()]));
-      line.clear();
+      csv.writeNext(createHeaderRow());
 
+      final List<String> line = new ArrayList<>();
       for (final SchedTeam team : getAllTeams()) {
         final int teamNum = (team.getGroup()
             + 1)
