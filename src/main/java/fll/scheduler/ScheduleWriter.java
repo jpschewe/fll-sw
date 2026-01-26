@@ -767,6 +767,19 @@ public final class ScheduleWriter {
     }
   }
 
+  /**
+   * @return map time to the team schedule information
+   */
+  private static Map<PerformanceTime, TeamScheduleInfo> collectPerformanceTimes(final TournamentSchedule schedule) {
+    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
+    for (final TeamScheduleInfo si : schedule.getSchedule()) {
+      for (final PerformanceTime pt : si.getAllPerformances()) {
+        performanceTimes.put(pt, si);
+      }
+    }
+    return performanceTimes;
+  }
+
   private static Document createPerformanceSchedulePerTable(final Connection connection,
                                                             final TournamentData tournamentData,
                                                             final TournamentSchedule schedule,
@@ -777,12 +790,7 @@ public final class ScheduleWriter {
     final List<TableInformation> tables = TableInformation.getTournamentTableInformation(connection,
                                                                                          tournamentData.getCurrentTournament());
 
-    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
-    for (final TeamScheduleInfo si : schedule.getSchedule()) {
-      for (final PerformanceTime pt : si.getAllPerformances()) {
-        performanceTimes.put(pt, si);
-      }
-    }
+    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = collectPerformanceTimes(schedule);
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -843,12 +851,7 @@ public final class ScheduleWriter {
   private static Document createPerformanceSchedule(final RunMetadataFactory runMetadataFactory,
                                                     final List<TableInformation> tables,
                                                     final TournamentSchedule schedule) {
-    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = new HashMap<>();
-    for (final TeamScheduleInfo si : schedule.getSchedule()) {
-      for (final PerformanceTime pt : si.getAllPerformances()) {
-        performanceTimes.put(pt, si);
-      }
-    }
+    final Map<PerformanceTime, TeamScheduleInfo> performanceTimes = collectPerformanceTimes(schedule);
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
