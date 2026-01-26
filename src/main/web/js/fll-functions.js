@@ -226,3 +226,84 @@ function parseBoolean(str) {
     return (lowerCaseStr === "true" || lowerCaseStr === "yes" || lowerCaseStr === "1");
 }
 
+
+
+/**
+ * @param {Element} scrollElement the element to scroll
+ * @param {Element} topElement the element inside of scrollElement that signals the top of the scroll area
+ * @param {Element} bottomElement the element inside of scrollElement that signals the bottom of the scroll area
+ * @param {number} endPauseSeconds the number of seconds to pause at the top and bottom before switching directions
+ * @param {number} pixelsToScroll the number of pixels to scroll each secondsBetweenScrolls
+ * @param {number} secondsBetweenScrolls the number of seconds to pause between executing scroll commands
+ */
+function startEndlessScroll(scrollElement, topElement, bottomElement, endPauseSeconds, pixelsToScroll, secondsBetweenScrolls) {
+    let scrollingDown = true;
+    let scrollingPause = false;
+    let scrollingPauseStartTimestamp = 0;
+    let prevScrollTimestamp = 0;
+
+    const callback = (entries, observer) => {
+        let topVisible = false;
+        let bottomVisible = false;
+        entries.forEach((entry) => {
+            //const isTop = topElement == entry.target;
+            //const isBottom = bottomElement == entry.target;
+            //console.log(`Intersecting: ${entry.isIntersecting} ratio: ${entry.intersectionRatio} element: ${entry.target} top: ${isTop} bottom ${isBottom}`);
+            if (entry.isIntersecting) {
+                if (topElement == entry.target) {
+                    topVisible = true;
+                } else if (bottomElement == entry.target) {
+                    bottomVisible = true;
+                }
+            }
+        });
+
+        if (topVisible && bottomVisible) {
+            // Handle initial state where both top and bottom are marked as visible.
+            // In this case we want to scroll down.
+            scrollingDown = true;
+        } else if (topVisible) {
+            // hit the top, time to start scrolling down
+            scrollingPause = true;
+            scrollingDown = true;
+        } else if (bottomVisible) {
+            // hit the bottom, time to start scrolling up
+            scrollingPause = true;
+            scrollingDown = false;
+        }
+    };
+
+    const options = {
+        root: document.getElementById("all_teams"),
+        threshold: 1.0
+    }
+    const observer = new IntersectionObserver(callback, options);
+    observer.observe(topElement);
+    observer.observe(bottomElement);
+
+    const animationCallback = (timestamp) => {
+        if (scrollingPause) {
+            if (scrollingPauseStartTimestamp > 0) {
+                const pauseDiffSeconds = (timestamp - scrollingPauseStartTimestamp) / 1000.0;
+                if (pauseDiffSeconds > endPauseSeconds) {
+                    scrollingPause = false;
+                    scrollingPauseStartTimestamp = 0;
+                }
+            } else {
+                scrollingPauseStartTimestamp = timestamp;
+            }
+        }
+
+
+        const scrollDiffSeconds = (timestamp - prevScrollTimestamp) / 1000.0;
+        if (!scrollingPause && scrollDiffSeconds >= secondsBetweenScrolls) {
+            const scrollAmount = scrollingDown ? pixelsToScroll : -1 * pixelsToScroll;
+            scrollElement.scrollBy(0, scrollAmount);
+            prevScrollTimestamp = timestamp;
+        }
+
+        requestAnimationFrame(animationCallback);
+    };
+
+    requestAnimationFrame(animationCallback);
+}
