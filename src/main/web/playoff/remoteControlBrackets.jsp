@@ -73,32 +73,9 @@ SPAN.TIE {
 <script type='text/javascript' src='remoteControlBrackets.js'></script>
 
 <script type="text/javascript">
-  let prevScrollTimestamp = 0;
-  // if less than 1, then Chromebooks don't appear to scroll
-  const pixelsToScroll = 2;
-  let scrollingDown = true;
-
-  function doScroll(timestamp) {
-    const diff = timestamp - prevScrollTimestamp;
-    if (diff / 1000.0 >= secondsBetweenScrolls) {
-      if (scrollingDown && elementIsVisible(document.getElementById("bottom"))) {
-        scrollingDown = false;
-      } else if (!scrollingDown
-          && elementIsVisible(document.getElementById("top"))) {
-        scrollingDown = true;
-      }
-
-      const scrollAmount = scrollingDown ? pixelsToScroll : -1 * pixelsToScroll;
-      window.scrollBy(0, scrollAmount);
-      prevScrollTimestamp = timestamp;
-    }
-
-    requestAnimationFrame(doScroll);
-  }
-
   document.addEventListener("DOMContentLoaded", function() {
     <c:if test="${empty param.scroll}">
-    requestAnimationFrame(doScroll);
+    startScrolling();
     </c:if>
     colorTableLabels();
   });
