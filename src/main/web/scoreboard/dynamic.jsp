@@ -19,7 +19,7 @@ fll.web.scoreboard.Dynamic.populateContext(request, application, pageContext);
 <link rel='stylesheet' type='text/css' href='dynamic.css' />
 
 <script type="text/javascript">
-  var secondsBetweenScrolls = parseFloat("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
+  const secondsBetweenScrolls = parseFloat("${scrollRate}"); // could be here directly as an integer, but the JSTL and auto-formatting don't agree
 </script>
 
 <script type='text/javascript'
