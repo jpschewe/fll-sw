@@ -1,3 +1,4 @@
+* #1323 - Better handling of display remote control errors 
 * Add timestamp to awards summary sheet
 * Don't prompt the judge for modified score overwrite when the tournament changes
 * Hide the cursor on the display pages
