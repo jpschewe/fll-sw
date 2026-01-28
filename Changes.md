@@ -1,3 +1,4 @@
+* #1323 - Better handling of display remote control errors 
 * #1303 - Track and display last page access for users
 * #1282 - Rework database schema to not be dependent on the challenge description
 * #1117 - Upgrade database on software startup. Most users won't see any effect from this.
