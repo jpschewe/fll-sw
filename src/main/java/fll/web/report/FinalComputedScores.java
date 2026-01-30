@@ -89,7 +89,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * @param category the category the score information is for
    * @param rank the rank in the category
-   * @param rankFraction the rank weighted by teams
    * @param scoreText the string formatted score
    * @param missing true if the score is missing
    */
@@ -102,10 +101,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * @param teamNumber team number
    * @param teamName team name
-   * @param orgaization organization
+   * @param organization organization
    * @param judgingGroup judging group or award group
    * @param subjectiveRawScoreData subjective raw scores
-   * @param subjectiveSclaedScoreData subjective scaled scores
+   * @param subjectiveScaledScoreData subjective scaled scores
    * @param performanceRawScoreData performance raw scores
    * @param performanceScaledScoreData performance scaled scores
    * @param overallScore team overall score
