@@ -886,14 +886,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
-  private List<TeamScoreData> gatherReportData(final Connection connection,
-                                               final List<AwardCategory> awardOrder,
-                                               final ChallengeDescription description,
-                                               final String groupName,
-                                               final ReportSelector selector,
-                                               final WinnerType winnerCriteria,
-                                               final Tournament tournament,
-                                               final PerformanceScoreCategory performanceCategory)
+  private static List<TeamScoreData> gatherReportData(final Connection connection,
+                                                      final List<AwardCategory> awardOrder,
+                                                      final ChallengeDescription description,
+                                                      final String groupName,
+                                                      final ReportSelector selector,
+                                                      final WinnerType winnerCriteria,
+                                                      final Tournament tournament,
+                                                      final PerformanceScoreCategory performanceCategory)
       throws SQLException {
     final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                                           description,
@@ -1048,9 +1048,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return reportData;
   }
 
-  private ScoreData computeCategoryScaledScore(final AwardCategory category,
-                                               final Integer teamNumber,
-                                               final Map<Integer, ImmutablePair<Integer, Double>> rankInCategory) {
+  private static ScoreData computeCategoryScaledScore(final AwardCategory category,
+                                                      final Integer teamNumber,
+                                                      final Map<Integer, ImmutablePair<Integer, Double>> rankInCategory) {
     final double scaledScore;
     final int rank;
     if (rankInCategory.containsKey(teamNumber)) {
@@ -1085,11 +1085,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return new ScoreData(category, rank, rankFraction, scoreText, Double.isNaN(scaledScore));
   }
 
-  private ScoreData computeRawPerformanceScore(final Connection connection,
-                                               final Tournament tournament,
-                                               final PerformanceScoreCategory category,
-                                               final ScoreType performanceScoreType,
-                                               final int teamNumber)
+  private static ScoreData computeRawPerformanceScore(final Connection connection,
+                                                      final Tournament tournament,
+                                                      final PerformanceScoreCategory category,
+                                                      final ScoreType performanceScoreType,
+                                                      final int teamNumber)
       throws SQLException {
     try (PreparedStatement scorePrep = connection.prepareStatement("SELECT score" //
         + " FROM performance_seeding_max"
@@ -1234,11 +1234,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")
-  private List<ScoreData> computeRawSubjectiveScoreColumns(final Connection connection,
-                                                           final List<AwardCategory> awardOrder,
-                                                           final Tournament tournament,
-                                                           final String ascDesc,
-                                                           final int teamNumber)
+  private static List<ScoreData> computeRawSubjectiveScoreColumns(final Connection connection,
+                                                                  final List<AwardCategory> awardOrder,
+                                                                  final Tournament tournament,
+                                                                  final String ascDesc,
+                                                                  final int teamNumber)
       throws SQLException {
 
     final List<ScoreData> subjScoreData = new LinkedList<>();
