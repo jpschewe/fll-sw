@@ -123,9 +123,11 @@ const finalistNumericModule = {};
                 }
 
                 if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
+                    const rank = finalist_module.getWeightedRank(team, currentCategory);
+
                     const rankCol = document.createElement("td");
                     row.appendChild(rankCol);
-                    rankCol.innerText = "99.9";
+                    rankCol.innerText = rank.toFixed(2);
                 }
 
                 const numFinalistCol = document.createElement("td");

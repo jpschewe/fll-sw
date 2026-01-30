@@ -907,12 +907,12 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @throws SQLException on a database error
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
-  private static List<TeamScoreData> gatherReportData(final Connection connection,
-                                                      final List<AwardCategory> awardOrder,
-                                                      final ChallengeDescription description,
-                                                      final String groupName,
-                                                      final ReportSelector selector,
-                                                      final Tournament tournament)
+  public static List<TeamScoreData> gatherReportData(final Connection connection,
+                                                     final List<AwardCategory> awardOrder,
+                                                     final ChallengeDescription description,
+                                                     final String groupName,
+                                                     final ReportSelector selector,
+                                                     final Tournament tournament)
       throws SQLException {
     final PerformanceScoreCategory performanceCategory = description.getPerformance();
     final WinnerType winnerCriteria = description.getWinner();
