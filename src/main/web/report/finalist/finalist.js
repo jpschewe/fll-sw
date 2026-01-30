@@ -1902,7 +1902,7 @@ const finalist_module = {}
             })
             waitList.push(playoffBracketTeamsPromise);
 
-            Promise.all(waitList1).then(function(_) {
+            Promise.all(waitList).then(function(_) {
                 doneCallback();
             });
 
