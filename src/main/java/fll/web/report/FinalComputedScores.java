@@ -86,23 +86,40 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  private record ScoreData(AwardCategory category,
-                           int rank,
-                           double rankFraction,
-                           String scoreText,
-                           boolean missing) {
+  /**
+   * @param category the category the score information is for
+   * @param rank the rank in the category
+   * @param scoreText the string formatted score
+   * @param missing true if the score is missing
+   */
+  public record ScoreData(AwardCategory category,
+                          int rank,
+                          String scoreText,
+                          boolean missing) {
   }
 
-  private record TeamScoreData(int teamNumber,
-                               String teamName,
-                               String organization,
-                               String judgingGroup,
-                               List<ScoreData> subjectiveRawScoreData,
-                               List<ScoreData> subjectiveScaledScoreData,
-                               ScoreData performanceRawScoreData,
-                               ScoreData performanceScaledScoreData,
-                               double overallScore,
-                               double weightedRank) {
+  /**
+   * @param teamNumber team number
+   * @param teamName team name
+   * @param organization organization
+   * @param judgingGroup judging group or award group
+   * @param subjectiveRawScoreData subjective raw scores
+   * @param subjectiveScaledScoreData subjective scaled scores
+   * @param performanceRawScoreData performance raw scores
+   * @param performanceScaledScoreData performance scaled scores
+   * @param overallScore team overall score
+   * @param weightedRank team weighted rank across all categories
+   */
+  public record TeamScoreData(int teamNumber,
+                              String teamName,
+                              String organization,
+                              String judgingGroup,
+                              List<ScoreData> subjectiveRawScoreData,
+                              List<ScoreData> subjectiveScaledScoreData,
+                              ScoreData performanceRawScoreData,
+                              ScoreData performanceScaledScoreData,
+                              double overallScore,
+                              double weightedRank) {
   }
 
   private static final Comparator<TeamScoreData> OVERALL_COMPARATOR = Comparator.comparingDouble(TeamScoreData::overallScore)
@@ -337,8 +354,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
     }
 
-    final WinnerType winnerCriteria = challengeDescription.getWinner();
-
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -371,9 +386,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       for (final String group : groups) {
         final @Nullable Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
                                                                             challengeDescription, challengeTitle,
-                                                                            winnerCriteria, tournament, pageMasterName,
-                                                                            legend, bestTeams, group, selector,
-                                                                            sortOrder);
+                                                                            tournament, pageMasterName, legend,
+                                                                            bestTeams, group, selector, sortOrder);
         if (null != pageSequence) {
           rootElement.appendChild(pageSequence);
         }
@@ -381,9 +395,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     } else {
       final @Nullable Element pageSequence = createAwardGroupPageSequence(connection, document, awardOrder,
                                                                           challengeDescription, challengeTitle,
-                                                                          winnerCriteria, tournament, pageMasterName,
-                                                                          legend, bestTeams, groupName, selector,
-                                                                          sortOrder);
+                                                                          tournament, pageMasterName, legend, bestTeams,
+                                                                          groupName, selector, sortOrder);
       if (null != pageSequence) {
         rootElement.appendChild(pageSequence);
       }
@@ -397,7 +410,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                          final List<AwardCategory> awardOrder,
                                                          final ChallengeDescription challengeDescription,
                                                          final String challengeTitle,
-                                                         final WinnerType winnerCriteria,
                                                          final Tournament tournament,
                                                          final String pageMasterName,
                                                          final Element legend,
@@ -445,7 +457,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     divTable.appendChild(tableHeader);
 
     final Element tableBody = writeScores(connection, document, awardOrder, challengeDescription, groupName, selector,
-                                          sortOrder, winnerCriteria, tournament, bestTeams);
+                                          sortOrder, tournament, bestTeams);
     divTable.appendChild(tableBody);
 
     if (!tableBody.hasChildNodes()) {
@@ -695,16 +707,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final String groupName,
                               final ReportSelector selector,
                               final SortOrder sortOrder,
-                              final WinnerType winnerCriteria,
                               final Tournament tournament,
                               final Set<Integer> bestTeams)
       throws SQLException {
 
-    final PerformanceScoreCategory performanceCategory = description.getPerformance();
     final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
 
     final List<TeamScoreData> reportData = gatherReportData(connection, awardOrder, description, groupName, selector,
-                                                            winnerCriteria, tournament, performanceCategory);
+                                                            tournament);
 
     switch (sortOrder) {
     case WEIGHTED_RANK:
@@ -885,16 +895,27 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return tableBody;
   }
 
+  /**
+   * @param connection database
+   * @param awardOrder the awards to be given out
+   * @param description the challenge
+   * @param groupName name of the award group or judging group
+   * @param selector {@link ReportSelector}
+   * @param tournament the tournament
+   * @return data for the report
+   * @throws SQLException on a database error
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
-  private List<TeamScoreData> gatherReportData(final Connection connection,
-                                               final List<AwardCategory> awardOrder,
-                                               final ChallengeDescription description,
-                                               final String groupName,
-                                               final ReportSelector selector,
-                                               final WinnerType winnerCriteria,
-                                               final Tournament tournament,
-                                               final PerformanceScoreCategory performanceCategory)
+  public static List<TeamScoreData> gatherReportData(final Connection connection,
+                                                     final List<AwardCategory> awardOrder,
+                                                     final ChallengeDescription description,
+                                                     final String groupName,
+                                                     final ReportSelector selector,
+                                                     final Tournament tournament)
       throws SQLException {
+    final PerformanceScoreCategory performanceCategory = description.getPerformance();
+    final WinnerType winnerCriteria = description.getWinner();
+
     final Map<AwardCategory, Map<String, Map<Integer, ImmutablePair<Integer, Double>>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                                           description,
                                                                                                                                           tournament);
@@ -1048,9 +1069,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return reportData;
   }
 
-  private ScoreData computeCategoryScaledScore(final AwardCategory category,
-                                               final Integer teamNumber,
-                                               final Map<Integer, ImmutablePair<Integer, Double>> rankInCategory) {
+  private static ScoreData computeCategoryScaledScore(final AwardCategory category,
+                                                      final Integer teamNumber,
+                                                      final Map<Integer, ImmutablePair<Integer, Double>> rankInCategory) {
     final double scaledScore;
     final int rank;
     if (rankInCategory.containsKey(teamNumber)) {
@@ -1080,16 +1101,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final String scoreText = overallScoreText
         + rankText;
 
-    final double rankFraction = (double) rank
-        / (double) rankInCategory.size();
-    return new ScoreData(category, rank, rankFraction, scoreText, Double.isNaN(scaledScore));
+    return new ScoreData(category, rank, scoreText, Double.isNaN(scaledScore));
   }
 
-  private ScoreData computeRawPerformanceScore(final Connection connection,
-                                               final Tournament tournament,
-                                               final PerformanceScoreCategory category,
-                                               final ScoreType performanceScoreType,
-                                               final int teamNumber)
+  private static ScoreData computeRawPerformanceScore(final Connection connection,
+                                                      final Tournament tournament,
+                                                      final PerformanceScoreCategory category,
+                                                      final ScoreType performanceScoreType,
+                                                      final int teamNumber)
       throws SQLException {
     try (PreparedStatement scorePrep = connection.prepareStatement("SELECT score" //
         + " FROM performance_seeding_max"
@@ -1120,7 +1139,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           text = Utilities.getFormatForScoreType(performanceScoreType).format(rawScore);
         }
 
-        return new ScoreData(category, -1, Double.NaN, text, Double.isNaN(rawScore));
+        return new ScoreData(category, -1, text, Double.isNaN(rawScore));
 
       } // ResultSet
     } // PreparedStatement
@@ -1234,11 +1253,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")
-  private List<ScoreData> computeRawSubjectiveScoreColumns(final Connection connection,
-                                                           final List<AwardCategory> awardOrder,
-                                                           final Tournament tournament,
-                                                           final String ascDesc,
-                                                           final int teamNumber)
+  private static List<ScoreData> computeRawSubjectiveScoreColumns(final Connection connection,
+                                                                  final List<AwardCategory> awardOrder,
+                                                                  final Tournament tournament,
+                                                                  final String ascDesc,
+                                                                  final int teamNumber)
       throws SQLException {
 
     final List<ScoreData> subjScoreData = new LinkedList<>();
@@ -1284,7 +1303,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 scoreText = rawScoreText.toString();
               }
 
-              subjScoreData.add(new ScoreData(awardCategory, -1, Double.NaN, scoreText, !scoreSeen));
+              subjScoreData.add(new ScoreData(awardCategory, -1, scoreText, !scoreSeen));
             } // ResultSet
           } // category weight greater than 0
         }
@@ -1317,7 +1336,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 scoreText = rawScoreText.toString();
               }
 
-              subjScoreData.add(new ScoreData(awardCategory, -1, Double.NaN, scoreText, !scoreSeen));
+              subjScoreData.add(new ScoreData(awardCategory, -1, scoreText, !scoreSeen));
             } // ResultSet
           } // category weight greater than 0
         }

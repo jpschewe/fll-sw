@@ -9,12 +9,28 @@ package fll.web.api;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fll.Tournament;
+import fll.Utilities;
+import fll.db.AwardDeterminationOrder;
+import fll.web.ApplicationAttributes;
+import fll.web.AuthenticationContext;
+import fll.web.SessionAttributes;
+import fll.web.TournamentData;
+import fll.web.report.FinalComputedScores;
+import fll.web.report.awards.AwardCategory;
+import fll.web.report.awards.AwardsScriptReport;
+import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,18 +38,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import javax.sql.DataSource;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fll.Utilities;
-import fll.db.Queries;
-import fll.web.ApplicationAttributes;
-import fll.web.AuthenticationContext;
-import fll.web.SessionAttributes;
 
 /**
- * Map of team number to score.
+ * Map of team number to overall score and rank.
  */
 @WebServlet("/api/OverallScores")
 public class OverallScoresServlet extends HttpServlet {
@@ -53,6 +60,8 @@ public class OverallScoresServlet extends HttpServlet {
       return;
     }
 
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final TournamentData tournamentData = ApplicationAttributes.getTournamentData(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
@@ -62,28 +71,44 @@ public class OverallScoresServlet extends HttpServlet {
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
 
-      final int tournament = Queries.getCurrentTournament(connection);
+      final Tournament tournament = tournamentData.getCurrentTournament();
+      final Collection<String> groups = AwardsScriptReport.getJudgingStationOrder(connection, tournament);
+      final List<AwardCategory> awardOrder = Collections.unmodifiableList(AwardDeterminationOrder.get(connection,
+                                                                                                      description));
 
-      final Map<Integer, Double> scores = new HashMap<>();
-      try (
-          PreparedStatement prep = connection.prepareStatement("SELECT team_number, overall_score from overall_scores WHERE tournament = ?")) {
-        prep.setInt(1, tournament);
+      final Map<Integer, Data> scores = new HashMap<>();
 
-        try (ResultSet rs = prep.executeQuery()) {
-          while (rs.next()) {
-            final int teamNumber = rs.getInt(1);
-            final double overallScore = rs.getDouble(2);
-
-            scores.put(teamNumber, overallScore);
-          } // foreach team
-        } // result set
-      } // prepared statement
+      for (final String groupName : groups) {
+        final List<FinalComputedScores.TeamScoreData> groupScoreData = FinalComputedScores.gatherReportData(connection,
+                                                                                                            awardOrder,
+                                                                                                            description,
+                                                                                                            groupName,
+                                                                                                            // compute
+                                                                                                            // ranks
+                                                                                                            // byF
+                                                                                                            // judging
+                                                                                                            // group
+                                                                                                            FinalComputedScores.ReportSelector.JUDGING_STATION,
+                                                                                                            tournament);
+        for (final FinalComputedScores.TeamScoreData teamScoreData : groupScoreData) {
+          final Data data = new Data(teamScoreData.overallScore(), teamScoreData.weightedRank());
+          scores.put(teamScoreData.teamNumber(), data);
+        }
+      }
 
       jsonMapper.writeValue(writer, scores);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
 
+  }
+
+  /**
+   * @param overallScore the overall team score
+   * @param weightedRank the team's overall weighted rank
+   */
+  public record Data(double overallScore,
+                     double weightedRank) {
   }
 
 }

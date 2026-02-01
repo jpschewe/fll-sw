@@ -122,6 +122,14 @@ const finalistNumericModule = {};
                     scoreCol.innerText = score.toFixed(2);
                 }
 
+                if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
+                    const rank = finalist_module.getWeightedRank(team, currentCategory);
+
+                    const rankCol = document.createElement("td");
+                    row.appendChild(rankCol);
+                    rankCol.innerText = rank.toFixed(2);
+                }
+
                 const numFinalistCol = document.createElement("td");
                 row.appendChild(numFinalistCol);
                 numFinalistCol.setAttribute("id", getNumFinalistsId(team));
@@ -166,7 +174,17 @@ const finalistNumericModule = {};
 
         const scoreCol = document.createElement("th");
         headerRow.appendChild(scoreCol);
-        scoreCol.innerText = "Score";
+        if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
+            scoreCol.innerText = "Overall Score";
+        } else {
+            scoreCol.innerText = "Score";
+        }
+
+        if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
+            const rankCol = document.createElement("th");
+            headerRow.appendChild(rankCol);
+            rankCol.innerText = "Weighted Rank By Judging Group"
+        }
 
         const numCategoriesCol = document.createElement("th");
         headerRow.appendChild(numCategoriesCol);
