@@ -341,7 +341,7 @@ const finalist_module = {}
     finalist_module.CHAMPIONSHIP_NAME = "Champion's";
 
     finalist_module.clearAllData = function() {
-        _log("Clearing finalist data from local storage");
+        finalist_module.log("Clearing finalist data from local storage");
         _clear_local_storage();
         _init_variables();
     };
@@ -1008,7 +1008,7 @@ const finalist_module = {}
      * @return array of timeslots in order from earliest to latest
      */
     finalist_module.scheduleFinalists = function(currentDivision) {
-        _log("Creating schedule for " + currentDivision);
+        finalist_module.log("Creating schedule for " + currentDivision);
 
         const finalistsCount = finalist_module.getTeamToCategoryMap(currentDivision);
 
@@ -1342,7 +1342,7 @@ const finalist_module = {}
 
     finalist_module.log = function(str) {
         if (typeof (console) != 'undefined') {
-            console.log(str);
+            console.log(`finalistModule: ${str}`);
         }
     };
 
@@ -1757,7 +1757,7 @@ const finalist_module = {}
     };
 
     /**
-     * Load the overall scores from the server.
+     * Load the overall scores from the server and store them with the championship category.
      * 
      * @return promise to execute
      */
@@ -1810,6 +1810,7 @@ const finalist_module = {}
      */
     finalist_module.loadCurrentTournament = function() {
         return fetch("../../api/Tournaments/current").then(checkJsonResponse).then(function(tournament) {
+            finalist_module.log(`Loaded tournament ${tournament.name}`);
             finalist_module.setTournament(tournament.name);
         });
     };
@@ -1901,7 +1902,7 @@ const finalist_module = {}
             })
             waitList.push(playoffBracketTeamsPromise);
 
-            Promise.all(waitList1).then(function(_) {
+            Promise.all(waitList).then(function(_) {
                 doneCallback();
             });
 
