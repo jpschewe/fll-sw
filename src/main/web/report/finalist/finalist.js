@@ -655,6 +655,16 @@ const finalist_module = {}
                     return 1;
                 }
                 // fall through to score check
+            } else {
+                // sort by rank first for Championship
+                const aRank = finalist_module.getWeightedRank(a, currentCategory);
+                const bRank = finalist_module.getWeightedRank(b, currentCategory);
+                if (aRank < bRank) {
+                    // lower rank is better
+                    return -1;
+                } else if (aRank > bRank) {
+                    return 1;
+                }
             }
             const aScore = finalist_module.getCategoryScore(a, currentCategory);
             const bScore = finalist_module.getCategoryScore(b, currentCategory);
