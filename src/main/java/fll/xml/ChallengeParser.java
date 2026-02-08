@@ -19,7 +19,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -317,11 +319,52 @@ public final class ChallengeParser {
 
     final Goal firstGoal = goals.get(0);
     final List<RubricRange> firstRubricRange = firstGoal.getRubric();
+
+    // Check ranges cover all possible values and don't overlap. Only need to check
+    // the first goal due to the consistency checks below.
+    if (!firstRubricRange.isEmpty()) {
+      // Only check if there is a rubric in the goal
+
+      final List<Integer> allValuesSeen = firstRubricRange.stream() //
+                                                          .map(r -> IntStream.rangeClosed(r.getMin(), r.getMax())) //
+                                                          .map(is -> is.mapToObj(Integer::valueOf)) //
+                                                          .flatMap(Function.identity()) //
+                                                          .sorted() // make the error output easier to read
+                                                          .toList();
+      final Set<Integer> seenValues = new HashSet<>(allValuesSeen);
+      if (seenValues.size() != allValuesSeen.size()) {
+        throw new RubricRangeException(firstGoal,
+                                       String.format("Rubric ranges overlap. All values: %s", allValuesSeen));
+      }
+
+      final int minSeen = seenValues.stream().mapToInt(Integer::intValue).min().orElseThrow();
+      final int maxSeen = seenValues.stream().mapToInt(Integer::intValue).max().orElseThrow();
+
+      // check for contiguous values
+      final Set<Integer> expectedValues = IntStream.rangeClosed(minSeen, maxSeen).mapToObj(Integer::valueOf)
+                                                   .collect(Collectors.toSet());
+      if (!expectedValues.equals(seenValues)) {
+        throw new RubricRangeException(firstGoal,
+                                       String.format("Rubric range min/max values not contiguous: %s", seenValues));
+      }
+
+      if (minSeen > firstGoal.getMin()) {
+        throw new RubricRangeException(firstGoal,
+                                       String.format("Goal minimum value %f is not covered by the range with a mininum value of %d",
+                                                     firstGoal.getMin(), minSeen));
+      }
+      if (maxSeen < firstGoal.getMax()) {
+        throw new RubricRangeException(firstGoal,
+                                       String.format("Goal maximum value %f is not covered by the range with a maxinum value of %d",
+                                                     firstGoal.getMax(), maxSeen));
+      }
+    }
+
     for (final Goal compareGoal : goals) {
       final List<RubricRange> compareRubricRange = compareGoal.getRubric();
       if (firstRubricRange.size() != compareRubricRange.size()) {
-        throw new ChallengeValidationException(String.format("Rubric range size not the same between goal %s and %s",
-                                                             firstGoal.getTitle(), compareGoal.getTitle()));
+        throw new RubricRangeException(compareGoal, String.format("Rubric range size not the same with goal %s",
+                                                                  firstGoal.getTitle()));
       }
 
       final Iterator<RubricRange> firstIter = firstRubricRange.iterator();
@@ -331,21 +374,24 @@ public final class ChallengeParser {
         final RubricRange firstRange = firstIter.next();
         final RubricRange compareRange = compareIter.next();
         if (!firstRange.getTitle().equals(compareRange.getTitle())) {
-          throw new ChallengeValidationException(String.format("Rubric range titles not the same between goal %s (%s) and goal %s (%s)",
-                                                               firstGoal.getTitle(), firstRange.getTitle(),
-                                                               compareGoal.getTitle(), compareRange.getTitle()));
+          throw new RubricRangeException(compareGoal, compareRange,
+                                         String.format("Rubric range titles inconsistent with goal %s %s != %s",
+                                                       firstGoal.getTitle(), firstRange.getTitle(),
+                                                       compareRange.getTitle()));
         }
 
         if (firstRange.getMin() != compareRange.getMin()) {
-          throw new ChallengeValidationException(String.format("Rubric range min not the same between goal %s (%d) and goal %s (%d)",
-                                                               firstGoal.getTitle(), firstRange.getMin(),
-                                                               compareGoal.getTitle(), compareRange.getMin()));
+          throw new RubricRangeException(compareGoal, compareRange,
+                                         String.format("Rubric range min inconsistent with goal %s %d != %d",
+                                                       firstGoal.getTitle(), firstRange.getMin(),
+                                                       compareRange.getMin()));
         }
 
         if (firstRange.getMax() != compareRange.getMax()) {
-          throw new ChallengeValidationException(String.format("Rubric range max not the same between goal %s (%d) and goal %s (%d)",
-                                                               firstGoal.getTitle(), firstRange.getMax(),
-                                                               compareGoal.getTitle(), compareRange.getMax()));
+          throw new RubricRangeException(compareGoal, compareRange,
+                                         String.format("Rubric range max inconsistent with goal %s %d != %d",
+                                                       firstGoal.getTitle(), firstRange.getMax(),
+                                                       compareRange.getMax()));
         }
 
       }

@@ -1,4 +1,5 @@
 * #715 - refactor database init in IntegrationTestUtils to factor out duplicate code
+* #740 - Validate rubric ranges when parsing a challenge description
 * #1324 - Add weighted rank to Championship category in finalist scheduling
 * #1315 - Fixed load error with finalist scheduling
 * #1323 - Better handling of display remote control errors 
