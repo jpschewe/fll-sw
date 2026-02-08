@@ -37,9 +37,7 @@ abstract class BaseScheduleServlet extends BaseFLLServlet {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
-   * Calls
-   * {@link #outputSchedule(Connection, TournamentData, ChallengeDescription, TournamentSchedule, OutputStream)}
-   * to write the schedule.
+   * Calls {@code outputSchedule} to write the PDF.
    */
   @Override
   protected final void processRequest(final HttpServletRequest request,
