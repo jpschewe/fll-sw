@@ -1,3 +1,4 @@
+* #792 - Format last seen time to hours and minutes on remote control display page
 * Sort championship on finalist scheduling by rank
 * #1324 - Add weighted rank to Championship category in finalist scheduling
 * #1315 - Fixed load error with finalist scheduling
