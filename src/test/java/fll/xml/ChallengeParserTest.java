@@ -511,7 +511,7 @@ public class ChallengeParserTest {
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream(String.format("data/%s", filename))) {
       assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-    } catch (final ChallengeValidationException e) {
+    } catch (final RubricRangeException e) {
       exception = true;
     }
     assertTrue(exception, "Expected an exception due to overlapping rubric.");
@@ -537,10 +537,37 @@ public class ChallengeParserTest {
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream(String.format("data/%s", filename))) {
       assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-    } catch (final ChallengeValidationException e) {
+    } catch (final RubricRangeException e) {
       exception = true;
     }
     assertTrue(exception, "Expected an exception due to the rubric not covering all possible values.");
+  }
+
+  /**
+   * @return filenames to use for {@link #testRubricConsistency(String)}
+   */
+  public static Stream<String> rubricConsistencyValues() {
+    return Stream.of("subjective-rubric-consistency-1.xml", "subjective-rubric-consistency-2.xml",
+                     "subjective-rubric-consistency-3.xml");
+  }
+
+  /**
+   * Test that rubric ranges are consistent across goals.
+   * 
+   * @param filename file to test
+   * @throws IOException test error
+   */
+  @ParameterizedTest
+  @MethodSource("rubricConsistencyValues")
+  public void testRubricConsistency(final String filename) throws IOException {
+    boolean exception = false;
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream(String.format("data/%s", filename))) {
+      assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    } catch (final RubricRangeException e) {
+      exception = true;
+    }
+    assertTrue(exception, "Expected an exception due to the rubric inconsistent across goals.");
   }
 
 }

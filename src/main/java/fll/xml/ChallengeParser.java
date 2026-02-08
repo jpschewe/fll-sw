@@ -320,8 +320,8 @@ public final class ChallengeParser {
     for (final Goal compareGoal : goals) {
       final List<RubricRange> compareRubricRange = compareGoal.getRubric();
       if (firstRubricRange.size() != compareRubricRange.size()) {
-        throw new ChallengeValidationException(String.format("Rubric range size not the same between goal %s and %s",
-                                                             firstGoal.getTitle(), compareGoal.getTitle()));
+        throw new RubricRangeException(compareGoal, String.format("Rubric range size not the same with goal %s",
+                                                                  firstGoal.getTitle()));
       }
 
       final Iterator<RubricRange> firstIter = firstRubricRange.iterator();
@@ -331,21 +331,24 @@ public final class ChallengeParser {
         final RubricRange firstRange = firstIter.next();
         final RubricRange compareRange = compareIter.next();
         if (!firstRange.getTitle().equals(compareRange.getTitle())) {
-          throw new ChallengeValidationException(String.format("Rubric range titles not the same between goal %s (%s) and goal %s (%s)",
-                                                               firstGoal.getTitle(), firstRange.getTitle(),
-                                                               compareGoal.getTitle(), compareRange.getTitle()));
+          throw new RubricRangeException(compareGoal, compareRange,
+                                         String.format("Rubric range titles inconsistent with goal %s %s != %s",
+                                                       firstGoal.getTitle(), firstRange.getTitle(),
+                                                       compareRange.getTitle()));
         }
 
         if (firstRange.getMin() != compareRange.getMin()) {
-          throw new ChallengeValidationException(String.format("Rubric range min not the same between goal %s (%d) and goal %s (%d)",
-                                                               firstGoal.getTitle(), firstRange.getMin(),
-                                                               compareGoal.getTitle(), compareRange.getMin()));
+          throw new RubricRangeException(compareGoal, compareRange,
+                                         String.format("Rubric range min inconsistent with goal %s %d != %d",
+                                                       firstGoal.getTitle(), firstRange.getMin(),
+                                                       compareRange.getMin()));
         }
 
         if (firstRange.getMax() != compareRange.getMax()) {
-          throw new ChallengeValidationException(String.format("Rubric range max not the same between goal %s (%d) and goal %s (%d)",
-                                                               firstGoal.getTitle(), firstRange.getMax(),
-                                                               compareGoal.getTitle(), compareRange.getMax()));
+          throw new RubricRangeException(compareGoal, compareRange,
+                                         String.format("Rubric range max inconsistent with goal %s %d != %d",
+                                                       firstGoal.getTitle(), firstRange.getMax(),
+                                                       compareRange.getMax()));
         }
 
       }
