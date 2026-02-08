@@ -50,7 +50,6 @@ fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
 </head>
 
 <body class='scoreboard fll-sw-hide-cursor'>
-    <%@ include file="/WEB-INF/jspf/message.jspf"%>
     <h1>Teams in finalist judging</h1>
 
     <div id="top">&nbsp;</div>
