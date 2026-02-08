@@ -7,74 +7,37 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
-
-import javax.sql.DataSource;
 
 import fll.Tournament;
 import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
-import fll.util.FLLRuntimeException;
-import fll.web.ApplicationAttributes;
-import fll.web.AuthenticationContext;
-import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
-import fll.web.UserRole;
-import fll.web.WebUtils;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
+import fll.web.TournamentData;
+import fll.xml.ChallengeDescription;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * @see ScheduleWriter#outputSubjectiveSchedulesByCategory(TournamentSchedule,
  *      java.io.OutputStream)
  */
 @WebServlet("/admin/SubjectiveScheduleByCategory")
-public class SubjectiveScheduleByCategory extends BaseFLLServlet {
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+public class SubjectiveScheduleByCategory extends BaseScheduleServlet {
 
   @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session)
-      throws IOException, ServletException {
-    final AuthenticationContext auth = SessionAttributes.getAuthentication(session);
+  void outputSchedule(final Connection connection,
+                      final TournamentData tournamentData,
+                      final ChallengeDescription description,
+                      final TournamentSchedule schedule,
+                      final OutputStream output)
+      throws SQLException, IOException {
+    ScheduleWriter.outputSubjectiveSchedulesByCategory(schedule, output);
+  }
 
-    if (!auth.requireRoles(request, response, session, Set.of(UserRole.ADMIN), false)) {
-      return;
-    }
-
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (Connection connection = datasource.getConnection()) {
-      final Tournament tournament = Tournament.getCurrentTournament(connection);
-      final int currentTournamentID = tournament.getTournamentID();
-
-      if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>There is no schedule for this tournament.</p>");
-        WebUtils.sendRedirect(application, response, "/admin/index.jsp");
-        return;
-      }
-
-      final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournamentID);
-
-      response.reset();
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition",
-                         String.format("attachment; filename=\"%s_subjectiveByCategoryAndTime.pdf\"",
-                                       tournament.getName()));
-      ScheduleWriter.outputSubjectiveSchedulesByCategory(schedule, response.getOutputStream());
-    } catch (final SQLException sqle) {
-      LOGGER.error(sqle.getMessage(), sqle);
-      throw new FLLRuntimeException(sqle);
-    }
+  @Override
+  String getFilename(Tournament tournament) {
+    return String.format("%s_subjectiveByCategoryAndTime.pdf", tournament.getName());
   }
 
 }
