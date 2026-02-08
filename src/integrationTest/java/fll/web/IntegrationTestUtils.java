@@ -253,34 +253,8 @@ public final class IntegrationTestUtils {
                                         final WebDriverWait driverWait,
                                         final Path challengeFile) {
 
-    LOGGER.trace("Visiting setup");
-    driver.get(TestUtils.URL_ROOT
-        + "setup/");
-
-    // wait for the login page or the setup page to load
-    driverWait.until(ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(By.name("submit_login")),
-                                           ExpectedConditions.urlContains("/setup")));
-
-    if (isElementPresent(driver, By.name("submit_login"))) {
-      LOGGER.trace("Login required");
-      login(driver);
-
-      LOGGER.trace("Visiting setup after login");
-      driver.get(TestUtils.URL_ROOT
-          + "setup/");
-    }
-
-    final WebElement fileEle = driverWait.until(ExpectedConditions.elementToBeClickable(By.name("xmldocument")));
-    fileEle.sendKeys(challengeFile.toAbsolutePath().toString());
-
-    final boolean expectAlert = driver.getPageSource()
-                                      .contains("This will erase ALL scores and team information in the database");
-
-    final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
-    reinitDB.click();
-    LOGGER.trace("Clicked reinitializeDatabase");
-
-    finishDatabaseInitialization(driver, driverWait, expectAlert);
+    commonInitializeDatabase(driver, driverWait, "xmldocument", challengeFile.toAbsolutePath().toString(),
+                             "reinitializeDatabase");
   }
 
   /**
@@ -300,37 +274,49 @@ public final class IntegrationTestUtils {
 
     final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
     try {
-      selenium.get(TestUtils.URL_ROOT
-          + "setup/");
-
-      // wait for the login page or the setup page to load
-      seleniumWait.until(ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(By.name("submit_login")),
-                                               ExpectedConditions.urlContains("/setup")));
-
-      if (isElementPresent(selenium, By.name("submit_login"))) {
-        login(selenium);
-
-        selenium.get(TestUtils.URL_ROOT
-            + "setup/");
-      }
-
-      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("dbdump")))
-                  .sendKeys(dumpFile.getAbsolutePath());
-
-      final boolean expectAlert = selenium.getPageSource()
-                                          .contains("This will erase ALL scores and team information in the database");
-
-      final WebElement createEle = selenium.findElement(By.name("createdb"));
-      createEle.click();
-      LOGGER.trace("Clicked createdb button");
-
-      finishDatabaseInitialization(selenium, seleniumWait, expectAlert);
+      commonInitializeDatabase(selenium, seleniumWait, "dbdump", dumpFile.getAbsolutePath(), "createdb");
     } finally {
       if (!dumpFile.delete()) {
         dumpFile.deleteOnExit();
       }
     }
     login(selenium);
+  }
+
+  private static void commonInitializeDatabase(final WebDriver driver,
+                                               final WebDriverWait driverWait,
+                                               final String inputElementName,
+                                               final String inputElementValue,
+                                               final String submitButtonName) {
+
+    LOGGER.trace("Visiting setup");
+    driver.get(TestUtils.URL_ROOT
+        + "setup/");
+
+    // wait for the login page or the setup page to load
+    driverWait.until(ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(By.name("submit_login")),
+                                           ExpectedConditions.urlContains("/setup")));
+
+    if (isElementPresent(driver, By.name("submit_login"))) {
+      LOGGER.trace("Login required");
+      login(driver);
+
+      LOGGER.trace("Visiting setup after login");
+      driver.get(TestUtils.URL_ROOT
+          + "setup/");
+    }
+
+    final WebElement fileEle = driverWait.until(ExpectedConditions.elementToBeClickable(By.name(inputElementName)));
+    fileEle.sendKeys(inputElementValue);
+
+    final boolean expectAlert = driver.getPageSource()
+                                      .contains("This will erase ALL scores and team information in the database");
+
+    final WebElement reinitDB = driver.findElement(By.name(submitButtonName));
+    reinitDB.click();
+    LOGGER.trace("Clicked {}", submitButtonName);
+
+    finishDatabaseInitialization(driver, driverWait, expectAlert);
   }
 
   private static void finishDatabaseInitialization(final WebDriver selenium,

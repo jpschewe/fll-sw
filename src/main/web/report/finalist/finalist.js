@@ -172,6 +172,7 @@ const finalist_module = {}
         this.org = org;
         this.judgingGroup = judgingGroup;
         this.categoryScores = {};
+        this.weightedRank = {};
         // names of playoff brackets this team is competing in
         this.playoffDivisions = [];
         _teams[num] = this;
@@ -192,8 +193,8 @@ const finalist_module = {}
     function Category(name, numeric, overall) {
         let category_id;
         // find the next available id
-        for (category_id = 0; category_id < Number.MAX_VALUE
-            && _categories[category_id]; category_id = category_id + 1)
+        for (category_id = 0;category_id < Number.MAX_VALUE
+            && _categories[category_id];category_id = category_id + 1)
             ;
 
         if (category_id == Number.MAX_VALUE || category_id + 1 == Number.MAX_VALUE) {
@@ -341,7 +342,7 @@ const finalist_module = {}
     finalist_module.CHAMPIONSHIP_NAME = "Champion's";
 
     finalist_module.clearAllData = function() {
-        _log("Clearing finalist data from local storage");
+        finalist_module.log("Clearing finalist data from local storage");
         _clear_local_storage();
         _init_variables();
     };
@@ -599,6 +600,14 @@ const finalist_module = {}
 
     finalist_module.setCategoryScore = function(team, category, score) {
         team.categoryScores[category.catId] = score;
+    };
+
+    finalist_module.getWeightedRank = function(team, category) {
+        return team.weightedRank[category.catId];
+    };
+
+    finalist_module.setWeightedRank = function(team, category, rank) {
+        team.weightedRank[category.catId] = rank;
     };
 
     /**
@@ -1008,7 +1017,7 @@ const finalist_module = {}
      * @return array of timeslots in order from earliest to latest
      */
     finalist_module.scheduleFinalists = function(currentDivision) {
-        _log("Creating schedule for " + currentDivision);
+        finalist_module.log("Creating schedule for " + currentDivision);
 
         const finalistsCount = finalist_module.getTeamToCategoryMap(currentDivision);
 
@@ -1342,7 +1351,7 @@ const finalist_module = {}
 
     finalist_module.log = function(str) {
         if (typeof (console) != 'undefined') {
-            console.log(str);
+            console.log(`finalistModule: ${str}`);
         }
     };
 
@@ -1757,7 +1766,7 @@ const finalist_module = {}
     };
 
     /**
-     * Load the overall scores from the server.
+     * Load the overall scores from the server and store them with the championship category.
      * 
      * @return promise to execute
      */
@@ -1769,13 +1778,14 @@ const finalist_module = {}
                 throw new Error("Missing championship category");
             }
 
-            for (const [teamNumber, score] of Object.entries(data)) {
+            for (const [teamNumber, scoreData] of Object.entries(data)) {
                 const team = finalist_module.lookupTeam(teamNumber);
                 if (null == team) {
                     throw new Error("Cannot find team with " + teamNumber + " found in overall scores");
                 }
 
-                finalist_module.setCategoryScore(team, championship, score);
+                finalist_module.setCategoryScore(team, championship, scoreData.overallScore);
+                finalist_module.setWeightedRank(team, championship, scoreData.weightedRank);
             } // scores
         });
     };
@@ -1810,6 +1820,7 @@ const finalist_module = {}
      */
     finalist_module.loadCurrentTournament = function() {
         return fetch("../../api/Tournaments/current").then(checkJsonResponse).then(function(tournament) {
+            finalist_module.log(`Loaded tournament ${tournament.name}`);
             finalist_module.setTournament(tournament.name);
         });
     };
@@ -1901,7 +1912,7 @@ const finalist_module = {}
             })
             waitList.push(playoffBracketTeamsPromise);
 
-            Promise.all(waitList1).then(function(_) {
+            Promise.all(waitList).then(function(_) {
                 doneCallback();
             });
 

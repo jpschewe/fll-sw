@@ -665,7 +665,7 @@ public class AwardsReport extends BaseFLLServlet {
     }
   }
 
-  private Element createHeader(final Document document,
+  private static Element createHeader(final Document document,
                                final ChallengeDescription description,
                                final Tournament tournament) {
     final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);

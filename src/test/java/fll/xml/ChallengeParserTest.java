@@ -491,4 +491,83 @@ public class ChallengeParserTest {
     assertTrue(exception, "Expected an exception due to circular references.");
   }
 
+  /**
+   * @return filenames to use for {@link #testRubricNonContiguous(String)}
+   */
+  public static Stream<String> overlappingRubricValues() {
+    return Stream.of("subjective-rubric-non-contiguous-1.xml", "subjective-rubric-non-contiguous-2.xml");
+  }
+
+  /**
+   * Check that rubric ranges don't overlap.
+   * 
+   * @param filename file to test
+   * @throws IOException test error
+   */
+  @ParameterizedTest
+  @MethodSource("overlappingRubricValues")
+  public void testOverlappingRubric(final String filename) throws IOException {
+    boolean exception = false;
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream(String.format("data/%s", filename))) {
+      assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    } catch (final RubricRangeException e) {
+      exception = true;
+    }
+    assertTrue(exception, "Expected an exception due to overlapping rubric.");
+  }
+
+  /**
+   * @return filenames to use for {@link #testRubricNonContiguous(String)}
+   */
+  public static Stream<String> rubricNonContiguousValues() {
+    return Stream.of("subjective-rubric-non-contiguous-1.xml", "subjective-rubric-non-contiguous-2.xml");
+  }
+
+  /**
+   * Test that rubric ranges cover the whole space of possible values.
+   * 
+   * @param filename file to test
+   * @throws IOException test error
+   */
+  @ParameterizedTest
+  @MethodSource("rubricNonContiguousValues")
+  public void testRubricNonContiguous(final String filename) throws IOException {
+    boolean exception = false;
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream(String.format("data/%s", filename))) {
+      assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    } catch (final RubricRangeException e) {
+      exception = true;
+    }
+    assertTrue(exception, "Expected an exception due to the rubric not covering all possible values.");
+  }
+
+  /**
+   * @return filenames to use for {@link #testRubricConsistency(String)}
+   */
+  public static Stream<String> rubricConsistencyValues() {
+    return Stream.of("subjective-rubric-consistency-1.xml", "subjective-rubric-consistency-2.xml",
+                     "subjective-rubric-consistency-3.xml");
+  }
+
+  /**
+   * Test that rubric ranges are consistent across goals.
+   * 
+   * @param filename file to test
+   * @throws IOException test error
+   */
+  @ParameterizedTest
+  @MethodSource("rubricConsistencyValues")
+  public void testRubricConsistency(final String filename) throws IOException {
+    boolean exception = false;
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream(String.format("data/%s", filename))) {
+      assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+    } catch (final RubricRangeException e) {
+      exception = true;
+    }
+    assertTrue(exception, "Expected an exception due to the rubric inconsistent across goals.");
+  }
+
 }

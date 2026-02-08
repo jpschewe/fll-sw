@@ -103,13 +103,19 @@ public class RemoteControlPost extends BaseFLLServlet {
     // which displays get notified.
     // Also set the page URL
     final Set<DisplayInfo> followingDefault = new HashSet<>();
+    final Set<DisplayInfo> displaysToSkip = new HashSet<>();
     for (final DisplayInfo display : displays) {
       if (toDelete.contains(display)) {
         continue;
       }
 
-      final String displayRemotePage = WebUtils.getNonNullRequestParameter(request,
-                                                                           display.getRemotePageFormParamName());
+      // check for all displays, however not all of them may have been available on
+      // the control page at the time it was rendered
+      final @Nullable String displayRemotePage = request.getParameter(display.getRemotePageFormParamName());
+      if (null == displayRemotePage) {
+        displaysToSkip.add(display);
+        continue;
+      }
 
       final boolean displayFollowDefault = DisplayInfo.DEFAULT_REMOTE_PAGE.equals(displayRemotePage);
       if (displayFollowDefault) {
@@ -138,6 +144,9 @@ public class RemoteControlPost extends BaseFLLServlet {
     // handle the other paramters
     for (final DisplayInfo display : displays) {
       if (toDelete.contains(display)) {
+        continue;
+      }
+      if (displaysToSkip.contains(display)) {
         continue;
       }
 
