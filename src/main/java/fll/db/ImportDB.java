@@ -1943,7 +1943,7 @@ public final class ImportDB {
 
       // add new foreign key constraint to the tournament teams table
       if (createConstraints) {
-        stmt.executeUpdate("ALTER TABLE Performance ADD CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeamss(TeamNumber, Tournament) ON DELETE CASCADE");
+        stmt.executeUpdate("ALTER TABLE Performance ADD CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeams(TeamNumber, Tournament) ON DELETE CASCADE");
       }
 
     } // statements
