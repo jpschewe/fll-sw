@@ -63,7 +63,7 @@ public class RubricRangeException extends ChallengeValidationException {
    * @param goal the goal with the problematic range
    * @param range the problematic range
    * @param message description of the error
-   * @param throwable {@link Throwable#getCause()}
+   * @param cause {@link Throwable#getCause()}
    */
   public RubricRangeException(final Goal goal,
                               final RubricRange range,
