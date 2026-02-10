@@ -1221,7 +1221,7 @@ public class Launcher extends JFrame {
    */
   private static void migrate(final String oldInstallationDirectory) throws FLLMigrationException {
     try {
-      final Path exportFile = Files.createTempFile("migrate", "flldb");
+      final Path exportFile = Files.createTempFile("migrate", ".flldb");
 
       final String oldDatabase = oldInstallationDirectory
           + "/web/WEB-INF/flldb";
