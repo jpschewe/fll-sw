@@ -36,6 +36,7 @@ import fll.ScoreStandardization;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentLevel;
+import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.AwardWinners;
@@ -102,7 +103,7 @@ public class AwardsCSV extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=awards.csv");
 
-      try (CSVWriter csv = new CSVWriter(response.getWriter())) {
+      try (CSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
         writeHeader(csv);
         writeAwards(description, connection, csv, tournamentData.getCurrentTournament(), sortedAwardGroups);
         final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection,

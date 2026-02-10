@@ -1,3 +1,5 @@
+* #1327 - Work around bug in opencsv where the escape character is inconsistent
+
 Release 20.3.0
 ==============
 

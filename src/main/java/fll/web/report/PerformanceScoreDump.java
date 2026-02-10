@@ -66,7 +66,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=performance_scores.csv");
 
-      try (CSVWriter csv = new CSVWriter(response.getWriter())) {
+      try (CSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
 
         writeHeader(csv);
         writeData(connection, tournamentID, performanceScoreType, csv);

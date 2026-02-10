@@ -1527,7 +1527,7 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException on an error writing
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
-    try (CSVWriter csv = new CSVWriter(outputWriter)) {
+    try (CSVWriter csv = Utilities.createCSVWriter(outputWriter)) {
 
       final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);

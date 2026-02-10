@@ -83,7 +83,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=performance_scores.csv");
 
-      try (CSVWriter csv = new CSVWriter(response.getWriter())) {
+      try (CSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
 
         writeHeader(csv, description);
 

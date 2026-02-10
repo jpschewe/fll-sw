@@ -1549,8 +1549,8 @@ public class GreedySolver {
   private void outputSchedule(final File schedule) throws IOException {
     final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
 
-    try (CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
-                                                              Utilities.DEFAULT_CHARSET))) {
+    try (CSVWriter csv = Utilities.createCSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
+                                                                          Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);

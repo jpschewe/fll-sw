@@ -366,7 +366,7 @@ public final class DumpDB extends BaseFLLServlet {
     boolean retval = false;
     // can't close the CSVwriter because that will close outputWriter, which is
     // actually the zip output stream
-    final CSVWriter csvwriter = new CSVWriter(outputWriter);
+    final CSVWriter csvwriter = Utilities.createCSVWriter(outputWriter);
     try (ResultSet rs = metadata.getColumns(null, null, tableName, "%")) {
       while (rs.next()) {
         retval = true;
@@ -424,7 +424,7 @@ public final class DumpDB extends BaseFLLServlet {
 
       // can't close the CSVwriter because that will close outputWriter, which is
       // actually the zip output stream
-      final CSVWriter csvwriter = new CSVWriter(outputWriter);
+      final CSVWriter csvwriter = Utilities.createCSVWriter(outputWriter);
       csvwriter.setResultService(new NullResultSetHelperService(FLL_SW_NULL_STRING));
       try (ResultSet rs = stmt.executeQuery("SELECT * FROM "
           + tableName)) {

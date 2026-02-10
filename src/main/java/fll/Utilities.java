@@ -12,6 +12,7 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -54,6 +55,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.ICSVParser;
+import com.opencsv.ICSVWriter;
 
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;
@@ -814,6 +819,20 @@ public final class Utilities {
     } else {
       return name;
     }
+  }
+
+  /**
+   * Exists to work around bug https://sourceforge.net/p/opencsv/bugs/268/ in
+   * OpenCSV.
+   * 
+   * @param writer passed to
+   *          {@link CSVWriter#CSVWriter(Writer, char, char, char, String)}
+   * @return a {@link CSVWriter} that is consistent with the default constructor
+   *         for {@link CSVReader}
+   */
+  public static CSVWriter createCSVWriter(final Writer writer) {
+    return new CSVWriter(writer, ICSVParser.DEFAULT_SEPARATOR, ICSVParser.DEFAULT_QUOTE_CHARACTER,
+                         ICSVParser.DEFAULT_ESCAPE_CHARACTER, ICSVWriter.DEFAULT_LINE_END);
   }
 
 }
