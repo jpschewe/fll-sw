@@ -1,3 +1,6 @@
+Release 20.3.0
+==============
+
 * #792 - Format last seen time to hours and minutes on remote control display page
 * Sort championship on finalist scheduling by rank
 * #1324 - Add weighted rank to Championship category in finalist scheduling
@@ -9,6 +12,7 @@
 
 Release 20.2.0
 ==============
+
 * #1319 - only notify displays where the URL changed that the URL changed
 * #1318 - Update score board text on the dynamic scoreboard when it changes
 * #1310 - Add a clock to the scoreboard display
