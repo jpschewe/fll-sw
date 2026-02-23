@@ -832,7 +832,7 @@ public final class Utilities {
 
   /**
    * @param reader base reader
-   * @return csv reader
+   * @return reader csv reader
    * @see #createCSVWriter(Writer)
    */
   public static CSVReader createCSVReader(final Reader reader) {
@@ -843,7 +843,7 @@ public final class Utilities {
   /**
    * Ensure that we have consistent CSV reading and writing.
    * 
-   * @param base writer
+   * @param writer base writer
    * @return csv writer
    * @see #createCSVReader(Reader)
    */
