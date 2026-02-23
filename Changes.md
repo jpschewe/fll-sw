@@ -1,4 +1,4 @@
-* #1327 - Work around bug in opencsv where the escape character is inconsistent
+* #1327 - Fix problem with inconsistent CSV writing and reading
 
 Release 20.3.0
 ==============
