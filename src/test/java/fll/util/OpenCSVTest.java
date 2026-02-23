@@ -4,7 +4,9 @@
 
 package fll.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -69,16 +71,66 @@ public class OpenCSVTest {
 
     StringReader reader = new StringReader(data);
     try (CSVReader csvReader = Utilities.createCSVReader(reader)) {
-      String[] line = csvReader.readNext();
-      if (null == line) {
-        throw new RuntimeException("Cannot find the header line");
-      }
-      final String[] columnTypes = new String[line.length];
+      String[] headerLine = csvReader.readNext();
+      assertNotNull(headerLine);
 
+      String[] line;
       while (null != (line = csvReader.readNext())) {
-        assertEquals(columnTypes.length, line.length,
+        assertEquals(headerLine.length, line.length,
                      "The number of columns in each row should match the number of columns in the header row");
       }
+    }
+  }
+
+  /**
+   * Test that writing and reading with double quotes in a column works properly.
+   * 
+   * @throws IOException test error
+   * @throws CsvValidationException test error
+   */
+  @Test
+  public void testQuoteInString() throws IOException, CsvValidationException {
+    final String[] header = new String[] { "column1", "column2", "column3", "column4" };
+    final String[] l1 = new String[] { "good", "something", "\"", "else" };
+    final String[] l2 = new String[] { "one", "two", "\"three\"", "four" };
+    final String[] l3 = new String[] { "five", "six", "\"seven", "eight" };
+    final String[] l4 = new String[] { "nine", "ten", "eleven\"", "twelve" };
+
+    final StringWriter writer = new StringWriter();
+    try (ICSVWriter csvWriter = Utilities.createCSVWriter((writer))) {
+      csvWriter.writeNext(header);
+      csvWriter.writeNext(l1);
+      csvWriter.writeNext(l2);
+      csvWriter.writeNext(l3);
+      csvWriter.writeNext(l4);
+    }
+
+    final String data = writer.toString();
+
+    StringReader reader = new StringReader(data);
+    try (CSVReader csvReader = Utilities.createCSVReader(reader)) {
+      String[] headerLine = csvReader.readNext();
+      assertNotNull(headerLine);
+
+      final String[] actual1 = csvReader.readNext();
+      assertNotNull(actual1);
+      assertEquals(headerLine.length, actual1.length);
+      assertArrayEquals(l1, actual1);
+
+      final String[] actual2 = csvReader.readNext();
+      assertNotNull(actual2);
+      assertEquals(headerLine.length, actual2.length);
+      assertArrayEquals(l2, actual2);
+
+      final String[] actual3 = csvReader.readNext();
+      assertNotNull(actual3);
+      assertEquals(headerLine.length, actual3.length);
+      assertArrayEquals(l3, actual3);
+
+      final String[] actual4 = csvReader.readNext();
+      assertNotNull(actual4);
+      assertEquals(headerLine.length, actual4.length);
+      assertArrayEquals(l4, actual4);
     }
   }
 
