@@ -47,7 +47,7 @@ import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -1527,7 +1527,7 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException on an error writing
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
-    try (CSVWriter csv = Utilities.createCSVWriter(outputWriter)) {
+    try (ICSVWriter csv = Utilities.createCSVWriter(outputWriter)) {
 
       final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);

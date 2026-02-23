@@ -13,15 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -34,6 +28,12 @@ import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -66,7 +66,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=performance_scores.csv");
 
-      try (CSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
+      try (ICSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
 
         writeHeader(csv);
         writeData(connection, tournamentID, performanceScoreType, csv);
@@ -88,7 +88,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
   private void writeData(final Connection connection,
                          final int tournamentID,
                          final ScoreType performanceScoreType,
-                         final CSVWriter csv)
+                         final ICSVWriter csv)
       throws SQLException {
 
     PreparedStatement getScores = null;
@@ -132,7 +132,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
    * 
    * @param csv where to write
    */
-  private void writeHeader(final CSVWriter csv) {
+  private void writeHeader(final ICSVWriter csv) {
     csv.writeNext(new String[] { "team#", "team name", "round", "score", "award_group", "judging_group" });
   }
 

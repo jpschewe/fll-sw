@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
@@ -83,7 +83,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=performance_scores.csv");
 
-      try (CSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
+      try (ICSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
 
         writeHeader(csv, description);
 
@@ -102,7 +102,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
   private void writeDataForTournament(final Connection connection,
                                       final ChallengeDescription description,
                                       final Tournament tournament,
-                                      final CSVWriter csv)
+                                      final ICSVWriter csv)
       throws SQLException {
     final PerformanceScoreCategory performanceCategory = description.getPerformance();
 
@@ -310,7 +310,7 @@ public class TournamentAdvancement extends BaseFLLServlet {
     return true;
   }
 
-  private void writeHeader(final CSVWriter csv,
+  private void writeHeader(final ICSVWriter csv,
                            final ChallengeDescription description) {
     final List<String> headers = new LinkedList<>();
     headers.add("Team #");

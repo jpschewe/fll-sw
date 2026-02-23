@@ -12,6 +12,7 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -56,9 +57,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVParser;
 import com.opencsv.ICSVWriter;
+import com.opencsv.RFC4180Parser;
+import com.opencsv.RFC4180ParserBuilder;
 
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;
@@ -821,18 +825,31 @@ public final class Utilities {
     }
   }
 
+  private static ICSVParser createCsvParser() {
+    final RFC4180Parser parser = new RFC4180ParserBuilder().build();
+    return parser;
+  }
+
   /**
-   * Exists to work around bug https://sourceforge.net/p/opencsv/bugs/268/ in
-   * OpenCSV.
-   * 
-   * @param writer passed to
-   *          {@link CSVWriter#CSVWriter(Writer, char, char, char, String)}
-   * @return a {@link CSVWriter} that is consistent with the default constructor
-   *         for {@link CSVReader}
+   * @param reader base reader
+   * @return csv reader
+   * @see #createCSVWriter(Writer)
    */
-  public static CSVWriter createCSVWriter(final Writer writer) {
-    return new CSVWriter(writer, ICSVParser.DEFAULT_SEPARATOR, ICSVParser.DEFAULT_QUOTE_CHARACTER,
-                         ICSVParser.DEFAULT_ESCAPE_CHARACTER, ICSVWriter.DEFAULT_LINE_END);
+  public static CSVReader createCSVReader(final Reader reader) {
+    final CSVReader csvReader = new CSVReaderBuilder(reader).withCSVParser(createCsvParser()).build();
+    return csvReader;
+  }
+
+  /**
+   * Ensure that we have consistent CSV reading and writing.
+   * 
+   * @param base writer
+   * @return csv writer
+   * @see #createCSVReader(Reader)
+   */
+  public static ICSVWriter createCSVWriter(final Writer writer) {
+    final ICSVWriter csvWriter = new CSVWriterBuilder(writer).withParser(createCsvParser()).build();
+    return csvWriter;
   }
 
 }

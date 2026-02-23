@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import com.diffplug.common.base.Errors;
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
 
@@ -103,7 +103,7 @@ public class AwardsCSV extends BaseFLLServlet {
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "filename=awards.csv");
 
-      try (CSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
+      try (ICSVWriter csv = Utilities.createCSVWriter(response.getWriter())) {
         writeHeader(csv);
         writeAwards(description, connection, csv, tournamentData.getCurrentTournament(), sortedAwardGroups);
         final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection,
@@ -117,13 +117,13 @@ public class AwardsCSV extends BaseFLLServlet {
     }
   }
 
-  private void writeHeader(final CSVWriter csv) {
+  private void writeHeader(final ICSVWriter csv) {
     csv.writeNext(new String[] { "team #", "team name", "award" });
   }
 
   private void writeAwards(final ChallengeDescription description,
                            final Connection connection,
-                           final CSVWriter csv,
+                           final ICSVWriter csv,
                            final Tournament tournament,
                            final List<String> sortedAwardGroups)
       throws SQLException, IOException {
@@ -220,7 +220,7 @@ public class AwardsCSV extends BaseFLLServlet {
 
   private static void addHeadToHead(final Connection connection,
                                     final Tournament tournament,
-                                    final CSVWriter csv,
+                                    final ICSVWriter csv,
                                     final List<String> sortedGroups)
       throws SQLException, IOException {
 
@@ -240,7 +240,7 @@ public class AwardsCSV extends BaseFLLServlet {
 
   private static void processDivision(final Connection connection,
                                       final Tournament tournament,
-                                      final CSVWriter csv,
+                                      final ICSVWriter csv,
                                       final String division)
       throws SQLException, IOException {
 
@@ -279,7 +279,7 @@ public class AwardsCSV extends BaseFLLServlet {
 
   private void addSubjectiveOverallWinners(final Connection connection,
                                            final ChallengeDescription description,
-                                           final CSVWriter csv,
+                                           final ICSVWriter csv,
                                            final String categoryName,
                                            final List<OverallAwardWinner> categoryWinners)
       throws SQLException {
@@ -304,7 +304,7 @@ public class AwardsCSV extends BaseFLLServlet {
 
   private void addSubjectiveAwardGroupWinners(final Connection connection,
                                               final ChallengeDescription description,
-                                              final CSVWriter csv,
+                                              final ICSVWriter csv,
                                               final String categoryName,
                                               final Map<String, List<AwardWinner>> categoryWinners,
                                               final List<String> awardGroupOrder)
@@ -352,7 +352,7 @@ public class AwardsCSV extends BaseFLLServlet {
   }
 
   private void addPerformance(final Connection connection,
-                              final CSVWriter csv,
+                              final ICSVWriter csv,
                               final ChallengeDescription description,
                               final List<String> sortedAwardGroups)
       throws SQLException, IOException {
@@ -405,7 +405,7 @@ public class AwardsCSV extends BaseFLLServlet {
 
   private static void addAdvancingTeams(final List<AdvancingTeam> advancing,
                                         final Connection connection,
-                                        final CSVWriter csv,
+                                        final ICSVWriter csv,
                                         final Tournament tournament,
                                         final List<String> sortedGroups)
       throws SQLException {
