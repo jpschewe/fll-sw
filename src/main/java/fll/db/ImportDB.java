@@ -273,7 +273,7 @@ public final class ImportDB {
    */
   private static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
     try {
-      final CSVReader csvreader = new CSVReader(reader);
+      final CSVReader csvreader = Utilities.createCSVReader(reader);
       final Map<String, String> columnTypes = new HashMap<>();
 
       String[] line;
@@ -3679,7 +3679,7 @@ public final class ImportDB {
                                   final int dumpVersion)
       throws IOException, SQLException {
     try {
-      final CSVReader csvreader = new CSVReader(reader);
+      final CSVReader csvreader = Utilities.createCSVReader(reader);
 
       // read the header and create the table and create the
       final StringBuilder insertPrepSQL = new StringBuilder();
