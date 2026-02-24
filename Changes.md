@@ -1,3 +1,5 @@
+* #1327 - Fix problem with inconsistent CSV writing and reading
+
 Release 20.3.0
 ==============
 

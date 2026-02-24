@@ -43,7 +43,7 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -1549,8 +1549,8 @@ public class GreedySolver {
   private void outputSchedule(final File schedule) throws IOException {
     final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
 
-    try (CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
-                                                              Utilities.DEFAULT_CHARSET))) {
+    try (ICSVWriter csv = Utilities.createCSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
+                                                                           Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);

@@ -12,6 +12,8 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -54,6 +56,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVParser;
+import com.opencsv.ICSVWriter;
+import com.opencsv.RFC4180Parser;
+import com.opencsv.RFC4180ParserBuilder;
 
 import fll.util.FLLRuntimeException;
 import fll.xml.ScoreType;
@@ -814,6 +823,33 @@ public final class Utilities {
     } else {
       return name;
     }
+  }
+
+  private static ICSVParser createCsvParser() {
+    final RFC4180Parser parser = new RFC4180ParserBuilder().build();
+    return parser;
+  }
+
+  /**
+   * @param reader base reader
+   * @return reader csv reader
+   * @see #createCSVWriter(Writer)
+   */
+  public static CSVReader createCSVReader(final Reader reader) {
+    final CSVReader csvReader = new CSVReaderBuilder(reader).withCSVParser(createCsvParser()).build();
+    return csvReader;
+  }
+
+  /**
+   * Ensure that we have consistent CSV reading and writing.
+   * 
+   * @param writer base writer
+   * @return csv writer
+   * @see #createCSVReader(Reader)
+   */
+  public static ICSVWriter createCSVWriter(final Writer writer) {
+    final ICSVWriter csvWriter = new CSVWriterBuilder(writer).withParser(createCsvParser()).build();
+    return csvWriter;
   }
 
 }
