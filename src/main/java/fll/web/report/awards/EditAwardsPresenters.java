@@ -38,6 +38,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.VirtualSubjectiveScoreCategory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -74,6 +75,7 @@ public class EditAwardsPresenters extends BaseFLLServlet {
       page.setAttribute("tournament", tournament);
 
       loadSubjectiveCategoryPresenters(page, description, connection, tournament);
+      loadVirtualSubjectiveCategoryPresenters(page, description, connection, tournament);
 
       loadNonNumericCategoryPresenters(page, description, connection, tournamentLevel, tournament);
 
@@ -109,6 +111,12 @@ public class EditAwardsPresenters extends BaseFLLServlet {
     return description.getSubjectiveCategories();
   }
 
+  private static List<VirtualSubjectiveScoreCategory> getVirtualSubjectiveCategories(final ChallengeDescription description) {
+    // extra method in case we later ignore some categories like the non-numeric
+    // categories
+    return description.getVirtualSubjectiveCategories();
+  }
+
   private static void loadSubjectiveCategoryPresenters(final PageContext page,
                                                        final ChallengeDescription description,
                                                        final Connection connection,
@@ -138,6 +146,37 @@ public class EditAwardsPresenters extends BaseFLLServlet {
 
     page.setAttribute("subjectiveCategoryPresenter", subjectiveCategoryPresenter);
     page.setAttribute("subjectiveCategoryPresenterSpecified", subjectiveCategoryPresenterSpecified);
+  }
+
+  private static void loadVirtualSubjectiveCategoryPresenters(final PageContext page,
+                                                              final ChallengeDescription description,
+                                                              final Connection connection,
+                                                              final Tournament tournament)
+      throws SQLException {
+    final List<VirtualSubjectiveScoreCategory> virtualSubjectiveCategories = getVirtualSubjectiveCategories(description);
+    page.setAttribute("virtualSubjectiveCategories", virtualSubjectiveCategories);
+
+    final Map<VirtualSubjectiveScoreCategory, String> virtualSubjectiveCategoryPresenter = new HashMap<>();
+    final Map<VirtualSubjectiveScoreCategory, Boolean> virtualSubjectiveCategoryPresenterSpecified = new HashMap<>();
+
+    for (final VirtualSubjectiveScoreCategory category : virtualSubjectiveCategories) {
+      final boolean presenterSpecified = AwardsScript.isPresenterSpecifiedForTournament(connection, tournament,
+                                                                                        category);
+
+      final String presenter;
+      if (!presenterSpecified) {
+        // display the value that would be used to the user
+        presenter = AwardsScript.getPresenter(connection, tournament, category);
+      } else {
+        presenter = AwardsScript.getPresenterForTournament(connection, tournament, category);
+      }
+
+      virtualSubjectiveCategoryPresenter.put(category, presenter);
+      virtualSubjectiveCategoryPresenterSpecified.put(category, presenterSpecified);
+    }
+
+    page.setAttribute("virtualSubjectiveCategoryPresenter", virtualSubjectiveCategoryPresenter);
+    page.setAttribute("virtualSubjectiveCategoryPresenterSpecified", virtualSubjectiveCategoryPresenterSpecified);
   }
 
   private static void loadNonNumericCategoryPresenters(final PageContext page,
@@ -223,6 +262,7 @@ public class EditAwardsPresenters extends BaseFLLServlet {
       storeSpecialCategoryPresenters(request, connection, tournament);
 
       storeSubjectiveCategoryPresenters(request, description, connection, tournament);
+      storeVirtualSubjectiveCategoryPresenters(request, description, connection, tournament);
 
       storeNonNumericCategoryPresenters(request, description, connection, tournamentLevel, tournament);
 
@@ -265,6 +305,27 @@ public class EditAwardsPresenters extends BaseFLLServlet {
     final List<SubjectiveScoreCategory> categories = getSubjectiveCategories(description);
 
     for (final SubjectiveScoreCategory category : categories) {
+      final @Nullable String specifiedStr = request.getParameter(String.format("category_%s_presenter_specified",
+                                                                               category.getName()));
+      if (null != specifiedStr) {
+        final String text = WebUtils.getNonNullRequestParameter(request, String.format("category_%s_presenter_text",
+                                                                                       category.getName()));
+
+        AwardsScript.updatePresenterForTournament(connection, tournament, category, text);
+      } else {
+        AwardsScript.clearPresenterForTournament(connection, tournament, category);
+      }
+    }
+  }
+
+  private void storeVirtualSubjectiveCategoryPresenters(final HttpServletRequest request,
+                                                        final ChallengeDescription description,
+                                                        final Connection connection,
+                                                        final Tournament tournament)
+      throws SQLException {
+    final List<VirtualSubjectiveScoreCategory> categories = getVirtualSubjectiveCategories(description);
+
+    for (final VirtualSubjectiveScoreCategory category : categories) {
       final @Nullable String specifiedStr = request.getParameter(String.format("category_%s_presenter_specified",
                                                                                category.getName()));
       if (null != specifiedStr) {

@@ -30,7 +30,11 @@ function pageInit() {
   <c:forEach items="${subjectiveCategories}" var="category">
   awardsScriptModule.configurePresenterEntry("category_${category.name}", ${subjectiveCategoryPresenterSpecified[category]});
   </c:forEach>
-  
+
+  <c:forEach items="${virtualSubjectiveCategories}" var="category">
+  awardsScriptModule.configurePresenterEntry("category_${category.name}", ${vitualSubjectiveCategoryPresenterSpecified[category]});
+  </c:forEach>
+
   <c:forEach items="${nonNumericCategories}" var="category">
   awardsScriptModule.configurePresenterEntry("category_${category.title}", ${nonNumericCategoryPresenterSpecified[category]});  
   </c:forEach>
@@ -91,6 +95,18 @@ function pageInit() {
                     name="category_${category.name}_presenter_text"
                     id="category_${category.name}_presenter_text"
                     value="${subjectiveCategoryPresenter[category]}" />
+            </div>
+        </c:forEach>
+        <c:forEach items="${virtualSubjectiveCategories}" var="category">
+            <h4>Category ${category.title}</h4>
+            <div>
+                <input type="checkbox"
+                    name="category_${category.name}_presenter_specified"
+                    id="category_${category.name}_presenter_specified" />
+                <input type="text"
+                    name="category_${category.name}_presenter_text"
+                    id="category_${category.name}_presenter_text"
+                    value="${virtualSubjectiveCategoryPresenter[category]}" />
             </div>
         </c:forEach>
 
