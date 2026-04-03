@@ -43,7 +43,7 @@ const finalistNumericModule = {};
     }
 
     function createTeamTable(teams, currentDivision, currentCategory) {
-        const prevScore = new Map();
+        const prevRank = new Map();
         const topTeams = new Map();
         const prevRow = new Map();
 
@@ -54,7 +54,7 @@ const finalistNumericModule = {};
                 const row = document.createElement("tr");
                 dataElement.appendChild(row);
 
-                const score = finalist_module.getCategoryScore(team, currentCategory);
+                const rank = finalist_module.getRank(team, currentCategory);
                 const group = team.judgingGroup;
                 //  || (group == prevJudgingGroup && Math.abs(prevScore - score) < 1)
                 if (!topTeams.has(group)) {
@@ -62,10 +62,10 @@ const finalistNumericModule = {};
                     row.classList.add("top-score");
                 } else {
                     // same judging group
-                    if (topTeams.get(group) && Math.abs(prevScore.get(group) - score) < 1) {
+                    if (topTeams.get(group) && Math.abs(prevRank.get(group) - rank) < 1) {
                         // close to top score
                         row.classList.add("top-score");
-                    } else if (Math.abs(prevScore.get(group) - score) < 1) {
+                    } else if (Math.abs(prevRank.get(group) - rank) < 1) {
                         // close score
                         row.classList.add("tie-score");
                         if (prevRow.get(group)) {
@@ -77,7 +77,7 @@ const finalistNumericModule = {};
                         topTeams.set(group, false);
                     }
                 }
-                prevScore.set(group, score);
+                prevRank.set(group, rank);
                 prevRow.set(group, row);
 
                 const finalistCol = document.createElement("td");
@@ -116,19 +116,9 @@ const finalistNumericModule = {};
                 row.appendChild(nameCol);
                 nameCol.innerText = team.name;
 
-                const scoreCol = document.createElement("td");
-                row.appendChild(scoreCol);
-                if (score) {
-                    scoreCol.innerText = score.toFixed(2);
-                }
-
-                if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
-                    const rank = finalist_module.getWeightedRank(team, currentCategory);
-
-                    const rankCol = document.createElement("td");
-                    row.appendChild(rankCol);
-                    rankCol.innerText = rank.toFixed(2);
-                }
+                const rankCol = document.createElement("td");
+                row.appendChild(rankCol);
+                rankCol.innerText = rank.toFixed(2);
 
                 const numFinalistCol = document.createElement("td");
                 row.appendChild(numFinalistCol);
@@ -172,19 +162,10 @@ const finalistNumericModule = {};
         headerRow.appendChild(teamNameCol);
         teamNameCol.innerText = "Team Name";
 
-        const scoreCol = document.createElement("th");
-        headerRow.appendChild(scoreCol);
-        if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
-            scoreCol.innerText = "Overall Score";
-        } else {
-            scoreCol.innerText = "Score";
-        }
 
-        if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
-            const rankCol = document.createElement("th");
-            headerRow.appendChild(rankCol);
-            rankCol.innerText = "Weighted Rank By Judging Group"
-        }
+        const rankCol = document.createElement("th");
+        headerRow.appendChild(rankCol);
+        rankCol.innerText = "Rank By Judging Group"
 
         const numCategoriesCol = document.createElement("th");
         headerRow.appendChild(numCategoriesCol);

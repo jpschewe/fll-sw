@@ -1,3 +1,4 @@
+* #1334 - Use rank instead of score for sorting teams in finalist scheduling
 * #1331 - Add editing of presenters for virtual subjective categories
 * #1327 - Fix problem with inconsistent CSV writing and reading
 
