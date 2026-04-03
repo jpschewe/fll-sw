@@ -123,7 +123,7 @@ const finalistNumericModule = {};
                 }
 
                 if (currentCategory.name == finalist_module.CHAMPIONSHIP_NAME) {
-                    const rank = finalist_module.getWeightedRank(team, currentCategory);
+                    const rank = finalist_module.getRank(team, currentCategory);
 
                     const rankCol = document.createElement("td");
                     row.appendChild(rankCol);

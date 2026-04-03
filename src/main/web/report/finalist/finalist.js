@@ -172,7 +172,7 @@ const finalist_module = {}
         this.org = org;
         this.judgingGroup = judgingGroup;
         this.categoryScores = {};
-        this.weightedRank = {};
+        this.rank = {};
         // names of playoff brackets this team is competing in
         this.playoffDivisions = [];
         _teams[num] = this;
@@ -602,12 +602,12 @@ const finalist_module = {}
         team.categoryScores[category.catId] = score;
     };
 
-    finalist_module.getWeightedRank = function(team, category) {
-        return team.weightedRank[category.catId];
+    finalist_module.getRank = function(team, category) {
+        return team.rank[category.catId];
     };
 
-    finalist_module.setWeightedRank = function(team, category, rank) {
-        team.weightedRank[category.catId] = rank;
+    finalist_module.setRank = function(team, category, rank) {
+        team.rank[category.catId] = rank;
     };
 
     /**
@@ -657,8 +657,8 @@ const finalist_module = {}
                 // fall through to score check
             } else {
                 // sort by rank first for Championship
-                const aRank = finalist_module.getWeightedRank(a, currentCategory);
-                const bRank = finalist_module.getWeightedRank(b, currentCategory);
+                const aRank = finalist_module.getRank(a, currentCategory);
+                const bRank = finalist_module.getRank(b, currentCategory);
                 if (aRank < bRank) {
                     // lower rank is better
                     return -1;
@@ -1795,7 +1795,7 @@ const finalist_module = {}
                 }
 
                 finalist_module.setCategoryScore(team, championship, scoreData.overallScore);
-                finalist_module.setWeightedRank(team, championship, scoreData.weightedRank);
+                finalist_module.setRank(team, championship, scoreData.weightedRank);
             } // scores
         });
     };
