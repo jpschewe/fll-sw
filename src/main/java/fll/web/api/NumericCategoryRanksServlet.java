@@ -38,10 +38,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Map of category title to team number to score.
+ * Map of category title to team number to rank.
  */
-@WebServlet("/api/NumericCategoryScores")
-public class NumericCategoryScoresServlet extends HttpServlet {
+@WebServlet("/api/NumericCategoryRanks")
+public class NumericCategoryRanksServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
@@ -83,7 +83,7 @@ public class NumericCategoryScoresServlet extends HttpServlet {
                                                                            score,
                                                                            rank) -> {
 
-                                                            categoryScores.put(teamNumber, score);
+                                                            categoryScores.put(teamNumber, Double.valueOf(rank));
                                                           });
         } // judging station
       } // category
@@ -99,7 +99,7 @@ public class NumericCategoryScoresServlet extends HttpServlet {
                                                                            score,
                                                                            rank) -> {
 
-                                                            categoryScores.put(teamNumber, score);
+                                                            categoryScores.put(teamNumber, Double.valueOf(rank));
                                                           });
         } // judging station
       } // category
