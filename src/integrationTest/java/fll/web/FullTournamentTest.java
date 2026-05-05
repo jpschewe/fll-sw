@@ -67,7 +67,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import fll.JudgeInformation;
 import fll.Team;
@@ -646,7 +646,7 @@ public class FullTournamentTest {
         + "_teams.csv");
     // write the teams out to a file
     try (Writer writer = Files.newBufferedWriter(teamsFile, Utilities.DEFAULT_CHARSET)) {
-      try (CSVWriter csvWriter = new CSVWriter(writer)) {
+      try (ICSVWriter csvWriter = Utilities.createCSVWriter(writer)) {
         csvWriter.writeNext(new String[] { "team_name", "team_number", "affiliation", "award_group", "judging_group",
                                            "tournament" });
         final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(testDataConnection,

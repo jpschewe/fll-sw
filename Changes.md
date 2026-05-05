@@ -1,5 +1,14 @@
 * #715 - refactor database init in IntegrationTestUtils to factor out duplicate code
 * #740 - Validate rubric ranges when parsing a challenge description
+* #1334 - Use rank instead of score for sorting teams in finalist scheduling
+* #1331 - Add editing of presenters for virtual subjective categories
+* #1327 - Fix problem with inconsistent CSV writing and reading
+
+Release 20.3.0
+==============
+
+* #792 - Format last seen time to hours and minutes on remote control display page
+* Sort championship on finalist scheduling by rank
 * #1324 - Add weighted rank to Championship category in finalist scheduling
 * #1315 - Fixed load error with finalist scheduling
 * #1323 - Better handling of display remote control errors 

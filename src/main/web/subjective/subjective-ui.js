@@ -1814,14 +1814,6 @@ function setupAfterContentLoaded() {
         alertCallback = null;
     });
 
-    document.getElementById("confirm-modified-scores-dialog_yes").addEventListener('click', function() {
-        document.getElementById('confirm-modified-scores-dialog').classList.add("fll-sw-ui-inactive");
-        reloadDataConfirmed();
-    });
-    document.getElementById("confirm-modified-scores-dialog_no").addEventListener('click', function() {
-        document.getElementById('confirm-modified-scores-dialog').classList.add("fll-sw-ui-inactive");
-    });
-
     document.getElementById("score-summary_show-comments").addEventListener('click', function() {
         toggleScoreSummaryComments();
     });

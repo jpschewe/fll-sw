@@ -14,3 +14,9 @@
 .tie {
     background-color: yellow;
 }
+
+td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+    

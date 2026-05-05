@@ -20,7 +20,7 @@ fll.web.report.ReportIndex.populateContext(application, session, pageContext, fa
 </head>
 
 <body>
-    <h1>Head Judge Sate</h1>
+    <h1>Head Judge State</h1>
 
     <%@ include file="/WEB-INF/jspf/message.jspf"%>
 

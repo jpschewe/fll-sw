@@ -171,8 +171,7 @@ const finalist_module = {}
         this.name = name;
         this.org = org;
         this.judgingGroup = judgingGroup;
-        this.categoryScores = {};
-        this.weightedRank = {};
+        this.rank = {};
         // names of playoff brackets this team is competing in
         this.playoffDivisions = [];
         _teams[num] = this;
@@ -594,20 +593,12 @@ const finalist_module = {}
         return _teams[teamNum];
     };
 
-    finalist_module.getCategoryScore = function(team, category) {
-        return team.categoryScores[category.catId];
+    finalist_module.getRank = function(team, category) {
+        return team.rank[category.catId];
     };
 
-    finalist_module.setCategoryScore = function(team, category, score) {
-        team.categoryScores[category.catId] = score;
-    };
-
-    finalist_module.getWeightedRank = function(team, category) {
-        return team.weightedRank[category.catId];
-    };
-
-    finalist_module.setWeightedRank = function(team, category, rank) {
-        team.weightedRank[category.catId] = rank;
+    finalist_module.setRank = function(team, category, rank) {
+        team.rank[category.catId] = rank;
     };
 
     /**
@@ -646,7 +637,7 @@ const finalist_module = {}
     finalist_module.sortTeamsByCategory = function(teams, currentCategory) {
         teams.sort(function(a, b) {
             if (currentCategory.name != finalist_module.CHAMPIONSHIP_NAME) {
-                // sort by score group first
+                // sort by score group first, unless championship which is overall
                 const aGroup = a.judgingGroup;
                 const bGroup = b.judgingGroup;
                 if (aGroup < bGroup) {
@@ -654,19 +645,22 @@ const finalist_module = {}
                 } else if (aGroup > bGroup) {
                     return 1;
                 }
-                // fall through to score check
             }
-            const aScore = finalist_module.getCategoryScore(a, currentCategory);
-            const bScore = finalist_module.getCategoryScore(b, currentCategory);
-            if (aScore == bScore) {
-                return 0;
-            } else if (null == aScore) {
-                // no score is lowest
-                return 1;
-            } else if (null == bScore) {
-                // no score is lowest
+
+            // sort by rank
+            const aRank = finalist_module.getRank(a, currentCategory);
+            const bRank = finalist_module.getRank(b, currentCategory);
+            if (aRank < bRank) {
+                // lower rank is better
                 return -1;
-            } else if (aScore < bScore) {
+            } else if (aRank > bRank) {
+                return 1;
+            }
+
+            // sort by team number
+            if (a.num == b.num) {
+                return 0;
+            } else if (a.num < b.num) {
                 return 1;
             } else {
                 return -1;
@@ -693,27 +687,27 @@ const finalist_module = {}
         }
 
         finalist_module.clearTeamsInCategory(currentCategory, currentDivision);
-        const prevScores = {};
+        const prevRanks = {};
         finalist_module.sortTeamsByCategory(teams, currentCategory);
         for (const team of teams) {
             if (currentCategory.overall
                 || currentDivision == team.awardGroup) {
                 const group = team.judgingGroup;
-                const prevScore = prevScores[group];
-                const curScore = finalist_module.getCategoryScore(team, currentCategory);
-                if (curScore != undefined && curScore > 0) {
+                const prevScore = prevRanks[group];
+                const curRank = finalist_module.getRank(team, currentCategory);
+                if (curRank != undefined && curRank > 0) {
                     if (prevScore == undefined) {
                         finalist_module.addTeamToCategory(currentCategory, team.num);
                         scoreGroups[group] = scoreGroups[group] - 1;
-                        prevScores[group] = curScore;
-                    } else if (Math.abs(prevScore - curScore) < 1) {
+                        prevRanks[group] = curRank;
+                    } else if (Math.abs(prevScore - curRank) < 1) {
                         // tie
                         finalist_module.addTeamToCategory(currentCategory, team.num);
-                        prevScores[group] = curScore;
+                        prevRanks[group] = curRank;
                     } else if (scoreGroups[group] > 0) {
                         finalist_module.addTeamToCategory(currentCategory, team.num);
                         scoreGroups[group] = scoreGroups[group] - 1;
-                        prevScores[group] = curScore;
+                        prevRanks[group] = curRank;
                     } else {
                         // check if we can short circuit the loop over teams
                         let checkedEnoughTeams = true;
@@ -1766,7 +1760,7 @@ const finalist_module = {}
     };
 
     /**
-     * Load the overall scores from the server and store them with the championship category.
+     * Load the overall scores and ranks from the server and store them with the championship category.
      * 
      * @return promise to execute
      */
@@ -1784,32 +1778,31 @@ const finalist_module = {}
                     throw new Error("Cannot find team with " + teamNumber + " found in overall scores");
                 }
 
-                finalist_module.setCategoryScore(team, championship, scoreData.overallScore);
-                finalist_module.setWeightedRank(team, championship, scoreData.weightedRank);
+                finalist_module.setRank(team, championship, scoreData.weightedRank);
             } // scores
         });
     };
 
     /**
-     * Load the scores for the numeric categories from the server.
+     * Load the ranks for the numeric categories from the server.
      * 
      * @return promise to execute
      */
-    finalist_module.loadCategoryScores = function() {
-        return fetch("../../api/NumericCategoryScores").then(checkJsonResponse).then(function(data) {
-            for (const [categoryName, categoryScores] of Object.entries(data)) {
+    finalist_module.loadCategoryRanks = function() {
+        return fetch("../../api/NumericCategoryRanks").then(checkJsonResponse).then(function(data) {
+            for (const [categoryName, categoryRanks] of Object.entries(data)) {
                 const category = finalist_module.getCategoryByName(categoryName);
                 if (null == category) {
                     throw new Error("Cannot find category '" + categoryName + "'");
                 }
 
-                for (const [teamNumber, score] of Object.entries(categoryScores)) {
+                for (const [teamNumber, rank] of Object.entries(categoryRanks)) {
                     const team = finalist_module.lookupTeam(teamNumber);
                     if (null == team) {
-                        throw new Error("Cannot find team with " + teamNumber + " found in scores for category '" + categoryName + "'");
+                        throw new Error("Cannot find team with " + teamNumber + " found in ranks for category '" + categoryName + "'");
                     }
 
-                    finalist_module.setCategoryScore(team, category, score);
+                    finalist_module.setRank(team, category, rank);
                 } // category scores
             } // categories
         });
@@ -1900,11 +1893,11 @@ const finalist_module = {}
             })
             waitList.push(overallScoresPromise);
 
-            const numericCategoryScoresPromise = finalist_module.loadCategoryScores();
-            numericCategoryScoresPromise.catch(function() {
+            const numericCategoryRanksPromise = finalist_module.loadCategoryRanks();
+            numericCategoryRanksPromise.catch(function() {
                 failCallback("Numeric category scores");
             })
-            waitList.push(numericCategoryScoresPromise);
+            waitList.push(numericCategoryRanksPromise);
 
             const playoffBracketTeamsPromise = finalist_module.loadPlayoffBracketTeams();
             playoffBracketTeamsPromise.catch(function() {

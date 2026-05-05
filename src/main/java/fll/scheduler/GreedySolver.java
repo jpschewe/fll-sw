@@ -43,7 +43,7 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
-import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -1549,11 +1549,25 @@ public class GreedySolver {
   private void outputSchedule(final File schedule) throws IOException {
     final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
 
-    try (CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
-                                                              Utilities.DEFAULT_CHARSET))) {
-      csv.writeNext(createHeaderRow());
-
+    try (ICSVWriter csv = Utilities.createCSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
+                                                                           Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<>();
+      line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+      line.add(TournamentSchedule.TEAM_NAME_HEADER);
+      line.add(TournamentSchedule.ORGANIZATION_HEADER);
+      line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+      for (final SubjectiveStation station : subjectiveStations) {
+        line.add(station.getName());
+      }
+      for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+            + 1));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+            + 1));
+      }
+      csv.writeNext(line.toArray(new String[line.size()]));
+      line.clear();
+
       for (final SchedTeam team : getAllTeams()) {
         final int teamNum = (team.getGroup()
             + 1)

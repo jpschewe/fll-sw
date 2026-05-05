@@ -66,8 +66,10 @@ fll.web.admin.RemoteControl.populateContext(application, pageContext);
           ${displayInfo.name}
           </c:when>
                             <c:otherwise>
-          ${displayInfo.name}-seen@${displayInfo.lastSeen}
-          </c:otherwise>
+          ${displayInfo.name}-seen@<javatime:format
+                                    value="${displayInfo.lastSeen}"
+                                    pattern="h:mm a" />
+                            </c:otherwise>
                         </c:choose>
                     </th>
                 </c:forEach>

@@ -85,7 +85,7 @@ public class OverallScoresServlet extends HttpServlet {
                                                                                                             groupName,
                                                                                                             // compute
                                                                                                             // ranks
-                                                                                                            // byF
+                                                                                                            // by
                                                                                                             // judging
                                                                                                             // group
                                                                                                             FinalComputedScores.ReportSelector.JUDGING_STATION,

@@ -530,9 +530,9 @@ public final class ScoreEntry {
     if (!editFlag
         && !tabletEntry) {
       formatter.format("  if (newValue == 1) {%n");
-      formatter.format("    document.getElementById('verification-warning').style.visibility = 'visible';%n");
+      formatter.format("    document.getElementById('verification-warning').classList.remove('fll-sw-ui-inactive');%n");
       formatter.format("  } else if (newValue == 0) {%n");
-      formatter.format("    document.getElementById('verification-warning').style.visibility = 'hidden';%n");
+      formatter.format("    document.getElementById('verification-warning').classList.add('fll-sw-ui-inactive');%n");
       formatter.format("  }%n");
     }
 
