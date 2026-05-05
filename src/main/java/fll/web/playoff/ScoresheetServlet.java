@@ -23,6 +23,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -76,7 +77,8 @@ public class ScoresheetServlet extends BaseFLLServlet {
         // send back to the same page
         SessionAttributes.appendToMessage(session, "<div class='success'>Table assignments updated</div>");
         final String referrer = request.getHeader("Referer");
-        response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
+        response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp"
+            : WebUtils.sanitizeHttpHeader(referrer)));
       }
 
     } catch (final SQLException e) {

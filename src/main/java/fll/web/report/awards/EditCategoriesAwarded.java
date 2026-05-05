@@ -27,6 +27,7 @@ import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.NonNumericCategory;
 import jakarta.servlet.ServletContext;
@@ -104,7 +105,7 @@ public class EditCategoriesAwarded extends BaseFLLServlet {
 
       final @Nullable String referer = request.getParameter("referer");
       if (null != referer) {
-        response.sendRedirect(response.encodeRedirectURL(referer));
+        response.sendRedirect(response.encodeRedirectURL(WebUtils.sanitizeHttpHeader(referer)));
       } else {
         response.sendRedirect(response.encodeRedirectURL("/report/awards/index.jsp"));
       }

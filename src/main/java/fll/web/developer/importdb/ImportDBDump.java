@@ -82,7 +82,7 @@ public class ImportDBDump extends BaseFLLServlet {
       return;
     }
 
-    session.setAttribute(IMPORT_DB_FINAL_REDIRECT_KEY, request.getHeader("Referer"));
+    session.setAttribute(IMPORT_DB_FINAL_REDIRECT_KEY, WebUtils.sanitizeHttpHeader(request.getHeader("Referer")));
 
     final StringBuilder message = new StringBuilder();
 

@@ -22,6 +22,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -110,7 +111,8 @@ import jakarta.servlet.jsp.PageContext;
     }
 
     final String referrer = request.getHeader("Referer");
-    response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
+    response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp"
+        : WebUtils.sanitizeHttpHeader(referrer)));
   }
 
 }
