@@ -90,7 +90,7 @@ eclipse {
 }
 
 dependencies {
-  jspc("org.apache.ant:ant:1.10.15")
+  jspc("org.apache.ant:ant:1.10.17")
 }
 
 testSets {
