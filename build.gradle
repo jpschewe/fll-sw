@@ -186,6 +186,7 @@ configurations {
 
 // work around issue with checkerframework dependencies
 // https://github.com/kelloggm/checkerframework-gradle-plugin/issues/290
+// only realy an issue for dependencyUpdates task 
 //configurations.all {
 //  resolutionStrategy {
 //    force("org.checkerframework:jdk8:3.3.0")
