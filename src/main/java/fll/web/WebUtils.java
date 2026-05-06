@@ -441,7 +441,7 @@ public final class WebUtils {
     } else {
       redirect = referrer;
     }
-    response.sendRedirect(response.encodeRedirectURL(redirect));
+    response.sendRedirect(response.encodeRedirectURL(WebUtils.sanitizeHttpHeader(redirect)));
   }
 
   /**
@@ -510,4 +510,24 @@ public final class WebUtils {
       return false;
     }
   }
+
+  /** Matches \r, \n, and other control characters (\x00-\x1F, \x7F) */
+  private static final Pattern DANGEROUS_CHARS = Pattern.compile("[\\r\\n\\x00-\\x1f\\x7f]");
+
+  /**
+   * Remove dangerous characters from HTTP header values so that they can be
+   * inserted back into an HTTP header and avoid response splitting.
+   * 
+   * @param rawHeader the received header
+   * @return a string that can be inserted back into a header
+   */
+  public static String sanitizeHttpHeader(final @Nullable String rawHeader) {
+    if (null == rawHeader) {
+      return "";
+    }
+
+    // Remove dangerous characters and trim whitespace
+    return DANGEROUS_CHARS.matcher(rawHeader).replaceAll("").trim();
+  }
+
 }

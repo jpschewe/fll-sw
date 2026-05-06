@@ -113,7 +113,7 @@ public class EditAwardDeterminationOrder extends BaseFLLServlet {
 
       final @Nullable String referer = request.getParameter("referer");
       if (null != referer) {
-        response.sendRedirect(response.encodeRedirectURL(referer));
+        response.sendRedirect(response.encodeRedirectURL(WebUtils.sanitizeHttpHeader(referer)));
       } else {
         response.sendRedirect(response.encodeRedirectURL("/report/index.jsp"));
       }

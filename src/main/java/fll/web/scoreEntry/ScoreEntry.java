@@ -34,6 +34,7 @@ import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.web.TournamentData;
+import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
@@ -133,7 +134,8 @@ public final class ScoreEntry {
     pageContext.setAttribute(SessionAttributes.WORKFLOW_ID, workflowId);
 
     // set redirect and include the workflow id (if one exists)
-    final String baseRedirect = StringUtils.isEmpty(referrer) ? "select_team.jsp" : referrer;
+    final String baseRedirect = StringUtils.isEmpty(referrer) ? "select_team.jsp"
+        : WebUtils.sanitizeHttpHeader(referrer);
     final String redirect;
     if (!StringUtils.isBlank(workflowId)) {
       redirect = String.format("%s%s%s=%s", baseRedirect, baseRedirect.contains("?") ? "&" : "?",

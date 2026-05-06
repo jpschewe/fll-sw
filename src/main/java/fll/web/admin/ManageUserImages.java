@@ -18,6 +18,7 @@ import fll.web.AuthenticationContext;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
+import fll.web.WebUtils;
 import fll.web.Welcome;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -99,7 +100,8 @@ public class ManageUserImages extends BaseFLLServlet {
     }
 
     final String referrer = request.getHeader("Referer");
-    response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
+    response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp"
+        : WebUtils.sanitizeHttpHeader(referrer)));
   }
 
 }

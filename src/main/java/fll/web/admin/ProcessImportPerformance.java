@@ -59,7 +59,8 @@ public class ProcessImportPerformance extends BaseFLLServlet {
       return;
     }
 
-    session.setAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY, request.getHeader("Referer"));
+    session.setAttribute(ImportDBDump.IMPORT_DB_FINAL_REDIRECT_KEY,
+                         WebUtils.sanitizeHttpHeader(request.getHeader("Referer")));
 
     final StringBuilder message = new StringBuilder();
 
