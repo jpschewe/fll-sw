@@ -553,11 +553,12 @@ tasks.register("renderWorkflows") {
     outputs.files(outputFiles)
     
     doLast {
-      ioMap.each{ inFile, outFile ->
-                        exec{
-          commandLine("dot", "-Tpdf", "-o", outFile, inFile)
-                        }
-      }
+        def execOps = services.get(ExecOperations)
+        ioMap.each { inFile, outFile ->
+            execOps.exec {
+                commandLine("dot", "-Tpdf", "-o", outFile, inFile)
+            }
+        }
     }
 }
 distributionDependencies.dependsOn(renderWorkflows)
