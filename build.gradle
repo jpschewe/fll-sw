@@ -12,6 +12,7 @@ buildscript {
     dependencies {
       // needs to use old plugin mechanism otherwise I can't set the extra properties   
       classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
+      classpath(group: "ch.poole.gradle", name: "markdown-gradle-plugin", version: "0.2.6")
     }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
@@ -23,7 +24,7 @@ buildscript {
         substitute module("com.overzealous:remark:1.1.0") using module("com.wavefront:remark:2023-07.07") because "not available on maven central anymore"
       }
     }
-}    
+}
 
 plugins {
     id "java"
@@ -31,7 +32,6 @@ plugins {
     id "com.dorongold.task-tree" version "4.0.1" // gradle <task> taskTree
     id "org.unbroken-dome.test-sets" version "4.1.0"
     id "eclipse"
-    id "org.kordamp.gradle.markdown" version "2.2.0" // markdownToHtml        
     id "com.github.spotbugs" version "6.5.4"
     id "de.aaschmid.cpd" version "3.5"
     id "edu.sc.seis.launch4j" version "4.0.0"
@@ -53,6 +53,9 @@ ext.snapshotSuffix = "beta.<count>+g<sha>"
 // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
 apply plugin: "com.cinnober.gradle.semver-git"
 
+// needs apply so that the plugin can be downloaded from maven central
+apply plugin: "ch.poole.gradle.markdown" // markdownToHtml
+  
 repositories {
     mavenCentral()
     maven {
