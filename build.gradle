@@ -311,6 +311,13 @@ tasks.withType(Tar){
     archiveExtension = "tar.gz"
 }
 
+// Starting with gradle 9 filesystem permissions aren't used by default
+// https://docs.gradle.org/9.0.0/userguide/working_with_files.html#sec:reproducible_archives
+tasks.withType(AbstractArchiveTask).configureEach {
+    useFileSystemPermissions()
+}
+
+
 javadoc {
     failOnError = false
     options.addStringOption("Xmaxwarns", "10000")
