@@ -1,3 +1,5 @@
+* #715 - refactor database init in IntegrationTestUtils to factor out duplicate code
+* #740 - Validate rubric ranges when parsing a challenge description
 * #1334 - Use rank instead of score for sorting teams in finalist scheduling
 * #1331 - Add editing of presenters for virtual subjective categories
 * #1327 - Fix problem with inconsistent CSV writing and reading
@@ -10,6 +12,9 @@ Release 20.3.0
 * #1324 - Add weighted rank to Championship category in finalist scheduling
 * #1315 - Fixed load error with finalist scheduling
 * #1323 - Better handling of display remote control errors 
+* #1303 - Track and display last page access for users
+* #1282 - Rework database schema to not be dependent on the challenge description
+* #1117 - Upgrade database on software startup. Most users won't see any effect from this.
 * Add timestamp to awards summary sheet
 * Don't prompt the judge for modified score overwrite when the tournament changes
 * Hide the cursor on the display pages
@@ -41,6 +46,7 @@ Release 20.2.0
 * #1288 - Internal rework of TeamScore to separate subjective and performance objects
 * #1299 - Editing performance runs dropdown now shows run names
 * Allow the head judge role to do everything the report generater (tournament reporter) can do
+* #1288 - Internal rework of TeamScore to separate subjective and performance objects
 
 Release 20.1.0
 ==============

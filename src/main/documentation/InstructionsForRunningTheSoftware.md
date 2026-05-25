@@ -4,8 +4,6 @@ It is best to go through this documentation the first time from the server so th
 When you click on a link you should right click on it and open it in a new tab or window. 
 This way you won't loose the this document.
 
-See [FLLTools Integration](flltools-integration.md) for integration with the FLLTools project from FIRST.
-
 See the [Minnesota Notes page](MinnesotaNotes.md) for details specific to running a tournament in Minnesota.
 
 See the [training presentation](training/computer-training.odp) for an overview presentation of running a tournament.

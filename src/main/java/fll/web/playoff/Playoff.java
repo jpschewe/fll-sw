@@ -36,14 +36,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
-import fll.db.GenerateDB;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.RunMetadata;
 import fll.db.RunMetadataFactory;
 import fll.db.TableInformation;
 import fll.scores.DatabasePerformanceTeamScore;
-import fll.scores.DummyTeamScore;
+import fll.scores.DefaultPerformanceTeamScore;
 import fll.scores.PerformanceTeamScore;
 import fll.scores.TeamScore;
 import fll.util.FLLInternalException;
@@ -287,9 +286,8 @@ public final class Playoff {
           + " run: "
           + runNumber);
     }
-    try (PreparedStatement prep = connection.prepareStatement("INSERT INTO "
-        + GenerateDB.PERFORMANCE_TABLE_NAME
-        + "(TeamNumber, Tournament, RunNumber, Bye, Verified, tablename)"
+    try (PreparedStatement prep = connection.prepareStatement("INSERT INTO performance"
+        + " (TeamNumber, Tournament, RunNumber, Bye, Verified, tablename)"
         + " VALUES( ?, ?, ?, 1, 1, ?)")) {
       prep.setInt(1, team.getTeamNumber());
       prep.setInt(2, tournament);
@@ -1512,30 +1510,34 @@ public final class Playoff {
           + " found that it's already finished, skipping");
       return;
     } else if (teamAscoreExists) {
-      final PerformanceTeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter,
-                                                                 simpleGoals, enumGoals, true, false,
-                                                                 LocalDateTime.now());
+      final PerformanceTeamScore teamBscore = new DefaultPerformanceTeamScore(teamBteamNumber,
+                                                                              performanceRunNumberToEnter, simpleGoals,
+                                                                              enumGoals, PerformanceTeamScore.ALL_TABLE,
+                                                                              true, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamBscore);
 
     } else if (teamBscoreExists) {
-      final PerformanceTeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter,
-                                                                 simpleGoals, enumGoals, true, false,
-                                                                 LocalDateTime.now());
+      final PerformanceTeamScore teamAscore = new DefaultPerformanceTeamScore(teamAteamNumber,
+                                                                              performanceRunNumberToEnter, simpleGoals,
+                                                                              enumGoals, PerformanceTeamScore.ALL_TABLE,
+                                                                              true, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamAscore);
     } else {
       // initial value score
-      final PerformanceTeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter,
-                                                                 simpleGoals, enumGoals, false, false,
-                                                                 LocalDateTime.now());
+      final PerformanceTeamScore teamAscore = new DefaultPerformanceTeamScore(teamAteamNumber,
+                                                                              performanceRunNumberToEnter, simpleGoals,
+                                                                              enumGoals, PerformanceTeamScore.ALL_TABLE,
+                                                                              false, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamAscore);
 
       // no show
-      final PerformanceTeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter,
-                                                                 simpleGoals, enumGoals, true, false,
-                                                                 LocalDateTime.now());
+      final PerformanceTeamScore teamBscore = new DefaultPerformanceTeamScore(teamBteamNumber,
+                                                                              performanceRunNumberToEnter, simpleGoals,
+                                                                              enumGoals, PerformanceTeamScore.ALL_TABLE,
+                                                                              true, false, true, LocalDateTime.now());
       Queries.insertPerformanceScore(runMetadataFactory, connection, datasource, description, tournament, true,
                                      teamBscore);
     }

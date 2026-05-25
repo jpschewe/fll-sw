@@ -194,7 +194,7 @@ public final class PerformanceRunsVsSchedule {
     }
 
     private static String determineEditedTableDisplay(final String origTable) {
-      if ("ALL".equals(origTable)) {
+      if (PerformanceTeamScore.ALL_TABLE.equals(origTable)) {
         return "UNKNOWN";
       } else {
         return origTable;

@@ -27,7 +27,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.WebUtils;
-import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -81,9 +80,7 @@ public class CommitTeam extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
       final int teamNumber = WebUtils.getIntRequestParameter(request, "teamNumber");
@@ -92,7 +89,7 @@ public class CommitTeam extends BaseFLLServlet {
       if (!StringUtils.isEmpty(request.getParameter("delete"))) {
         LOGGER.info("Deleting {}", teamNumber);
 
-        Queries.deleteTeam(teamNumber, challengeDescription, connection);
+        Queries.deleteTeam(teamNumber, connection);
         message.append("<p id='success'>Successfully deleted team "
             + teamNumber
             + "</p>");
@@ -203,7 +200,7 @@ public class CommitTeam extends BaseFLLServlet {
 
             } else if (previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
               // team was removed from tournament
-              Queries.deleteTeamFromTournament(connection, description, teamNumber, tournament.getTournamentID());
+              Queries.deleteTeamFromTournament(connection, teamNumber, tournament.getTournamentID());
             }
 
           } // playoffs not initialized
@@ -218,9 +215,7 @@ public class CommitTeam extends BaseFLLServlet {
       final String referrer = SessionAttributes.getAttribute(session, "edit_team_referrer", String.class);
       session.removeAttribute("edit_team_referrer");
       response.sendRedirect(response.encodeRedirectURL(StringUtils.isEmpty(referrer) ? "index.jsp" : referrer));
-    } catch (
-
-    final SQLException e) {
+    } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
     }

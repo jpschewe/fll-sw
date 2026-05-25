@@ -18,7 +18,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Tournament;
 import fll.scheduler.TournamentSchedule;
@@ -96,7 +95,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
         message.append("<p class='warning'>You have not loaded a schedule. If you intend to do so you should go back to the <a href='index.jsp'>admin page</a> and do this before assigning judges.</p>");
       }
 
-      if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament.getTournamentID())) {
+      if (checkForEnteredSubjectiveScores(connection, tournament.getTournamentID())) {
         message.append("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
       }
 
@@ -116,24 +115,21 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     }
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
-                                                         final List<SubjectiveScoreCategory> subjectiveCategories,
                                                          final int tournament)
       throws SQLException {
-    for (final SubjectiveScoreCategory category : subjectiveCategories) {
-      final String categoryName = category.getName();
-      try (PreparedStatement prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?",
-                                                                              categoryName))) {
-        prep.setInt(1, tournament);
-        try (ResultSet rs = prep.executeQuery()) {
-          if (rs.next()) {
-            return true;
-          }
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM subjective WHERE tournament_id = ?")) {
+      prep.setInt(1, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int count = rs.getInt(1);
+          return count > 0;
+        } else {
+          return false;
         }
       }
     }
-    return false;
   }
 
   private Map<String, String> gatherCategories(final List<SubjectiveScoreCategory> subjectiveCategories) {

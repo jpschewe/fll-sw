@@ -620,6 +620,10 @@ fll.web.PageVariables.populateTournamentTeams(application, pageContext);
         <li>
             <a href="unlockUserAccount.jsp">Unlock User account</a>
         </li>
+        <li>
+            <a href="<c:url value='/admin/user-info.jsp'/>">User
+                Information</a>
+        </li>
     </ul>
 
     <h2>Advanced</h2>

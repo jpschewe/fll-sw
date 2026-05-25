@@ -40,7 +40,8 @@ fll.web.JudgeIndex.populateContext(application, pageContext);
 
     <div class="wide">
         <form method="POST"
-            action="<c:url value='/report/SubjectiveScoreRubrics'/>">
+            action="<c:url value='/report/SubjectiveScoreRubrics'/>"
+            target="_blank">
             Generate the rubrics with scores for the specified category
             and award group
             <select name='categoryName'>

@@ -1158,7 +1158,6 @@ public final class ScoreEntry {
                   found = true;
                 }
               }
-
               if (!found) {
                 throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
                     + name
@@ -1175,7 +1174,7 @@ public final class ScoreEntry {
             }
           } // !computed
         } // foreach goal
-      } // real score
+      }
 
       // Always init the special double-check column
       writer.println("  Verified = "

@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
@@ -223,28 +224,16 @@ public final class ImportDB {
   private static void importAuthentication(final Connection sourceConnection,
                                            final Connection destConnection)
       throws SQLException {
-    try (Statement source = sourceConnection.createStatement();
-        ResultSet sourceData = source.executeQuery("SELECT fll_user, fll_pass FROM fll_authentication");
-        PreparedStatement dest = destConnection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
-      while (sourceData.next()) {
-        final String user = sourceData.getString("fll_user");
-        final String pass = sourceData.getString("fll_pass");
-        dest.setString(1, user);
-        dest.setString(2, pass);
-        dest.executeUpdate();
-      }
+    try (
+        PreparedStatement source = sourceConnection.prepareStatement("SELECT fll_user, fll_pass, num_failures, last_failure, last_access FROM fll_authentication");
+        PreparedStatement dest = destConnection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass, num_failures, last_failure, last_access) VALUES(?, ?, ?, ?, ?)")) {
+
+      copyData(source, 0, dest, 0, -1);
     }
 
-    try (Statement source = sourceConnection.createStatement();
-        ResultSet sourceData = source.executeQuery("SELECT fll_user, fll_role FROM auth_roles");
+    try (PreparedStatement source = sourceConnection.prepareStatement("SELECT fll_user, fll_role FROM auth_roles");
         PreparedStatement dest = destConnection.prepareStatement("INSERT INTO auth_roles (fll_user, fll_role) VALUES(?, ?)")) {
-      while (sourceData.next()) {
-        final String user = sourceData.getString("fll_user");
-        final String role = sourceData.getString("fll_role");
-        dest.setString(1, user);
-        dest.setString(2, role);
-        dest.executeUpdate();
-      }
+      copyData(source, 0, dest, 0, -1);
     }
   }
 
@@ -307,7 +296,7 @@ public final class ImportDB {
    * <p>
    * Once the database has been loaded it will be upgraded to the current
    * version using
-   * {@link #upgradeDatabase(Connection, ChallengeDescription)}.
+   * {@link #upgradeDatabase(Connection, ChallengeDescription, boolean)}.
    * </p>
    * <p>
    * The created database does not have constraints, nor does it have the
@@ -463,7 +452,7 @@ public final class ImportDB {
           + dbVersion);
     }
 
-    upgradeDatabase(connection, description);
+    upgradeDatabase(connection, description, false);
 
     return new ImportResult(importDirectory, hasBugs);
   }
@@ -592,27 +581,25 @@ public final class ImportDB {
    * we're only fixing up column names and the data in the column.
    *
    * @param connection the database to upgrade
-   * @param descriptionFor0to1Upgrade the challenge description read from the
+   * @param challengeDescription the challenge description read from the
    *          loaded file, only
    *          use this for adding to the database, any upgrades to the description
    *          should read from the database
-   * @param descriptionFor0to1Upgrade a developer friendly version of
-   *          challengeDocument
+   * @param createConstraints if true, create constraints
    * @throws SQLException on an error
-   * @throws IllegalArgumentException if the database cannot be upgraded for
-   *           some reason
    */
-  private static void upgradeDatabase(final Connection connection,
-                                      final ChallengeDescription descriptionFor0to1Upgrade)
-      throws SQLException, IllegalArgumentException {
+  public static void upgradeDatabase(final Connection connection,
+                                     final ChallengeDescription challengeDescription,
+                                     final boolean createConstraints)
+      throws SQLException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
-      upgrade0To1(connection, descriptionFor0to1Upgrade);
+      upgrade0To1(connection, challengeDescription);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
-      upgrade1To2(connection);
+      upgrade1To2(connection, createConstraints);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 6) {
@@ -628,11 +615,11 @@ public final class ImportDB {
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 9) {
-      upgrade8To9(connection);
+      upgrade8To9(connection, createConstraints);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 10) {
-      upgrade9To10(connection);
+      upgrade9To10(connection, createConstraints);
     }
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 11) {
@@ -673,22 +660,22 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 19) {
-      upgrade18To19(connection);
+      upgrade18To19(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 20) {
-      upgrade19To20(connection);
+      upgrade19To20(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 21) {
-      upgrade20To21(connection);
+      upgrade20To21(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 22) {
-      upgrade21To22(connection);
+      upgrade21To22(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -703,12 +690,12 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 25) {
-      upgrade24To25(connection);
+      upgrade24To25(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 26) {
-      upgrade25To26(connection);
+      upgrade25To26(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -718,7 +705,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 28) {
-      upgrade27To28(connection);
+      upgrade27To28(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -728,17 +715,17 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 30) {
-      upgrade29To30(connection);
+      upgrade29To30(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 31) {
-      upgrade30To31(connection);
+      upgrade30To31(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 32) {
-      upgrade31To32(connection);
+      upgrade31To32(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -753,7 +740,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 35) {
-      upgrade34To35(connection);
+      upgrade34To35(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -768,12 +755,12 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 38) {
-      upgrade37To38(connection);
+      upgrade37To38(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 39) {
-      upgrade38To39(connection);
+      upgrade38To39(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -783,7 +770,7 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 41) {
-      upgrade40To41(connection);
+      upgrade40To41(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -798,22 +785,22 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 44) {
-      upgrade43To44(connection);
+      upgrade43To44(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 45) {
-      upgrade44To45(connection);
+      upgrade44To45(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 46) {
-      upgrade45to46(connection);
+      upgrade45to46(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 47) {
-      upgrade46to47(connection);
+      upgrade46to47(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -823,17 +810,27 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 49) {
-      upgrade48to49(connection);
+      upgrade48to49(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 50) {
-      upgrade49to50(connection);
+      upgrade49to50(connection, createConstraints);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 51) {
-      upgrade50to51(connection);
+      upgrade50to51(connection, createConstraints);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 52) {
+      upgrade51to52(connection, createConstraints, challengeDescription);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 53) {
+      upgrade52to53(connection);
     }
 
     // NOTE: when adding new tournament parameters they need to be explicitly set in
@@ -843,15 +840,17 @@ public final class ImportDB {
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
-      throw new RuntimeException("Internal error, database version not updated to current instead was: "
+      throw new FLLRuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
     }
   }
 
-  private static void upgrade1To2(final Connection connection) throws SQLException {
+  private static void upgrade1To2(final Connection connection,
+                                  final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 1 to 2");
 
-    GenerateDB.createScheduleTables(connection, false);
+    GenerateDB.createScheduleTables(connection, createConstraints);
 
     // set the version to 2 - this will have been set while creating
     // global_parameters, but we need to force it to 2 for later upgrade
@@ -859,18 +858,22 @@ public final class ImportDB {
     setDBVersion(connection, 2);
   }
 
-  private static void upgrade8To9(final Connection connection) throws SQLException {
+  private static void upgrade8To9(final Connection connection,
+                                  final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 8 to 9");
 
-    GenerateDB.createFinalistScheduleTables(connection, false);
+    GenerateDB.createFinalistScheduleTables(connection, createConstraints);
 
     setDBVersion(connection, 9);
   }
 
-  private static void upgrade9To10(final Connection connection) throws SQLException {
+  private static void upgrade9To10(final Connection connection,
+                                   final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 9 to 10");
 
-    GenerateDB.createTableDivision(connection, false);
+    GenerateDB.createTableDivision(connection, createConstraints);
 
     setDBVersion(connection, 10);
   }
@@ -1013,21 +1016,25 @@ public final class ImportDB {
     setDBVersion(connection, 18);
   }
 
-  private static void upgrade18To19(final Connection connection) throws SQLException {
+  private static void upgrade18To19(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 18 to 19");
 
-    GenerateDB.createSubjectiveComputedScoresTable(connection, false);
-    GenerateDB.createFinalScoresTable(connection, false);
-    GenerateDB.createOverallScoresTable(connection, false);
+    GenerateDB.createSubjectiveComputedScoresTable(connection, createConstraints);
+    GenerateDB.createFinalScoresTable(connection, createConstraints);
+    GenerateDB.createOverallScoresTable(connection, createConstraints);
 
     setDBVersion(connection, 19);
   }
 
-  private static void upgrade19To20(final Connection connection) throws SQLException {
+  private static void upgrade19To20(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 19 to 20");
 
-    GenerateDB.createSubjectiveAwardWinnerTables(connection, false);
-    GenerateDB.createAdvancingTeamsTable(connection, false);
+    GenerateDB.createSubjectiveAwardWinnerTables(connection, createConstraints);
+    GenerateDB.createAdvancingTeamsTable(connection, createConstraints);
 
     // add level and next_level to Tournaments
     try (Statement stmt = connection.createStatement()) {
@@ -1046,18 +1053,22 @@ public final class ImportDB {
     setDBVersion(connection, 20);
   }
 
-  private static void upgrade20To21(final Connection connection) throws SQLException {
+  private static void upgrade20To21(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 20 to 21");
 
-    GenerateDB.createAutomaticFinishedPlayoffTable(connection, false);
+    GenerateDB.createAutomaticFinishedPlayoffTable(connection, createConstraints);
 
     setDBVersion(connection, 21);
   }
 
-  private static void upgrade21To22(final Connection connection) throws SQLException {
+  private static void upgrade21To22(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 21 to 22");
 
-    GenerateDB.createAwardGroupOrder(connection, false);
+    GenerateDB.createAwardGroupOrder(connection, createConstraints);
 
     setDBVersion(connection, 22);
   }
@@ -1105,15 +1116,19 @@ public final class ImportDB {
     setDBVersion(connection, 24);
   }
 
-  private static void upgrade24To25(final Connection connection) throws SQLException {
+  private static void upgrade24To25(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 24 to 25");
 
-    GenerateDB.createDelayedPerformanceTable(connection, false);
+    GenerateDB.createDelayedPerformanceTable(connection, createConstraints);
 
     setDBVersion(connection, 25);
   }
 
-  private static void upgrade25To26(final Connection connection) throws SQLException {
+  private static void upgrade25To26(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 25 to 26");
 
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
@@ -1121,7 +1136,7 @@ public final class ImportDB {
       GenerateDB.createAuthentication(connection);
     }
 
-    GenerateDB.createAuthenticationRoles(connection, false);
+    GenerateDB.createAuthenticationRoles(connection, createConstraints);
 
     // all existing users have admin privileges
     for (final String user : Authentication.getUsers(connection)) {
@@ -1148,10 +1163,12 @@ public final class ImportDB {
     setDBVersion(connection, 27);
   }
 
-  private static void upgrade27To28(final Connection connection) throws SQLException {
+  private static void upgrade27To28(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 27 to 28");
 
-    GenerateDB.createFinalistParameterTables(connection, false);
+    GenerateDB.createFinalistParameterTables(connection, createConstraints);
 
     if (!checkForColumnInTable(connection, "finalist_schedule", "judge_end_time")) {
       try (Statement stmt = connection.createStatement()) {
@@ -1234,7 +1251,9 @@ public final class ImportDB {
     setDBVersion(connection, 29);
   }
 
-  private static void upgrade29To30(final Connection connection) throws SQLException {
+  private static void upgrade29To30(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 29 to 30");
 
     int mismatchCount = 0;
@@ -1244,7 +1263,7 @@ public final class ImportDB {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
     if (!tables.contains("tournament_level")) {
       // create the table and the default level
-      GenerateDB.createTournamentLevelsTable(connection, false);
+      GenerateDB.createTournamentLevelsTable(connection, createConstraints);
     }
 
     // the column can exist in a 0 to 1 upgrade
@@ -1355,10 +1374,12 @@ public final class ImportDB {
    * Adds categories_ignored table that tracks categories to ignore per tournament
    * level.
    */
-  private static void upgrade30To31(final Connection connection) throws SQLException {
+  private static void upgrade30To31(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 30 to 31");
 
-    GenerateDB.createCategoriesIgnored(connection, false);
+    GenerateDB.createCategoriesIgnored(connection, createConstraints);
 
     setDBVersion(connection, 31);
   }
@@ -1366,10 +1387,12 @@ public final class ImportDB {
   /**
    * Adds awards script tables.
    */
-  private static void upgrade31To32(final Connection connection) throws SQLException {
+  private static void upgrade31To32(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 31 to 32");
 
-    GenerateDB.createAwardsScriptTables(connection, false);
+    GenerateDB.createAwardsScriptTables(connection, createConstraints);
 
     setDBVersion(connection, 32);
   }
@@ -1436,10 +1459,12 @@ public final class ImportDB {
   /**
    * Split playoffData table into playoffData and playoffTableData.
    */
-  private static void upgrade34To35(final Connection connection) throws SQLException {
+  private static void upgrade34To35(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 34 to 35");
 
-    GenerateDB.createPlayoffTableData(connection, false);
+    GenerateDB.createPlayoffTableData(connection, createConstraints);
 
     try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("INSERT INTO PlayoffTableData (event_division, Tournament, PlayoffRound, LineNumber, AssignedTable)" //
@@ -1458,13 +1483,9 @@ public final class ImportDB {
     LOGGER.debug("Upgrading database from 35 to 36");
 
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("ALTER TABLE "
-          + GenerateDB.PERFORMANCE_TABLE_NAME
-          + " ADD COLUMN tablename varchar(64)");
+      stmt.executeUpdate("ALTER TABLE performance ADD COLUMN tablename varchar(64)");
 
-      stmt.executeUpdate("UPDATE "
-          + GenerateDB.PERFORMANCE_TABLE_NAME
-          + " SET tablename = 'UNKNOWN'");
+      stmt.executeUpdate("UPDATE performance SET tablename = 'UNKNOWN'");
     }
 
     setDBVersion(connection, 36);
@@ -1482,11 +1503,13 @@ public final class ImportDB {
   /**
    * Add deliberation tables.
    */
-  private static void upgrade37To38(final Connection connection) throws SQLException {
+  private static void upgrade37To38(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 37 to 38");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createDeliberationTables(connection, false);
+      GenerateDB.createDeliberationTables(connection, createConstraints);
     }
 
     setDBVersion(connection, 38);
@@ -1495,11 +1518,13 @@ public final class ImportDB {
   /**
    * Add deliberation category order table.
    */
-  private static void upgrade38To39(final Connection connection) throws SQLException {
+  private static void upgrade38To39(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 38 to 39");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createDeliberationCategoryOrder(connection, false);
+      GenerateDB.createDeliberationCategoryOrder(connection, createConstraints);
     }
 
     setDBVersion(connection, 39);
@@ -1522,10 +1547,12 @@ public final class ImportDB {
   /**
    * Add schedule duration table.
    */
-  private static void upgrade40To41(final Connection connection) throws SQLException {
+  private static void upgrade40To41(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 40 to 41");
 
-    GenerateDB.createScheduleDurationTable(connection, false);
+    GenerateDB.createScheduleDurationTable(connection, createConstraints);
 
     setDBVersion(connection, 41);
   }
@@ -1563,11 +1590,13 @@ public final class ImportDB {
   /**
    * Create virtual subjective category table.
    */
-  private static void upgrade43To44(final Connection connection) throws SQLException {
+  private static void upgrade43To44(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 43 to 44");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createVirtualSubjectiveCategoryTable(connection, false);
+      GenerateDB.createVirtualSubjectiveCategoryTable(connection, createConstraints);
     }
 
     setDBVersion(connection, 44);
@@ -1576,11 +1605,13 @@ public final class ImportDB {
   /**
    * Create finalist table for non-numeric nominees.
    */
-  private static void upgrade44To45(final Connection connection) throws SQLException {
+  private static void upgrade44To45(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 44 to 45");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createFinalistNonNumericNomineesTables(connection, false);
+      GenerateDB.createFinalistNonNumericNomineesTables(connection, createConstraints);
     }
 
     setDBVersion(connection, 45);
@@ -1589,11 +1620,13 @@ public final class ImportDB {
   /**
    * Add virtual category award winner table.
    */
-  private static void upgrade45to46(final Connection connection) throws SQLException {
+  private static void upgrade45to46(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 45 to 46");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createVirtualSubjectiveAwardWinnerTable(connection, false);
+      GenerateDB.createVirtualSubjectiveAwardWinnerTable(connection, createConstraints);
     }
     setDBVersion(connection, 46);
   }
@@ -1601,11 +1634,13 @@ public final class ImportDB {
   /**
    * Add award determination order table.
    */
-  private static void upgrade46to47(final Connection connection) throws SQLException {
+  private static void upgrade46to47(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
     LOGGER.debug("Upgrading database from 46 to 47");
 
     try (Statement stmt = connection.createStatement()) {
-      GenerateDB.createAwardDeterminationTable(connection, false);
+      GenerateDB.createAwardDeterminationTable(connection, createConstraints);
     }
     setDBVersion(connection, 47);
   }
@@ -1643,8 +1678,10 @@ public final class ImportDB {
    * Add wave checkin times.
    * Ensure all waves are non-null.
    */
-  private static void upgrade48to49(final Connection connection) throws SQLException {
-    GenerateDB.createScheduleWaveCheckin(connection, false);
+  private static void upgrade48to49(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
+    GenerateDB.createScheduleWaveCheckin(connection, createConstraints);
 
     // ensure waves are set to the empty string instead of null
     try (Statement stmt = connection.createStatement()) {
@@ -1657,8 +1694,10 @@ public final class ImportDB {
   /**
    * Add tables for finalist groups
    */
-  private static void upgrade49to50(final Connection connection) throws SQLException {
-    GenerateDB.createFinalistGroupTables(connection, false);
+  private static void upgrade49to50(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
+    GenerateDB.createFinalistGroupTables(connection, createConstraints);
 
     setDBVersion(connection, 50);
   }
@@ -1666,8 +1705,10 @@ public final class ImportDB {
   /**
    * Add run metadata.
    */
-  private static void upgrade50to51(final Connection connection) throws SQLException {
-    GenerateDB.createRunMetadataTable(connection, false);
+  private static void upgrade50to51(final Connection connection,
+                                    final boolean createConstraints)
+      throws SQLException {
+    GenerateDB.createRunMetadataTable(connection, createConstraints);
 
     // migrate data
     try (PreparedStatement prep = connection.prepareStatement("SELECT TP3.param_value FROM tournament_parameters AS TP3" //
@@ -1727,6 +1768,270 @@ public final class ImportDB {
     } // allocate prepared statements
 
     setDBVersion(connection, 51);
+  }
+
+  /**
+   * Rework performance goal values into their own normalized tables.
+   * Rework subjective data to normalized tables.
+   */
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Column names to drop depends on the goal names, also table names to drop come from category names")
+  private static void upgrade51to52(final Connection connection,
+                                    final boolean createConstraints,
+                                    final ChallengeDescription description)
+      throws SQLException {
+
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+
+    GenerateDB.createPerformanceGoalsTables(connection, createConstraints);
+
+    // delete scores for teams that aren't in a tournament anymore
+    // delete schedule entries for teams that aren't in the tournament anymore
+    for (final Tournament tournament : Tournament.getTournaments(connection)) {
+      try (
+          PreparedStatement selectTournamentTeams = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE Tournament = ?");
+          PreparedStatement selectPerformanceTeams = connection.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ?");
+          PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance WHERE Tournament = ? AND TeamNumber = ?");
+          PreparedStatement selectScheduleTeams = connection.prepareStatement("SELEcT team_number FROM schedule WHERE Tournament = ?");
+          PreparedStatement deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ? AND team_number = ?");
+          PreparedStatement deleteSchedulePerf = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ? AND team_number = ?");
+          PreparedStatement deleteScheduleSubjective = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ? AND team_number = ?")) {
+        selectTournamentTeams.setInt(1, tournament.getTournamentID());
+        selectPerformanceTeams.setInt(1, tournament.getTournamentID());
+        selectScheduleTeams.setInt(1, tournament.getTournamentID());
+        deletePerformance.setInt(1, tournament.getTournamentID());
+        deleteScheduleSubjective.setInt(1, tournament.getTournamentID());
+        deleteSchedulePerf.setInt(1, tournament.getTournamentID());
+        deleteSchedule.setInt(1, tournament.getTournamentID());
+
+        final Set<Integer> tournamentTeams = new HashSet<>();
+        try (ResultSet rs = selectTournamentTeams.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            tournamentTeams.add(teamNumber);
+          }
+        }
+
+        final Set<Integer> performanceTeams = new HashSet<>();
+        try (ResultSet rs = selectPerformanceTeams.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            performanceTeams.add(teamNumber);
+          }
+        }
+
+        performanceTeams.removeAll(tournamentTeams);
+        for (final int deleteTeam : performanceTeams) {
+          LOGGER.warn("Deleting performance scores for team {} in tournament {} due to that team no longer being in the tournament",
+                      deleteTeam, tournament.toString());
+          deletePerformance.setInt(2, deleteTeam);
+          deletePerformance.executeUpdate();
+        }
+
+        final Set<Integer> scheduleTeams = new HashSet<>();
+        try (ResultSet rs = selectScheduleTeams.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            scheduleTeams.add(teamNumber);
+          }
+        }
+        scheduleTeams.removeAll(tournamentTeams);
+        for (final int deleteTeam : scheduleTeams) {
+          LOGGER.warn("Deleting schedule for team {} in tournament {} due to that team no longer being in the tournament",
+                      deleteTeam, tournament.toString());
+          deleteScheduleSubjective.setInt(2, deleteTeam);
+          deleteScheduleSubjective.executeUpdate();
+
+          deleteSchedulePerf.setInt(2, deleteTeam);
+          deleteSchedulePerf.executeUpdate();
+
+          deleteSchedule.setInt(2, deleteTeam);
+          deleteSchedule.executeUpdate();
+        }
+
+        for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+          final String tableName = category.getName();
+
+          try (PreparedStatement selectSubjectiveTeams = connection.prepareStatement("SELEcT TeamNumber FROM "
+              + tableName
+              + " WHERE Tournament = ?");
+              PreparedStatement deleteSubjective = connection.prepareStatement("DELETE FROM "
+                  + tableName
+                  + " WHERE Tournament = ? AND TeamNumber = ?")) {
+            selectSubjectiveTeams.setInt(1, tournament.getTournamentID());
+            deleteSubjective.setInt(1, tournament.getTournamentID());
+
+            final Set<Integer> subjectiveTeams = new HashSet<>();
+            try (ResultSet rs = selectSubjectiveTeams.executeQuery()) {
+              while (rs.next()) {
+                final int teamNumber = rs.getInt(1);
+                subjectiveTeams.add(teamNumber);
+              }
+            }
+
+            subjectiveTeams.removeAll(tournamentTeams);
+            for (final int deleteTeam : subjectiveTeams) {
+              LOGGER.warn("Deleting subjective scores for team {} in category {} in tournament {} due to that team no longer being in the tournament",
+                          deleteTeam, category.getTitle(), tournament.toString());
+              deleteSubjective.setInt(2, deleteTeam);
+              deleteSubjective.executeUpdate();
+            }
+          }
+        }
+      }
+    }
+
+    // reorganize the performance goal data
+    try (Statement stmt = connection.createStatement();
+        PreparedStatement goalInsert = connection.prepareStatement("INSERT INTO performance_goals (tournament_id, team_number, run_number, goal_name, goal_value) VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, team_number, run_number, goal_name, goal_value) VALUES(?, ?, ?, ?, ?)")) {
+
+      stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
+
+      try (ResultSet rs = stmt.executeQuery("SELECT * FROM Performance")) {
+        while (rs.next()) {
+
+          final int tournamentId = rs.getInt("Tournament");
+          final int teamNumber = rs.getInt("TeamNumber");
+          final int runNumber = rs.getInt("RunNumber");
+          final boolean isNoShow = rs.getBoolean("NoShow");
+          final boolean isBye = rs.getBoolean("Bye");
+          if (!isNoShow
+              && !isBye) {
+            for (final AbstractGoal element : performanceElement.getAllGoals()) {
+              if (!element.isComputed()) {
+                final String name = element.getName();
+
+                if (element.isEnumerated()) {
+                  final String value = rs.getString(name);
+                  enumGoalInsert.setInt(1, tournamentId);
+                  enumGoalInsert.setInt(2, teamNumber);
+                  enumGoalInsert.setInt(3, runNumber);
+                  enumGoalInsert.setString(4, name);
+                  enumGoalInsert.setString(5, value);
+                  enumGoalInsert.executeUpdate();
+                } else {
+                  final double value = rs.getDouble(name);
+                  goalInsert.setInt(1, tournamentId);
+                  goalInsert.setInt(2, teamNumber);
+                  goalInsert.setInt(3, runNumber);
+                  goalInsert.setString(4, name);
+                  goalInsert.setDouble(5, value);
+                  goalInsert.executeUpdate();
+                }
+              } // !computed
+            } // foreach goal
+          } // has score
+
+        } // foreach score
+      } // result set
+
+      // delete the additional columns from Performance - needed for in-place database
+      // upgrades
+      for (final AbstractGoal element : performanceElement.getAllGoals()) {
+        if (!element.isComputed()) {
+          final String name = element.getName();
+          stmt.executeUpdate(String.format("ALTER TABLE Performance DROP COLUMN %s", name));
+        }
+      }
+
+      // add new foreign key constraint to the tournament teams table
+      if (createConstraints) {
+        stmt.executeUpdate("ALTER TABLE Performance ADD CONSTRAINT performance_fk3 FOREIGN KEY(TeamNumber, Tournament) REFERENCES TournamentTeams(TeamNumber, Tournament) ON DELETE CASCADE");
+      }
+
+    } // statements
+
+    GenerateDB.createSubjectiveTables(connection, createConstraints);
+
+    // reorganize the subjective goal data
+    try (Statement stmt = connection.createStatement();
+        PreparedStatement insert = connection.prepareStatement("INSERT INTO subjective (tournament_id, category_name, judge, team_number, NoShow, note, comment_great_job, comment_think_about) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement goalInsert = connection.prepareStatement("INSERT INTO subjective_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)");
+        PreparedStatement enumGoalInsert = connection.prepareStatement("INSERT INTO subjective_enum_goals (tournament_id, category_name, team_number, judge, goal_name, goal_value) VALUES(?, ?, ?, ?, ?, ?)")) {
+
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final String tableName = category.getName();
+
+        insert.setString(2, tableName);
+        goalInsert.setString(2, tableName);
+        enumGoalInsert.setString(2, tableName);
+
+        try (ResultSet rs = stmt.executeQuery(String.format("SELECT * FROM %s", tableName))) {
+          while (rs.next()) {
+
+            final int tournamentId = rs.getInt("Tournament");
+            final int teamNumber = rs.getInt("TeamNumber");
+            final String judge = castNonNull(rs.getString("Judge"));
+            final boolean isNoShow = rs.getBoolean("NoShow");
+            final String note = rs.getString("note");
+            final @Nullable String commentGreatJob = rs.getString("comment_great_job");
+            final @Nullable String commentThinkAbout = rs.getString("comment_think_about");
+
+            insert.setInt(1, tournamentId);
+            insert.setString(3, judge);
+            insert.setInt(4, teamNumber);
+            insert.setBoolean(5, isNoShow);
+            insert.setString(6, note);
+            insert.setString(7, commentGreatJob);
+            insert.setString(8, commentThinkAbout);
+            insert.executeUpdate();
+
+            if (!isNoShow) {
+              enumGoalInsert.setInt(1, tournamentId);
+              enumGoalInsert.setString(4, judge);
+              enumGoalInsert.setInt(3, teamNumber);
+
+              goalInsert.setInt(1, tournamentId);
+              goalInsert.setString(4, judge);
+              goalInsert.setInt(3, teamNumber);
+
+              for (final AbstractGoal element : category.getAllGoals()) {
+                if (!element.isComputed()) {
+                  final String name = element.getName();
+
+                  if (element.isEnumerated()) {
+                    final String value = rs.getString(name);
+                    enumGoalInsert.setString(5, name);
+                    enumGoalInsert.setString(6, value);
+                    enumGoalInsert.executeUpdate();
+                  } else {
+                    final double value = rs.getDouble(name);
+                    goalInsert.setString(5, name);
+                    goalInsert.setDouble(6, value);
+                    goalInsert.executeUpdate();
+                  }
+                } // !computed
+              } // foreach goal
+            } // has score
+          } // foreach score
+        } // result set
+      } // foreach category
+
+      // delete the subjective tables - needed for in-place database
+      // upgrades
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final String tableName = category.getName();
+        stmt.executeUpdate(String.format("DROP TABLE %s", tableName));
+      }
+    } // statements
+
+    setDBVersion(connection, 52);
+  }
+
+  /**
+   * Add last access column to authentication table.
+   */
+  private static void upgrade52to53(final Connection connection) throws SQLException {
+    LOGGER.debug("Upgrading database from 52 to 53");
+
+    try (Statement stmt = connection.createStatement()) {
+      if (!checkForColumnInTable(connection, "fll_authentication", "last_access")) {
+        stmt.executeUpdate("ALTER TABLE fll_authentication ADD COLUMN last_access TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL");
+      }
+    }
+
+    setDBVersion(connection, 53);
   }
 
   /**
@@ -2171,11 +2476,11 @@ public final class ImportDB {
     }
 
     if (importPerformance) {
-      importPerformanceData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
+      importPerformanceData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     }
 
     if (importSubjective) {
-      importSubjectiveData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
+      importSubjectiveData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     }
 
     if (importFinalist) {
@@ -2184,7 +2489,7 @@ public final class ImportDB {
     }
 
     // update score totals
-    ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournamentID);
+    ScoreStandardization.updateScoreTotals(description, destinationConnection, destTournament);
   }
 
   private static void importGlobalData(final Connection sourceConnection,
@@ -2202,12 +2507,11 @@ public final class ImportDB {
 
   private static void importSubjectiveData(final Connection sourceConnection,
                                            final Connection destinationConnection,
-                                           final ChallengeDescription description,
                                            final int sourceTournamentID,
                                            final int destTournamentID)
       throws SQLException {
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
+    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importAdvancingTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importAwardWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
@@ -2216,11 +2520,10 @@ public final class ImportDB {
 
   private static void importPerformanceData(final Connection sourceConnection,
                                             final Connection destinationConnection,
-                                            final ChallengeDescription description,
                                             final int sourceTournamentID,
                                             final int destTournamentID)
       throws SQLException {
-    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
+    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
@@ -2297,12 +2600,30 @@ public final class ImportDB {
     }
   }
 
+  /**
+   * Calls {@link #copyData(PreparedStatement, int, PreparedStatement, int, int)}
+   * with a {@code sourceOffset} of {@code 0}, {@code destOffset} of {@code 1} and
+   * {@code columnCountOverride} of {@code -1}.
+   */
   private static void copyData(final PreparedStatement sourcePrep,
                                final PreparedStatement destPrep)
       throws SQLException {
     copyData(sourcePrep, 0, destPrep, 1, -1);
   }
 
+  /**
+   * Copy data from {@code sourcePrep} to {@code destPrep}. {@code sourcePrep} is
+   * a select statement and {@code destPrep} is a matching insert statement.
+   * Source index + {@code sourceOffset} is used to populate dest parameter +
+   * {@code destOffset}.
+   * 
+   * @param sourceOffset Usually set to {@code 0}
+   * @param destOffset Set to {@code 1} when the first parameter to insert is the
+   *          tournament identifier
+   * @param columnCountOverride if not {@code -1}, then use this instead of
+   *          {@link ResultSetMetaData#getColumnCount()} for the number of columns
+   * @throws SQLException on a database error
+   */
   private static void copyData(final PreparedStatement sourcePrep,
                                final int sourceOffset,
                                final PreparedStatement destPrep,
@@ -2666,118 +2987,89 @@ public final class ImportDB {
 
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
-                                       final int destTournamentID,
-                                       final ChallengeDescription description)
+                                       final int destTournamentID)
       throws SQLException {
-    // loop over each subjective category
-    for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
-      final String tableName = categoryElement.getName();
-      LOGGER.debug("Importing {}", tableName);
 
-      try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
-          + tableName
-          + " WHERE Tournament = ?")) {
-        destPrep.setInt(1, destTournamentID);
-        destPrep.executeUpdate();
-      }
+    try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM subjective"
+        + " WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
 
-      final StringBuilder columns = new StringBuilder();
-      int numColumns = 0;
-      columns.append(" Tournament,");
-      ++numColumns;
-      columns.append(" TeamNumber,");
-      ++numColumns;
-      columns.append(" NoShow,");
-      ++numColumns;
-      final List<AbstractGoal> goals = categoryElement.getAllGoals();
-      for (final AbstractGoal element : goals) {
-        if (!element.isComputed()) {
-          columns.append(" "
-              + element.getName()
-              + ",");
-          ++numColumns;
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_name, judge, team_number, NoSHow, note, comment_great_job, comment_think_about"
+            + " FROM subjective WHERE tournament_id = ?");
 
-          columns.append(" "
-              + GenerateDB.getGoalCommentColumnName(element)
-              + ",");
-          ++numColumns;
-        }
-      }
-      columns.append(" note,");
-      ++numColumns;
-      columns.append(" Judge,");
-      ++numColumns;
-      columns.append(" comment_great_job,");
-      ++numColumns;
-      columns.append(" comment_think_about");
-      ++numColumns;
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective (tournament_id, category_name, judge, team_number, NoSHow, note, comment_great_job, comment_think_about)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
 
-      importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
-                   sourceTournamentID);
+    importSubjectiveGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importSubjectiveEnumGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  private static void importSubjectiveGoals(final Connection sourceConnection,
+                                            final Connection destinationConnection,
+                                            final int sourceTournamentID,
+                                            final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing subjective_goals");
+
+    // should not be needed due to cascade constraints, but can't hurt
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM subjective_goals WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_name, judge, team_number, goal_name, goal_value, comment "
+            + "FROM subjective_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_goals (tournament_id, category_name, judge, team_number, goal_name, goal_value, comment)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
     }
   }
 
-  /**
-   * Common import code for importSubjective and importPerformance.
-   *
-   * @param columns the columns in the table, this should include Tournament,
-   *          TeamNumber, NoShow, Judge or Verified, then all elements for
-   *          category
-   * @param tableName the name of the table to update
-   * @param numColumns the number of columns
-   * @param destinationConnection
-   * @param destTournamentID
-   * @param sourceConnection
-   * @param sourceTournamentID
-   * @throws SQLException
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
-  private static void importCommon(final StringBuilder columns,
-                                   final String tableName,
-                                   final int numColumns,
-                                   final Connection destinationConnection,
-                                   final int destTournamentID,
-                                   final Connection sourceConnection,
-                                   final int sourceTournamentID)
+  private static void importSubjectiveEnumGoals(final Connection sourceConnection,
+                                                final Connection destinationConnection,
+                                                final int sourceTournamentID,
+                                                final int destTournamentID)
       throws SQLException {
-    final StringBuffer sql = new StringBuffer();
-    sql.append("INSERT INTO ");
-    sql.append(tableName);
-    sql.append(" (");
-    sql.append(columns.toString());
-    sql.append(") VALUES (");
-    for (int i = 0; i < numColumns; i++) {
-      if (i > 0) {
-        sql.append(", ");
-      }
-      sql.append("?");
-    }
-    sql.append(")");
-    try (PreparedStatement destPrep = destinationConnection.prepareStatement(sql.toString());
+    LOGGER.debug("Importing subjective_enum_goals");
 
-        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT "
-            + columns.toString()
-            + " FROM "
-            + tableName
-            + " WHERE Tournament = ?")) {
-
+    // should not be needed due to cascade constraints, but can't hurt
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM subjective_enum_goals WHERE tournament_id = ?")) {
       destPrep.setInt(1, destTournamentID);
-      sourcePrep.setInt(1, sourceTournamentID);
-      copyData(sourcePrep, 1, destPrep, 1, numColumns
-          - 1);
+      destPrep.executeUpdate();
     }
 
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT category_name, judge, team_number, goal_name, goal_value, comment "
+            + "FROM subjective_enum_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_enum_goals (tournament_id, category_name, judge, team_number, goal_name, goal_value, comment)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
+    }
   }
 
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
-                                        final int destTournamentID,
-                                        final ChallengeDescription description)
+                                        final int destTournamentID)
       throws SQLException {
     LOGGER.debug("Importing performance run metadata");
     try (
@@ -2796,38 +3088,75 @@ public final class ImportDB {
     }
 
     LOGGER.debug("Importing performance scores");
-    final PerformanceScoreCategory performanceElement = description.getPerformance();
-    final String tableName = "Performance";
-    try (PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM "
-        + tableName
-        + " WHERE Tournament = ?")) {
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
     }
 
-    final StringBuilder columns = new StringBuilder();
-    columns.append(" Tournament,");
-    columns.append(" TeamNumber,");
-    columns.append(" RunNumber,");
-    // Note: If TimeStamp is no longer the 3rd element, then the hack below
-    // needs to be modified
-    columns.append(" TimeStamp,");
-    final List<AbstractGoal> goals = performanceElement.getAllGoals();
-    int numColumns = 7;
-    for (final AbstractGoal element : goals) {
-      if (!element.isComputed()) {
-        columns.append(" "
-            + element.getName()
-            + ",");
-        ++numColumns;
-      }
-    }
-    columns.append(" NoShow,");
-    columns.append(" Bye,");
-    columns.append(" Verified");
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, RunNumber, TimeStamp, NoShow, Bye, Verified"
+            + " FROM Performance WHERE Tournament = ?");
 
-    importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
-                 sourceTournamentID);
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO Performance (Tournament, TeamNumber, RunNumber, TimeStamp, NoShow, Bye, Verified)"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      copyData(sourcePrep, destPrep);
+    }
+
+    importPerformanceGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importPerformanceEnumGoals(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  private static void importPerformanceGoals(final Connection sourceConnection,
+                                             final Connection destinationConnection,
+                                             final int sourceTournamentID,
+                                             final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing performance_goals");
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance_goals WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, run_number, goal_name, goal_value "
+            + "FROM performance_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO performance_goals (tournament_id, team_number, run_number, goal_name, goal_value)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
+    } // prepared statements
+  }
+
+  private static void importPerformanceEnumGoals(final Connection sourceConnection,
+                                                 final Connection destinationConnection,
+                                                 final int sourceTournamentID,
+                                                 final int destTournamentID)
+      throws SQLException {
+    LOGGER.debug("Importing performance_enum_goals");
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM performance_enum_goals WHERE tournament_id = ?")) {
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+    }
+
+    try (
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, run_number, goal_name, goal_value "
+            + "FROM performance_enum_goals WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO performance_enum_goals (tournament_id, team_number, run_number, goal_name, goal_value)"
+            + "VALUES (?, ?, ?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+
+      copyData(sourcePrep, destPrep);
+    } // prepared statements
   }
 
   /**

@@ -60,8 +60,6 @@ public class TournamentScheduleTest {
    */
   @Test
   public void testForNoSchedule() throws SQLException, UnsupportedEncodingException {
-    Utilities.loadDBDriver();
-
     final String url = "jdbc:hsqldb:mem:ut_ts_test_no1";
     Connection memConnection = null;
     try {
@@ -120,8 +118,6 @@ public class TournamentScheduleTest {
   @Test
   public void testStoreSchedule()
       throws SQLException, IOException, InvalidFormatException, ParseException, ScheduleParseException {
-    Utilities.loadDBDriver();
-
     final String tournamentName = "ut_ts_test_ss1";
     final String url = "jdbc:hsqldb:mem:ut_ts_test_ss1";
     final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");

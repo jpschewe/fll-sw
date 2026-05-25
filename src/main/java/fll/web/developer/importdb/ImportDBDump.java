@@ -86,7 +86,6 @@ public class ImportDBDump extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
-    Utilities.loadDBDriver();
     final String redirectUrl;
     try {
       if (null != request.getPart("importdb")) {

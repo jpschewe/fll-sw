@@ -8,13 +8,18 @@ package fll.web;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import fll.db.Authentication;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -217,6 +222,16 @@ public final class AuthenticationContext implements Serializable {
                               final Set<UserRole> requiredRoles,
                               final boolean allowSetup)
       throws ServletException, IOException {
+
+    if (loggedIn
+        && null != username) {
+      final DataSource datasource = ApplicationAttributes.getDataSource(session.getServletContext());
+      try (Connection connection = datasource.getConnection()) {
+        Authentication.recordAccess(connection, username);
+      } catch (final SQLException e) {
+        LOGGER.error("Unable to record page access for {}.", username, e);
+      }
+    }
 
     if (allowSetup
         && isInSetup()) {

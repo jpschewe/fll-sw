@@ -9,14 +9,14 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 /**
  * Represents a score for a team.
  */
-public abstract class BaseTeamScore implements TeamScore {
+/* package */ abstract class BaseTeamScore implements TeamScore {
 
   /**
    * Create a non-performance TeamScore for the specified team.
    *
    * @param teamNumber {@link #getTeamNumber()}
    */
-  public BaseTeamScore(final int teamNumber) {
+  BaseTeamScore(final int teamNumber) {
     this.teamNumber = teamNumber;
   }
 
@@ -37,12 +37,36 @@ public abstract class BaseTeamScore implements TeamScore {
   @SideEffectFree
   public abstract boolean isNoShow();
 
+  /**
+   * Implemented to return {@link Double#NaN} if {@link #isNoShow()} returns
+   * {@code true}, otherwise return the value.
+   */
   @Override
   @SideEffectFree
-  public abstract double getRawScore(String goalName);
+  public double getRawScore(final String goalName) {
+    if (isNoShow()) {
+      return Double.NaN;
+    } else {
+      return internalGetRawScore(goalName);
+    }
+  }
 
+  protected abstract double internalGetRawScore(String goalName);
+
+  /**
+   * Implemented to return {@code null} if {@link #isNoShow()} returns
+   * {@code true}, otherwise return the value.
+   */
   @Override
   @SideEffectFree
-  public abstract @Nullable String getEnumRawScore(String goalName);
+  public @Nullable String getEnumRawScore(final String goalName) {
+    if (isNoShow()) {
+      return null;
+    } else {
+      return internalGetEnumRawScore(goalName);
+    }
+  }
+
+  protected abstract @Nullable String internalGetEnumRawScore(String goalName);
 
 }

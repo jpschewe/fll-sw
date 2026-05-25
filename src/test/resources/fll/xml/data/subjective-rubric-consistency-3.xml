@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fll copyright="" revision="0" revisionComment="" schemaVersion="3"
+    title="different min/max" winner="HIGH">
+
+    <Performance minimumScore="0" weight="1.0">
+
+        <goal initialValue="0" max="1" min="0" multiplier="40"
+            name="pump_station" title="Protect the Pump Station" />
+
+    </Performance>
+
+    <subjectiveCategory name="overlapping1"
+        title="overlapping1" weight="1.0">
+        <goal initialValue="0" max="12" min="1" multiplier="1"
+            name="goal1" title="Goal 1">
+            <rubric>
+                <range max="4" min="1"
+                    shortDescription="Unclear definition of the problem"
+                    title="Beginning" />
+                <range max="6" min="4"
+                    shortDescription="Partially clear definition of the problem"
+                    title="Developing" />
+                <range max="9" min="7"
+                    shortDescription="Clear definition of the problem"
+                    title="Accomplished" />
+                <range max="12" min="10"
+                    shortDescription="How has the team exceeded?"
+                    title="Exceeds" />
+            </rubric>
+        </goal>
+        <goal initialValue="0" max="12" min="1" multiplier="1"
+            name="goal2" title="Goal 2">
+            <rubric>
+                <range max="4" min="1"
+                    shortDescription="Unclear definition of the problem"
+                    title="Beginning" />
+                <range max="7" min="4"
+                    shortDescription="Partially clear definition of the problem"
+                    title="Developing" />
+                <range max="9" min="8"
+                    shortDescription="Clear definition of the problem"
+                    title="Accomplished" />
+                <range max="12" min="10"
+                    shortDescription="How has the team exceeded?"
+                    title="Exceeds" />
+            </rubric>
+        </goal>
+    </subjectiveCategory>
+
+
+</fll>

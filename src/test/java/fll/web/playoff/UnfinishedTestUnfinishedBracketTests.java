@@ -7,9 +7,6 @@
 package fll.web.playoff;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,9 +18,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+
 import fll.Team;
 import fll.db.GlobalParameters;
-import fll.scores.DummyTeamScore;
+import fll.scores.DefaultPerformanceTeamScore;
 import fll.scores.PerformanceTeamScore;
 import fll.xml.ChallengeDescription;
 
@@ -84,8 +85,8 @@ public final class UnfinishedTestUnfinishedBracketTests extends UnfinishedBaseTe
 
     Playoff.populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
 
-    final PerformanceTeamScore teamScore = new DummyTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1, simpleGoals,
-                                                              enumGoals, LocalDateTime.now());
+    final PerformanceTeamScore teamScore = new DefaultPerformanceTeamScore(UnfinishedBaseTest.UNFINISHED_TEAM_NUMBER, 1,
+                                                                           simpleGoals, enumGoals, LocalDateTime.now());
 
     challenge.getPerformance().evaluate(teamScore);
   }

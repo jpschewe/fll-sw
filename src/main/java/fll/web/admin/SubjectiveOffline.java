@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.JudgeInformation;
-import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
@@ -33,6 +32,7 @@ import fll.web.MissingRequiredParameterException;
 import fll.web.SessionAttributes;
 import fll.web.UserRole;
 import fll.web.api.JudgesServlet;
+import fll.web.api.SubjectiveScore;
 import fll.web.api.SubjectiveScoresServlet;
 import fll.xml.ChallengeDescription;
 import jakarta.servlet.ServletContext;
