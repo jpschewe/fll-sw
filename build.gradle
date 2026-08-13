@@ -140,9 +140,9 @@ integrationTest {
 }
 
 ext {
-    slf4j_version = "2.0.17"
-    tomcat_version = "11.0.21"
-    junit_version = "6.0.3"
+    slf4j_version = "2.0.18"
+    tomcat_version = "11.0.24"
+    junit_version = "6.1.3"
     log4j_version = "2.25.4"
     spotbugs_version = "4.9.8"
     checker_framework_version = "3.42.0"
@@ -298,7 +298,7 @@ dependencies {
     // xml APIs are part of the JDK
     exclude(group: "xml-apis", module: "xml-apis")
   }
-  integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-java", version: "4.43.0")
+  integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-java", version: "4.47.0")
   integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "6.3.4")
   
   // make selenium log to log4j
