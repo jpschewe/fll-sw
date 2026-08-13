@@ -232,10 +232,10 @@ dependencies {
   implementation(group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version)
   compileOnly(group: "com.google.code.findbugs", name: "jsr305", version: "3.0.2")
     
-  implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.21.3")
-  implementation(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.21")
-  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8", version: "2.21.3")
-  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310", version: "2.21.3")
+  implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.22.1")
+  implementation(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.22")
+  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jdk8", version: "2.22.1")
+  implementation(group: "com.fasterxml.jackson.datatype", name: "jackson-datatype-jsr310", version: "2.22.1")
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
