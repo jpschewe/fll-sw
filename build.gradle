@@ -893,7 +893,7 @@ checkstyle {
     configFile = file("checkstyle.xml")
     showViolations = true
     ignoreFailures = true
-    toolVersion = "10.3.1"
+    toolVersion = "13.10.0"
 }
 
 checkerFramework {
