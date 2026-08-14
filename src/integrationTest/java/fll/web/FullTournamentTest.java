@@ -1019,8 +1019,9 @@ public class FullTournamentTest {
       boolean found = false;
       for (final WebElement option : verifySelect.getOptions()) {
         final String value = option.getDomProperty("value");
-        if (value.startsWith(teamNumber
-            + "-")) {
+        if (value != null
+            && value.startsWith(teamNumber
+                + "-")) {
           verifySelect.selectByValue(value);
           found = true;
           break;
