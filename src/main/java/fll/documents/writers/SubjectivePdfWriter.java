@@ -542,16 +542,16 @@ public final class SubjectivePdfWriter {
 
   private static final class SubjectiveConstants {
 
-    // Core Values catagory constants
+    /** Core Values category constant. */
     public static final String CORE_VALUES_NAME = "core_values";
 
-    // Project catagory constants
+    /** Project category constant. */
     public static final String PROJECT_NAME = "project";
 
-    // Robot Design constants
+    /** Robot Design constant. */
     public static final String ROBOT_DESIGN_NAME = "robot_design";
 
-    // Robot Programming constants
+    /** Robot Programming constant. */
     public static final String PROGRAMMING_NAME = "robot_programming";
   }
 
