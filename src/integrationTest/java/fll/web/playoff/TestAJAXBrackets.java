@@ -205,7 +205,7 @@ public class TestAJAXBrackets {
       boolean found = false;
       for (final WebElement option : verifySelect.getOptions()) {
         final String value = option.getDomProperty("value");
-        if (value.startsWith("4-")) {
+        if (null != value && value.startsWith("4-")) {
           verifySelect.selectByValue(value);
           found = true;
           break;

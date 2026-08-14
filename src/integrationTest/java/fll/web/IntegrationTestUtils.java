@@ -711,7 +711,7 @@ public final class IntegrationTestUtils {
         + selenium.getClass().getName());
     if (selenium instanceof JavascriptExecutor) {
       final JavascriptExecutor jsSelenium = (JavascriptExecutor) selenium;
-      final String uAgent = jsSelenium.executeScript("return navigator.userAgent;").toString();
+      final Object uAgent = jsSelenium.executeScript("return navigator.userAgent;");
       LOGGER.info("User agent: "
           + uAgent);
     }
@@ -954,6 +954,7 @@ public final class IntegrationTestUtils {
     for (final WebElement option : currentTournamentSel.getOptions()) {
       if (option.isSelected()) {
         final String idStr = option.getDomProperty("value");
+        assertNotNull(idStr);
         return Integer.parseInt(idStr);
       }
     }

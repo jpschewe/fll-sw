@@ -29,7 +29,7 @@ public abstract class CategoryTextDifference extends CategoryStringDifference {
   }
 
   @Override
-  public String getFieldDescription() {
+  protected String getFieldDescription() {
     return "text";
   }
 

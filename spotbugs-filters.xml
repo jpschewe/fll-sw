@@ -50,5 +50,15 @@
         </or>
     </Match>
 
+    <!-- checker framework catches the null pointers and not worried about 
+        them in testing -->
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+        <or>
+            <Source name="**/integrationTest/**" />
+            <Source name="**/test/**" />
+        </or>
+    </Match>
+
 </FindBugsFilter>
 
