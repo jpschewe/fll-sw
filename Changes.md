@@ -1,3 +1,6 @@
+Release 21.0.0
+==============
+
 * #715 - refactor database init in IntegrationTestUtils to factor out duplicate code
 * #740 - Validate rubric ranges when parsing a challenge description
 * #1334 - Use rank instead of score for sorting teams in finalist scheduling
