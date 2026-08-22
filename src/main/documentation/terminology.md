@@ -33,8 +33,6 @@ Performance, subjective and non-numeric.
 Categories are made up of goals.
 All scores for the goals in a category are added together to determine the raw score for a category.
 Each category has a weight that determines how much that score contributes to a team's overall score.
-This weight is multiplied by the scaled score for a category and then summed to determine their overall score.
-See [score normalization](ScoreExplaination.pdf) for details on how raw scores become scaled scores.
 
 
 Performance
