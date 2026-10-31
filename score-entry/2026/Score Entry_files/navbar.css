@@ -1,0 +1,63 @@
+.navbar::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #f1f1f1;
+    width: 100%;
+
+    /* requires padding of the body to avoid overlap
+    position: fixed;
+    top: 0;
+    */
+}
+
+.navbar li {
+    float: left;
+}
+
+.navbar li a, .navbar .dropbtn {
+    display: inline-block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.navbar li a:hover {
+    background-color: #555;
+    color: white;
+}
+
+.navbar li a:hover, .navbar .dropdown:hover .dropbtn {
+    background-color: red;
+}
+
+.navbar li.dropdown {
+    display: inline-block;
+}
+
+.navbar .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.navbar .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.navbar .dropdown:hover .dropdown-content {
+    display: block;
+}

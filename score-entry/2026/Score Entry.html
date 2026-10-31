@@ -1,0 +1,3387 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    
+    
+        <title>Score Entry</title>
+    
+
+
+<!--  runtype : PRACTICE -->
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/fll-sw__OaH.css">
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/scoreEntry__OaH.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="Score%20Entry_files/runType-practice__OaH.css">
+    
+    
+    
+
+
+<script type="text/javascript" src="Score%20Entry_files/fll-functions__OaH.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/fll-objects__OaH.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/fll-storage__OaH.js"></script>
+<script type="text/javascript" src="Score%20Entry_files/scoreEntryModule__OaH.js"></script>
+
+
+
+
+
+<script type="text/javascript">
+const roundText = "";
+const teamNumber = "";
+const runNumber = "";
+const redirect = "http://localhost:9080/index.jsp";
+
+var EditFlag = false;
+
+
+function init() {
+    document.scoreEntry.m02_count_exploding_seeds_slider.oninput = function() {
+    document.scoreEntry.m02_count_exploding_seeds.innerHTML = this.value;
+    set_m02_count_exploding_seeds(this.value);
+  };
+  document.scoreEntry.m06_count_leaf_fragments_slider.oninput = function() {
+    document.scoreEntry.m06_count_leaf_fragments.innerHTML = this.value;
+    set_m06_count_leaf_fragments(this.value);
+  };
+  document.scoreEntry.m07_num_connections_slider.oninput = function() {
+    document.scoreEntry.m07_num_connections.innerHTML = this.value;
+    set_m07_num_connections(this.value);
+  };
+  document.scoreEntry.m14_seeds_delivered_slider.oninput = function() {
+    document.scoreEntry.m14_seeds_delivered.innerHTML = this.value;
+    set_m14_seeds_delivered(this.value);
+  };
+  document.scoreEntry.m14_seeds_touching_mat_slider.oninput = function() {
+    document.scoreEntry.m14_seeds_touching_mat.innerHTML = this.value;
+    set_m14_seeds_touching_mat(this.value);
+  };
+  document.scoreEntry.gp_score_slider.oninput = function() {
+    document.scoreEntry.gp_score.innerHTML = this.value;
+    set_gp_score(this.value);
+  };
+  m00_one_launch_area_raw = 0.0;
+  m01_drone_not_on_mat_raw = 0.0;
+  m01_lidar_map_flipped_raw = 0.0;
+  m02_count_exploding_seeds_raw = 0.0;
+  m03_research_flag_down_raw = 0.0;
+  m03_rock_starting_position_raw = 0.0;
+  m04_one_leaf_removed_raw = 0.0;
+  m04_second_leaf_removed_raw = 0.0;
+  m04_katydid_in_original_position_raw = 1.0;
+  m04_katydid_left_habitat_raw = 0.0;
+  m04_katydid_out_of_habitat_raw = 0.0;
+  m05_root_partially_extended_raw = 0.0;
+  m05_root_completely_extended_raw = 0.0;
+  m09_platform_raised_raw = 0.0;
+  m09_camera_trap_deployed_raw = 0.0;
+  m09_seed_not_touching_tree_raw = 0.0;
+  m08_vine_touching_mat_raw = 0.0;
+  m10_spider_habitat_position_raw = 1.0;
+  m10_snail_habitat_position_raw = 1.0;
+  m06_ant_touching_nest_raw = 0.0;
+  m06_count_leaf_fragments_raw = 0.0;
+  m07_mycelium_completely_extended_raw = 0.0;
+  m07_num_connections_raw = 0.0;
+  m11_root_cover_down_raw = 0.0;
+  m12_cane_raised_raw = 0.0;
+  m12_support_tie_raw = 0.0;
+  m13_keystone_species_delivered_raw = 0.0;
+  m14_seeds_delivered_raw = 0.0;
+  m14_seeds_touching_mat_raw = 0.0;
+  m15_nesting_canopy_raised_raw = 0.0;
+  m15_garden_skylight_in_raw = 0.0;
+  m15_compost_hatch_completely_open_raw = 0.0;
+  m15_dock_location_raw = "mine";
+  m16_precision_tokens_raw = "five";
+  m16_precision_tokens_raw = "six";
+  gp_score_raw = 3.0;
+  Verified = 0;
+
+
+  refresh();
+  
+  if(document.scoreEntry.totalScore) {
+      /* Saves total score for smarter notification popups */
+    savedTotalScore = document.scoreEntry.totalScore.value;
+  }
+}
+
+function refresh() { 
+  var score = 0;
+
+  // m00_one_launch_area
+if(m00_one_launch_area_raw == 0) {
+  document.scoreEntry.m00_one_launch_area[0].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m00_one_launch_area[1].checked = true
+  document.scoreEntry.m00_one_launch_area_radioValue.value = 'YES'
+}
+m00_one_launch_area_computed = m00_one_launch_area_raw * 20.0;
+score += m00_one_launch_area_computed;
+document.scoreEntry.score_m00_one_launch_area.value = m00_one_launch_area_computed;
+
+// m01_drone_not_on_mat
+if(m01_drone_not_on_mat_raw == 0) {
+  document.scoreEntry.m01_drone_not_on_mat[0].checked = true
+  document.scoreEntry.m01_drone_not_on_mat_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_drone_not_on_mat[1].checked = true
+  document.scoreEntry.m01_drone_not_on_mat_radioValue.value = 'YES'
+}
+m01_drone_not_on_mat_computed = m01_drone_not_on_mat_raw * 20.0;
+score += m01_drone_not_on_mat_computed;
+document.scoreEntry.score_m01_drone_not_on_mat.value = m01_drone_not_on_mat_computed;
+
+// m01_lidar_map_flipped
+if(m01_lidar_map_flipped_raw == 0) {
+  document.scoreEntry.m01_lidar_map_flipped[0].checked = true
+  document.scoreEntry.m01_lidar_map_flipped_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_lidar_map_flipped[1].checked = true
+  document.scoreEntry.m01_lidar_map_flipped_radioValue.value = 'YES'
+}
+m01_lidar_map_flipped_computed = m01_lidar_map_flipped_raw * 10.0;
+score += m01_lidar_map_flipped_computed;
+document.scoreEntry.score_m01_lidar_map_flipped.value = m01_lidar_map_flipped_computed;
+
+// m02_count_exploding_seeds
+document.scoreEntry.m02_count_exploding_seeds.value = m02_count_exploding_seeds_raw;
+m02_count_exploding_seeds_computed = m02_count_exploding_seeds_raw * 10.0;
+document.scoreEntry.m02_count_exploding_seeds_slider.value = m02_count_exploding_seeds_raw;
+score += m02_count_exploding_seeds_computed;
+document.scoreEntry.score_m02_count_exploding_seeds.value = m02_count_exploding_seeds_computed;
+
+// m03_research_flag_down
+if(m03_research_flag_down_raw == 0) {
+  document.scoreEntry.m03_research_flag_down[0].checked = true
+  document.scoreEntry.m03_research_flag_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_research_flag_down[1].checked = true
+  document.scoreEntry.m03_research_flag_down_radioValue.value = 'YES'
+}
+m03_research_flag_down_computed = m03_research_flag_down_raw * 20.0;
+score += m03_research_flag_down_computed;
+document.scoreEntry.score_m03_research_flag_down.value = m03_research_flag_down_computed;
+
+// m03_rock_starting_position
+if(m03_rock_starting_position_raw == 0) {
+  document.scoreEntry.m03_rock_starting_position[0].checked = true
+  document.scoreEntry.m03_rock_starting_position_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_rock_starting_position[1].checked = true
+  document.scoreEntry.m03_rock_starting_position_radioValue.value = 'YES'
+}
+m03_rock_starting_position_computed = m03_rock_starting_position_raw * 10.0;
+score += m03_rock_starting_position_computed;
+document.scoreEntry.score_m03_rock_starting_position.value = m03_rock_starting_position_computed;
+
+// m04_one_leaf_removed
+if(m04_one_leaf_removed_raw == 0) {
+  document.scoreEntry.m04_one_leaf_removed[0].checked = true
+  document.scoreEntry.m04_one_leaf_removed_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_one_leaf_removed[1].checked = true
+  document.scoreEntry.m04_one_leaf_removed_radioValue.value = 'YES'
+}
+m04_one_leaf_removed_computed = m04_one_leaf_removed_raw * 0.0;
+score += m04_one_leaf_removed_computed;
+document.scoreEntry.score_m04_one_leaf_removed.value = m04_one_leaf_removed_computed;
+
+// m04_second_leaf_removed
+if(m04_second_leaf_removed_raw == 0) {
+  document.scoreEntry.m04_second_leaf_removed[0].checked = true
+  document.scoreEntry.m04_second_leaf_removed_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_second_leaf_removed[1].checked = true
+  document.scoreEntry.m04_second_leaf_removed_radioValue.value = 'YES'
+}
+m04_second_leaf_removed_computed = m04_second_leaf_removed_raw * 0.0;
+score += m04_second_leaf_removed_computed;
+document.scoreEntry.score_m04_second_leaf_removed.value = m04_second_leaf_removed_computed;
+
+// m04_katydid_in_original_position
+if(m04_katydid_in_original_position_raw == 0) {
+  document.scoreEntry.m04_katydid_in_original_position[0].checked = true
+  document.scoreEntry.m04_katydid_in_original_position_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_katydid_in_original_position[1].checked = true
+  document.scoreEntry.m04_katydid_in_original_position_radioValue.value = 'YES'
+}
+m04_katydid_in_original_position_computed = m04_katydid_in_original_position_raw * 0.0;
+score += m04_katydid_in_original_position_computed;
+document.scoreEntry.score_m04_katydid_in_original_position.value = m04_katydid_in_original_position_computed;
+
+// m04_katydid_left_habitat
+if(m04_katydid_left_habitat_raw == 0) {
+  document.scoreEntry.m04_katydid_left_habitat[0].checked = true
+  document.scoreEntry.m04_katydid_left_habitat_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_katydid_left_habitat[1].checked = true
+  document.scoreEntry.m04_katydid_left_habitat_radioValue.value = 'YES'
+}
+m04_katydid_left_habitat_computed = m04_katydid_left_habitat_raw * 0.0;
+score += m04_katydid_left_habitat_computed;
+document.scoreEntry.score_m04_katydid_left_habitat.value = m04_katydid_left_habitat_computed;
+
+// m04_katydid_out_of_habitat
+if(m04_katydid_out_of_habitat_raw == 0) {
+  document.scoreEntry.m04_katydid_out_of_habitat[0].checked = true
+  document.scoreEntry.m04_katydid_out_of_habitat_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_katydid_out_of_habitat[1].checked = true
+  document.scoreEntry.m04_katydid_out_of_habitat_radioValue.value = 'YES'
+}
+m04_katydid_out_of_habitat_computed = m04_katydid_out_of_habitat_raw * 0.0;
+score += m04_katydid_out_of_habitat_computed;
+document.scoreEntry.score_m04_katydid_out_of_habitat.value = m04_katydid_out_of_habitat_computed;
+
+compute_goal_4a();
+score += goal_4a_computed;
+
+compute_goal_4b();
+score += goal_4b_computed;
+
+// m05_root_partially_extended
+if(m05_root_partially_extended_raw == 0) {
+  document.scoreEntry.m05_root_partially_extended[0].checked = true
+  document.scoreEntry.m05_root_partially_extended_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m05_root_partially_extended[1].checked = true
+  document.scoreEntry.m05_root_partially_extended_radioValue.value = 'YES'
+}
+m05_root_partially_extended_computed = m05_root_partially_extended_raw * 10.0;
+score += m05_root_partially_extended_computed;
+document.scoreEntry.score_m05_root_partially_extended.value = m05_root_partially_extended_computed;
+
+// m05_root_completely_extended
+if(m05_root_completely_extended_raw == 0) {
+  document.scoreEntry.m05_root_completely_extended[0].checked = true
+  document.scoreEntry.m05_root_completely_extended_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m05_root_completely_extended[1].checked = true
+  document.scoreEntry.m05_root_completely_extended_radioValue.value = 'YES'
+}
+m05_root_completely_extended_computed = m05_root_completely_extended_raw * 20.0;
+score += m05_root_completely_extended_computed;
+document.scoreEntry.score_m05_root_completely_extended.value = m05_root_completely_extended_computed;
+
+// m09_platform_raised
+if(m09_platform_raised_raw == 0) {
+  document.scoreEntry.m09_platform_raised[0].checked = true
+  document.scoreEntry.m09_platform_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_platform_raised[1].checked = true
+  document.scoreEntry.m09_platform_raised_radioValue.value = 'YES'
+}
+m09_platform_raised_computed = m09_platform_raised_raw * 10.0;
+score += m09_platform_raised_computed;
+document.scoreEntry.score_m09_platform_raised.value = m09_platform_raised_computed;
+
+// m09_camera_trap_deployed
+if(m09_camera_trap_deployed_raw == 0) {
+  document.scoreEntry.m09_camera_trap_deployed[0].checked = true
+  document.scoreEntry.m09_camera_trap_deployed_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_camera_trap_deployed[1].checked = true
+  document.scoreEntry.m09_camera_trap_deployed_radioValue.value = 'YES'
+}
+m09_camera_trap_deployed_computed = m09_camera_trap_deployed_raw * 10.0;
+score += m09_camera_trap_deployed_computed;
+document.scoreEntry.score_m09_camera_trap_deployed.value = m09_camera_trap_deployed_computed;
+
+// m09_seed_not_touching_tree
+if(m09_seed_not_touching_tree_raw == 0) {
+  document.scoreEntry.m09_seed_not_touching_tree[0].checked = true
+  document.scoreEntry.m09_seed_not_touching_tree_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m09_seed_not_touching_tree[1].checked = true
+  document.scoreEntry.m09_seed_not_touching_tree_radioValue.value = 'YES'
+}
+m09_seed_not_touching_tree_computed = m09_seed_not_touching_tree_raw * 10.0;
+score += m09_seed_not_touching_tree_computed;
+document.scoreEntry.score_m09_seed_not_touching_tree.value = m09_seed_not_touching_tree_computed;
+
+// m08_vine_touching_mat
+if(m08_vine_touching_mat_raw == 0) {
+  document.scoreEntry.m08_vine_touching_mat[0].checked = true
+  document.scoreEntry.m08_vine_touching_mat_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m08_vine_touching_mat[1].checked = true
+  document.scoreEntry.m08_vine_touching_mat_radioValue.value = 'YES'
+}
+m08_vine_touching_mat_computed = m08_vine_touching_mat_raw * 30.0;
+score += m08_vine_touching_mat_computed;
+document.scoreEntry.score_m08_vine_touching_mat.value = m08_vine_touching_mat_computed;
+
+// m10_spider_habitat_position
+if(m10_spider_habitat_position_raw == 0) {
+  document.scoreEntry.m10_spider_habitat_position[0].checked = true
+  document.scoreEntry.m10_spider_habitat_position_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_spider_habitat_position[1].checked = true
+  document.scoreEntry.m10_spider_habitat_position_radioValue.value = 'YES'
+}
+m10_spider_habitat_position_computed = m10_spider_habitat_position_raw * 10.0;
+score += m10_spider_habitat_position_computed;
+document.scoreEntry.score_m10_spider_habitat_position.value = m10_spider_habitat_position_computed;
+
+// m10_snail_habitat_position
+if(m10_snail_habitat_position_raw == 0) {
+  document.scoreEntry.m10_snail_habitat_position[0].checked = true
+  document.scoreEntry.m10_snail_habitat_position_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_snail_habitat_position[1].checked = true
+  document.scoreEntry.m10_snail_habitat_position_radioValue.value = 'YES'
+}
+m10_snail_habitat_position_computed = m10_snail_habitat_position_raw * 10.0;
+score += m10_snail_habitat_position_computed;
+document.scoreEntry.score_m10_snail_habitat_position.value = m10_snail_habitat_position_computed;
+
+// m06_ant_touching_nest
+if(m06_ant_touching_nest_raw == 0) {
+  document.scoreEntry.m06_ant_touching_nest[0].checked = true
+  document.scoreEntry.m06_ant_touching_nest_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_ant_touching_nest[1].checked = true
+  document.scoreEntry.m06_ant_touching_nest_radioValue.value = 'YES'
+}
+m06_ant_touching_nest_computed = m06_ant_touching_nest_raw * 0.0;
+score += m06_ant_touching_nest_computed;
+document.scoreEntry.score_m06_ant_touching_nest.value = m06_ant_touching_nest_computed;
+
+// m06_count_leaf_fragments
+document.scoreEntry.m06_count_leaf_fragments.value = m06_count_leaf_fragments_raw;
+m06_count_leaf_fragments_computed = m06_count_leaf_fragments_raw * 0.0;
+document.scoreEntry.m06_count_leaf_fragments_slider.value = m06_count_leaf_fragments_raw;
+score += m06_count_leaf_fragments_computed;
+document.scoreEntry.score_m06_count_leaf_fragments.value = m06_count_leaf_fragments_computed;
+
+compute_goal_6a();
+score += goal_6a_computed;
+
+// m07_mycelium_completely_extended
+if(m07_mycelium_completely_extended_raw == 0) {
+  document.scoreEntry.m07_mycelium_completely_extended[0].checked = true
+  document.scoreEntry.m07_mycelium_completely_extended_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_mycelium_completely_extended[1].checked = true
+  document.scoreEntry.m07_mycelium_completely_extended_radioValue.value = 'YES'
+}
+m07_mycelium_completely_extended_computed = m07_mycelium_completely_extended_raw * 20.0;
+score += m07_mycelium_completely_extended_computed;
+document.scoreEntry.score_m07_mycelium_completely_extended.value = m07_mycelium_completely_extended_computed;
+
+// m07_num_connections
+document.scoreEntry.m07_num_connections.value = m07_num_connections_raw;
+m07_num_connections_computed = m07_num_connections_raw * 0.0;
+document.scoreEntry.m07_num_connections_slider.value = m07_num_connections_raw;
+score += m07_num_connections_computed;
+document.scoreEntry.score_m07_num_connections.value = m07_num_connections_computed;
+
+compute_goal_7a();
+score += goal_7a_computed;
+
+// m11_root_cover_down
+if(m11_root_cover_down_raw == 0) {
+  document.scoreEntry.m11_root_cover_down[0].checked = true
+  document.scoreEntry.m11_root_cover_down_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m11_root_cover_down[1].checked = true
+  document.scoreEntry.m11_root_cover_down_radioValue.value = 'YES'
+}
+m11_root_cover_down_computed = m11_root_cover_down_raw * 20.0;
+score += m11_root_cover_down_computed;
+document.scoreEntry.score_m11_root_cover_down.value = m11_root_cover_down_computed;
+
+// m12_cane_raised
+if(m12_cane_raised_raw == 0) {
+  document.scoreEntry.m12_cane_raised[0].checked = true
+  document.scoreEntry.m12_cane_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m12_cane_raised[1].checked = true
+  document.scoreEntry.m12_cane_raised_radioValue.value = 'YES'
+}
+m12_cane_raised_computed = m12_cane_raised_raw * 20.0;
+score += m12_cane_raised_computed;
+document.scoreEntry.score_m12_cane_raised.value = m12_cane_raised_computed;
+
+// m12_support_tie
+if(m12_support_tie_raw == 0) {
+  document.scoreEntry.m12_support_tie[0].checked = true
+  document.scoreEntry.m12_support_tie_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m12_support_tie[1].checked = true
+  document.scoreEntry.m12_support_tie_radioValue.value = 'YES'
+}
+m12_support_tie_computed = m12_support_tie_raw * 10.0;
+score += m12_support_tie_computed;
+document.scoreEntry.score_m12_support_tie.value = m12_support_tie_computed;
+
+// m13_keystone_species_delivered
+if(m13_keystone_species_delivered_raw == 0) {
+  document.scoreEntry.m13_keystone_species_delivered[0].checked = true
+  document.scoreEntry.m13_keystone_species_delivered_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m13_keystone_species_delivered[1].checked = true
+  document.scoreEntry.m13_keystone_species_delivered_radioValue.value = 'YES'
+}
+m13_keystone_species_delivered_computed = m13_keystone_species_delivered_raw * 30.0;
+score += m13_keystone_species_delivered_computed;
+document.scoreEntry.score_m13_keystone_species_delivered.value = m13_keystone_species_delivered_computed;
+
+// m14_seeds_delivered
+document.scoreEntry.m14_seeds_delivered.value = m14_seeds_delivered_raw;
+m14_seeds_delivered_computed = m14_seeds_delivered_raw * 5.0;
+document.scoreEntry.m14_seeds_delivered_slider.value = m14_seeds_delivered_raw;
+score += m14_seeds_delivered_computed;
+document.scoreEntry.score_m14_seeds_delivered.value = m14_seeds_delivered_computed;
+
+// m14_seeds_touching_mat
+document.scoreEntry.m14_seeds_touching_mat.value = m14_seeds_touching_mat_raw;
+m14_seeds_touching_mat_computed = m14_seeds_touching_mat_raw * 5.0;
+document.scoreEntry.m14_seeds_touching_mat_slider.value = m14_seeds_touching_mat_raw;
+score += m14_seeds_touching_mat_computed;
+document.scoreEntry.score_m14_seeds_touching_mat.value = m14_seeds_touching_mat_computed;
+
+// m15_nesting_canopy_raised
+if(m15_nesting_canopy_raised_raw == 0) {
+  document.scoreEntry.m15_nesting_canopy_raised[0].checked = true
+  document.scoreEntry.m15_nesting_canopy_raised_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15_nesting_canopy_raised[1].checked = true
+  document.scoreEntry.m15_nesting_canopy_raised_radioValue.value = 'YES'
+}
+m15_nesting_canopy_raised_computed = m15_nesting_canopy_raised_raw * 10.0;
+score += m15_nesting_canopy_raised_computed;
+document.scoreEntry.score_m15_nesting_canopy_raised.value = m15_nesting_canopy_raised_computed;
+
+// m15_garden_skylight_in
+if(m15_garden_skylight_in_raw == 0) {
+  document.scoreEntry.m15_garden_skylight_in[0].checked = true
+  document.scoreEntry.m15_garden_skylight_in_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15_garden_skylight_in[1].checked = true
+  document.scoreEntry.m15_garden_skylight_in_radioValue.value = 'YES'
+}
+m15_garden_skylight_in_computed = m15_garden_skylight_in_raw * 10.0;
+score += m15_garden_skylight_in_computed;
+document.scoreEntry.score_m15_garden_skylight_in.value = m15_garden_skylight_in_computed;
+
+// m15_compost_hatch_completely_open
+if(m15_compost_hatch_completely_open_raw == 0) {
+  document.scoreEntry.m15_compost_hatch_completely_open[0].checked = true
+  document.scoreEntry.m15_compost_hatch_completely_open_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m15_compost_hatch_completely_open[1].checked = true
+  document.scoreEntry.m15_compost_hatch_completely_open_radioValue.value = 'YES'
+}
+m15_compost_hatch_completely_open_computed = m15_compost_hatch_completely_open_raw * 10.0;
+score += m15_compost_hatch_completely_open_computed;
+document.scoreEntry.score_m15_compost_hatch_completely_open.value = m15_compost_hatch_completely_open_computed;
+
+// m15_dock_location
+if(m15_dock_location_raw == "mine") {
+  document.scoreEntry.m15_dock_location[0].checked = true;
+  m15_dock_location_computed = 1.000000 * 0.0;
+  document.scoreEntry.m15_dock_location_radioValue.value = 'MINE'
+} else if(m15_dock_location_raw == "city") {
+  document.scoreEntry.m15_dock_location[1].checked = true;
+  m15_dock_location_computed = 2.000000 * 0.0;
+  document.scoreEntry.m15_dock_location_radioValue.value = 'CITY'
+} else if(m15_dock_location_raw == "farm") {
+  document.scoreEntry.m15_dock_location[2].checked = true;
+  m15_dock_location_computed = 3.000000 * 0.0;
+  document.scoreEntry.m15_dock_location_radioValue.value = 'FARM'
+} else if(m15_dock_location_raw == "none") {
+  document.scoreEntry.m15_dock_location[3].checked = true;
+  m15_dock_location_computed = 4.000000 * 0.0;
+  document.scoreEntry.m15_dock_location_radioValue.value = 'NONE'
+}
+score += m15_dock_location_computed;
+document.scoreEntry.score_m15_dock_location.value = m15_dock_location_computed;
+
+compute_goal_15();
+score += goal_15_computed;
+
+// m16_precision_tokens
+if(m16_precision_tokens_raw == "zero") {
+  document.scoreEntry.m16_precision_tokens[0].checked = true;
+  m16_precision_tokens_computed = 0.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ZERO'
+} else if(m16_precision_tokens_raw == "one") {
+  document.scoreEntry.m16_precision_tokens[1].checked = true;
+  m16_precision_tokens_computed = 10.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'ONE'
+} else if(m16_precision_tokens_raw == "two") {
+  document.scoreEntry.m16_precision_tokens[2].checked = true;
+  m16_precision_tokens_computed = 15.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'TWO'
+} else if(m16_precision_tokens_raw == "three") {
+  document.scoreEntry.m16_precision_tokens[3].checked = true;
+  m16_precision_tokens_computed = 25.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'THREE'
+} else if(m16_precision_tokens_raw == "four") {
+  document.scoreEntry.m16_precision_tokens[4].checked = true;
+  m16_precision_tokens_computed = 35.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FOUR'
+} else if(m16_precision_tokens_raw == "five") {
+  document.scoreEntry.m16_precision_tokens[5].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'FIVE'
+} else if(m16_precision_tokens_raw == "six") {
+  document.scoreEntry.m16_precision_tokens[6].checked = true;
+  m16_precision_tokens_computed = 50.000000 * 1.0;
+  document.scoreEntry.m16_precision_tokens_radioValue.value = 'SIX'
+}
+score += m16_precision_tokens_computed;
+document.scoreEntry.score_m16_precision_tokens.value = m16_precision_tokens_computed;
+
+// gp_score
+document.scoreEntry.gp_score.value = gp_score_raw;
+gp_score_computed = gp_score_raw * 0.0;
+document.scoreEntry.gp_score_slider.value = gp_score_raw;
+score += gp_score_computed;
+document.scoreEntry.score_gp_score.value = gp_score_computed;
+
+const verifiedLabel = document.getElementById('verify-score-label');
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true;
+  verifiedLabel.classList.add('verify-score-unverified');
+  verifiedLabel.classList.remove('verify-score-verified');
+} else {
+  document.scoreEntry.Verified[1].checked = true;
+  verifiedLabel.classList.remove('verify-score-unverified');
+  verifiedLabel.classList.add('verify-score-verified');
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  if(document.scoreEntry.totalScore) {
+    document.scoreEntry.totalScore.value = score;
+  }
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  removeChildren(document.getElementById("score-errors"));
+  
+  var m00_one_launch_area_error = false;
+  var m01_drone_not_on_mat_error = false;
+  var m01_lidar_map_flipped_error = false;
+  var m02_count_exploding_seeds_error = false;
+  var m03_research_flag_down_error = false;
+  var m03_rock_starting_position_error = false;
+  var m04_one_leaf_removed_error = false;
+  var m04_second_leaf_removed_error = false;
+  var m04_katydid_in_original_position_error = false;
+  var m04_katydid_left_habitat_error = false;
+  var m04_katydid_out_of_habitat_error = false;
+  var m05_root_partially_extended_error = false;
+  var m05_root_completely_extended_error = false;
+  var m09_platform_raised_error = false;
+  var m09_camera_trap_deployed_error = false;
+  var m09_seed_not_touching_tree_error = false;
+  var m08_vine_touching_mat_error = false;
+  var m10_spider_habitat_position_error = false;
+  var m10_snail_habitat_position_error = false;
+  var m06_ant_touching_nest_error = false;
+  var m06_count_leaf_fragments_error = false;
+  var m07_mycelium_completely_extended_error = false;
+  var m07_num_connections_error = false;
+  var m11_root_cover_down_error = false;
+  var m12_cane_raised_error = false;
+  var m12_support_tie_error = false;
+  var m13_keystone_species_delivered_error = false;
+  var m14_seeds_delivered_error = false;
+  var m14_seeds_touching_mat_error = false;
+  var m15_nesting_canopy_raised_error = false;
+  var m15_garden_skylight_in_error = false;
+  var m15_compost_hatch_completely_open_error = false;
+  var m15_dock_location_error = false;
+  var m16_precision_tokens_error = false;
+  var gp_score_error = false;
+  var restriction_0_value = parseInt(1.000000* m01_drone_not_on_mat_raw + -1.000000* m01_lidar_map_flipped_raw);
+  if(restriction_0_value > 1.000000 || restriction_0_value < 0.000000) {
+    const restriction_0_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_0_error);
+    restriction_0_error.innerText = "LiDAR map and scan marker cannot score if the Drone is touching the mat";
+    error_found = true;
+    m01_drone_not_on_mat_error = true;
+    m01_lidar_map_flipped_error = true;
+  }
+  var restriction_1_value = parseInt(1.000000* m03_research_flag_down_raw + -1.000000* m03_rock_starting_position_raw);
+  if(restriction_1_value > 1.000000 || restriction_1_value < 0.000000) {
+    const restriction_1_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_1_error);
+    restriction_1_error.innerText = "The research flag must be down for the rock to score";
+    error_found = true;
+    m03_research_flag_down_error = true;
+    m03_rock_starting_position_error = true;
+  }
+  var restriction_2_value = parseInt(1.000000* m04_one_leaf_removed_raw + -1.000000* m04_second_leaf_removed_raw);
+  if(restriction_2_value > 1.000000 || restriction_2_value < 0.000000) {
+    const restriction_2_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_2_error);
+    restriction_2_error.innerText = "First leaf must be removed before second leaf can score";
+    error_found = true;
+    m04_one_leaf_removed_error = true;
+    m04_second_leaf_removed_error = true;
+  }
+  var restriction_3_value = parseInt(1.000000* m04_katydid_out_of_habitat_raw + 1.000000* m04_katydid_in_original_position_raw);
+  if(restriction_3_value > 1.000000 || restriction_3_value < 0.000000) {
+    const restriction_3_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_3_error);
+    restriction_3_error.innerText = "Katydid must be in leaf habitat if it never left starting position";
+    error_found = true;
+    m04_katydid_out_of_habitat_error = true;
+    m04_katydid_in_original_position_error = true;
+  }
+  var restriction_4_value = parseInt(-1.000000* m04_katydid_out_of_habitat_raw + 1.000000* m04_katydid_left_habitat_raw);
+  if(restriction_4_value > 1.000000 || restriction_4_value < 0.000000) {
+    const restriction_4_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_4_error);
+    restriction_4_error.innerText = "Katydid must have left the leaf habitat if it is no longer in the leaf habitat.";
+    error_found = true;
+    m04_katydid_out_of_habitat_error = true;
+    m04_katydid_left_habitat_error = true;
+  }
+  var restriction_5_value = parseInt(1.000000* m05_root_partially_extended_raw + 1.000000* m05_root_completely_extended_raw);
+  if(restriction_5_value > 1.000000 || restriction_5_value < 0.000000) {
+    const restriction_5_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_5_error);
+    restriction_5_error.innerText = "Plant root cannot be BOTH partially and completely extended";
+    error_found = true;
+    m05_root_partially_extended_error = true;
+    m05_root_completely_extended_error = true;
+  }
+  var restriction_6_value = parseInt(-1.000000* m07_mycelium_completely_extended_raw + 1.000000* m07_num_connections_raw);
+  if(restriction_6_value > 1.000000 || restriction_6_value < -512.000000) {
+    const restriction_6_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_6_error);
+    restriction_6_error.innerText = "2 connections not possible - Mycelium is not completely extended.";
+    error_found = true;
+    m07_mycelium_completely_extended_error = true;
+    m07_num_connections_error = true;
+  }
+  var restriction_7_value = parseInt(-1.000000* m05_root_completely_extended_raw + 1.000000* m07_num_connections_raw);
+  if(restriction_7_value > 1.000000 || restriction_7_value < -512.000000) {
+    const restriction_7_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_7_error);
+    restriction_7_error.innerText = "2 connections not possible - Plant root is not completely extended.";
+    error_found = true;
+    m05_root_completely_extended_error = true;
+    m07_num_connections_error = true;
+  }
+  var restriction_8_value = parseInt(4.000000* m06_ant_touching_nest_raw + -1.000000* m06_count_leaf_fragments_raw);
+  if(restriction_8_value > 512.000000 || restriction_8_value < 0.000000) {
+    const restriction_8_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_8_error);
+    restriction_8_error.innerText = "Ant must be touching the nest for leaf fragments to score.";
+    error_found = true;
+    m06_ant_touching_nest_error = true;
+    m06_count_leaf_fragments_error = true;
+  }
+  var restriction_9_value = Math.round(-1.000000* m07_mycelium_completely_extended_raw + -1.000000* m05_root_completely_extended_raw + 0.500000* m07_num_connections_raw);
+  if(restriction_9_value > 0.000000 || restriction_9_value < -512.000000) {
+    const restriction_9_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_9_error);
+    restriction_9_error.innerText = "No connections are possible - Mycelium and plant root are not completely extended.";
+    error_found = true;
+    m07_mycelium_completely_extended_error = true;
+    m05_root_completely_extended_error = true;
+    m07_num_connections_error = true;
+  }
+  var restriction_10_value = parseInt(1.000000* m14_seeds_delivered_raw + -1.000000* m14_seeds_touching_mat_raw);
+  if(restriction_10_value > 512.000000 || restriction_10_value < 0.000000) {
+    const restriction_10_error = document.createElement("div");
+    document.getElementById('score-errors').appendChild(restriction_10_error);
+    restriction_10_error.innerText = "Seeds must be in the replantation station to score for touching the mat";
+    error_found = true;
+    m14_seeds_delivered_error = true;
+    m14_seeds_touching_mat_error = true;
+  }
+if(m00_one_launch_area_error) {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m00_one_launch_area_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m01_drone_not_on_mat_error) {
+  const ele = document.getElementById("m01_drone_not_on_mat_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m01_drone_not_on_mat_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m01_lidar_map_flipped_error) {
+  const ele = document.getElementById("m01_lidar_map_flipped_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m01_lidar_map_flipped_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m02_count_exploding_seeds_error) {
+  const ele = document.getElementById("m02_count_exploding_seeds_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m02_count_exploding_seeds_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_research_flag_down_error) {
+  const ele = document.getElementById("m03_research_flag_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_research_flag_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m03_rock_starting_position_error) {
+  const ele = document.getElementById("m03_rock_starting_position_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m03_rock_starting_position_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_one_leaf_removed_error) {
+  const ele = document.getElementById("m04_one_leaf_removed_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_one_leaf_removed_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_second_leaf_removed_error) {
+  const ele = document.getElementById("m04_second_leaf_removed_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_second_leaf_removed_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_katydid_in_original_position_error) {
+  const ele = document.getElementById("m04_katydid_in_original_position_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_katydid_in_original_position_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_katydid_left_habitat_error) {
+  const ele = document.getElementById("m04_katydid_left_habitat_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_katydid_left_habitat_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m04_katydid_out_of_habitat_error) {
+  const ele = document.getElementById("m04_katydid_out_of_habitat_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m04_katydid_out_of_habitat_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m05_root_partially_extended_error) {
+  const ele = document.getElementById("m05_root_partially_extended_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m05_root_partially_extended_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m05_root_completely_extended_error) {
+  const ele = document.getElementById("m05_root_completely_extended_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m05_root_completely_extended_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_platform_raised_error) {
+  const ele = document.getElementById("m09_platform_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_platform_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_camera_trap_deployed_error) {
+  const ele = document.getElementById("m09_camera_trap_deployed_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_camera_trap_deployed_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m09_seed_not_touching_tree_error) {
+  const ele = document.getElementById("m09_seed_not_touching_tree_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m09_seed_not_touching_tree_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m08_vine_touching_mat_error) {
+  const ele = document.getElementById("m08_vine_touching_mat_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m08_vine_touching_mat_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_spider_habitat_position_error) {
+  const ele = document.getElementById("m10_spider_habitat_position_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_spider_habitat_position_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m10_snail_habitat_position_error) {
+  const ele = document.getElementById("m10_snail_habitat_position_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m10_snail_habitat_position_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_ant_touching_nest_error) {
+  const ele = document.getElementById("m06_ant_touching_nest_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_ant_touching_nest_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m06_count_leaf_fragments_error) {
+  const ele = document.getElementById("m06_count_leaf_fragments_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m06_count_leaf_fragments_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m07_mycelium_completely_extended_error) {
+  const ele = document.getElementById("m07_mycelium_completely_extended_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m07_mycelium_completely_extended_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m07_num_connections_error) {
+  const ele = document.getElementById("m07_num_connections_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m07_num_connections_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m11_root_cover_down_error) {
+  const ele = document.getElementById("m11_root_cover_down_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m11_root_cover_down_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m12_cane_raised_error) {
+  const ele = document.getElementById("m12_cane_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m12_cane_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m12_support_tie_error) {
+  const ele = document.getElementById("m12_support_tie_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m12_support_tie_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m13_keystone_species_delivered_error) {
+  const ele = document.getElementById("m13_keystone_species_delivered_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m13_keystone_species_delivered_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_seeds_delivered_error) {
+  const ele = document.getElementById("m14_seeds_delivered_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_seeds_delivered_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m14_seeds_touching_mat_error) {
+  const ele = document.getElementById("m14_seeds_touching_mat_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m14_seeds_touching_mat_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_nesting_canopy_raised_error) {
+  const ele = document.getElementById("m15_nesting_canopy_raised_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_nesting_canopy_raised_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_garden_skylight_in_error) {
+  const ele = document.getElementById("m15_garden_skylight_in_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_garden_skylight_in_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_compost_hatch_completely_open_error) {
+  const ele = document.getElementById("m15_compost_hatch_completely_open_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_compost_hatch_completely_open_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m15_dock_location_error) {
+  const ele = document.getElementById("m15_dock_location_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m15_dock_location_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(m16_precision_tokens_error) {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("m16_precision_tokens_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+if(gp_score_error) {
+  const ele = document.getElementById("gp_score_row");
+  if(!ele.classList.contains("restriction-error")) {
+    ele.classList.add("restriction-error");
+  }
+} else {
+  const ele = document.getElementById("gp_score_row");
+  if(ele.classList.contains("restriction-error")) {
+    ele.classList.remove("restriction-error");
+  }
+}
+
+
+  const submitScoreButton = document.getElementById("submit_score")
+  if(error_found) {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = true;
+    }
+    document.getElementById("score-errors").classList.remove("fll-sw-ui-inactive");
+  } else {
+    if(submitScoreButton) {
+      submitScoreButton.disabled = false;
+    }
+    document.getElementById("score-errors").classList.add("fll-sw-ui-inactive");
+  }
+}
+
+function isConsistent() {
+  //m00_one_launch_area
+  if(m00_one_launch_area_raw < 0.0 || m00_one_launch_area_raw > 1.0) {
+    return false;
+  }
+
+  //m01_drone_not_on_mat
+  if(m01_drone_not_on_mat_raw < 0.0 || m01_drone_not_on_mat_raw > 1.0) {
+    return false;
+  }
+
+  //m01_lidar_map_flipped
+  if(m01_lidar_map_flipped_raw < 0.0 || m01_lidar_map_flipped_raw > 1.0) {
+    return false;
+  }
+
+  //m02_count_exploding_seeds
+  if(m02_count_exploding_seeds_raw < 0.0 || m02_count_exploding_seeds_raw > 3.0) {
+    return false;
+  }
+
+  //m03_research_flag_down
+  if(m03_research_flag_down_raw < 0.0 || m03_research_flag_down_raw > 1.0) {
+    return false;
+  }
+
+  //m03_rock_starting_position
+  if(m03_rock_starting_position_raw < 0.0 || m03_rock_starting_position_raw > 1.0) {
+    return false;
+  }
+
+  //m04_one_leaf_removed
+  if(m04_one_leaf_removed_raw < 0.0 || m04_one_leaf_removed_raw > 1.0) {
+    return false;
+  }
+
+  //m04_second_leaf_removed
+  if(m04_second_leaf_removed_raw < 0.0 || m04_second_leaf_removed_raw > 1.0) {
+    return false;
+  }
+
+  //m04_katydid_in_original_position
+  if(m04_katydid_in_original_position_raw < 0.0 || m04_katydid_in_original_position_raw > 1.0) {
+    return false;
+  }
+
+  //m04_katydid_left_habitat
+  if(m04_katydid_left_habitat_raw < 0.0 || m04_katydid_left_habitat_raw > 1.0) {
+    return false;
+  }
+
+  //m04_katydid_out_of_habitat
+  if(m04_katydid_out_of_habitat_raw < 0.0 || m04_katydid_out_of_habitat_raw > 1.0) {
+    return false;
+  }
+
+  //m05_root_partially_extended
+  if(m05_root_partially_extended_raw < 0.0 || m05_root_partially_extended_raw > 1.0) {
+    return false;
+  }
+
+  //m05_root_completely_extended
+  if(m05_root_completely_extended_raw < 0.0 || m05_root_completely_extended_raw > 1.0) {
+    return false;
+  }
+
+  //m09_platform_raised
+  if(m09_platform_raised_raw < 0.0 || m09_platform_raised_raw > 1.0) {
+    return false;
+  }
+
+  //m09_camera_trap_deployed
+  if(m09_camera_trap_deployed_raw < 0.0 || m09_camera_trap_deployed_raw > 1.0) {
+    return false;
+  }
+
+  //m09_seed_not_touching_tree
+  if(m09_seed_not_touching_tree_raw < 0.0 || m09_seed_not_touching_tree_raw > 1.0) {
+    return false;
+  }
+
+  //m08_vine_touching_mat
+  if(m08_vine_touching_mat_raw < 0.0 || m08_vine_touching_mat_raw > 1.0) {
+    return false;
+  }
+
+  //m10_spider_habitat_position
+  if(m10_spider_habitat_position_raw < 0.0 || m10_spider_habitat_position_raw > 1.0) {
+    return false;
+  }
+
+  //m10_snail_habitat_position
+  if(m10_snail_habitat_position_raw < 0.0 || m10_snail_habitat_position_raw > 1.0) {
+    return false;
+  }
+
+  //m06_ant_touching_nest
+  if(m06_ant_touching_nest_raw < 0.0 || m06_ant_touching_nest_raw > 1.0) {
+    return false;
+  }
+
+  //m06_count_leaf_fragments
+  if(m06_count_leaf_fragments_raw < 0.0 || m06_count_leaf_fragments_raw > 4.0) {
+    return false;
+  }
+
+  //m07_mycelium_completely_extended
+  if(m07_mycelium_completely_extended_raw < 0.0 || m07_mycelium_completely_extended_raw > 1.0) {
+    return false;
+  }
+
+  //m07_num_connections
+  if(m07_num_connections_raw < 0.0 || m07_num_connections_raw > 2.0) {
+    return false;
+  }
+
+  //m11_root_cover_down
+  if(m11_root_cover_down_raw < 0.0 || m11_root_cover_down_raw > 1.0) {
+    return false;
+  }
+
+  //m12_cane_raised
+  if(m12_cane_raised_raw < 0.0 || m12_cane_raised_raw > 1.0) {
+    return false;
+  }
+
+  //m12_support_tie
+  if(m12_support_tie_raw < 0.0 || m12_support_tie_raw > 1.0) {
+    return false;
+  }
+
+  //m13_keystone_species_delivered
+  if(m13_keystone_species_delivered_raw < 0.0 || m13_keystone_species_delivered_raw > 1.0) {
+    return false;
+  }
+
+  //m14_seeds_delivered
+  if(m14_seeds_delivered_raw < 0.0 || m14_seeds_delivered_raw > 4.0) {
+    return false;
+  }
+
+  //m14_seeds_touching_mat
+  if(m14_seeds_touching_mat_raw < 0.0 || m14_seeds_touching_mat_raw > 4.0) {
+    return false;
+  }
+
+  //m15_nesting_canopy_raised
+  if(m15_nesting_canopy_raised_raw < 0.0 || m15_nesting_canopy_raised_raw > 1.0) {
+    return false;
+  }
+
+  //m15_garden_skylight_in
+  if(m15_garden_skylight_in_raw < 0.0 || m15_garden_skylight_in_raw > 1.0) {
+    return false;
+  }
+
+  //m15_compost_hatch_completely_open
+  if(m15_compost_hatch_completely_open_raw < 0.0 || m15_compost_hatch_completely_open_raw > 1.0) {
+    return false;
+  }
+
+  //m15_dock_location
+   // nothing to check
+
+  //m16_precision_tokens
+   // nothing to check
+
+  //gp_score
+  if(gp_score_raw < 2.0 || gp_score_raw > 4.0) {
+    return false;
+  }
+
+  return true;
+}
+
+
+// m00_one_launch_area
+var m00_one_launch_area_raw;
+var m00_one_launch_area_computed;
+function set_m00_one_launch_area(newValue) {
+  var temp = m00_one_launch_area_raw;
+  m00_one_launch_area_raw = newValue;
+  if(!isConsistent()) {
+    m00_one_launch_area_raw = temp;
+  }
+  refresh();
+}
+function check_m00_one_launch_area() {
+  var str = document.scoreEntry.m00_one_launch_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m00_one_launch_area(num);
+  }
+  refresh();
+}
+
+
+// m01_drone_not_on_mat
+var m01_drone_not_on_mat_raw;
+var m01_drone_not_on_mat_computed;
+function set_m01_drone_not_on_mat(newValue) {
+  var temp = m01_drone_not_on_mat_raw;
+  m01_drone_not_on_mat_raw = newValue;
+  if(!isConsistent()) {
+    m01_drone_not_on_mat_raw = temp;
+  }
+  refresh();
+}
+function check_m01_drone_not_on_mat() {
+  var str = document.scoreEntry.m01_drone_not_on_mat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_drone_not_on_mat(num);
+  }
+  refresh();
+}
+
+
+// m01_lidar_map_flipped
+var m01_lidar_map_flipped_raw;
+var m01_lidar_map_flipped_computed;
+function set_m01_lidar_map_flipped(newValue) {
+  var temp = m01_lidar_map_flipped_raw;
+  m01_lidar_map_flipped_raw = newValue;
+  if(!isConsistent()) {
+    m01_lidar_map_flipped_raw = temp;
+  }
+  refresh();
+}
+function check_m01_lidar_map_flipped() {
+  var str = document.scoreEntry.m01_lidar_map_flipped.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_lidar_map_flipped(num);
+  }
+  refresh();
+}
+
+
+// m02_count_exploding_seeds
+var m02_count_exploding_seeds_raw;
+var m02_count_exploding_seeds_computed;
+function set_m02_count_exploding_seeds(newValue) {
+  var temp = m02_count_exploding_seeds_raw;
+  m02_count_exploding_seeds_raw = newValue;
+  if(!isConsistent()) {
+    m02_count_exploding_seeds_raw = temp;
+  }
+  refresh();
+}
+function check_m02_count_exploding_seeds() {
+  var str = document.scoreEntry.m02_count_exploding_seeds.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_count_exploding_seeds(num);
+  }
+  refresh();
+}
+function increment_m02_count_exploding_seeds(increment) {
+  var temp = m02_count_exploding_seeds_raw
+  m02_count_exploding_seeds_raw += increment;
+  if(m02_count_exploding_seeds_raw > 3.0) {
+    m02_count_exploding_seeds_raw = 3.0;
+   }
+  if(m02_count_exploding_seeds_raw < 0.0) {
+    m02_count_exploding_seeds_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m02_count_exploding_seeds_raw = temp;
+  }
+  refresh();
+}
+
+
+// m03_research_flag_down
+var m03_research_flag_down_raw;
+var m03_research_flag_down_computed;
+function set_m03_research_flag_down(newValue) {
+  var temp = m03_research_flag_down_raw;
+  m03_research_flag_down_raw = newValue;
+  if(!isConsistent()) {
+    m03_research_flag_down_raw = temp;
+  }
+  refresh();
+}
+function check_m03_research_flag_down() {
+  var str = document.scoreEntry.m03_research_flag_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_research_flag_down(num);
+  }
+  refresh();
+}
+
+
+// m03_rock_starting_position
+var m03_rock_starting_position_raw;
+var m03_rock_starting_position_computed;
+function set_m03_rock_starting_position(newValue) {
+  var temp = m03_rock_starting_position_raw;
+  m03_rock_starting_position_raw = newValue;
+  if(!isConsistent()) {
+    m03_rock_starting_position_raw = temp;
+  }
+  refresh();
+}
+function check_m03_rock_starting_position() {
+  var str = document.scoreEntry.m03_rock_starting_position.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_rock_starting_position(num);
+  }
+  refresh();
+}
+
+
+// m04_one_leaf_removed
+var m04_one_leaf_removed_raw;
+var m04_one_leaf_removed_computed;
+function set_m04_one_leaf_removed(newValue) {
+  var temp = m04_one_leaf_removed_raw;
+  m04_one_leaf_removed_raw = newValue;
+  if(!isConsistent()) {
+    m04_one_leaf_removed_raw = temp;
+  }
+  refresh();
+}
+function check_m04_one_leaf_removed() {
+  var str = document.scoreEntry.m04_one_leaf_removed.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_one_leaf_removed(num);
+  }
+  refresh();
+}
+
+
+// m04_second_leaf_removed
+var m04_second_leaf_removed_raw;
+var m04_second_leaf_removed_computed;
+function set_m04_second_leaf_removed(newValue) {
+  var temp = m04_second_leaf_removed_raw;
+  m04_second_leaf_removed_raw = newValue;
+  if(!isConsistent()) {
+    m04_second_leaf_removed_raw = temp;
+  }
+  refresh();
+}
+function check_m04_second_leaf_removed() {
+  var str = document.scoreEntry.m04_second_leaf_removed.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_second_leaf_removed(num);
+  }
+  refresh();
+}
+
+
+// m04_katydid_in_original_position
+var m04_katydid_in_original_position_raw;
+var m04_katydid_in_original_position_computed;
+function set_m04_katydid_in_original_position(newValue) {
+  var temp = m04_katydid_in_original_position_raw;
+  m04_katydid_in_original_position_raw = newValue;
+  if(!isConsistent()) {
+    m04_katydid_in_original_position_raw = temp;
+  }
+  refresh();
+}
+function check_m04_katydid_in_original_position() {
+  var str = document.scoreEntry.m04_katydid_in_original_position.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_katydid_in_original_position(num);
+  }
+  refresh();
+}
+
+
+// m04_katydid_left_habitat
+var m04_katydid_left_habitat_raw;
+var m04_katydid_left_habitat_computed;
+function set_m04_katydid_left_habitat(newValue) {
+  var temp = m04_katydid_left_habitat_raw;
+  m04_katydid_left_habitat_raw = newValue;
+  if(!isConsistent()) {
+    m04_katydid_left_habitat_raw = temp;
+  }
+  refresh();
+}
+function check_m04_katydid_left_habitat() {
+  var str = document.scoreEntry.m04_katydid_left_habitat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_katydid_left_habitat(num);
+  }
+  refresh();
+}
+
+
+// m04_katydid_out_of_habitat
+var m04_katydid_out_of_habitat_raw;
+var m04_katydid_out_of_habitat_computed;
+function set_m04_katydid_out_of_habitat(newValue) {
+  var temp = m04_katydid_out_of_habitat_raw;
+  m04_katydid_out_of_habitat_raw = newValue;
+  if(!isConsistent()) {
+    m04_katydid_out_of_habitat_raw = temp;
+  }
+  refresh();
+}
+function check_m04_katydid_out_of_habitat() {
+  var str = document.scoreEntry.m04_katydid_out_of_habitat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_katydid_out_of_habitat(num);
+  }
+  refresh();
+}
+
+
+// goal_4a
+var goal_4a_computed;
+function compute_goal_4a() {
+  if(parseInt(-1.000000* m04_one_leaf_removed_raw + 1.000000* m04_katydid_out_of_habitat_raw) <= parseInt(-1.000000)) {
+    goal_4a_computed = parseInt(10.000000);
+  } else {
+    goal_4a_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_goal_4a.value = goal_4a_computed;
+}
+// goal_4b
+var goal_4b_computed;
+function compute_goal_4b() {
+  if(parseInt(-1.000000* m04_one_leaf_removed_raw + -1.000000* m04_katydid_in_original_position_raw + 1.000000* m04_katydid_left_habitat_raw + -1.000000* m04_second_leaf_removed_raw) <= parseInt(-3.000000)) {
+    goal_4b_computed = parseInt(20.000000);
+  } else {
+    goal_4b_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_goal_4b.value = goal_4b_computed;
+}
+// m05_root_partially_extended
+var m05_root_partially_extended_raw;
+var m05_root_partially_extended_computed;
+function set_m05_root_partially_extended(newValue) {
+  var temp = m05_root_partially_extended_raw;
+  m05_root_partially_extended_raw = newValue;
+  if(!isConsistent()) {
+    m05_root_partially_extended_raw = temp;
+  }
+  refresh();
+}
+function check_m05_root_partially_extended() {
+  var str = document.scoreEntry.m05_root_partially_extended.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_root_partially_extended(num);
+  }
+  refresh();
+}
+
+
+// m05_root_completely_extended
+var m05_root_completely_extended_raw;
+var m05_root_completely_extended_computed;
+function set_m05_root_completely_extended(newValue) {
+  var temp = m05_root_completely_extended_raw;
+  m05_root_completely_extended_raw = newValue;
+  if(!isConsistent()) {
+    m05_root_completely_extended_raw = temp;
+  }
+  refresh();
+}
+function check_m05_root_completely_extended() {
+  var str = document.scoreEntry.m05_root_completely_extended.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_root_completely_extended(num);
+  }
+  refresh();
+}
+
+
+// m09_platform_raised
+var m09_platform_raised_raw;
+var m09_platform_raised_computed;
+function set_m09_platform_raised(newValue) {
+  var temp = m09_platform_raised_raw;
+  m09_platform_raised_raw = newValue;
+  if(!isConsistent()) {
+    m09_platform_raised_raw = temp;
+  }
+  refresh();
+}
+function check_m09_platform_raised() {
+  var str = document.scoreEntry.m09_platform_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_platform_raised(num);
+  }
+  refresh();
+}
+
+
+// m09_camera_trap_deployed
+var m09_camera_trap_deployed_raw;
+var m09_camera_trap_deployed_computed;
+function set_m09_camera_trap_deployed(newValue) {
+  var temp = m09_camera_trap_deployed_raw;
+  m09_camera_trap_deployed_raw = newValue;
+  if(!isConsistent()) {
+    m09_camera_trap_deployed_raw = temp;
+  }
+  refresh();
+}
+function check_m09_camera_trap_deployed() {
+  var str = document.scoreEntry.m09_camera_trap_deployed.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_camera_trap_deployed(num);
+  }
+  refresh();
+}
+
+
+// m09_seed_not_touching_tree
+var m09_seed_not_touching_tree_raw;
+var m09_seed_not_touching_tree_computed;
+function set_m09_seed_not_touching_tree(newValue) {
+  var temp = m09_seed_not_touching_tree_raw;
+  m09_seed_not_touching_tree_raw = newValue;
+  if(!isConsistent()) {
+    m09_seed_not_touching_tree_raw = temp;
+  }
+  refresh();
+}
+function check_m09_seed_not_touching_tree() {
+  var str = document.scoreEntry.m09_seed_not_touching_tree.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_seed_not_touching_tree(num);
+  }
+  refresh();
+}
+
+
+// m08_vine_touching_mat
+var m08_vine_touching_mat_raw;
+var m08_vine_touching_mat_computed;
+function set_m08_vine_touching_mat(newValue) {
+  var temp = m08_vine_touching_mat_raw;
+  m08_vine_touching_mat_raw = newValue;
+  if(!isConsistent()) {
+    m08_vine_touching_mat_raw = temp;
+  }
+  refresh();
+}
+function check_m08_vine_touching_mat() {
+  var str = document.scoreEntry.m08_vine_touching_mat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_vine_touching_mat(num);
+  }
+  refresh();
+}
+
+
+// m10_spider_habitat_position
+var m10_spider_habitat_position_raw;
+var m10_spider_habitat_position_computed;
+function set_m10_spider_habitat_position(newValue) {
+  var temp = m10_spider_habitat_position_raw;
+  m10_spider_habitat_position_raw = newValue;
+  if(!isConsistent()) {
+    m10_spider_habitat_position_raw = temp;
+  }
+  refresh();
+}
+function check_m10_spider_habitat_position() {
+  var str = document.scoreEntry.m10_spider_habitat_position.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_spider_habitat_position(num);
+  }
+  refresh();
+}
+
+
+// m10_snail_habitat_position
+var m10_snail_habitat_position_raw;
+var m10_snail_habitat_position_computed;
+function set_m10_snail_habitat_position(newValue) {
+  var temp = m10_snail_habitat_position_raw;
+  m10_snail_habitat_position_raw = newValue;
+  if(!isConsistent()) {
+    m10_snail_habitat_position_raw = temp;
+  }
+  refresh();
+}
+function check_m10_snail_habitat_position() {
+  var str = document.scoreEntry.m10_snail_habitat_position.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_snail_habitat_position(num);
+  }
+  refresh();
+}
+
+
+// m06_ant_touching_nest
+var m06_ant_touching_nest_raw;
+var m06_ant_touching_nest_computed;
+function set_m06_ant_touching_nest(newValue) {
+  var temp = m06_ant_touching_nest_raw;
+  m06_ant_touching_nest_raw = newValue;
+  if(!isConsistent()) {
+    m06_ant_touching_nest_raw = temp;
+  }
+  refresh();
+}
+function check_m06_ant_touching_nest() {
+  var str = document.scoreEntry.m06_ant_touching_nest.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_ant_touching_nest(num);
+  }
+  refresh();
+}
+
+
+// m06_count_leaf_fragments
+var m06_count_leaf_fragments_raw;
+var m06_count_leaf_fragments_computed;
+function set_m06_count_leaf_fragments(newValue) {
+  var temp = m06_count_leaf_fragments_raw;
+  m06_count_leaf_fragments_raw = newValue;
+  if(!isConsistent()) {
+    m06_count_leaf_fragments_raw = temp;
+  }
+  refresh();
+}
+function check_m06_count_leaf_fragments() {
+  var str = document.scoreEntry.m06_count_leaf_fragments.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_count_leaf_fragments(num);
+  }
+  refresh();
+}
+function increment_m06_count_leaf_fragments(increment) {
+  var temp = m06_count_leaf_fragments_raw
+  m06_count_leaf_fragments_raw += increment;
+  if(m06_count_leaf_fragments_raw > 4.0) {
+    m06_count_leaf_fragments_raw = 4.0;
+   }
+  if(m06_count_leaf_fragments_raw < 0.0) {
+    m06_count_leaf_fragments_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m06_count_leaf_fragments_raw = temp;
+  }
+  refresh();
+}
+
+
+// goal_6a
+var goal_6a_computed;
+function compute_goal_6a() {
+  if(parseInt(1.000000* m06_ant_touching_nest_raw) >= parseInt(1.000000)) {
+    goal_6a_computed = parseInt(10.000000* m06_count_leaf_fragments_raw);
+  } else {
+    goal_6a_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_goal_6a.value = goal_6a_computed;
+}
+// m07_mycelium_completely_extended
+var m07_mycelium_completely_extended_raw;
+var m07_mycelium_completely_extended_computed;
+function set_m07_mycelium_completely_extended(newValue) {
+  var temp = m07_mycelium_completely_extended_raw;
+  m07_mycelium_completely_extended_raw = newValue;
+  if(!isConsistent()) {
+    m07_mycelium_completely_extended_raw = temp;
+  }
+  refresh();
+}
+function check_m07_mycelium_completely_extended() {
+  var str = document.scoreEntry.m07_mycelium_completely_extended.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_mycelium_completely_extended(num);
+  }
+  refresh();
+}
+
+
+// m07_num_connections
+var m07_num_connections_raw;
+var m07_num_connections_computed;
+function set_m07_num_connections(newValue) {
+  var temp = m07_num_connections_raw;
+  m07_num_connections_raw = newValue;
+  if(!isConsistent()) {
+    m07_num_connections_raw = temp;
+  }
+  refresh();
+}
+function check_m07_num_connections() {
+  var str = document.scoreEntry.m07_num_connections.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_num_connections(num);
+  }
+  refresh();
+}
+function increment_m07_num_connections(increment) {
+  var temp = m07_num_connections_raw
+  m07_num_connections_raw += increment;
+  if(m07_num_connections_raw > 2.0) {
+    m07_num_connections_raw = 2.0;
+   }
+  if(m07_num_connections_raw < 0.0) {
+    m07_num_connections_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m07_num_connections_raw = temp;
+  }
+  refresh();
+}
+
+
+// goal_7a
+var goal_7a_computed;
+function compute_goal_7a() {
+  if(parseInt(1.000000* m07_mycelium_completely_extended_raw) >= parseInt(1.000000)) {
+    goal_7a_computed = parseInt(10.000000* m07_num_connections_raw);
+  } else {
+    goal_7a_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_goal_7a.value = goal_7a_computed;
+}
+// m11_root_cover_down
+var m11_root_cover_down_raw;
+var m11_root_cover_down_computed;
+function set_m11_root_cover_down(newValue) {
+  var temp = m11_root_cover_down_raw;
+  m11_root_cover_down_raw = newValue;
+  if(!isConsistent()) {
+    m11_root_cover_down_raw = temp;
+  }
+  refresh();
+}
+function check_m11_root_cover_down() {
+  var str = document.scoreEntry.m11_root_cover_down.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_root_cover_down(num);
+  }
+  refresh();
+}
+
+
+// m12_cane_raised
+var m12_cane_raised_raw;
+var m12_cane_raised_computed;
+function set_m12_cane_raised(newValue) {
+  var temp = m12_cane_raised_raw;
+  m12_cane_raised_raw = newValue;
+  if(!isConsistent()) {
+    m12_cane_raised_raw = temp;
+  }
+  refresh();
+}
+function check_m12_cane_raised() {
+  var str = document.scoreEntry.m12_cane_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_cane_raised(num);
+  }
+  refresh();
+}
+
+
+// m12_support_tie
+var m12_support_tie_raw;
+var m12_support_tie_computed;
+function set_m12_support_tie(newValue) {
+  var temp = m12_support_tie_raw;
+  m12_support_tie_raw = newValue;
+  if(!isConsistent()) {
+    m12_support_tie_raw = temp;
+  }
+  refresh();
+}
+function check_m12_support_tie() {
+  var str = document.scoreEntry.m12_support_tie.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_support_tie(num);
+  }
+  refresh();
+}
+
+
+// m13_keystone_species_delivered
+var m13_keystone_species_delivered_raw;
+var m13_keystone_species_delivered_computed;
+function set_m13_keystone_species_delivered(newValue) {
+  var temp = m13_keystone_species_delivered_raw;
+  m13_keystone_species_delivered_raw = newValue;
+  if(!isConsistent()) {
+    m13_keystone_species_delivered_raw = temp;
+  }
+  refresh();
+}
+function check_m13_keystone_species_delivered() {
+  var str = document.scoreEntry.m13_keystone_species_delivered.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_keystone_species_delivered(num);
+  }
+  refresh();
+}
+
+
+// m14_seeds_delivered
+var m14_seeds_delivered_raw;
+var m14_seeds_delivered_computed;
+function set_m14_seeds_delivered(newValue) {
+  var temp = m14_seeds_delivered_raw;
+  m14_seeds_delivered_raw = newValue;
+  if(!isConsistent()) {
+    m14_seeds_delivered_raw = temp;
+  }
+  refresh();
+}
+function check_m14_seeds_delivered() {
+  var str = document.scoreEntry.m14_seeds_delivered.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_seeds_delivered(num);
+  }
+  refresh();
+}
+function increment_m14_seeds_delivered(increment) {
+  var temp = m14_seeds_delivered_raw
+  m14_seeds_delivered_raw += increment;
+  if(m14_seeds_delivered_raw > 4.0) {
+    m14_seeds_delivered_raw = 4.0;
+   }
+  if(m14_seeds_delivered_raw < 0.0) {
+    m14_seeds_delivered_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m14_seeds_delivered_raw = temp;
+  }
+  refresh();
+}
+
+
+// m14_seeds_touching_mat
+var m14_seeds_touching_mat_raw;
+var m14_seeds_touching_mat_computed;
+function set_m14_seeds_touching_mat(newValue) {
+  var temp = m14_seeds_touching_mat_raw;
+  m14_seeds_touching_mat_raw = newValue;
+  if(!isConsistent()) {
+    m14_seeds_touching_mat_raw = temp;
+  }
+  refresh();
+}
+function check_m14_seeds_touching_mat() {
+  var str = document.scoreEntry.m14_seeds_touching_mat.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_seeds_touching_mat(num);
+  }
+  refresh();
+}
+function increment_m14_seeds_touching_mat(increment) {
+  var temp = m14_seeds_touching_mat_raw
+  m14_seeds_touching_mat_raw += increment;
+  if(m14_seeds_touching_mat_raw > 4.0) {
+    m14_seeds_touching_mat_raw = 4.0;
+   }
+  if(m14_seeds_touching_mat_raw < 0.0) {
+    m14_seeds_touching_mat_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m14_seeds_touching_mat_raw = temp;
+  }
+  refresh();
+}
+
+
+// m15_nesting_canopy_raised
+var m15_nesting_canopy_raised_raw;
+var m15_nesting_canopy_raised_computed;
+function set_m15_nesting_canopy_raised(newValue) {
+  var temp = m15_nesting_canopy_raised_raw;
+  m15_nesting_canopy_raised_raw = newValue;
+  if(!isConsistent()) {
+    m15_nesting_canopy_raised_raw = temp;
+  }
+  refresh();
+}
+function check_m15_nesting_canopy_raised() {
+  var str = document.scoreEntry.m15_nesting_canopy_raised.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_nesting_canopy_raised(num);
+  }
+  refresh();
+}
+
+
+// m15_garden_skylight_in
+var m15_garden_skylight_in_raw;
+var m15_garden_skylight_in_computed;
+function set_m15_garden_skylight_in(newValue) {
+  var temp = m15_garden_skylight_in_raw;
+  m15_garden_skylight_in_raw = newValue;
+  if(!isConsistent()) {
+    m15_garden_skylight_in_raw = temp;
+  }
+  refresh();
+}
+function check_m15_garden_skylight_in() {
+  var str = document.scoreEntry.m15_garden_skylight_in.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_garden_skylight_in(num);
+  }
+  refresh();
+}
+
+
+// m15_compost_hatch_completely_open
+var m15_compost_hatch_completely_open_raw;
+var m15_compost_hatch_completely_open_computed;
+function set_m15_compost_hatch_completely_open(newValue) {
+  var temp = m15_compost_hatch_completely_open_raw;
+  m15_compost_hatch_completely_open_raw = newValue;
+  if(!isConsistent()) {
+    m15_compost_hatch_completely_open_raw = temp;
+  }
+  refresh();
+}
+function check_m15_compost_hatch_completely_open() {
+  var str = document.scoreEntry.m15_compost_hatch_completely_open.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_compost_hatch_completely_open(num);
+  }
+  refresh();
+}
+
+
+// m15_dock_location
+var m15_dock_location_raw;
+var m15_dock_location_computed;
+function set_m15_dock_location(newValue) {
+  var temp = m15_dock_location_raw;
+  m15_dock_location_raw = newValue;
+  if(!isConsistent()) {
+    m15_dock_location_raw = temp;
+  }
+  refresh();
+}
+function check_m15_dock_location() {
+  var str = document.scoreEntry.m15_dock_location.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m15_dock_location(num);
+  }
+  refresh();
+}
+
+
+// goal_15
+var goal_15_computed;
+function compute_goal_15() {
+  if(m15_dock_location_raw == 'city') {
+    goal_15_computed = parseInt(10.000000* m15_garden_skylight_in_raw);
+  } else if(m15_dock_location_raw == 'farm') {
+    goal_15_computed = parseInt(10.000000* m15_compost_hatch_completely_open_raw);
+  } else if(m15_dock_location_raw == 'mine') {
+    goal_15_computed = parseInt(10.000000* m15_nesting_canopy_raised_raw);
+  } else {
+    goal_15_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_goal_15.value = goal_15_computed;
+}
+// m16_precision_tokens
+var m16_precision_tokens_raw;
+var m16_precision_tokens_computed;
+function set_m16_precision_tokens(newValue) {
+  var temp = m16_precision_tokens_raw;
+  m16_precision_tokens_raw = newValue;
+  if(!isConsistent()) {
+    m16_precision_tokens_raw = temp;
+  }
+  refresh();
+}
+function check_m16_precision_tokens() {
+  var str = document.scoreEntry.m16_precision_tokens.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m16_precision_tokens(num);
+  }
+  refresh();
+}
+
+
+// gp_score
+var gp_score_raw;
+var gp_score_computed;
+function set_gp_score(newValue) {
+  var temp = gp_score_raw;
+  gp_score_raw = newValue;
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+function check_gp_score() {
+  var str = document.scoreEntry.gp_score.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_gp_score(num);
+  }
+  refresh();
+}
+function increment_gp_score(increment) {
+  var temp = gp_score_raw
+  gp_score_raw += increment;
+  if(gp_score_raw > 4.0) {
+    gp_score_raw = 4.0;
+   }
+  if(gp_score_raw < 2.0) {
+    gp_score_raw = 2.0;
+   }
+  if(!isConsistent()) {
+    gp_score_raw = temp;
+  }
+  refresh();
+}
+
+
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  refresh();
+}
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const resetButton = document.getElementById("reset_score");
+  if(resetButton) {
+      resetButton.addEventListener('click', init);
+  }
+});
+
+</script>
+
+
+<script type="text/javascript" src="Score%20Entry_files/scoreEntry__OaH.js"></script>
+</head>
+
+<body>
+
+    <form name="scoreEntry" id="scoreEntry" class="fll-sw-ui-body">
+        
+            
+            
+                <input type="hidden" name="tablename" value="ALL">
+            
+        
+
+        <input type="hidden" id="NoShow" name="NoShow" value="false">
+        <input type="hidden" id="delete" name="delete" value="false">
+
+        <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+
+        <input type="hidden" name="RunNumber" value="" readonly="readonly">
+        <input type="hidden" name="TeamNumber" value="" readonly="readonly">
+
+        <header>
+            <div id="floating-messages">
+                <div id="score-errors" class="fll-sw-ui-inactive"></div>
+                <div id="verification-warning" class="fll-sw-ui-inactive">Are you sure this
+                    score has been Verified? Normally scores are not
+                    verified on the initial entry.</div>
+            </div>
+
+            <!-- top info bar (team name etc) -->
+            <table id="top_info" border="1" cellpadding="0" cellspacing="0" width="100%">
+                <tbody><tr align="center" valign="middle">
+                    <td>
+
+                        <table border="0" cellpadding="5" cellspacing="0" width="90%">
+                            <!--  inner box on title -->
+                            <tbody><tr>
+                                <td valign="middle" align="center">
+                                    
+                                        
+                                        
+                                            <font face="Arial" size="4">Score
+                                                Entry</font>
+                                        
+                                    
+                                </td>
+                            </tr>
+                            <tr align="center">
+                                <td>
+                                    <font face="Arial" size="4" color="#0000ff">
+
+                                        
+                                            
+                      Practice
+                      
+                                            
+                                        
+                                    </font>
+                                </td>
+                            </tr>
+                        </tbody></table>
+                        <!--  end inner box on title -->
+
+                    </td>
+                </tr>
+                <!-- team info -->
+
+                
+
+            </tbody></table>
+            <!--  end info bar -->
+        </header>
+
+        <main id="review-mode_container">
+            <div id="review-mode_glasspane"></div>
+
+            <!-- score entry -->
+            <table class="score-entry">
+                <colgroup>
+                    <!--  goal -->
+                    <col width="50%">
+                    <!-- buttons -->
+                    <col width="30%">
+                    <!-- count -->
+                    <col width="10%">
+                    <!--  score -->
+                    <col width="10%">
+                </colgroup>
+                <tbody><tr>
+                    <td colspan="2">
+                        <font size="4">
+                            <u>Goal</u>
+                        </font>
+                    </td>
+                    <td align="right">
+                        <font size="4">
+                            <u>Count</u>
+                        </font>
+                    </td>
+                    <td align="right" class="score-cell">
+                        <font size="4">
+                            <u>Score</u>
+                        </font>
+                    </td>
+                </tr>
+
+                
+                    
+                    
+                        
+                        <tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>M00 - EQUIPMENT INSPECTION BONUS</b></td>
+</tr>
+<!-- m00_one_launch_area -->
+<tr id="m00_one_launch_area_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL Equipment Fits in ONE Launch area under 12":
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_no" name="m00_one_launch_area" value="0" onclick="set_m00_one_launch_area(0)" checked="checked">
+        <span id="m00_one_launch_area_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m00_one_launch_area_yes" name="m00_one_launch_area" value="1" onclick="set_m00_one_launch_area(1)">
+        <span id="m00_one_launch_area_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m00_one_launch_area_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m00_one_launch_area" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m00_one_launch_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG01 - DRONE SURVEY</b></td>
+</tr>
+<!-- m01_drone_not_on_mat -->
+<tr id="m01_drone_not_on_mat_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Drone is not touching the mat - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m01_drone_not_on_mat_no" name="m01_drone_not_on_mat" value="0" onclick="set_m01_drone_not_on_mat(0)" checked="checked">
+        <span id="m01_drone_not_on_mat_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m01_drone_not_on_mat_yes" name="m01_drone_not_on_mat" value="1" onclick="set_m01_drone_not_on_mat(1)">
+        <span id="m01_drone_not_on_mat_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_drone_not_on_mat_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m01_drone_not_on_mat" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m01_drone_not_on_mat -->
+
+<!-- m01_lidar_map_flipped -->
+<tr id="m01_lidar_map_flipped_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND LiDAR map is flipped over, scan marker at least partly in survey area - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m01_lidar_map_flipped_no" name="m01_lidar_map_flipped" value="0" onclick="set_m01_lidar_map_flipped(0)" checked="checked">
+        <span id="m01_lidar_map_flipped_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m01_lidar_map_flipped_yes" name="m01_lidar_map_flipped" value="1" onclick="set_m01_lidar_map_flipped(1)">
+        <span id="m01_lidar_map_flipped_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_lidar_map_flipped_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m01_lidar_map_flipped" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m01_lidar_map_flipped -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG02 - EXPLODING SEEDS</b></td>
+</tr>
+<!-- m02_count_exploding_seeds -->
+<tr id="m02_count_exploding_seeds_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Seeds no longer touching stalk:
+  </td>
+  <td>
+<input type="range" min="0" max="3" class="slider" id="m02_count_exploding_seeds_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="33.33%" y="0" width="2" height="100%"></rect>
+<rect x="66.67%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_count_exploding_seeds" size="3" align="right" onchange="check_m02_count_exploding_seeds()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m02_count_exploding_seeds" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m02_count_exploding_seeds -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG03 - FLIP THE ROCK</b></td>
+</tr>
+<!-- m03_research_flag_down -->
+<tr id="m03_research_flag_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The research flag is down:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m03_research_flag_down_no" name="m03_research_flag_down" value="0" onclick="set_m03_research_flag_down(0)" checked="checked">
+        <span id="m03_research_flag_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m03_research_flag_down_yes" name="m03_research_flag_down" value="1" onclick="set_m03_research_flag_down(1)">
+        <span id="m03_research_flag_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_research_flag_down_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m03_research_flag_down" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m03_research_flag_down -->
+
+<!-- m03_rock_starting_position -->
+<tr id="m03_rock_starting_position_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND the rock is in its starting position (gray side up):
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m03_rock_starting_position_no" name="m03_rock_starting_position" value="0" onclick="set_m03_rock_starting_position(0)" checked="checked">
+        <span id="m03_rock_starting_position_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m03_rock_starting_position_yes" name="m03_rock_starting_position" value="1" onclick="set_m03_rock_starting_position(1)">
+        <span id="m03_rock_starting_position_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_rock_starting_position_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m03_rock_starting_position" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m03_rock_starting_position -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG04 - LUCKY LEAVES</b></td>
+</tr>
+<!-- m04_one_leaf_removed -->
+<tr id="m04_one_leaf_removed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;One leaf is no longer touching the nest - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_one_leaf_removed_no" name="m04_one_leaf_removed" value="0" onclick="set_m04_one_leaf_removed(0)" checked="checked">
+        <span id="m04_one_leaf_removed_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_one_leaf_removed_yes" name="m04_one_leaf_removed" value="1" onclick="set_m04_one_leaf_removed(1)">
+        <span id="m04_one_leaf_removed_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_one_leaf_removed_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_one_leaf_removed" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_one_leaf_removed -->
+
+<!-- m04_second_leaf_removed -->
+<tr id="m04_second_leaf_removed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND second leaf is no longer touching the nest - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_second_leaf_removed_no" name="m04_second_leaf_removed" value="0" onclick="set_m04_second_leaf_removed(0)" checked="checked">
+        <span id="m04_second_leaf_removed_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_second_leaf_removed_yes" name="m04_second_leaf_removed" value="1" onclick="set_m04_second_leaf_removed(1)">
+        <span id="m04_second_leaf_removed_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_second_leaf_removed_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_second_leaf_removed" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_second_leaf_removed -->
+
+<!-- m04_katydid_in_original_position -->
+<tr id="m04_katydid_in_original_position_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Katydid is in STARTING position:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_katydid_in_original_position_no" name="m04_katydid_in_original_position" value="0" onclick="set_m04_katydid_in_original_position(0)">
+        <span id="m04_katydid_in_original_position_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_katydid_in_original_position_yes" name="m04_katydid_in_original_position" value="1" onclick="set_m04_katydid_in_original_position(1)" checked="checked">
+        <span id="m04_katydid_in_original_position_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_katydid_in_original_position_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="YES">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_katydid_in_original_position" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_katydid_in_original_position -->
+
+<!-- m04_katydid_left_habitat -->
+<tr id="m04_katydid_left_habitat_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Katydid COMPLETELY left the leaf habitat at any time during the match:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_katydid_left_habitat_no" name="m04_katydid_left_habitat" value="0" onclick="set_m04_katydid_left_habitat(0)" checked="checked">
+        <span id="m04_katydid_left_habitat_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_katydid_left_habitat_yes" name="m04_katydid_left_habitat" value="1" onclick="set_m04_katydid_left_habitat(1)">
+        <span id="m04_katydid_left_habitat_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_katydid_left_habitat_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_katydid_left_habitat" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_katydid_left_habitat -->
+
+<!-- m04_katydid_out_of_habitat -->
+<tr id="m04_katydid_out_of_habitat_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Katydid is COMPLETELY outside the leaf habitat at end of match:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m04_katydid_out_of_habitat_no" name="m04_katydid_out_of_habitat" value="0" onclick="set_m04_katydid_out_of_habitat(0)" checked="checked">
+        <span id="m04_katydid_out_of_habitat_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m04_katydid_out_of_habitat_yes" name="m04_katydid_out_of_habitat" value="1" onclick="set_m04_katydid_out_of_habitat(1)">
+        <span id="m04_katydid_out_of_habitat_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_katydid_out_of_habitat_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m04_katydid_out_of_habitat" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m04_katydid_out_of_habitat -->
+
+<!-- goal_4a -->
+<tr id="goal_4a_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calc First Leaf:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_4a" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_4a -->
+
+<!-- goal_4b -->
+<tr id="goal_4b_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calc Second Leaf:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_4b" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_4b -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG05 - REACHING ROOTS</b></td>
+</tr>
+<!-- m05_root_partially_extended -->
+<tr id="m05_root_partially_extended_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The plant root is PARTIALLY extended - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m05_root_partially_extended_no" name="m05_root_partially_extended" value="0" onclick="set_m05_root_partially_extended(0)" checked="checked">
+        <span id="m05_root_partially_extended_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m05_root_partially_extended_yes" name="m05_root_partially_extended" value="1" onclick="set_m05_root_partially_extended(1)">
+        <span id="m05_root_partially_extended_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_root_partially_extended_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m05_root_partially_extended" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m05_root_partially_extended -->
+
+<!-- m05_root_completely_extended -->
+<tr id="m05_root_completely_extended_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The plant root is COMPLETELY extended - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m05_root_completely_extended_no" name="m05_root_completely_extended" value="0" onclick="set_m05_root_completely_extended(0)" checked="checked">
+        <span id="m05_root_completely_extended_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m05_root_completely_extended_yes" name="m05_root_completely_extended" value="1" onclick="set_m05_root_completely_extended(1)">
+        <span id="m05_root_completely_extended_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_root_completely_extended_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m05_root_completely_extended" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m05_root_completely_extended -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG09 - RESEARCH PLATFORM</b></td>
+</tr>
+<!-- m09_platform_raised -->
+<tr id="m09_platform_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Research platform is raised - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_platform_raised_no" name="m09_platform_raised" value="0" onclick="set_m09_platform_raised(0)" checked="checked">
+        <span id="m09_platform_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_platform_raised_yes" name="m09_platform_raised" value="1" onclick="set_m09_platform_raised(1)">
+        <span id="m09_platform_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_platform_raised_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m09_platform_raised" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m09_platform_raised -->
+
+<!-- m09_camera_trap_deployed -->
+<tr id="m09_camera_trap_deployed_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Camera trap is deployed - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_camera_trap_deployed_no" name="m09_camera_trap_deployed" value="0" onclick="set_m09_camera_trap_deployed(0)" checked="checked">
+        <span id="m09_camera_trap_deployed_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_camera_trap_deployed_yes" name="m09_camera_trap_deployed" value="1" onclick="set_m09_camera_trap_deployed(1)">
+        <span id="m09_camera_trap_deployed_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_camera_trap_deployed_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m09_camera_trap_deployed" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m09_camera_trap_deployed -->
+
+<!-- m09_seed_not_touching_tree -->
+<tr id="m09_seed_not_touching_tree_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The seed is no longer touching the tree - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m09_seed_not_touching_tree_no" name="m09_seed_not_touching_tree" value="0" onclick="set_m09_seed_not_touching_tree(0)" checked="checked">
+        <span id="m09_seed_not_touching_tree_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m09_seed_not_touching_tree_yes" name="m09_seed_not_touching_tree" value="1" onclick="set_m09_seed_not_touching_tree(1)">
+        <span id="m09_seed_not_touching_tree_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_seed_not_touching_tree_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m09_seed_not_touching_tree" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m09_seed_not_touching_tree -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG08 - TANGLED</b></td>
+</tr>
+<!-- m08_vine_touching_mat -->
+<tr id="m08_vine_touching_mat_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The vine is touching the mat:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m08_vine_touching_mat_no" name="m08_vine_touching_mat" value="0" onclick="set_m08_vine_touching_mat(0)" checked="checked">
+        <span id="m08_vine_touching_mat_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m08_vine_touching_mat_yes" name="m08_vine_touching_mat" value="1" onclick="set_m08_vine_touching_mat(1)">
+        <span id="m08_vine_touching_mat_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m08_vine_touching_mat_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m08_vine_touching_mat" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m08_vine_touching_mat -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG10 - FRAGILE MICROHABITATS</b></td>
+</tr>
+<!-- m10_spider_habitat_position -->
+<tr id="m10_spider_habitat_position_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spider habitat is in its original starting position - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m10_spider_habitat_position_no" name="m10_spider_habitat_position" value="0" onclick="set_m10_spider_habitat_position(0)">
+        <span id="m10_spider_habitat_position_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m10_spider_habitat_position_yes" name="m10_spider_habitat_position" value="1" onclick="set_m10_spider_habitat_position(1)" checked="checked">
+        <span id="m10_spider_habitat_position_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_spider_habitat_position_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="YES">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m10_spider_habitat_position" size="3" align="right" readonly="readonly" tabindex="-1" value="10">
+  </td>
+</tr>
+<!-- end m10_spider_habitat_position -->
+
+<!-- m10_snail_habitat_position -->
+<tr id="m10_snail_habitat_position_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Snail habitat is in its original starting position - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m10_snail_habitat_position_no" name="m10_snail_habitat_position" value="0" onclick="set_m10_snail_habitat_position(0)">
+        <span id="m10_snail_habitat_position_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m10_snail_habitat_position_yes" name="m10_snail_habitat_position" value="1" onclick="set_m10_snail_habitat_position(1)" checked="checked">
+        <span id="m10_snail_habitat_position_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_snail_habitat_position_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="YES">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m10_snail_habitat_position" size="3" align="right" readonly="readonly" tabindex="-1" value="10">
+  </td>
+</tr>
+<!-- end m10_snail_habitat_position -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG06 - LEAFCUTTER FRENZY</b></td>
+</tr>
+<!-- m06_ant_touching_nest -->
+<tr id="m06_ant_touching_nest_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ant is touching the nest:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m06_ant_touching_nest_no" name="m06_ant_touching_nest" value="0" onclick="set_m06_ant_touching_nest(0)" checked="checked">
+        <span id="m06_ant_touching_nest_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m06_ant_touching_nest_yes" name="m06_ant_touching_nest" value="1" onclick="set_m06_ant_touching_nest(1)">
+        <span id="m06_ant_touching_nest_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_ant_touching_nest_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m06_ant_touching_nest" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m06_ant_touching_nest -->
+
+<!-- m06_count_leaf_fragments -->
+<tr id="m06_count_leaf_fragments_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND # Leaf fragments contained in the nest:
+  </td>
+  <td>
+<input type="range" min="0" max="4" class="slider" id="m06_count_leaf_fragments_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="25.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="75.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_count_leaf_fragments" size="3" align="right" onchange="check_m06_count_leaf_fragments()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m06_count_leaf_fragments" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m06_count_leaf_fragments -->
+
+<!-- goal_6a -->
+<tr id="goal_6a_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calc leafcutter frenzy:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_6a" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_6a -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG07 - HUMONGOUS FUNGUS</b></td>
+</tr>
+<!-- m07_mycelium_completely_extended -->
+<tr id="m07_mycelium_completely_extended_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The mycelium is completely extended - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m07_mycelium_completely_extended_no" name="m07_mycelium_completely_extended" value="0" onclick="set_m07_mycelium_completely_extended(0)" checked="checked">
+        <span id="m07_mycelium_completely_extended_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m07_mycelium_completely_extended_yes" name="m07_mycelium_completely_extended" value="1" onclick="set_m07_mycelium_completely_extended(1)">
+        <span id="m07_mycelium_completely_extended_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_mycelium_completely_extended_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m07_mycelium_completely_extended" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m07_mycelium_completely_extended -->
+
+<!-- m07_num_connections -->
+<tr id="m07_num_connections_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND # connections between one team's fully extended mycelium and opposite team's fully extended plant root (two locations):
+  </td>
+  <td>
+<input type="range" min="0" max="2" class="slider" id="m07_num_connections_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_num_connections" size="3" align="right" onchange="check_m07_num_connections()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m07_num_connections" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m07_num_connections -->
+
+<!-- goal_7a -->
+<tr id="goal_7a_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calc Connection Scoring:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_7a" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_7a -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG11 - WINDOW TO THE PAST</b></td>
+</tr>
+<!-- m11_root_cover_down -->
+<tr id="m11_root_cover_down_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Root cover is down, touching the mat:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m11_root_cover_down_no" name="m11_root_cover_down" value="0" onclick="set_m11_root_cover_down(0)" checked="checked">
+        <span id="m11_root_cover_down_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m11_root_cover_down_yes" name="m11_root_cover_down" value="1" onclick="set_m11_root_cover_down(1)">
+        <span id="m11_root_cover_down_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m11_root_cover_down_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m11_root_cover_down" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m11_root_cover_down -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG12 - FOREST ELDER</b></td>
+</tr>
+<!-- m12_cane_raised -->
+<tr id="m12_cane_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cane is completely raised, touching the tree - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m12_cane_raised_no" name="m12_cane_raised" value="0" onclick="set_m12_cane_raised(0)" checked="checked">
+        <span id="m12_cane_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m12_cane_raised_yes" name="m12_cane_raised" value="1" onclick="set_m12_cane_raised(1)">
+        <span id="m12_cane_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_cane_raised_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m12_cane_raised" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m12_cane_raised -->
+
+<!-- m12_support_tie -->
+<tr id="m12_support_tie_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Support tie is around the post - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m12_support_tie_no" name="m12_support_tie" value="0" onclick="set_m12_support_tie(0)" checked="checked">
+        <span id="m12_support_tie_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m12_support_tie_yes" name="m12_support_tie" value="1" onclick="set_m12_support_tie(1)">
+        <span id="m12_support_tie_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_support_tie_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m12_support_tie" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m12_support_tie -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG13 - KEYSTONE SPECIES</b></td>
+</tr>
+<!-- m13_keystone_species_delivered -->
+<tr id="m13_keystone_species_delivered_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Team's keystone species is on restoration platform AND young trees are raised:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m13_keystone_species_delivered_no" name="m13_keystone_species_delivered" value="0" onclick="set_m13_keystone_species_delivered(0)" checked="checked">
+        <span id="m13_keystone_species_delivered_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m13_keystone_species_delivered_yes" name="m13_keystone_species_delivered" value="1" onclick="set_m13_keystone_species_delivered(1)">
+        <span id="m13_keystone_species_delivered_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_keystone_species_delivered_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m13_keystone_species_delivered" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m13_keystone_species_delivered -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG14 - SEEDS OF RENEWAL</b></td>
+</tr>
+<!-- m14_seeds_delivered -->
+<tr id="m14_seeds_delivered_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Seeds contained within the replantation station:
+  </td>
+  <td>
+<input type="range" min="0" max="4" class="slider" id="m14_seeds_delivered_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="25.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="75.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_seeds_delivered" size="3" align="right" onchange="check_m14_seeds_delivered()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_seeds_delivered" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_seeds_delivered -->
+
+<!-- m14_seeds_touching_mat -->
+<tr id="m14_seeds_touching_mat_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AND touching the mat:
+  </td>
+  <td>
+<input type="range" min="0" max="4" class="slider" id="m14_seeds_touching_mat_slider" value="0">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="25.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="75.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="m14_seeds_touching_mat" size="3" align="right" onchange="check_m14_seeds_touching_mat()" value="0">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m14_seeds_touching_mat" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m14_seeds_touching_mat -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG15 - BIOCENTRIC ARCHITECTURE</b></td>
+</tr>
+<!-- m15_nesting_canopy_raised -->
+<tr id="m15_nesting_canopy_raised_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nesting canopy is raised - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15_nesting_canopy_raised_no" name="m15_nesting_canopy_raised" value="0" onclick="set_m15_nesting_canopy_raised(0)" checked="checked">
+        <span id="m15_nesting_canopy_raised_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15_nesting_canopy_raised_yes" name="m15_nesting_canopy_raised" value="1" onclick="set_m15_nesting_canopy_raised(1)">
+        <span id="m15_nesting_canopy_raised_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_nesting_canopy_raised_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15_nesting_canopy_raised" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15_nesting_canopy_raised -->
+
+<!-- m15_garden_skylight_in -->
+<tr id="m15_garden_skylight_in_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Garden skylight is completely in - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15_garden_skylight_in_no" name="m15_garden_skylight_in" value="0" onclick="set_m15_garden_skylight_in(0)" checked="checked">
+        <span id="m15_garden_skylight_in_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15_garden_skylight_in_yes" name="m15_garden_skylight_in" value="1" onclick="set_m15_garden_skylight_in(1)">
+        <span id="m15_garden_skylight_in_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_garden_skylight_in_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15_garden_skylight_in" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15_garden_skylight_in -->
+
+<!-- m15_compost_hatch_completely_open -->
+<tr id="m15_compost_hatch_completely_open_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compost hatch is completely opened, touching the mat - not touching equipment at end:
+  </td>
+  <td>
+        <label class="y-n-button">
+          <input type="radio" id="m15_compost_hatch_completely_open_no" name="m15_compost_hatch_completely_open" value="0" onclick="set_m15_compost_hatch_completely_open(0)" checked="checked">
+        <span id="m15_compost_hatch_completely_open_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="m15_compost_hatch_completely_open_yes" name="m15_compost_hatch_completely_open" value="1" onclick="set_m15_compost_hatch_completely_open(1)">
+        <span id="m15_compost_hatch_completely_open_yes_span">Yes</span>
+        </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_compost_hatch_completely_open_radioValue" size="3" align="right" readonly="readonly" tabindex="-1" value="NO">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15_compost_hatch_completely_open" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15_compost_hatch_completely_open -->
+
+<!-- m15_dock_location -->
+<tr id="m15_dock_location_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dock where mission is located:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m15_dock_location" value="mine" id="m15_dock_location_mine" onclick='set_m15_dock_location("mine")' checked="checked">
+        <span id="m15_dock_location_mine_span">
+          Mine
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m15_dock_location" value="city" id="m15_dock_location_city" onclick='set_m15_dock_location("city")'>
+        <span id="m15_dock_location_city_span">
+          City
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m15_dock_location" value="farm" id="m15_dock_location_farm" onclick='set_m15_dock_location("farm")'>
+        <span id="m15_dock_location_farm_span">
+          Farm
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m15_dock_location" value="none" id="m15_dock_location_none" onclick='set_m15_dock_location("none")'>
+        <span id="m15_dock_location_none_span">
+          None
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m15_dock_location_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="MINE">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m15_dock_location" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end m15_dock_location -->
+
+<!-- goal_15 -->
+<tr id="goal_15_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calc Environmental Bonus:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_goal_15" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end goal_15 -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>BG16 - Precision Tokens Remaining</b></td>
+</tr>
+<!-- m16_precision_tokens -->
+<tr id="m16_precision_tokens_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Precision Tokens Remaining on Field:
+  </td>
+  <td>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="zero" id="m16_precision_tokens_zero" onclick='set_m16_precision_tokens("zero")'>
+        <span id="m16_precision_tokens_zero_span">
+          Zero
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="one" id="m16_precision_tokens_one" onclick='set_m16_precision_tokens("one")'>
+        <span id="m16_precision_tokens_one_span">
+          1
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="two" id="m16_precision_tokens_two" onclick='set_m16_precision_tokens("two")'>
+        <span id="m16_precision_tokens_two_span">
+          2
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="three" id="m16_precision_tokens_three" onclick='set_m16_precision_tokens("three")'>
+        <span id="m16_precision_tokens_three_span">
+          3
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="four" id="m16_precision_tokens_four" onclick='set_m16_precision_tokens("four")'>
+        <span id="m16_precision_tokens_four_span">
+          4
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="five" id="m16_precision_tokens_five" onclick='set_m16_precision_tokens("five")'>
+        <span id="m16_precision_tokens_five_span">
+          5
+        </span>
+      </label>
+      <label class="enum-button">
+          <input type="radio" name="m16_precision_tokens" value="six" id="m16_precision_tokens_six" onclick='set_m16_precision_tokens("six")' checked="checked">
+        <span id="m16_precision_tokens_six_span">
+          6
+        </span>
+      </label>
+  </td>
+  <td align="right">
+    <input type="text" name="m16_precision_tokens_radioValue" size="10" align="right" readonly="readonly" tabindex="-1" value="SIX">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_m16_precision_tokens" size="3" align="right" readonly="readonly" tabindex="-1" value="50">
+  </td>
+</tr>
+<!-- end m16_precision_tokens -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="4" class="center truncate"><b>GRACIOUS PROFESSIONALISM DISPLAYED AT THE ROBOT GAME TABLE</b></td>
+</tr>
+<!-- gp_score -->
+<tr id="gp_score_row">
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GP - Does not affect Robot Game Score:
+  </td>
+  <td>
+<input type="range" min="2" max="4" class="slider" id="gp_score_slider" value="3">
+<svg role="presentation" width="100%" height="15" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.00%" y="0" width="2" height="100%"></rect>
+<rect x="50.00%" y="0" width="2" height="100%"></rect>
+<rect x="99.00%" y="0" width="2" height="100%"></rect>
+</svg>
+  </td>
+  <td align="right">
+    <input type="text" name="gp_score" size="3" align="right" onchange="check_gp_score()" value="3">
+  </td>
+  <td align="right" class="score-cell">
+    <input type="text" name="score_gp_score" size="3" align="right" readonly="readonly" tabindex="-1" value="0">
+  </td>
+</tr>
+<!-- end gp_score -->
+
+
+
+                        <!-- Total Score -->
+                        <tr class="total-score-container">
+                            <td colspan="3" class="total-score-label">Total
+                                Score:</td>
+                            <td align="right" class="score-cell">
+                                <input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="70">
+                            </td>
+                        </tr>
+                    
+                
+                <!-- end check for bye -->
+
+            </tbody></table>
+            <!-- end score entry table  -->
+        </main>
+
+        <footer>
+            <div class="score-entry buttonbox">
+
+                <button id="score-entry_toggle-review-mode" type="button" class="fll-sw-button">Review
+                    Toggle</button>
+
+                <!-- Score Verification -->
+      <span id="verify-score-label" class="float_right verify-score-unverified">
+Team Agrees with the above entries:
+</span>
+      <span class="verify-score-buttonbox">
+        <label class="y-n-button">
+          <input type="radio" id="Verified_no" name="Verified" value="0" onclick="set_Verified(0)" checked="checked">
+        <span id="Verified_no_span">No</span>
+        </label>
+        <label class="y-n-button">
+          <input type="radio" id="Verified_yes" name="Verified" value="1" onclick="set_Verified(1)">
+        <span id="Verified_yes_span">Yes</span>
+        </label>
+      </span>
+
+            </div>
+
+            <div class="buttonbox score-entry-buttons">
+
+
+                <span id="challenge_revision">Challenge revision:
+                    4</span>
+                <span id="software_version">
+                    Software version:
+                    21.0.1-beta.1+g37657ee</span>
+
+                <span class="float_right">&nbsp;</span>
+                
+                    
+                        <button type="button" id="reset_score" class="fll-sw-button">Reset Form</button>
+                    
+                    
+                
+            </div>
+        </footer>
+
+    </form>
+    <!-- end score entry form -->
+
+
+    <div class="fll-sw-ui-dialog fll-sw-ui-inactive" id="yesno-dialog">
+        <div>
+            <p id="yesno-dialog_text"></p>
+            <button type="button" id="yesno-dialog_yes">Yes</button>
+            <button type="button" id="yesno-dialog_no">No</button>
+        </div>
+    </div>
+
+
+
+</body></html>
